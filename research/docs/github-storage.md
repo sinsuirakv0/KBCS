@@ -20,12 +20,13 @@ gh release download native-v15.7.2 --repo sinsuirakv0/KBCS --dir research/.local
 Get-FileHash research/.local/downloads/native-v15.7.2-materials.tar.gz -Algorithm SHA256
 tar -xzf research/.local/downloads/native-v15.7.2-materials.tar.gz
 $cache = (Get-ChildItem research/.local/cache/15.7.2/arm64-v8a -Directory | Where-Object Name -Like '*-complete').FullName
-python research/cli/cache.py --cache $cache stats
-python research/cli/cache.py --cache $cache find appUpdateDraw
+@{ cache = $cache } | ConvertTo-Json | Set-Content research/.local/reference.json -Encoding utf8BOM
+python research/cli/cache.py stats
+python research/cli/cache.py find appUpdateDraw
 ```
 
 ダウンロードしたアーカイブのSHA-256は同梱manifest JSONの `sha256` と照合します。manifestには内部ファイルの相対パス・サイズ・SHA-256もあります。
-保存時の `.local/reference.json` やidentity/configには元PCの絶対パスが残ります。別PCの検索では上記の `--cache` を指定します。解析を再開するときはGhidra/JDK、binary/snapshotなどのパスを新環境へ設定し、`backup-project.zip` を新しい作業先の `project/` に展開してください。保存済み資料の検索だけならGhidraもAPKも不要です。
+保存時の `.local/reference.json` やidentity/configには元PCの絶対パスが残ります。別PCでは上記の手順で既定参照先を登録します（PowerShell 7）。一時的な指定には `--cache` も使えますが、既定先と異なるキャッシュはジャーナルとファイルの再同期を行うため時間がかかります。解析を再開するときはGhidra/JDK、binary/snapshotなどのパスを新環境へ設定し、`backup-project.zip` を新しい作業先の `project/` に展開してください。保存済み資料の検索だけならGhidraもAPKも不要です。
 
 ## 再梱包
 
@@ -37,3 +38,10 @@ python -m indexer.materials --output research/.local/publish/native-v15.7.2-mate
 ```
 
 既存出力は上書きしません。APK・SOも必要な保存先に含める場合は `--include-binaries` を付けます。このツールはアップロードせず、選択した資料のアーカイブとmanifestだけを生成します。Releaseの可視性がPrivateであることを確認してから `gh release create/upload` で保存します。
+
+## 保存実績
+
+[Private Release native-v15.7.2](https://github.com/sinsuirakv0/KBCS/releases/tag/native-v15.7.2)へ保存済みです。
+25,398ファイルを436,265,209 bytesのアーカイブにまとめ、manifestと検証結果を添付しました。
+アーカイブSHA-256: `b1459dda0e8783ef5d996330b28bd67594d3341a40dc95c54f16b2b5edefc545`。
+全内部ファイルのハッシュ・gzip CRCと、GitHub側3アセットのサイズ・SHA-256の一致を確認しました。

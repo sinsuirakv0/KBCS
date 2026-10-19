@@ -67,3 +67,5 @@ python research/cli/cache.py assembly 00818144
 将来はbodyバイトハッシュ、正規化命令ハッシュ、文字列・呼出関係のアンカー、手動確認済み対応表を追加します。旧DBを保持し、アドレス一致だけで新旧を対応付けません。将来の戦闘エンジン等はGhidraをランタイム依存にせず、確認済み知見を独立成果物として利用します。
 
 ユーザー指定でPrivate KBCSにソースと資料を保存し、大容量資料はReleaseにまとめます。APK・SOの単体ファイル、認証情報、一時展開物は除外します。既存のAPK取得元リポジトリとworkflowは変更していません。
+
+[保存済みPrivate Release](https://github.com/sinsuirakv0/KBCS/releases/tag/native-v15.7.2)：全25,398ファイル、アーカイブ436,265,209 bytes。全ファイルハッシュ・gzip CRC・GitHub上の3アセットのサイズとSHA-256を照合済みです。
