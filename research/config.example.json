@@ -1,0 +1,11 @@
+{
+  "ghidra_home": "D:/KBC/tools/ghidra_12.1.2_PUBLIC",
+  "java_home": "D:/KBC/tools/jdk-21.0.11+10",
+  "mcp_url": "http://127.0.0.1:8089",
+  "program": "libnative-lib.so",
+  "heap": "512M",
+  "native_memory_limit_mb": 1536,
+  "timeout_seconds": 20,
+  "analysis_timeout_seconds": 600,
+  "batch_timeout_seconds": 900
+}
