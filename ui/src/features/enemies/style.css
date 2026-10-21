@@ -1,0 +1,21 @@
+@import "../../shared/ui/game-database.css";
+.enemy-money-base { display:block; white-space:normal; font-size:var(--font-size-small); }
+#enemy-table .unit-properties-column, #enemy-table .enemy-attributes-column { min-width:60px; }
+.enemy-hit-table { width:100%; border-collapse:collapse; }
+.enemy-hit-table th,.enemy-hit-table td { padding:2px 4px; height:auto; text-align:right; }
+.enemy-hit-table th:first-child { text-align:left; }
+.enemy-settings-note { margin:3px 0; }
+#enemy-compare-controls { margin-top:5px; }
+#enemy-compare-id { max-width:100%; min-width:150px; }
+.unit-lab-tabs { display:flex; margin-bottom:5px; border-bottom:1px solid var(--color-border); }
+.unit-lab-tabs button { border:0; border-radius:0; background:none; font-size:var(--font-size-tab); }
+.unit-lab-tabs button+button { border-left:1px solid var(--color-border); }
+.unit-lab-tabs [aria-selected="true"] { color:var(--color-accent); background:var(--color-control); }
+.enemy-compare-table th,.enemy-compare-table td { white-space:normal; }
+.enemy-compare-table th:first-child { width:70px; text-align:left; }
+.enemy-chart { display:block; width:100%; max-width:360px; margin:4px auto; }
+.enemy-chart text { fill:var(--color-text); font-size:var(--font-size-body); }
+.enemy-chart .grid { fill:none; stroke:var(--color-border); }
+.enemy-chart .series-0 { stroke:var(--color-primary); fill:var(--color-primary); fill-opacity:.15; }
+.enemy-chart .series-1 { stroke:var(--color-accent); fill:var(--color-accent); fill-opacity:.15; }
+.enemy-chart polygon { stroke-width:2; }

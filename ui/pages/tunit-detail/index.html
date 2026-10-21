@@ -1,0 +1,24 @@
+﻿<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>KBCS</title><link rel="icon" href="/images/kbc-logo.png"><link rel="stylesheet" href="/src/shared/ui/site.css"><link rel="stylesheet" href="/src/features/units/style.css"><link rel="stylesheet" href="/src/features/enemies/style.css"><link rel="stylesheet" href="/native.css"><script type="module" src="/src/app/main.js"></script><script type="module" src="/src/features/enemies/detail.js"></script></head>
+<body data-page="tunit-detail" class="units-page">
+<div class="site-shell"><a class="skip-link" href="#main">本文へ移動</a><header class="site-header"><a class="brand" href="/" aria-label="KBCS ホーム"><img src="/images/kbc-logo.png" alt="" width="28" height="28"><span>KBCS</span></a><nav class="site-nav" aria-label="サイト"><a href="/">ホーム</a><a href="/pages/unit-search/">キャラ検索</a><a href="/pages/tunit-search/">敵検索</a><a href="/pages/stage-search/">ステージ</a></nav><div class="theme-switcher" role="group" aria-label="表示テーマ"><button type="button" class="theme-button" data-theme-value="original" aria-label="濃紺" title="濃紺"><span class="theme-dot theme-dot-original" aria-hidden="true"></span></button><button type="button" class="theme-button" data-theme-value="dark" aria-label="ダーク" title="ダーク"><span class="theme-dot theme-dot-dark" aria-hidden="true"></span></button><button type="button" class="theme-button" data-theme-value="light" aria-label="ライト" title="ライト"><span class="theme-dot theme-dot-light" aria-hidden="true"></span></button></div><button type="button" class="site-settings-trigger" data-site-settings>設定</button></header><main id="main" class="page-main">
+  <h1 id="enemy-title" class="visually-hidden">敵詳細</h1>
+  <div class="db-toolbar"><a id="enemy-back" href="/pages/tunit-search/">敵検索へ</a><span id="enemy-version" class="db-meta"></span><span id="enemy-capture-status" class="db-meta" role="status"></span></div>
+  <p id="enemy-status" class="status" role="status">敵データを読み込んでいます。</p><button id="enemy-retry" type="button" hidden>再読み込み</button>
+  <div id="enemy-content" hidden>
+    <div class="db-toolbar"><label>体力 %<input id="enemy-health" type="number" min="0" max="1000000" value="100"></label><label>攻撃 %<input id="enemy-attack" type="number" min="0" max="1000000" value="100"></label><label><input id="enemy-same" type="checkbox" checked>倍率を揃える</label><label>単位<select id="enemy-time"><option value="seconds">秒</option><option value="frames">F</option></select></label></div>
+    <div id="enemy-sheet-output"></div>
+    <details class="unit-related" id="enemy-comparison"><summary>条件設定・比較</summary>
+      <div class="unit-lab-tabs" role="tablist" aria-label="条件設定・比較"><button type="button" role="tab" id="enemy-tab-settings" aria-controls="enemy-settings" aria-selected="true">条件設定</button><button type="button" role="tab" id="enemy-tab-results" aria-controls="enemy-comparison-results" aria-selected="false">結果・比較</button></div>
+      <section id="enemy-settings" role="tabpanel" aria-labelledby="enemy-tab-settings">
+        <fieldset><legend>現在の敵</legend><div id="enemy-condition-controls"></div></fieldset>
+        <label><input id="enemy-compare-enabled" type="checkbox">比較する敵を追加</label>
+        <fieldset id="enemy-compare-controls" hidden><legend>比較する敵</legend><div class="db-toolbar"><input id="enemy-compare-query" type="search" placeholder="名前・IDで探す" aria-label="比較する敵を検索"><select id="enemy-compare-id" aria-label="比較する敵"></select></div><label><input id="enemy-compare-same" type="checkbox" checked>条件を同じにする</label><div id="enemy-compare-conditions" hidden><div class="db-toolbar"><label>体力 %<input id="enemy-compare-health" type="number" min="0" max="1000000" value="100"></label><label>攻撃 %<input id="enemy-compare-attack" type="number" min="0" max="1000000" value="100"></label></div><div id="enemy-peer-condition-controls"></div></div></fieldset>
+        <button type="button" data-enemy-tab="results">結果・比較を見る</button>
+      </section>
+      <section id="enemy-comparison-results" role="tabpanel" aria-labelledby="enemy-tab-results" hidden><div class="db-toolbar"><button type="button" data-enemy-tab="settings">条件を変更</button><button type="button" data-capture="enemy-comparison-output">画像保存</button></div><div id="enemy-comparison-output"></div></section>
+    </details>
+  </div>
+</main></div>
+</body></html>

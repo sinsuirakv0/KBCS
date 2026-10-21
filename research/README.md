@@ -112,3 +112,15 @@ Ghidra内の実行ファイルSHA-256とも照合し、パス名だけで版を�
 詳しい設計は[architecture.md](docs/architecture.md)、実測と環境調査は[initial-report.md](docs/initial-report.md)を参照してください。
 
 全件処理の最終結果は[全関数キャッシュ実測・保存報告](docs/complete-report.md)を参照してください。
+
+## 計算の現版照合
+
+`verify/calculation.py`は既存の完全版キャッシュ・SOと検証済みアセットを読み、体力・攻撃・両方向命中・毒撃・メタルキラー・パーツ補間・章別お宝を局所実行する。既存Ghidraプロジェクトを変更しない。実行方法・条件・限界は[計算照合](../native/kbcs-core/docs/native-calculation.md)。完全な呼出記録はresearch/.local、小さい値のfixtureだけnative/kbcs-core/testsへ保存する。
+
+## ステージの番台別照合
+
+[番台一覧と確認状況](docs/stages/README.md)、[0番台の調査](docs/stages/00000.md)。`verify/stages.py`は40番台分の分類境界と0番台49マップ・324ステージの出現行、冠倍率、出現判定16条件、レア度制限6条件、ボスフラグ3値、通常報酬の比較8条件を現版ARM64へ照合する。配布DB・UIの生成コマンドではない。原本と実行結果の大きい報告は`.local/stages-1572-band0.json`へ保存する。`--publish`で出現判定だけの小さいC++照合用fixtureを更新する。
+
+```powershell
+python research/verify/stages.py --assets D:/KBC/KBC-rakv0-assets --python-libs D:/KBC/KBC-rakv0-lab/unit-db/research/python-libs
+```

@@ -2,3 +2,5 @@ research/.local/
 research/ghidra-workspace
 __pycache__/
 *.pyc
+target/
+.local/

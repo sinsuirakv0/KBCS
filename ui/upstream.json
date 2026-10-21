@@ -1,0 +1,68 @@
+{
+  "repository": "sinsuirakv0/kbc-web",
+  "files": {
+    "src/features/stages/style.css": "f202a706e49bbaa5d31e879477b6d24b6a0314300e3ca49025e991092496d3ed",
+    "src/shared/ui/game-database.css": "96bfab33acd9f4417fb2e9d84fe28d9aa1e4a97234a6a4b91c20ff2f12ec045d",
+    "src/shared/ui/database.css": "91275c4df96e7c08e20f49766136bcc5a1e2cbaaeec528b9bc477ed157eab216",
+    "src/features/stages/view.js": "e8deeb0f69d640ad61e1ba70912b326d4b1442ee6f0b32258218753d92a0ee25",
+    "src/features/stages/model.js": "80efa309a3767231731e4e6c198fb1b63a04cb40ab6409895a96c675ec8fd90e",
+    "src/shared/game/unit-stats.js": "a74fa5c6d913922df90e782611451be251c2935b14e925ae3e0c36cb98f5f806",
+    "src/shared/game/game-settings.js": "b0988f135c47a4afbeaa04268d4882171544cf2fb23caf01e77a97ba7a513307",
+    "src/shared/game/enemy-stats.js": "e921b213afecc649e6d5e371c05e726f7066a2684b57497f2475cac5e0efdf0d",
+    "src/shared/game/unit-view.js": "16cef7a23e7c18b3a57c8e2a3126b165959351f1b56c6ad6941e4716ddce3b9c",
+    "src/shared/game/database-view.js": "241b8a306817b46cc048a1af1e073160424cd36b753284e56a9319ff0339b2e4",
+    "src/shared/game/enemy-view.js": "0f81aebb3a41be01e7951682b39fd71ed9385df5c72e71d0cce5881f5e1c278c",
+    "src/features/stages/search.js": "21f9ca137acb55cf4ba83078a7901f9a57492f7533e69ac5bef6e43ee337f001",
+    "src/shared/browser/pagination.js": "6668280d72b0f654249fcf17fcf877dc77465648dc0fa14b7bf0846e6df8fb2a",
+    "src/features/stages/rewards.js": "612c61d3baac77f377acddc5a3cd96c02022efd7ce9d4e309962f31a52638f9c",
+    "src/shared/game/units.js": "9b04ce82fed0318d1abbe4251c9073776306c11aaba01e8806391c58a28e249e",
+    "src/shared/browser/game-settings.js": "127b7a597b34e8bbbb58ad8bbe3d67b962425fdd30c8f81bda144550d72dbf28",
+    "src/shared/browser/clipboard.js": "bc2397c1742d97d8c23ea1955577413a39a437b99c7573fc5522f8f0df30fa1b",
+    "src/shared/theme/theme.js": "4a73f810f102d201420650b7f60a3d10c738aa6702b54610bf93c74c8497a48c",
+    "src/shared/game/site-settings.js": "30b0ae939f3f4808b73bb11418de3f67feb874d7856ed2de2b399159dea98f46",
+    "src/shared/browser/storage.js": "ae2ab480885b8b3b06431d0c2a8331f3c32c7cb35c38a238839eaa87aeb2855a",
+    "src/shared/game/enemies.js": "5a8353fcf03a863279b8a81f2936e355b8f594e7ae0f9dccf01bbc9a76ca3c6f",
+    "src/shared/game/stages.js": "330d17f1b075cb7c867559170e8776016ddf8ac01a12eb9f4e8ad1ff1f241d66",
+    "src/features/units/style.css": "810759f2645a4ee60b8b09887bcb0f5cd63c2eca04f8fd3d75a7e026b1c61390",
+    "src/shared/ui/site.css": "885ca7d6c085401cd18a88e1bd262cf7aae924d2a8cdc5838304c45fabb7529d",
+    "src/shared/ui/tokens.css": "08f235179da5c311309b363006dd8fe0b424838934dddeb0b629c9e744253f10",
+    "src/features/enemies/style.css": "2c9cc200c98798f68458362aead4688c61403c041647bea14afa14affa8e0adb",
+    "src/features/enemies/detail.js": "948ba7240e233ca2d2a773c7938ad0a531dab852c08143369f900e16b38c34b6",
+    "src/shared/game/share-state.js": "34d76f75602626f53803e34e91202db36f4723b82a7deda968a44c680f4a1544",
+    "src/features/enemies/view.js": "3d7080a3a29fce3402fcaa688d82bed18d80838d7bd48ab9ec00911f10d12934",
+    "src/features/enemies/model.js": "b1b73945b38175c94ea829f299064b6af3478ecc57674320bbdc16d5695d8938",
+    "src/shared/browser/capture.js": "de578cbfb3fd9d4a51443878a17612390d9e59bfa29a17f6197bbae9eaa6d1b0",
+    "src/features/enemies/search.js": "48fab8c178d6b5a6e8fad8fac155aea5851088c6c06323a03deacbd7b6a7787a",
+    "src/features/units/combo-builder.js": "a52c978afef3f0d0f2d118a39d076f6c51ab4e59e7d69f8736a344f659804c52",
+    "src/features/units/view.js": "72a86225c8ad23a21538abcce36dd97b8db5f708019420e5641ca9b61ceaf574",
+    "src/features/units/combo-model.js": "defbbda416f37c891d0fec141c227be540fb1619b88655445daa56dae9b92cb6",
+    "src/features/units/model.js": "8eaafa215e9d1b44570ba64b1aa0e4dad3bd7eb3aaa047502283728c1b1bec8a",
+    "src/features/units/growth.js": "5f1b13dc1665c4ca31ac9fecbd87841b99082dabf2ea9d79668f2fdd6d1480ed",
+    "src/shared/browser/level-control.js": "871e21e4883dfcd05803ae85e4b0c141a3a87e7a438a617ef7778659f494e66b",
+    "src/features/units/search.js": "93f60f439f57e4a9bc32a87f0510febb4ffb09b560f7d8c06c98afb7f5d37f3f",
+    "src/features/units/filters.js": "8b6af31fa68b29fb1696bc26fcbf9ec29ead2b2a6b81bddb27807b1ad518e887",
+    "src/app/main.js": "98e93671a39daeeffd6ff5886b9f6e3af807ca01fbb7005ca47759fba84e6e61",
+    "icons/stages/crown-on.png": "7ef5f4e811f8974717450bc94dc417f3f99f34b0a528d0fa0b6072652818ad5c",
+    "icons/stages/crown-off.png": "93ce5e5a78c22d7bafc7348d4e83e2b6f6f1df2a06f0c31cf7f03d67270c9d80"
+  },
+  "enemies": {
+    "compilerSha256": "34420116f831afa4238348938711c125a3080b6ca6b5580f3d22d0653ccb9a74",
+    "castlesSha256": "ae3c5b7c8e404e5d55624ead170958315952f4bacc38b76dcc0dfbc8532415e1",
+    "iconsSha256": "ca019b9cc69d5fd1303bd8c24b90d0852d32cfe46caee996458d909094d5f40a"
+  },
+  "vendor": {
+    "html2canvas": {
+      "version": "1.4.1",
+      "sha256": "c3b0b8b257996d79b5e362d2aee2411ff74fd23e984e9900f5ba005ea4753d64",
+      "license": "MIT"
+    }
+  },
+  "talents": {
+    "source": "D:\\KBC\\KBC-rakv0-lab\\unit-db\\battle.mjs",
+    "sha256": "496d3d5acb2d9d769141a4b3c58c6c873d71d5095e905e4ec46aa540868eb34c",
+    "compilerSha256": "e75a5f9536de0c779256f41e37dc72c10b3647a08bbea29bedfd85d67a88de9b",
+    "functions": [
+      "applyUnitTalents"
+    ]
+  }
+}

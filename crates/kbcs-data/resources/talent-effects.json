@@ -1,0 +1,664 @@
+{
+  "1": {
+    "name": "\u653b\u6483\u529b\u30c0\u30a6\u30f3",
+    "effect": {
+      "kind": "ability",
+      "key": "weaken",
+      "label": "\u653b\u6483\u529b\u30c0\u30a6\u30f3",
+      "fields": [
+        "probability",
+        "duration",
+        "weakenPercent"
+      ]
+    }
+  },
+  "2": {
+    "name": "\u52d5\u304d\u3092\u6b62\u3081\u308b",
+    "effect": {
+      "kind": "ability",
+      "key": "stop",
+      "label": "\u52d5\u304d\u3092\u6b62\u3081\u308b",
+      "fields": [
+        "probability",
+        "duration"
+      ]
+    }
+  },
+  "3": {
+    "name": "\u52d5\u304d\u3092\u9045\u304f\u3059\u308b",
+    "effect": {
+      "kind": "ability",
+      "key": "slow",
+      "label": "\u52d5\u304d\u3092\u9045\u304f\u3059\u308b",
+      "fields": [
+        "probability",
+        "duration"
+      ]
+    }
+  },
+  "5": {
+    "name": "\u3081\u3063\u307d\u3046\u5f37\u3044",
+    "effect": {
+      "kind": "ability",
+      "key": "strong",
+      "label": "\u3081\u3063\u307d\u3046\u5f37\u3044",
+      "fields": []
+    }
+  },
+  "6": {
+    "name": "\u6253\u305f\u308c\u5f37\u3044",
+    "effect": {
+      "kind": "ability",
+      "key": "resistant",
+      "label": "\u6253\u305f\u308c\u5f37\u3044",
+      "fields": []
+    }
+  },
+  "7": {
+    "name": "\u8d85\u30c0\u30e1\u30fc\u30b8",
+    "effect": {
+      "kind": "ability",
+      "key": "massive",
+      "label": "\u8d85\u30c0\u30e1\u30fc\u30b8",
+      "fields": []
+    }
+  },
+  "8": {
+    "name": "\u3075\u3063\u3068\u3070\u3059",
+    "effect": {
+      "kind": "ability",
+      "key": "knockback",
+      "label": "\u3075\u3063\u3068\u3070\u3059",
+      "fields": [
+        "probability"
+      ]
+    }
+  },
+  "10": {
+    "name": "\u653b\u6483\u529b\u30a2\u30c3\u30d7\uff08\u4f53\u529b\u4f4e\u4e0b\u6642\uff09",
+    "effect": {
+      "kind": "ability",
+      "key": "strengthen",
+      "label": "\u653b\u6483\u529b\u30a2\u30c3\u30d7",
+      "fields": [
+        "healthReduction",
+        "strengthenPercent"
+      ]
+    }
+  },
+  "11": {
+    "name": "\u751f\u304d\u6b8b\u308b",
+    "effect": {
+      "kind": "ability",
+      "key": "survive",
+      "label": "\u751f\u304d\u6b8b\u308b",
+      "fields": [
+        "probability"
+      ]
+    }
+  },
+  "13": {
+    "name": "\u30af\u30ea\u30c6\u30a3\u30ab\u30eb",
+    "effect": {
+      "kind": "ability",
+      "key": "critical",
+      "label": "\u30af\u30ea\u30c6\u30a3\u30ab\u30eb",
+      "fields": [
+        "probability"
+      ]
+    }
+  },
+  "14": {
+    "name": "\u30be\u30f3\u30d3\u30ad\u30e9\u30fc",
+    "effect": {
+      "kind": "ability",
+      "key": "zombie-killer",
+      "label": "\u30be\u30f3\u30d3\u30ad\u30e9\u30fc",
+      "fields": []
+    }
+  },
+  "15": {
+    "name": "\u30d0\u30ea\u30a2\u30d6\u30ec\u30a4\u30ab\u30fc",
+    "effect": {
+      "kind": "ability",
+      "key": "barrier",
+      "label": "\u30d0\u30ea\u30a2\u30d6\u30ec\u30a4\u30ab\u30fc",
+      "fields": [
+        "probability"
+      ]
+    }
+  },
+  "16": {
+    "name": "\u6483\u7834\u6642\u304a\u91d12\u500d",
+    "effect": {
+      "kind": "ability",
+      "key": "money",
+      "label": "\u6483\u7834\u6642\u304a\u91d12\u500d",
+      "fields": []
+    }
+  },
+  "17": {
+    "name": "\u6ce2\u52d5",
+    "effect": {
+      "kind": "ability",
+      "key": "wave",
+      "label": "\u6ce2\u52d5",
+      "fields": [
+        "probability",
+        "level"
+      ]
+    }
+  },
+  "18": {
+    "name": "\u653b\u6483\u529b\u30c0\u30a6\u30f3\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "weaken-immune",
+      "label": "\u653b\u6483\u529b\u30c0\u30a6\u30f3\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "19": {
+    "name": "\u6b62\u3081\u308b\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "stop-immune",
+      "label": "\u6b62\u3081\u308b\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "20": {
+    "name": "\u9045\u304f\u3059\u308b\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "slow-immune",
+      "label": "\u9045\u304f\u3059\u308b\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "21": {
+    "name": "\u3075\u3063\u3068\u3070\u3059\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "knockback-immune",
+      "label": "\u3075\u3063\u3068\u3070\u3059\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "22": {
+    "name": "\u6ce2\u52d5\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "wave-immune",
+      "label": "\u6ce2\u52d5\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "24": {
+    "name": "\u30ef\u30fc\u30d7\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "warp-immune",
+      "label": "\u30ef\u30fc\u30d7\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "25": {
+    "name": "\u751f\u7523\u30b3\u30b9\u30c8\u6e1b\u5c11",
+    "effect": {
+      "kind": "stat",
+      "key": "cost"
+    }
+  },
+  "26": {
+    "name": "\u518d\u751f\u7523\u77ed\u7e2e",
+    "effect": {
+      "kind": "stat",
+      "key": "respawn"
+    }
+  },
+  "27": {
+    "name": "\u79fb\u52d5\u901f\u5ea6\u30a2\u30c3\u30d7",
+    "effect": {
+      "kind": "stat",
+      "key": "speed"
+    }
+  },
+  "28": {
+    "name": "KB\u6570\u30a2\u30c3\u30d7",
+    "effect": {
+      "kind": "stat",
+      "key": "knockbacks"
+    }
+  },
+  "29": {
+    "name": "\u53e4\u4ee3\u306e\u546a\u3044\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "curse-immune",
+      "label": "\u53e4\u4ee3\u306e\u546a\u3044\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "30": {
+    "name": "\u53e4\u4ee3\u306e\u546a\u3044\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "curse-immune",
+      "label": "\u53e4\u4ee3\u306e\u546a\u3044\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "31": {
+    "name": "\u57fa\u672c\u653b\u6483\u529b\u30a2\u30c3\u30d7",
+    "effect": {
+      "kind": "stat",
+      "key": "attackPercent"
+    }
+  },
+  "32": {
+    "name": "\u57fa\u672c\u4f53\u529b\u30a2\u30c3\u30d7",
+    "effect": {
+      "kind": "stat",
+      "key": "healthPercent"
+    }
+  },
+  "33": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "red"
+    }
+  },
+  "34": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "floating"
+    }
+  },
+  "35": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "black"
+    }
+  },
+  "36": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "metal"
+    }
+  },
+  "37": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "angel"
+    }
+  },
+  "38": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "alien"
+    }
+  },
+  "39": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "zombie"
+    }
+  },
+  "40": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "relic"
+    }
+  },
+  "41": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "white"
+    }
+  },
+  "42": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "witch"
+    }
+  },
+  "43": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "eva"
+    }
+  },
+  "44": {
+    "name": "\u653b\u6483\u529b\u30c0\u30a6\u30f3\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "weaken-immune",
+      "label": "\u653b\u6483\u529b\u30c0\u30a6\u30f3\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "45": {
+    "name": "\u6b62\u3081\u308b\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "stop-immune",
+      "label": "\u6b62\u3081\u308b\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "46": {
+    "name": "\u9045\u304f\u3059\u308b\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "slow-immune",
+      "label": "\u9045\u304f\u3059\u308b\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "47": {
+    "name": "\u3075\u3063\u3068\u3070\u3059\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "knockback-immune",
+      "label": "\u3075\u3063\u3068\u3070\u3059\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "48": {
+    "name": "\u6ce2\u52d5\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "wave-immune",
+      "label": "\u6ce2\u52d5\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "49": {
+    "name": "\u30ef\u30fc\u30d7\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "warp-immune",
+      "label": "\u30ef\u30fc\u30d7\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "50": {
+    "name": "\u6e3e\u8eab\u306e\u4e00\u6483",
+    "effect": {
+      "kind": "ability",
+      "key": "savage",
+      "label": "\u6e3e\u8eab\u306e\u4e00\u6483",
+      "fields": [
+        "probability",
+        "savagePercent"
+      ]
+    }
+  },
+  "51": {
+    "name": "\u653b\u6483\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "dodge",
+      "label": "\u653b\u6483\u7121\u52b9",
+      "fields": [
+        "probability",
+        "duration"
+      ]
+    }
+  },
+  "52": {
+    "name": "\u6bd2\u6483\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "toxic-immune",
+      "label": "\u6bd2\u6483\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "53": {
+    "name": "\u6bd2\u6483\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "toxic-immune",
+      "label": "\u6bd2\u6483\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "54": {
+    "name": "\u70c8\u6ce2\u8010\u6027",
+    "effect": {
+      "kind": "ability",
+      "key": "surge-immune",
+      "label": "\u70c8\u6ce2\u8010\u6027",
+      "fields": [
+        "resistance"
+      ]
+    }
+  },
+  "55": {
+    "name": "\u70c8\u6ce2\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "surge-immune",
+      "label": "\u70c8\u6ce2\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "56": {
+    "name": "\u70c8\u6ce2",
+    "effect": {
+      "kind": "ability",
+      "key": "surge",
+      "label": "\u70c8\u6ce2",
+      "fields": [
+        "probability",
+        "level",
+        "surgeStart",
+        "surgeWidth"
+      ]
+    }
+  },
+  "57": {
+    "name": null,
+    "effect": {
+      "kind": "target",
+      "key": "aku"
+    }
+  },
+  "58": {
+    "name": "\u30b7\u30fc\u30eb\u30c9\u30d6\u30ec\u30a4\u30ab\u30fc",
+    "effect": {
+      "kind": "ability",
+      "key": "shield",
+      "label": "\u30b7\u30fc\u30eb\u30c9\u30d6\u30ec\u30a4\u30ab\u30fc",
+      "fields": [
+        "probability"
+      ]
+    }
+  },
+  "59": {
+    "name": "\u9b42\u653b\u6483",
+    "effect": {
+      "kind": "ability",
+      "key": "soul-killer",
+      "label": "\u9b42\u653b\u6483",
+      "fields": []
+    }
+  },
+  "60": {
+    "name": "\u546a\u3044",
+    "effect": {
+      "kind": "ability",
+      "key": "curse",
+      "label": "\u546a\u3044",
+      "fields": [
+        "probability",
+        "duration"
+      ]
+    }
+  },
+  "61": {
+    "name": "\u653b\u6483\u9593\u9694\u77ed\u7e2e",
+    "effect": {
+      "kind": "stat",
+      "key": "intervalPercent"
+    }
+  },
+  "62": {
+    "name": "\u5c0f\u6ce2\u52d5",
+    "effect": {
+      "kind": "ability",
+      "key": "mini-wave",
+      "label": "\u5c0f\u6ce2\u52d5",
+      "fields": [
+        "probability",
+        "level",
+        "miniPercent"
+      ]
+    }
+  },
+  "63": {
+    "name": "\u8d85\u751f\u547d\u4f53\u7279\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "colossus",
+      "label": "\u8d85\u751f\u547d\u4f53\u7279\u52b9",
+      "fields": []
+    }
+  },
+  "64": {
+    "name": "\u8d85\u7363\u7279\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "behemoth",
+      "label": "\u8d85\u7363\u7279\u52b9",
+      "fields": [
+        "probability",
+        "duration"
+      ]
+    }
+  },
+  "65": {
+    "name": "\u5c0f\u70c8\u6ce2",
+    "effect": {
+      "kind": "ability",
+      "key": "mini-surge",
+      "label": "\u5c0f\u70c8\u6ce2",
+      "fields": [
+        "probability",
+        "level",
+        "surgeStart",
+        "surgeWidth"
+      ]
+    }
+  },
+  "66": {
+    "name": "\u8d85\u8ce2\u8005\u7279\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "sage",
+      "label": "\u8d85\u8ce2\u8005\u7279\u52b9",
+      "fields": []
+    }
+  },
+  "67": {
+    "name": "\u7206\u6ce2",
+    "effect": {
+      "kind": "ability",
+      "key": "blast",
+      "label": "\u7206\u6ce2",
+      "fields": [
+        "probability",
+        "blastStart",
+        "blastWidth"
+      ]
+    }
+  },
+  "68": {
+    "name": "\u70c8\u6ce2\u53cd\u5c04",
+    "effect": {
+      "kind": "ability",
+      "key": "surge-counter",
+      "label": "\u70c8\u6ce2\u53cd\u5c04",
+      "fields": []
+    }
+  },
+  "69": {
+    "name": "\u7206\u6ce2\u7121\u52b9",
+    "effect": {
+      "kind": "ability",
+      "key": "blast-immune",
+      "label": "\u7206\u6ce2\u7121\u52b9",
+      "fields": [
+        "immune"
+      ]
+    }
+  },
+  "70": {
+    "name": "\u57fa\u672c\u653b\u6483\u529b\u30a2\u30c3\u30d7\uff0b",
+    "effect": {
+      "kind": "stat",
+      "key": "attackPercent"
+    }
+  },
+  "71": {
+    "name": "\u57fa\u672c\u4f53\u529b\u30a2\u30c3\u30d7\uff0b",
+    "effect": {
+      "kind": "stat",
+      "key": "healthPercent"
+    }
+  },
+  "72": {
+    "name": "\u751f\u7523\u6642\u9593\u77ed\u7e2e",
+    "effect": {
+      "kind": "stat",
+      "key": "alternateRespawnPercent"
+    }
+  }
+}

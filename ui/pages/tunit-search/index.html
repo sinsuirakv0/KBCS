@@ -1,0 +1,32 @@
+﻿<!doctype html>
+<html lang="ja">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>KBCS</title><link rel="icon" href="/images/kbc-logo.png"><link rel="stylesheet" href="/src/shared/ui/site.css"><link rel="stylesheet" href="/src/features/units/style.css"><link rel="stylesheet" href="/src/features/enemies/style.css"><link rel="stylesheet" href="/native.css"><script type="module" src="/src/app/main.js"></script><script type="module" src="/src/features/enemies/search.js"></script></head>
+<body data-page="tunit-search" class="units-page">
+<div class="site-shell"><a class="skip-link" href="#main">本文へ移動</a><header class="site-header"><a class="brand" href="/" aria-label="KBCS ホーム"><img src="/images/kbc-logo.png" alt="" width="28" height="28"><span>KBCS</span></a><nav class="site-nav" aria-label="サイト"><a href="/">ホーム</a><a href="/pages/unit-search/">キャラ検索</a><a href="/pages/tunit-search/">敵検索</a><a href="/pages/stage-search/">ステージ</a></nav><div class="theme-switcher" role="group" aria-label="表示テーマ"><button type="button" class="theme-button" data-theme-value="original" aria-label="濃紺" title="濃紺"><span class="theme-dot theme-dot-original" aria-hidden="true"></span></button><button type="button" class="theme-button" data-theme-value="dark" aria-label="ダーク" title="ダーク"><span class="theme-dot theme-dot-dark" aria-hidden="true"></span></button><button type="button" class="theme-button" data-theme-value="light" aria-label="ライト" title="ライト"><span class="theme-dot theme-dot-light" aria-hidden="true"></span></button></div><button type="button" class="site-settings-trigger" data-site-settings>設定</button></header><main id="main" class="page-main">
+  <h1 class="visually-hidden">敵検索</h1>
+  <div class="db-toolbar"><a href="/pages/unit-search/">キャラ検索</a><span id="enemy-version" class="db-meta"></span></div>
+  <p id="enemy-status" class="status" role="status">敵データを読み込んでいます。</p><button id="enemy-retry" type="button" hidden>再読み込み</button>
+  <form id="enemy-filters" hidden>
+    <div class="db-toolbar"><input id="enemy-query" type="search" aria-label="敵名・ID" placeholder="敵名・ID（例：わんこ、0、0-10）"><button type="button" id="enemy-reset">クリア</button></div>
+    <div class="unit-match-toolbar">
+      <fieldset id="enemy-attribute-mode" class="unit-match-mode"><legend>属性・種族</legend><label class="db-chip"><input type="radio" name="attributeMode" value="any" checked><span>OR</span></label><label class="db-chip"><input type="radio" name="attributeMode" value="all"><span>AND</span></label></fieldset>
+      <fieldset id="enemy-ability-mode" class="unit-match-mode"><legend>特性・効果</legend><label class="db-chip"><input type="radio" name="abilityMode" value="all" checked><span>AND</span></label><label class="db-chip"><input type="radio" name="abilityMode" value="any"><span>OR</span></label></fieldset>
+    </div>
+    <div class="unit-filter-row"><span class="unit-filter-label">属性</span><fieldset id="enemy-attributes" class="db-filter-group" aria-label="属性"></fieldset></div>
+    <div class="unit-filter-row"><span class="unit-filter-label">種族</span><fieldset id="enemy-species" class="db-filter-group" aria-label="種族"></fieldset></div>
+    <div id="enemy-abilities"></div><output id="enemy-filter-hint" class="db-meta unit-filter-hint"></output>
+    <details class="unit-related"><summary>詳細検索・倍率</summary>
+      <div class="db-toolbar"><label>攻撃<select id="enemy-attack-type"><option value="">すべて</option><option>単体</option><option>範囲</option></select></label><label><input id="enemy-negate" type="checkbox">選んだ特性を除く</label></div>
+      <div class="unit-ranges" id="enemy-ranges"></div>
+      <fieldset><legend>数値の条件</legend><div class="db-toolbar"><label>体力 %<input id="enemy-health" type="number" min="0" max="1000000" value="100"></label><label>攻撃 %<input id="enemy-attack" type="number" min="0" max="1000000" value="100"></label><label>単位<select id="enemy-time"><option value="seconds">秒</option><option value="frames">F</option></select></label></div>
+      <div class="db-toolbar"><label>未来編クリスタル %<input id="enemy-alien" type="number" min="0" max="600" value="600"></label><label>宇宙編クリスタル %<input id="enemy-starred" type="number" min="0" max="1500" value="1500"></label></div><p class="db-meta">倍率の初期値は100%。お宝・施設は共通設定を使います。数値条件は表示中の値を使います。</p></fieldset>
+    </details>
+  </form>
+  <div id="enemy-results" hidden>
+    <div class="unit-list-meta"><span id="enemy-count" role="status"></span><label>表示<select id="enemy-page-size"><option value="25">25件</option><option value="50" selected>50件</option><option value="100">100件</option></select></label><label><input id="enemy-show-properties" type="checkbox" checked>特性</label></div>
+    <div class="db-table-wrap" id="enemy-table-wrap"><table class="db-table db-search-table" id="enemy-table"><thead></thead><tbody></tbody></table></div>
+    <p id="enemy-empty" hidden>条件に一致する敵がいません。</p>
+    <div class="db-pagination"><button id="enemy-prev" type="button">前へ</button><span id="enemy-page-status" class="db-page-status"></span><button id="enemy-next" type="button">次へ</button></div>
+  </div>
+</main></div>
+</body></html>

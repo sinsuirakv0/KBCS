@@ -1,0 +1,21 @@
+[package]
+name = "kbcs-app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde_json.workspace = true
+kbcs-data = { path = "../kbcs-data" }
+kbcs-bridge = { path = "../kbcs-bridge" }
+include_dir = "0.7"
+tiny_http = "0.12"
+url = "2"
+
+[target.'cfg(windows)'.dependencies]
+wry = { version = "0.57", default-features = false, features = ["os-webview"] }
+tao = { version = "0.37", default-features = false, features = ["rwh_06"] }
+
+[[bin]]
+name = "kbcs"
+path = "src/main.rs"

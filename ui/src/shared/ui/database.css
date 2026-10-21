@@ -1,0 +1,49 @@
+.db-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.db-toolbar input[type="search"] { flex: 1; width: auto; min-width: 100px; }
+.db-toolbar input[type="number"] { width: 58px; }
+.db-toolbar select { width: auto; max-width: 100%; }
+.db-toolbar label { display: inline-flex; align-items: center; gap: 4px; }
+.db-filter-group { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.db-filter-group legend { width: 100%; font-weight: 700; }
+.db-chip { position: relative; display: inline-flex; cursor: pointer; }
+.db-chip input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.db-chip > span { display: inline-flex; align-items: center; min-height: var(--control-height); padding: 2px 6px; border: 1px solid var(--color-border); border-radius: var(--radius); color: var(--color-muted); }
+.db-chip input:checked + span { border-color: var(--color-accent); color: var(--color-accent); }
+.db-chip input:focus-visible + span { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.db-filter-panel { padding: 8px; margin: 4px 0 8px; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.db-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius); }
+.db-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.db-table th, .db-table td { padding: 2px 5px; border-bottom: 1px solid var(--color-border); text-align: right; white-space: nowrap; }
+.db-table th { color: var(--color-muted); font-weight: 400; }
+.db-table th button { min-height: 22px; padding: 0; border: 0; background: none; color: inherit; }
+.db-table tbody tr:hover { background: var(--color-control); }
+.db-table .db-name { text-align: left; }
+.db-table .db-name a { display: block; min-width: 130px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+.db-table .db-icon { text-align: center; padding: 2px; }
+.db-table img { display: block; object-fit: contain; }
+.db-table tbody tr:last-child td { border-bottom: 0; }
+.db-pagination { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.db-pagination .db-page-status { min-width: 50px; text-align: center; }
+.db-page-numbers { display:contents; }
+.db-pagination, .db-pagination-edge { gap:2px; }
+.db-pagination-edge { display:inline-flex; }
+.db-pagination [data-page] { min-width:24px; padding-inline:4px; }
+.db-pagination [aria-current="page"] { color:var(--color-accent); border-color:var(--color-accent); background:var(--color-control); }
+.db-meta { color: var(--color-muted); font-size: var(--font-size-small); }
+.db-dialog { width: min(900px, calc(100vw - 16px)); max-height: calc(100dvh - 16px); padding: 12px; color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
+.db-dialog::backdrop { background: rgba(0, 0, 0, .65); }
+.db-dialog .db-table td { white-space: normal; }
+.db-search-table th, .db-search-table td, .db-search-table .db-name { text-align:center; vertical-align:middle; }
+.db-search-table th + th, .db-search-table td + td { border-left:1px solid var(--color-border); }
+.db-search-table .unit-property-list, .db-search-table .enemy-properties { justify-content:center; margin-inline:auto; }
+.db-search-table .unit-property, .db-search-table .unit-icon, .db-search-table .enemy-icon { margin-inline:auto; }
+.game-settings-dialog { max-width:540px; }
+.game-settings-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:6px 0; }
+.game-settings-fields label { display:flex; align-items:center; justify-content:space-between; gap:4px; }
+.game-settings-fields input, .game-settings-fields select { width:70px; flex-shrink:0; }
+.game-settings-dialog h2 { margin:0; }
+@media (max-width:380px) { .game-settings-fields { grid-template-columns:1fr; } }
+
+.game-settings-cannon { grid-template-columns:minmax(0,1fr)70px; }
+.game-settings-cannon label { flex-direction:column; align-items:stretch; gap:2px; }
+.game-settings-cannon input, .game-settings-cannon select { width:100%; min-width:0; }

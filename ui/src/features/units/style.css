@@ -1,0 +1,137 @@
+@import "../../shared/ui/game-database.css";
+.unit-calc-talents { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3px 8px; margin: 4px 0; }
+.unit-calc-talents label { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.unit-calc-talents select { width: 60px; flex-shrink: 0; padding-left: 3px; padding-right: 2px; }
+.unit-orb { display: grid; grid-template-columns: 34px minmax(0, 1.7fr) minmax(0, 1fr) 42px; gap: 3px; align-items: center; margin: 3px 0; }
+.unit-orb select { width: 100%; padding: 3px; }
+.unit-calc-name { margin: 6px 0 3px; font-weight: 700; }
+.unit-calc-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.unit-calc-table th, .unit-calc-table td { padding: 2px 4px; border: 1px solid var(--color-border); }
+.unit-calc-table th { text-align: left; color: var(--color-muted); font-weight: 400; }
+.unit-calc-table td { text-align: right; }
+.unit-lab-results .unit-abilities { margin-top: 5px; }
+.unit-calc-note { margin-top: 4px; }
+.unit-material { display: inline-flex; align-items: center; gap: 2px; vertical-align: middle; }
+.unit-material img { width: 24px; height: 24px; object-fit: contain; }
+.unit-radar-layout { display: grid; grid-template-columns: minmax(0,260px) minmax(0,1fr); gap: 8px; align-items: center; }
+#unit-radar-chart > svg { display: block; width: 100%; max-width: 260px; }
+.unit-radar-layout text { fill: var(--color-text); font-size: var(--font-size-body); }
+.unit-radar-grid { fill: none; stroke: var(--color-border); stroke-width: 1; }
+.unit-radar-series { stroke-width: 2; fill-opacity: .14; }
+.series-0 { stroke: var(--color-primary); fill: var(--color-primary); }
+.series-1 { stroke: var(--color-accent); fill: var(--color-accent); }
+.series-label-0 { color: var(--color-primary); }
+.series-label-1 { color: var(--color-accent); }
+#unit-radar-panel select { max-width: 100%; }
+@media (max-width: 640px) { .unit-radar-layout { grid-template-columns: minmax(0, 1fr); } #unit-radar-chart > svg { margin: auto; } }
+.unit-orb-image { display: inline-block; position: relative; vertical-align: middle; }
+.unit-orb-image > .unit-property-image { position: absolute; inset: 0; }
+.unit-orb-empty { display: inline-grid; width: 32px; height: 32px; place-items: center; border: 1px dashed var(--color-border); }
+.unit-combo-team { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.unit-combo-slot { display: grid; justify-items: center; gap: 3px; width: 64px; }
+.unit-combo-slot select { padding: 2px; }
+.unit-combo-options { max-height: 340px; overflow: auto; border-top: 1px solid var(--color-border); margin-top: 5px; }
+.unit-combo-option, .unit-combo-picked { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--color-border); }
+.unit-combo-option > div, .unit-combo-picked > span { min-width: 0; }
+.unit-combo-option > button, .unit-combo-picked > button { flex-shrink: 0; }
+.unit-combo-members > span { display: flex; flex-direction: column; align-items: center; }
+#unit-talent-controls .db-toolbar { margin: 0; }
+
+#unit-talent-controls details { margin-top: 4px; }
+#unit-talent-controls details[open] > summary { margin-bottom: 4px; }
+#unit-talent-controls .unit-calc-talents { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 641px) { #unit-talent-controls .unit-calc-talents { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.unit-settings-layout { display: grid; grid-template-columns: minmax(0,1fr); gap: 8px; align-items: start; margin-bottom: 6px; }
+.unit-settings-layout.is-comparing { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.unit-settings-layout > * { min-width: 0; }
+.unit-progression { padding: 0; margin: 0; list-style: none; }
+.unit-progression > li + li { margin-top: 3px; }
+.unit-progression ul { padding-left: 14px; }
+.unit-lab-inputs > fieldset { border: 1px solid var(--color-border); padding: 5px; }
+.unit-lab-inputs > fieldset > legend { padding: 0 4px; }
+.unit-lab-navigation { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; background: var(--color-surface); padding: 3px 0; border-bottom: 1px solid var(--color-border); }
+.unit-lab-navigation > label { display: inline-flex; align-items: center; gap: 4px; }
+.unit-form-lab > summary { min-height: 24px; }
+.unit-form-lab[open] > summary { margin-bottom: 4px; }
+.unit-form-calculation > td { padding: 4px!important; }
+.unit-summoner-list { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.unit-summoner-list a { display: inline-flex; align-items: center; gap: 4px; }
+#unit-lab .db-table td { text-align: right; }
+.unit-lab-tabs { display: flex; gap: 0; margin: 4px 0; border: 1px solid var(--color-border); }
+.unit-lab-tabs button { border: 0; border-right: 1px solid var(--color-border); border-radius: 0; padding: 2px 10px; }
+.unit-lab-tabs [aria-selected="true"] { color: var(--color-accent); background: var(--color-control); }
+.unit-lab-inputs .unit-related { margin-top: 0; padding: 0; border: 0; }
+.unit-lab-inputs #unit-calc-form { max-width: 100%; }
+.unit-lab-inputs #unit-calc-incoming { width: 84px; }
+.unit-lab-results .unit-calc-name { margin-top: 0; }
+#unit-radar-panel .unit-radar-layout svg { margin: auto; }
+#unit-lab-summary { margin-bottom: 5px; }
+#unit-lab-common { margin-bottom: 6px; }
+#unit-compare-conditions { border-top: 1px solid var(--color-border); margin-top: 5px; padding-top: 5px; }
+#unit-compare-condition-controls input[type="number"] { width: 84px; }
+#unit-compare-form { max-width: 100%; width: 100%; }
+.unit-peer-selection { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.unit-peer-selection > div { flex: 1; min-width: 0; }
+.unit-peer-selection > button { flex-shrink: 0; }
+.unit-peer-picker { width: min(580px,calc(100vw - 16px)); }
+.unit-peer-picker > input { width: 100%; }
+.unit-peer-picker .db-toolbar h2 { flex: 1; margin: 0; font-size: var(--font-size-body); }
+.unit-peer-candidates { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 3px; max-height: 60dvh; overflow: auto; }
+.unit-peer-candidates button { display: flex; align-items: center; gap: 5px; text-align: left; }
+.unit-peer-candidates button > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.unit-peer-candidates button .unit-icon { flex-shrink: 0; }
+.unit-peer-candidates [aria-pressed="true"] { border-color: var(--color-accent); }
+.unit-peer-candidates > p { grid-column: 1/-1; }
+.unit-result-toolbar { align-items: start; }
+.unit-result-toolbar select { max-width: 200px; }
+.unit-capture-menu { margin-left: auto; }
+.unit-capture-menu > summary { min-height: var(--control-height); padding: 3px 5px; border: 1px solid var(--color-border); border-radius: var(--radius); }
+.unit-capture-menu[open] { flex-basis: 100%; }
+.unit-capture-menu .db-toolbar { justify-content: flex-end; }
+.unit-result-note { margin-top: 4px; }
+.unit-result-group th { background: var(--color-control); font-weight: 700; }
+.unit-comparison-delta { color: var(--color-muted); white-space: normal!important; }
+#unit-radar-values .db-table { table-layout: fixed; }
+#unit-radar-values th { white-space: normal; overflow-wrap: anywhere; }
+#unit-radar-values th:first-child { width: 24%; }
+#unit-radar-values .db-name .db-meta { display: block; }
+.unit-growth-series { fill: none; stroke-width: 2; }
+.unit-growth-current { stroke: var(--color-muted); stroke-dasharray: 4 3; }
+#unit-growth-chart svg { display: block; width: 100%; }
+#unit-growth-chart text { fill: var(--color-text); font-size: var(--font-size-body); }
+#unit-growth-level { width: min(240px,100%); }
+#unit-growth-values .is-selected { background: var(--color-control); }
+@media (max-width:760px) { .unit-settings-layout.is-comparing { grid-template-columns: minmax(0,1fr); } }
+@media (max-width:480px) { .unit-peer-candidates { grid-template-columns: minmax(0,1fr); } .unit-result-toolbar select { max-width: 160px; } }
+
+#unit-talent-controls:not(.show-details) [data-talent-detail], #unit-talent-controls:not(.show-details) [data-np-cost] { display:none; }
+.unit-talent-entry { min-width:0; padding:4px 0; border-bottom:1px solid var(--color-border); }
+.unit-talent-entry small { display:block; white-space:pre-line; }
+.unit-orb-slots { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.unit-orb-slots > div { display:flex; align-items:center; gap:2px; }
+.unit-orb-slot { position:relative; display:grid; place-items:center; width:44px; height:44px; padding:0; background:none; border:0; }
+.unit-orb-slot-content { position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; }
+.unit-orb-slot .unit-property { pointer-events:none; }
+#unit-table-orbs { display:flex; align-items:center; flex-wrap:wrap; gap:6px; padding:2px 0; border-bottom:1px solid var(--color-border); }
+.unit-orb-picker { max-width:680px; }
+.unit-orb-picker label { display:grid; min-width:0; }
+.unit-orb-picker output { display:block; color:var(--color-error); }
+.unit-orb-picker p { margin-block:6px; white-space:pre-line; }
+
+.unit-talent-heading { display:flex; align-items:center; gap:6px; min-width:0; }
+.unit-talent-heading label { flex:1; min-width:0; }
+.unit-talent-heading strong { font-weight:700; }
+.unit-talent-heading [data-talent-status] { flex:0 1 auto; max-width:40%; }
+.unit-calc-talents select { min-height:22px; height:22px; padding-block:0; }
+.unit-talent-entry { padding-block:2px; }
+
+#unit-form-tabs { flex-wrap:wrap; }
+#unit-form-tabs a { white-space:nowrap; }
+
+#unit-table-orbs > .unit-condition-section { margin:0; padding:0; border:0; }
+#unit-table-orbs > .unit-condition-section[open] { flex-basis:100%; }
+.unit-level-setting { min-width:0; width:min(380px,100%); }
+#unit-level-heading { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px; color:var(--color-text); }
+#unit-level-heading output { font-weight:700; font-variant-numeric:tabular-nums; }
+
+#unit-summary { font-weight:600; }
