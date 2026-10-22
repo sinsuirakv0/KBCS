@@ -6,7 +6,7 @@ Private KBCSの通常のGitファイルへ、関数別のMarkdownとアドレス
 
 ローカルの大容量原本は引き続き `research/.local/`、圧縮バックアップはPrivate Releaseに保存します。参照用テキストの追加予定先は `research/reference/` です。APK・SO・SQLite・プロジェクトZIPは通常のGitへ追加しません。
 
-現時点のレビュー用出力は `research/.local/chatgpt-preview/reference/` に置きます。GitHubへの書込はAGENTS.mdの個別承認後に行います。元の解析資料を削除・移動しません。
+生成・検証用出力は `research/.local/chatgpt-preview/reference/` に保持し、ユーザーのpush承認に基づき `research/reference/` へ追加しました。元の解析資料を削除・移動していません。
 
 ## 構造と検索
 
@@ -33,11 +33,11 @@ MarkdownはBOM付きUTF-8、1ページ64KiB以下です。大きい関数や多�
 
 ChatGPTのGitHub連携で、Privateの `sinsuirakv0/KBCS` へのアクセスを許可します。PCのgh認証とは別です。連携が使えるアプリ・モードと、接続先の権限を確認してください。[OpenAI公式の連携案内](https://learn.chatgpt.com/docs/plugins)。
 
-この作業環境のGitHub連携では、KBCS内の既存文書をファイルパスで取得できることを確認しました。新規資料はGitHub反映後に改めて取得確認し、普段使うChatGPT側でも試します。全ファイルが検索結果に必ず現れることは保証せず、入口の索引と既知のパスでも辿れるようにしています。
+この作業環境のGitHub連携では、KBCS内の既存文書をファイルパスで取得できることを確認しました。反映後は資料の入口・通常関数・分割ページもこのGitHub連携で取得確認しました。普段使うChatGPT側でも接続設定と対応モードを確認してください。全ファイルが検索結果に必ず現れることは保証せず、入口の索引と既知のパスでも辿れるようにしています。
 
 プロンプト例:
 
-> GitHub連携でsinsuirakv0/KBCSのresearch/reference/README.mdを読んでください。15.7.2・arm64-v8aの資料を使い、appUpdateDrawの関数ページと必要な呼び出し先だけ取得してください。SO SHA-256と確度を確認し、根拠のファイルパスを添えて説明してください。取得できない場合は推測で補わず知らせてください。
+> GitHub連携でsinsuirakv0/KBCSのresearch/reference/README.mdを読んでください。15.7.2・arm64-v8aの資料を使い、appUpdateDraw（004184bc）の関数ページと必要な呼び出し先だけ取得してください。SO SHA-256と確度を確認し、根拠のファイルパスを添えて説明してください。取得できない場合は推測で補わず知らせてください。
 
 アドレスが分かっている場合:
 
@@ -68,4 +68,6 @@ manifestのpages/page_bytesは版別ディレクトリのMarkdownだけを集計
 
 実データ4関数（JNI入口、最大541,896 bytesの関数、追加設定で復旧した2関数）について、分割ページからコードを連結し、原本のテキストSHA-256と一致しました。リンク先と元DBのSHA-256も確認しています。最小テストは既存2件＋追加統合1件の計3件が通過しました。検証の詳細はローカルのresearch/.local/chatgpt-preview/validation.jsonです。
 
-GitHubへの反映と通常のChatGPT側での新規ページ取得確認は未実施です。現在はレビュー用のローカル出力まで完了しています。
+2026-10-22にPrivate KBCSのmainへ反映しました。[資料の入口](https://github.com/sinsuirakv0/KBCS/blob/main/research/reference/README.md)。この作業環境のChatGPT用GitHub連携から、入口・004184bcの疑似コード・00abf464の20/20ページを取得でき、Git blob SHAもローカルのコミットと一致しました。
+
+検索は `004184bc appUpdateDraw` と `appUpdateDraw` の両方で現時点では0件でした。原因や今後の反映時刻は確定していないため、当面は上記のファイルパス指定を使ってください。Web版・スマホ版の画面そのものの操作は本作業では確認していません。

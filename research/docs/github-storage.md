@@ -48,4 +48,4 @@ python -m indexer.materials --output research/.local/publish/native-v15.7.2-mate
 
 ## ChatGPTから直接読むための参照用テキスト
 
-通常のGitファイルへ関数別のページと索引を書き出す処理を追加しました。元のReleaseを保持したまま使います。[生成・接続・読み方](chatgpt-reference.md)を参照してください。GitHubへの追加は個別承認後に行います。
+通常のGitファイルへ関数別のページと索引を書き出す処理を追加しました。元のReleaseを保持したまま使います。[生成・接続・読み方](chatgpt-reference.md)を参照してください。2026-10-22のpush承認を受け、[参照用テキスト](https://github.com/sinsuirakv0/KBCS/tree/main/research/reference)をmainへ追加済みです。GitHub連携からファイルパス指定での取得も確認しました。
