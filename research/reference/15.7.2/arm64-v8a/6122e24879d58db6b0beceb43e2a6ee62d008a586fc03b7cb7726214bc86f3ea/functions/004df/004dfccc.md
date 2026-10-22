@@ -1,0 +1,71 @@
+﻿# 004dfccc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](004dfccc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "004dfccc",
+  "name": "FUN_004dfccc",
+  "size": 152,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "5a4d85b9adc12482eff7c22c1857b5ac61fdd5ab21a41abe6da4aa7e95282dbb",
+  "source_text_sha256": "5a4d85b9adc12482eff7c22c1857b5ac61fdd5ab21a41abe6da4aa7e95282dbb"
+}
+~~~
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bd6d90](../00bd6/00bd6d90.md)
+- [00bdaf30](../00bda/00bdaf30.md)
+- [00bdaf60](../00bda/00bdaf60.md)
+
+## 疑似コード 1/1 / UTF-8 816 bytes
+
+~~~c
+
+void FUN_004dfccc(undefined8 *param_1)
+
+{
+  long lVar1;
+  void *pvVar2;
+  __shared_weak_count *this;
+  void *pvVar3;
+  void *pvVar4;
+  
+  pvVar3 = (void *)*param_1;
+  if (pvVar3 == (void *)0x0) {
+    return;
+  }
+  pvVar4 = (void *)param_1[1];
+  pvVar2 = pvVar3;
+  if (pvVar4 != pvVar3) {
+    do {
+      this = *(__shared_weak_count **)((long)pvVar4 + -8);
+      if ((this != (__shared_weak_count *)0x0) &&
+         (lVar1 = FUN_00bd6d90(0xffffffffffffffff,this + 8), lVar1 == 0)) {
+        (**(code **)(*(long *)this + 0x10))(this);
+        std::__ndk1::__shared_weak_count::__release_weak(this);
+      }
+      pvVar4 = (void *)((long)pvVar4 + -0x10);
+    } while (pvVar4 != pvVar3);
+    pvVar2 = (void *)*param_1;
+  }
+  param_1[1] = pvVar3;
+  operator_delete(pvVar2);
+  return;
+}
+
+~~~

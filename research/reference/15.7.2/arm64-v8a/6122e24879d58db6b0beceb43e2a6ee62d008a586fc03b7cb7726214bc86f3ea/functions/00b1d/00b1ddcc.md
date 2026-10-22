@@ -1,0 +1,126 @@
+﻿# 00b1ddcc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00b1ddcc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b1ddcc",
+  "name": "flatbuffers::NumToString<short>",
+  "size": 364,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "9ab1c5dcee2f646b607e7e3cc97adf3ece4f7e286810a94fd6bce7536c7b5d9e",
+  "source_text_sha256": "9ab1c5dcee2f646b607e7e3cc97adf3ece4f7e286810a94fd6bce7536c7b5d9e"
+}
+~~~
+## 呼び出し元
+
+- [00bdf0e0](../00bdf/00bdf0e0.md)
+
+## 呼び出し先
+
+- [00bdaf60](../00bda/00bdaf60.md)
+- [00bdaf90](../00bda/00bdaf90.md)
+- [00bdb260](../00bdb/00bdb260.md)
+- [00bdb290](../00bdb/00bdb290.md)
+- [00bdb340](../00bdb/00bdb340.md)
+- [00bdd850](../00bdd/00bdd850.md)
+- [00bdfc00](../00bdf/00bdfc00.md)
+- [00be00e0](../00be0/00be00e0.md)
+
+## 疑似コード 1/1 / UTF-8 2628 bytes
+
+~~~c
+
+/* std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >
+   flatbuffers::NumToString<short>(short) */
+
+void flatbuffers::NumToString<short>(short param_1)
+
+{
+  undefined *puVar1;
+  undefined *puVar2;
+  undefined *puVar3;
+  undefined *puVar4;
+  long lVar5;
+  undefined *local_180;
+  undefined *puStack_178;
+  locale alStack_170 [8];
+  undefined8 local_168;
+  undefined8 uStack_160;
+  undefined8 local_158;
+  undefined8 uStack_150;
+  undefined8 local_148;
+  undefined8 uStack_140;
+  ulong local_138;
+  undefined8 uStack_130;
+  void *local_128;
+  undefined8 uStack_120;
+  undefined4 local_118;
+  undefined *local_110 [17];
+  undefined8 local_88;
+  undefined4 local_80;
+  long local_70;
+  
+  puVar2 = PTR_vtable_00c1ad28;
+  lVar5 = tpidr_el0;
+                    /* try { // try from 00b1de00 to 00c1df17 has its CatchHandler @ 00b1de00
+                       catch() { ... } // from try @ 00b1de00 with catch @ 00b1de00
+                       catch() { ... } // from try @ 00b1df58 with catch @ 00b1de00 */
+  local_70 = *(long *)(lVar5 + 0x28);
+  puVar1 = PTR_vtable_00c1ad28 + 0x40;
+  local_110[0] = PTR_construction_vtable_00c1b948 + 0x40;
+  local_180 = puVar1;
+  std::__ndk1::ios_base::init((ios_base *)local_110,&puStack_178);
+  puVar2 = puVar2 + 0x68;
+  puVar3 = PTR_vtable_00c1b950 + 0x10;
+  local_80 = 0xffffffff;
+  local_88 = 0;
+  local_180 = puVar1;
+  puStack_178 = puVar3;
+  local_110[0] = puVar2;
+  std::__ndk1::locale::locale(alStack_170);
+  uStack_140 = 0;
+  local_148 = 0;
+  uStack_150 = 0;
+  local_158 = 0;
+  uStack_160 = 0;
+  local_168 = 0;
+  puVar4 = PTR_vtable_00c1acd0 + 0x10;
+  uStack_130 = 0;
+  local_138 = 0;
+  uStack_120 = 0;
+  local_128 = (void *)0x0;
+  local_118 = 0x18;
+  puStack_178 = puVar4;
+  std::__ndk1::basic_ostream<char,std::__ndk1::char_traits<char>>::operator<<
+            ((basic_ostream<char,std::__ndk1::char_traits<char>> *)&local_180,param_1);
+  std::__ndk1::basic_stringbuf<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
+  str();
+  local_180 = puVar1;
+  local_110[0] = puVar2;
+  if ((local_138 & 1) != 0) {
+    puStack_178 = puVar4;
+    operator_delete(local_128);
+  }
+  puStack_178 = puVar3;
+  std::__ndk1::locale::~locale(alStack_170);
+  std::__ndk1::ios_base::~ios_base((ios_base *)local_110);
+  if (*(long *)(lVar5 + 0x28) == local_70) {
+                    /* try { // try from 00b1df18 to 00c1df23 has its CatchHandler @ 00b1e04c */
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

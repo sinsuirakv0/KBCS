@@ -1,0 +1,87 @@
+﻿# 00bbfcec
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00bbfcec.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bbfcec",
+  "name": "FUN_00bbfcec",
+  "size": 216,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "aaeb3cfdaf87b519a0b0ce770aa4b7e1e5facf4259c27b20775aeb8462705344",
+  "source_text_sha256": "aaeb3cfdaf87b519a0b0ce770aa4b7e1e5facf4259c27b20775aeb8462705344"
+}
+~~~
+## 呼び出し元
+
+- [00bbdd50](../00bbd/00bbdd50.md)
+- [00bc2e00](../00bc2/00bc2e00.md)
+
+## 呼び出し先
+
+- [00bdaff0](../00bda/00bdaff0.md)
+- [00bdd0d0](../00bdd/00bdd0d0.md)
+- [00bdd150](../00bdd/00bdd150.md)
+- [00bde1c0](../00bde/00bde1c0.md)
+
+## 疑似コード 1/1 / UTF-8 1462 bytes
+
+~~~c
+
+void FUN_00bbfcec(undefined8 *param_1,undefined8 *param_2)
+
+{
+  void *__dest;
+  undefined8 uVar1;
+  size_t __n;
+  undefined8 *__src;
+  undefined8 *puVar2;
+  
+                    /* try { // try from 00bbfcfc to 00cbfd03 has its CatchHandler @ 00bc8820 */
+  puVar2 = (undefined8 *)param_1[1];
+                    /* try { // try from 00bbfd08 to 00cbfd17 has its CatchHandler @ 00bc87e0 */
+  if (puVar2 == (undefined8 *)param_1[2]) {
+    __src = (undefined8 *)*param_1;
+    __n = (long)puVar2 - (long)__src;
+                    /* try { // try from 00bbfd2c to 00cbfd63 has its CatchHandler @ 00bc8a20 */
+    if (__src == param_1 + 3) {
+      __dest = malloc(__n * 2);
+      if (__dest == (void *)0x0) {
+                    /* WARNING: Subroutine does not return */
+        abort();
+      }
+      if (puVar2 != __src) {
+        memmove(__dest,__src,__n);
+      }
+      *param_1 = __dest;
+    }
+    else {
+      __dest = realloc(__src,__n * 2);
+      *param_1 = __dest;
+      if (__dest == (void *)0x0) {
+                    /* WARNING: Subroutine does not return */
+        abort();
+      }
+    }
+    puVar2 = (undefined8 *)((long)__dest + __n);
+    param_1[1] = puVar2;
+    param_1[2] = (void *)((long)__dest + ((long)__n >> 2) * 8);
+  }
+  uVar1 = *param_2;
+  param_1[1] = puVar2 + 1;
+  *puVar2 = uVar1;
+                    /* try { // try from 00bbfdb4 to 00cbfdc7 has its CatchHandler @ 00bc86d8 */
+  return;
+}
+
+~~~

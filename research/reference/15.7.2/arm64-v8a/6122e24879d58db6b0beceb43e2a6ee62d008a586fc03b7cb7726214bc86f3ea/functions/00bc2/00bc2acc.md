@@ -1,0 +1,76 @@
+﻿# 00bc2acc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00bc2acc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bc2acc",
+  "name": "FUN_00bc2acc",
+  "size": 172,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "84b2e9c00ef4b872d0146aca408058e6ae3c5b3ecedfe59f543385f79dd71010",
+  "source_text_sha256": "84b2e9c00ef4b872d0146aca408058e6ae3c5b3ecedfe59f543385f79dd71010"
+}
+~~~
+## 呼び出し元
+
+- [00bbdd50](../00bbd/00bbdd50.md)
+- [00bc1bc0](../00bc1/00bc1bc0.md)
+
+## 呼び出し先
+
+- [00bdb090](../00bdb/00bdb090.md)
+- [00bdb0d0](../00bdb/00bdb0d0.md)
+- [00bdd0d0](../00bdd/00bdd0d0.md)
+
+## 疑似コード 1/1 / UTF-8 1140 bytes
+
+~~~c
+
+undefined8 * FUN_00bc2acc(long param_1,char *param_2)
+
+{
+  undefined8 *puVar1;
+  size_t sVar2;
+  long lVar3;
+  undefined8 *puVar4;
+  void *pvVar5;
+  
+  pvVar5 = *(void **)(param_1 + 0x1330);
+  lVar3 = *(long *)((long)pvVar5 + 8);
+  puVar1 = pvVar5;
+  if (lVar3 - 0xfd0U < 0xfffffffffffff010) {
+    puVar1 = malloc(0x1000);
+    if (puVar1 == (void *)0x0) {
+                    /* WARNING: Subroutine does not return */
+      std::terminate();
+    }
+    lVar3 = 0;
+    *puVar1 = pvVar5;
+    puVar1[1] = 0;
+    *(undefined8 **)(param_1 + 0x1330) = puVar1;
+  }
+  *(long *)((long)puVar1 + 8) = lVar3 + 0x20;
+  sVar2 = strlen(param_2);
+  puVar4 = (undefined8 *)((long)puVar1 + lVar3 + 0x10);
+  *puVar4 = &PTR_FUN_00c17798;
+                    /* try { // try from 00bc2b40 to 00cc2b47 has its CatchHandler @ 00bc87cc */
+  *(undefined1 *)((long)puVar1 + lVar3 + 0x18) = 8;
+  *(char **)((long)puVar1 + lVar3 + 0x20) = param_2;
+  *(size_t *)((long)puVar1 + lVar3 + 0x28) = sVar2;
+  *(ushort *)((long)puVar1 + lVar3 + 0x19) =
+       *(ushort *)((long)puVar1 + lVar3 + 0x19) & 0xf000 | 0x540;
+  return puVar4;
+}
+
+~~~

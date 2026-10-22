@@ -1,0 +1,49 @@
+﻿# 00babccc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00babccc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00babccc",
+  "name": "std::__ndk1::codecvt<char16_t,char,mbstate_t>::~codecvt",
+  "size": 44,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "2ffa0b867c778930151768cfa7d0fa13f127373235d65d7ef0a8b394b41067a5",
+  "source_text_sha256": "2ffa0b867c778930151768cfa7d0fa13f127373235d65d7ef0a8b394b41067a5"
+}
+~~~
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bdaf60](../00bda/00bdaf60.md)
+- [00be1ab0](../00be1/00be1ab0.md)
+
+## 疑似コード 1/1 / UTF-8 310 bytes
+
+~~~c
+
+/* std::__ndk1::codecvt<char16_t, char, mbstate_t>::~codecvt() */
+
+void __thiscall
+std::__ndk1::codecvt<char16_t,char,mbstate_t>::~codecvt(codecvt<char16_t,char,mbstate_t> *this)
+
+{
+  __narrow_to_utf8<32ul>::~__narrow_to_utf8((__narrow_to_utf8<32ul> *)this);
+  operator_delete(this);
+  return;
+}
+
+~~~

@@ -45,3 +45,7 @@ python -m indexer.materials --output research/.local/publish/native-v15.7.2-mate
 25,398ファイルを436,265,209 bytesのアーカイブにまとめ、manifestと検証結果を添付しました。
 アーカイブSHA-256: `b1459dda0e8783ef5d996330b28bd67594d3341a40dc95c54f16b2b5edefc545`。
 全内部ファイルのハッシュ・gzip CRCと、GitHub側3アセットのサイズ・SHA-256の一致を確認しました。
+
+## ChatGPTから直接読むための参照用テキスト
+
+通常のGitファイルへ関数別のページと索引を書き出す処理を追加しました。元のReleaseを保持したまま使います。[生成・接続・読み方](chatgpt-reference.md)を参照してください。GitHubへの追加は個別承認後に行います。
