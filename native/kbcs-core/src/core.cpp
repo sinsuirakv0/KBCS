@@ -7,22 +7,38 @@ extern "C" uint32_t kbcs_core_ruleset_version(void) { return 1507021; }
 static bool valid(int64_t value) { return value >= 0 && value <= INT32_MAX; }
 static bool percent(int32_t value) { return value >= 0 && value <= 100; }
 
+extern "C" uint32_t kbcs_core_prepare_attack(const KbcsAttackPreparation *input, int32_t *output) {
+  if (!input || !output || input->attack < 0 || input->kind < 0 || input->kind > 2 ||
+      input->percent < 0 || input->percent > 10000 || input->wave_percent < 0 || input->wave_percent > 10000) return 1;
+  const int64_t product=int64_t(input->attack)*input->percent;
+  if (product > INT32_MAX) return 2;
+  int64_t value=product/(input->kind == 2 ? 500 : 100);
+  if (input->kind == 1) value=value*input->wave_percent/100;
+  if (!valid(value)) return 2;
+  *output=int32_t(value);
+  return 0;
+}
+
 extern "C" uint32_t kbcs_core_stat(const KbcsStatInput *in, KbcsStatOutput *out) {
   if (!in || !out || in->base < 0 || in->growth < 0 || in->growth > 100000 ||
       in->treasure < 0 || in->treasure > 10000 || in->combo < 0 || in->combo > 1000 ||
       in->talent < 0 || in->talent > 1000 || in->extra < 0 || in->extra > 1000) return 1;
+  KbcsStatOutput result{};
   int64_t value = (int64_t(in->base) * in->growth + 50) / 100;
-  out->stages[0] = value;
+  result.stages[0] = value;
+  if (!valid(value)) return 2;
   value += value * in->treasure / 100;
-  out->stages[1] = value;
+  result.stages[1] = value;
   const int32_t rates[] = {in->combo, in->talent, in->extra};
   for (int index=0; index<3; ++index) {
     if (!valid(value)) return 2;
     value = value * (100 + rates[index]) / 100;
-    out->stages[index+2] = value;
+    result.stages[index+2] = value;
   }
-  out->stages[5] = value;
-  return valid(value) ? 0 : 2;
+  result.stages[5] = value;
+  if (!valid(value)) return 2;
+  *out=result;
+  return 0;
 }
 
 static uint32_t calculateHit(const KbcsHitInput *in, KbcsHitOutput *out, bool incoming) {
@@ -39,9 +55,13 @@ static uint32_t calculateHit(const KbcsHitInput *in, KbcsHitOutput *out, bool in
       in->attack_orb,in->defense_orb,in->behemoth_rate,in->sage_rate,in->kill_strengthen,in->villain_rate};
   for (auto value : bounded) if (value < 0 || value > 10000) return 1;
   if (in->abilities<0 || (in->abilities & ~2047)!=0) return 1;
+  if (!in->castle && (((in->abilities & KBCS_BEHEMOTH) && !in->behemoth_rate) ||
+      ((in->abilities & KBCS_SAGE) && !in->sage_rate) ||
+      ((in->abilities & KBCS_VILLAIN) && !in->villain_rate))) return 1;
+  KbcsHitOutput result{};
   int64_t value = in->blocked ? 0 : in->attack;
   int index=0;
-  auto save = [&]() { out->stages[index++] = value; return valid(value); };
+  auto save = [&]() { result.stages[index++] = value; return valid(value); };
   auto scale = [&](int64_t numerator, int64_t denominator) {
     value = value * numerator / denominator;
   };
@@ -110,8 +130,9 @@ static uint32_t calculateHit(const KbcsHitInput *in, KbcsHitOutput *out, bool in
   if (!save()) return 2;
   if (in->immune) value = 0;
   if (!save()) return 2;
-  while (index<21) out->stages[index++]=value;
-  out->damage=value;
+  while (index<21) result.stages[index++]=value;
+  result.damage=value;
+  *out=result;
   return 0;
 }
 
@@ -147,16 +168,17 @@ extern "C" uint32_t kbcs_core_unit_metal_killer(int32_t hp, int32_t rate, KbcsMe
 extern "C" uint32_t kbcs_core_enemy_poison(const KbcsPoisonInput *in, KbcsPoisonOutput *out) {
   if (!in || !out || in->max_hp<0 || in->percent<1 || in->percent>100 ||
       !percent(in->resistance) || in->decoration_reduction<0 || in->decoration_reduction>10000) return 1;
-  *out={};out->stages[0]=in->max_hp;
-  if (in->immune) return 0;
+  KbcsPoisonOutput result{};result.stages[0]=in->max_hp;
+  if (in->immune) { *out=result; return 0; }
   int64_t value=0;
   const uint32_t code=minimumPercentage(in->max_hp,in->percent,value);
   if (code) return code;
-  out->stages[1]=value;
+  result.stages[1]=value;
   value=value*(100-in->resistance)/100;
   if (value<1) value=1;
-  out->stages[2]=value;
-  out->damage=value*(10000-in->decoration_reduction)/10000;
-  out->stages[3]=out->damage;
+  result.stages[2]=value;
+  result.damage=value*(10000-in->decoration_reduction)/10000;
+  result.stages[3]=result.damage;
+  *out=result;
   return 0;
 }

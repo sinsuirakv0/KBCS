@@ -78,7 +78,7 @@ fn main() -> Result<()> {
             println!("C++ ABI: {}", kbcs_bridge::abi_version());
         }
         Some("--help") | Some("help") => println!(
-            "kbcs [import|list|show|verify|catalog|preview] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
+            "kbcs [import|list|show|verify|catalog|motion|preview] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
         ),
         Some("preview") => service::serve(
             root,
@@ -86,12 +86,31 @@ fn main() -> Result<()> {
             source,
             &option("--bind").unwrap_or_else(|| "127.0.0.1:4817".into()),
         )?,
+        Some("motion") => {
+            let database = Database::open(&root, &region)?;
+            let value = if option("--kind").as_deref() == Some("effect") {
+                kbcs_data::effects::manifest(
+                    &database,
+                    &option("--id").unwrap_or_else(|| "skill_wave_attack".into()),
+                )?
+            } else {
+                kbcs_data::motions::manifest(
+                    &database,
+                    &region,
+                    &option("--kind").unwrap_or_else(|| "unit".into()),
+                    option("--id").unwrap_or_else(|| "0".into()).parse()?,
+                    option("--form").unwrap_or_else(|| "0".into()).parse()?,
+                )?
+            };
+            println!("{}", serde_json::to_string(&value)?);
+        }
         Some("catalog") => {
             let database = Database::open(&root, &region)?;
             let value = match option("--kind").as_deref() {
                 None | Some("units") => kbcs_data::view::catalog(&database, &region)?,
                 Some("enemies") => kbcs_data::enemies::catalog(&database, &region)?,
                 Some("stages") => kbcs_data::stages::catalog(&database, &region)?,
+                Some("effects") => kbcs_data::effects::catalog(&database)?,
                 Some(value) => anyhow::bail!("未知のデータ種別: {value}"),
             };
             println!("{}", serde_json::to_string(&value)?);

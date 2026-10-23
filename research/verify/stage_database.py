@@ -14,12 +14,12 @@ pointer=json.loads((args.data_dir/'current.json').read_text(encoding='utf-8-sig'
 path=args.data_dir/'official'/pointer['regions']['jp']
 db=sqlite3.connect(path.as_uri()+'?mode=ro',uri=True)
 schema=db.execute('pragma user_version').fetchone()[0]
-assert schema in [6,7]
+assert schema in [6,7,8]
 metadata=dict(db.execute('select key,value from metadata'))
 assert metadata['version']==witness['version']
 assert metadata['build_id']==witness['build']['buildId']
-assert db.execute('select count(*) from stage_map').fetchone()[0]==len(witness['maps'])
-assert db.execute('select count(*) from stage').fetchone()[0]==len(witness['stages'])
+assert db.execute('select count(*) from stage_map where id<1000').fetchone()[0]==len(witness['maps'])
+assert db.execute('select count(*) from stage where map_id<1000').fetchone()[0]==len(witness['stages'])
 count=0
 for stage in witness['stages']:
     rows=db.execute('select source_row,raw_cells,enemy_raw,count,first_raw,interval_min_raw,interval_max_raw,castle,layer_min,layer_max,boss,hp_percent,score,attack_percent,after_castle,kills from stage_spawn where map_id=? and stage_index=? order by position',(stage['map'],stage['stage'])).fetchall()
@@ -42,7 +42,7 @@ for name,source in witness['sources'].items():
     assert db.execute('select sha256 from source_file where path=?',(name,)).fetchone()[0]==source['sha256'],name
 assert db.execute("select count(*) from progression_stage where source_path like 'Data/MapStageDataPR_%' and map_id/1000 != 39").fetchone()[0]==0
 report={'maps':len(witness['maps']),'stages':len(witness['stages']),'spawns':count,'crowns':sum(len(row['nativeCrowns']) for row in witness['maps']),'sources':len(witness['sources']),'database':str(path)}
-if schema==7:
+if schema>=7:
     materials=json.loads((root/'research/.local/materials-1572.json').read_text(encoding='utf-8-sig'))
     f32=lambda value:struct.unpack('<f',struct.pack('<f',float(value)))[0]
     for profile in materials['profiles']:
@@ -57,6 +57,6 @@ if schema==7:
     for name,source in materials['sources'].items():
         assert db.execute('select sha256 from source_file where path=?',(name,)).fetchone()[0]==source['sha256']
     report['materials']={table:db.execute('select count(*) from '+table).fetchone()[0] for table in ['stage_material_profile','stage_material_crown','stage_material_count','stage_material_weight']}
-version='0.1.8' if schema==7 else '0.1.7'
+version='0.1.15-band0' if schema==8 else '0.1.8' if schema==7 else '0.1.7'
 (root/('research/.local/stage-database-'+version+'.json')).write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8-sig')
 print(json.dumps(report))

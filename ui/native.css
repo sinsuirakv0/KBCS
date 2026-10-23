@@ -172,3 +172,4 @@ body:has(.workspace) { height:100dvh; min-height:0; overflow:hidden; background:
 .workspace .stage-spawns { font-size:11px; }
 .workspace .stage-spawns .stage-enemy-cell { min-width:90px; }
 .workspace .stage-spawns th { white-space:normal; min-width:56px; }
+.stage-pattern-choice{display:flex;align-items:center;gap:8px;min-width:0;margin:6px 0}.stage-pattern-choice select{flex:1;min-width:0;max-width:100%}.stage-pattern-placeholder{border:1px solid var(--line,#52647e);padding:10px;margin:6px 0;color:var(--muted,#abb9cc)}

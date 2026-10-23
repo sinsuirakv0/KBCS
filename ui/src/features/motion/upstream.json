@@ -1,0 +1,9 @@
+﻿{
+  "source": "KBC-rakv0-lab/save/motion/frontend",
+  "files": {
+    "motion-engine.js": "8b16201405a2ac1f6a057db675d23fc2e235389c1f1f25aba9ef669b261662a5",
+    "native-webgl-renderer.js": "1579e5d10cc4375462ea3823c7fe82b6f22a8b3f63b8fbecbce3ea4b25dd1069",
+    "effect-sequence.js": "0cd1f8c7eca7e48127e2a4a0b5d3d531009124d106509fc57a5662b0ec5fe8e2"
+  },
+  "scope": "既存の整数姿勢評価・WebGL描画を再利用。元資料は15.5.0/15.7.1のため現版の全命令一致は主張しない。"
+}

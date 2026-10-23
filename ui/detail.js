@@ -59,7 +59,7 @@ function sheet(form){
     information('説明','<span class="unit-description">'+escapeHtml(form.description)+'</span>',true)+
     (form.index===0?information('入手条件',progressionHtml(unit.acquisition),true):'')+
     (evolution?information('進化条件',progressionHtml(evolution),true):'')+
-    information('表示','<button type="button" data-capture="unit-sheet-'+form.code+'">画像保存</button>')+
+    information('表示','<a href="/pages/unit-motion/?id='+unit.id+'&form='+form.code+'">モーション</a> <button type="button" data-capture="unit-sheet-'+form.code+'">画像保存</button>')+
     (form.index===unit.forms.at(-1).index&&unit.talents.length?information('本能','<div id="unit-talent-host"></div>'):'')+'</tbody></table>';
 }
 

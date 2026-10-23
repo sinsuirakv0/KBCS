@@ -1,8 +1,16 @@
 ﻿use serde::{Deserialize, Serialize};
 
+pub mod enemy;
 pub mod experience;
+pub mod inventory;
 pub mod materials;
+pub mod motion;
+pub mod random;
+pub mod reward;
+pub mod score;
 pub mod stage;
+pub mod stage_source;
+pub mod transition;
 
 #[repr(C)]
 #[derive(Clone, Copy, Default, Deserialize)]
@@ -19,6 +27,21 @@ pub struct StatInput {
 #[derive(Default, Serialize)]
 pub struct StatOutput {
     pub stages: [i64; 6],
+}
+
+#[repr(C)]
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AttackPreparation {
+    pub attack: i32,
+    pub kind: i32,
+    pub percent: i32,
+    pub wave_percent: i32,
+}
+pub fn prepare_attack(input: &AttackPreparation) -> Result<i32, u32> {
+    let mut output = 0;
+    let code = unsafe { kbcs_core_prepare_attack(input, &mut output) };
+    if code == 0 { Ok(output) } else { Err(code) }
 }
 
 #[repr(C)]
@@ -116,6 +139,7 @@ pub struct DamageOutput {
 }
 
 unsafe extern "C" {
+    fn kbcs_core_prepare_attack(input: *const AttackPreparation, output: *mut i32) -> u32;
     fn kbcs_core_abi_version() -> u32;
     fn kbcs_core_ruleset_version() -> u32;
     fn kbcs_core_stat(input: *const StatInput, output: *mut StatOutput) -> u32;
@@ -280,17 +304,32 @@ fn native_witnesses() {
     }
     for row in fixture["vectors"].as_array().unwrap() {
         let input: HitInput = serde_json::from_value(row["input"].clone()).unwrap();
+        let output = (if row["incoming"] == 1 {
+            enemy_hit(&input)
+        } else {
+            unit_hit(&input)
+        })
+        .unwrap();
         assert_eq!(
-            (if row["incoming"] == 1 {
-                enemy_hit(&input)
-            } else {
-                unit_hit(&input)
-            })
-            .unwrap()
-            .damage,
+            output.damage,
             row["damage"].as_i64().unwrap(),
             "{}",
             row["input"]
+        );
+        for (stage, value) in row["checkpoints"].as_object().unwrap() {
+            assert_eq!(
+                output.stages[stage.parse::<usize>().unwrap()],
+                value.as_i64().unwrap(),
+                "stage {stage}: {}",
+                row["input"]
+            );
+        }
+    }
+    for row in fixture["preparations"].as_array().unwrap() {
+        let input: AttackPreparation = serde_json::from_value(row["input"].clone()).unwrap();
+        assert_eq!(
+            i64::from(prepare_attack(&input).unwrap()),
+            row["result"].as_i64().unwrap()
         );
     }
     for row in fixture["poison"].as_array().unwrap() {
@@ -356,4 +395,55 @@ fn native_witnesses() {
         })
         .is_err()
     );
+    // FFIを直接呼んでも、失敗時は出力を部分更新しない。
+    let invalid_stat = StatInput {
+        base: i32::MAX,
+        growth: 100000,
+        ..Default::default()
+    };
+    let mut stat_output = StatOutput { stages: [-1; 6] };
+    assert_eq!(
+        unsafe { kbcs_core_stat(&invalid_stat, &mut stat_output) },
+        2
+    );
+    assert_eq!(stat_output.stages, [-1; 6]);
+    let mut hit_output = HitOutput {
+        damage: -1,
+        stages: [-1; 21],
+    };
+    let overflowing = HitInput {
+        attack: i32::MAX,
+        critical: 1,
+        ..Default::default()
+    };
+    assert_eq!(
+        unsafe { kbcs_core_unit_hit(&overflowing, &mut hit_output) },
+        2
+    );
+    assert_eq!((hit_output.damage, hit_output.stages), (-1, [-1; 21]));
+    for flag in [256, 512, 1024] {
+        let input = HitInput {
+            attack: 13,
+            abilities: flag,
+            ..Default::default()
+        };
+        assert!(matches!(unit_hit(&input), Err(1)));
+        assert!(matches!(enemy_hit(&input), Err(1)));
+    }
+    let mut poison_output = PoisonOutput {
+        damage: -1,
+        stages: [-1; 4],
+    };
+    let overflowing = PoisonInput {
+        max_hp: i32::MAX,
+        percent: 100,
+        resistance: 0,
+        decoration_reduction: 0,
+        immune: 0,
+    };
+    assert_eq!(
+        unsafe { kbcs_core_enemy_poison(&overflowing, &mut poison_output) },
+        2
+    );
+    assert_eq!((poison_output.damage, poison_output.stages), (-1, [-1; 4]));
 }

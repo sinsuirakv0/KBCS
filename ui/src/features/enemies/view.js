@@ -22,7 +22,7 @@ export function enemySheetHtml(database,enemy,stats,settings) {
     '<tr><th>特性</th><td colspan="5" class="unit-information"><ul class="unit-abilities">'+(enemyAbilitiesHtml(database,enemy,settings,stats)||'<li>なし</li>')+'</ul></td></tr>'+
     (enemy.attacks.length>1?'<tr><th>攻撃内訳</th><td colspan="5">'+hits+'</td></tr>':enemy.ranges.length?'<tr><th>攻撃範囲</th><td colspan="5">'+enemy.ranges[0].join('〜')+'</td></tr>':'')+
     '<tr><th>説明</th><td colspan="5" class="unit-description">'+(escapeHtml(enemy.description)||'図鑑説明なし')+'</td></tr>'+
-    '<tr><th>表示</th><td colspan="5">'+(enemy.motion?'<a href="/pages/unit-motion/?enemy='+enemy.id+'">モーション</a> ':'')+'<button type="button" data-capture="enemy-sheet-output">画像保存</button></td></tr></tbody></table>'+
+    '<tr><th>表示</th><td colspan="5">'+('<a href="/pages/enemy-motion/?id='+enemy.id+'">モーション</a> ')+'<button type="button" data-capture="enemy-sheet-output">画像保存</button></td></tr></tbody></table>'+
     '<p class="db-meta enemy-settings-note">体力'+settings.health+'% / 攻撃'+settings.attack+'%'+(stats.crystal!==1?' / お宝補正×'+stats.crystal:'')+'。お金は会計力Lv'+settings.accountingLevel+'・お宝'+settings.accountingTreasure+'%。「お宝未補正」は会計力Lvのみ反映（基本値'+enemy.drop+'）。'+(enemy.attackCycle===null?'攻撃モーション未収録のため、DPSは未計算。':'DPSは一連の攻撃合計 ÷ 攻撃頻度。波動・烈波などの追加ダメージは含みません。')+'</p>';
 }
 export function enemyConditionControls(enemy,settings,prefix) {

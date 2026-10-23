@@ -89,3 +89,7 @@ XPは共通calculateNative→Rust→C++のlegend_experienceを使う。クリア
 ## 開発素材（0.1.8）
 
 stage-detail.jsのrenderCalculationsがXPとmaterialDropsを同じバッチで計算し、WebのstageRewardsHtmlへ素材の確率・期待個数を渡す。素材表は閉じた状態で、冠を変更すると回数と理論値を再取得する。素材の重みやハズレをJSで再計算しない。native計算とDB/定義の版照合、古い非同期応答の破棄をXPと共有する。元のDropItem行は計算内訳の折りたたみへ保持し、報酬選択に素材アイコン・名前も含める。
+
+0.1.16はモーションを追加。ui/src/features/motion/docs/README.mdを参照。Webより詳しいパーツ/ファイル/分割画像の一覧と検査、KB→魂、独立した表示マスクを持つ。ステージ検索の出現敵列は初期非表示、右の表示設定で切替可能。
+
+0.1.17：effect-motionを追加。味方・敵・その他で同じviewer.js/姿勢/WebGL/パーツ操作を使い、effect-sequence.jsの既存演出制御を接続。その他モデルの分類・検索・静止表示と、波動/烈波のLv、爆波の一連再生。詳細はfeatures/motion/docs。

@@ -11,10 +11,10 @@ const row=(label,value)=>'<tr><th scope="row">'+label+'</th><td>'+value+'</td></
 const table=body=>'<table class="stage-sheet"><tbody>'+body+'</tbody></table>';
 export function stageSummaryHtml(stage,map,crown=1,settings={seconds:true},enemies){
   const seconds=settings.seconds,spawn=stage.spawns.find(spawn=>spawn.enemy===stage.enemyCastle),enemy=spawn&&enemies?.enemies[spawn.enemy],options=spawn?{...settings,...effectiveSpawn(spawn,map,crown)}:settings;
-  const castle=enemy?formatNumber(calculateEnemyStats(enemy,options).hp)+'<small> <a href="'+escapeHtml(enemyDetailUrl(enemy,options))+'">敵ID '+enemy.id+'</a></small>':formatNumber(stage.castleHealth);
+  const castle=enemy?formatNumber(calculateEnemyStats(enemy,options).hp)+'<small> <a href="'+escapeHtml(enemyDetailUrl(enemy,options))+'">敵ID '+enemy.id+'</a></small>':(stage.castleHealth==null?'—':formatNumber(stage.castleHealth));
   const wideRow=(label,value)=>'<tr><th scope="row">'+label+'</th><td colspan="3">'+value+'</td></tr>';
-  return '<table class="stage-sheet" aria-label="'+escapeHtml(stage.name)+'"><tbody><tr><th>統率力</th><td class="stage-number">'+formatNumber(stage.energy)+'</td><th>敵最大数</th><td class="stage-number">'+formatNumber(stage.maxEnemies)+'</td></tr><tr><th>城体力</th><td class="stage-number">'+(stage.timeLimit?'スコア制':castle)+'</td><th>ステージ幅</th><td class="stage-number">'+formatNumber(stage.width)+'</td></tr><tr><th>難易度</th><td>'+(stage.difficulty==null?'—':'★'+stage.difficulty)+'</td><th>コンテニュー</th><td>'+(stage.missing?'未収録':stage.noContinue?'不可':'可')+'</td></tr>'+
-    '<tr><th>城バリア</th><td>'+(stage.bossGuard?'あり':'なし')+'</td><th>制限時間</th><td>'+(stage.timeLimit?formatTime(stage.timeLimit,seconds):'なし')+'</td></tr>'+wideRow('敵生産間隔',stage.spawnInterval?[...new Set(stage.spawnInterval)].map(value=>formatTime(value,seconds)).join('〜'):'—')+wideRow('XP','<span data-stage-experience="'+stage.id+'"></span>')+
+  return '<table class="stage-sheet" aria-label="'+escapeHtml(stage.name)+'"><tbody><tr><th>統率力</th><td class="stage-number">'+formatNumber(stage.energy)+'</td><th>敵最大数</th><td class="stage-number">'+(stage.maxEnemies==null?'—':formatNumber(stage.maxEnemies))+'</td></tr><tr><th>城体力</th><td class="stage-number">'+(stage.timeLimit?'スコア制':castle)+'</td><th>ステージ幅</th><td class="stage-number">'+(stage.width==null?'—':formatNumber(stage.width))+'</td></tr><tr><th>難易度</th><td>'+(stage.difficulty==null?'—':'★'+stage.difficulty)+'</td><th>コンテニュー</th><td>'+(stage.width==null?'—':stage.noContinue?'不可':'可')+'</td></tr>'+
+    '<tr><th>城バリア</th><td>'+(stage.width==null?'—':stage.bossGuard?'あり':'なし')+'</td><th>制限時間</th><td>'+(stage.width==null?'—':stage.timeLimit?formatTime(stage.timeLimit,seconds):'なし')+'</td></tr>'+wideRow('敵生産間隔',stage.spawnInterval?.every(Number.isFinite)?[...new Set(stage.spawnInterval)].map(value=>formatTime(value,seconds)).join('〜'):'—')+wideRow('XP','<span data-stage-experience="'+stage.id+'"></span>')+
     (stage.variants?wideRow('抽選候補',stage.variants.length+'パターン / '+escapeHtml(stage.patternLabel||'')):'')+(stage.energy==null?wideRow('未収録の項目','敵出現の定義だけが残っているステージです。統率力・報酬などは推測せず未収録として表示します。'):'')+'</tbody></table>';
 }
 function unitLink(units,id,formIndex){
@@ -70,15 +70,18 @@ export function stageRulesHtml(database,stage,map,crown,units,seconds,{includeMa
   return body?table(body):'';
 }
 function exLinksHtml(database,stage){
-  const entries=stage.exLottery?.length?stage.exLottery:stage.ex?Array.from({length:Math.max(0,stage.ex.max-stage.ex.min+1)},(_,index)=>({map:stage.ex.map,stage:stage.ex.min+index,chance:null})):[];
-  return (stage.ex?'<div>移行率 '+percent(stage.ex.chance)+'</div>':'')+entries.map(entry=>{const candidate=database.stages.find(stage=>stage.id===entry.map+'-'+entry.stage);return '<div>'+(candidate?'<a href="'+stageDetailUrl(candidate)+'">'+escapeHtml(database.maps.find(map=>map.key===candidate.map).name+' / '+candidate.name)+'</a>':'EXマップ '+(entry.nativeMap||stage.ex?.nativeMap)+' / ステージ '+entry.stage)+(entry.chance!=null?' '+percent(entry.chance):'')+'</div>';}).join('');
+  const direct=stage.ex?Array.from({length:Math.max(0,stage.ex.max-stage.ex.min+1)},(_,index)=>({map:stage.ex.map,nativeMap:stage.ex.nativeMap,stage:stage.ex.min+index})):[];
+  const links=entries=>entries.map(entry=>{const map=database.maps.find(map=>map.key===entry.map),candidate=database.stages.find(stage=>stage.map===entry.map&&stage.index===entry.stage);return '<div>'+(candidate?'<a href="'+stageDetailUrl(candidate)+'">'+escapeHtml(map.name+' / '+candidate.name)+'</a>':'EXマップ '+entry.nativeMap+' / ステージ '+entry.stage)+'</div>';}).join('');
+  return (stage.ex?'<div>直接移行 '+percent(stage.ex.chance)+'</div>'+links(direct):'')+(stage.exLottery?.length?'<div>追加抽選の候補</div>'+links(stage.exLottery):'');
 }
+
 export function stageRewardsHtml(database,stage,units,map,crown=1,materials){
   const rewardHtml=reward=>{
     const item=database.rewards[reward.id],name=item?.name||'報酬 '+reward.id;
-    const image=item?.unit!=null?unitLink(units,item.unit,item.form):item?.icon?'<img src="'+escapeHtml(database.imageBase+item.icon)+'" alt="" loading="lazy">':'';
+    const image=item?.layers?.length?orbHtml(item):item?.unit!=null?unitLink(units,item.unit,item.form):item?.icon?'<img src="'+escapeHtml(database.imageBase+item.icon)+'" alt="" loading="lazy">':'';
     return '<span class="stage-reward" title="報酬ID '+reward.id+'">'+image+(item?.unit!=null?'':escapeHtml(name))+' ×'+formatNumber(reward.count)+(item?.evolution?'<span>進化権</span>':'')+'</span>';
   };
+  const orbHtml=item=>'<span class="unit-orb-image" role="img" aria-label="'+escapeHtml(item.name)+'" style="width:32px;height:32px">'+item.layers.map(layer=>{const [x,y,width,height]=layer.rect,scale=32/width;return '<span class="unit-property-image" style="width:32px;height:'+height*scale+'px"><img src="'+escapeHtml(database.imageBase+layer.path)+'" alt="" loading="lazy" style="width:'+layer.width*scale+'px;height:'+layer.height*scale+'px;left:'+(-x*scale)+'px;top:'+(-y*scale)+'px"></span>';}).join('')+'</span>';
   const drops=stage.drops.map(reward=>'<div>'+(reward.chance==null?'':percent(reward.chance)+' ')+rewardHtml(reward)+'</div>').join('');
   return table(row(map?.series==='D'?'初回クリア報酬':'クリア報酬',drops||'データ内の指定なし')+(stage.orderedRewards?row('報酬の抽選','この形式は確率を数値化していません。表示はデータ内の報酬候補です。'):'')+
     (stage.scoreRewards.length?row('スコア報酬',stage.scoreRewards.map(reward=>'<div>'+formatNumber(reward.score)+'点以上 '+rewardHtml(reward)+'</div>').join('')):'')+

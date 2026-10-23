@@ -124,3 +124,17 @@ Ghidra内の実行ファイルSHA-256とも照合し、パス名だけで版を�
 ```powershell
 python research/verify/stages.py --assets D:/KBC/KBC-rakv0-assets --python-libs D:/KBC/KBC-rakv0-lab/unit-db/research/python-libs
 ```
+
+0.1.9の追加照合はverify/enemy_stats.py（同版の敵HP/攻撃・冠・クリスタル）とverify/rewards.py（0番台の通常比較/取得済み分岐）。[共通コアの契約](../native/kbcs-core/docs/stages.md)に条件と制御helper、全件数を記録する。未実装の個体生成/実付与と区別する。
+
+## 0.1.10の追加照合
+
+`verify/rng.py --python-libs <libs>`は明示状態の乱数、個体枠/レイヤー、成功後の間隔/初回出現を局所実行する。`verify/calculation.py`は命中の21段階と攻撃準備を追加。入力契約と未確認境界は[native監査](../native/kbcs-core/docs/audit-20261022.md)、1000番台の再実行と例外は[番台調査](docs/stages/01000.md)。
+
+0.1.11のevent_rewards.pyは1000番台7種のmodeの候補数/比較と重み選択、報酬分類・冠別取得済みバイトを照合する。experience.pyは種別1のXPも検証する。再実行と制御helperは[native設計](../native/kbcs-core/docs/event-rewards.md)。
+
+0.1.12のverify/stage_score.pyは005dd634以降のスコア/閾値/保存更新/結果行を、verify/reward_finish.pyは重み選択後の履歴/付与要求/結果行を局所実行する。[範囲と再実行](../native/kbcs-core/docs/stage-score.md)。
+
+0.1.13はinventory.pyで実所持数の加算・変換・上限、ex_transition.pyで実RNGを含むEX抽選を照合する。event_rewards.pyは専用保存番号、stage_score.pyは保存番号なしのスキップと時計を追加。[関係と制限](../native/kbcs-core/docs/inventory-ex.md)。
+
+0.1.14の[39000番台までの共通入口・実測・未確認範囲](docs/stages/all-bands.md)。stage_source、stage::Row::decode、experience::stageを追加。原本の分類とファイル選択を、専用戦闘ランタイムの完成と混同しない。

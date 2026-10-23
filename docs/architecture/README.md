@@ -33,3 +33,11 @@ API根拠: [wry](https://docs.rs/wry/0.57.0/wry/)、[tao](https://docs.rs/tao/0.
 敵・ステージはdata、将来の戦闘はnative、APK出力とAI制御は必要時にRustの独立領域へ追加する。公式snapshotを編集用DBとして開かない。
 
 0.1.7ではstages::import/catalogが0番台の6表とWeb表示を接続する。検索・詳細は共通Serviceの/api/stagesを使用し、XPはcalculateNative→Service→experience::legend→C++へ渡す。DBの版と定義・コアの版を照合する。出現tick/commitの状態、乱数、敵個体の生成を閲覧UIは所有しない。
+
+
+0.1.15は全29系列のステージDBを公開する。検索は`/api/stages`の軽量索引、詳細は`?map=KEY`でマップ単位に取得する。DBパスごとにキャッシュを無効化し、索引と詳細のbuildId/revision一致をUIでも検査する。`/api/stage-variant`はDBの候補関係を検証してから返す。XPはstageExperienceを64件ずつ共通C++入口へ渡し、章/内部種別による入口を保持する。出現・抽選・報酬のゲーム内状態を閲覧UIで勝手に進めない。
+
+
+0.1.16のモーション閲覧は、Rustの保存済み原本manifestとC++のKB/魂時計、既存JavaScriptの整数姿勢評価/WebGL描画を接続する。パーツ表示マスクと描画を分離し、非表示の親も座標計算へ残す。姿勢評価自体のC++移植は今後であり、現時点の閲覧用評価器を戦闘ランタイムの完成扱いにしない。詳細はui/src/features/motion/docs。
+
+0.1.17のその他モーションも既存の同一姿勢/描画エンジンを使用。Rustはeffectsの素材対応と原本、JavaScriptの既存effect-sequenceは演出の時計と描画インスタンスだけを返す。戦闘状態や当たり判定と結合しない。

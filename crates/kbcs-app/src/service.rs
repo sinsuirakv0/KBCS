@@ -49,7 +49,7 @@ pub struct Service {
     catalog: Arc<Mutex<CatalogCache>>,
 }
 
-type CatalogCache = BTreeMap<&'static str, (PathBuf, Vec<u8>)>;
+type CatalogCache = BTreeMap<String, (PathBuf, Vec<u8>)>;
 
 impl Service {
     pub fn new(root: PathBuf, region: String, source: String) -> Self {
@@ -82,11 +82,14 @@ impl Service {
                     .as_object()
                     .is_some_and(|object| object.keys().all(|key| [
                         "stats",
+                        "enemyStats",
+                        "legendRewards",
                         "unitDamage",
                         "enemyDamage",
                         "metalKiller",
                         "poison",
                         "legendExperience",
+                        "stageExperience",
                         "materialDrops"
                     ]
                     .contains(&key.as_str()))),
@@ -94,6 +97,18 @@ impl Service {
             );
             let statistics: Vec<kbcs_bridge::StatInput> =
                 serde_json::from_value(value.get("stats").cloned().unwrap_or_else(|| json!([])))?;
+            let enemy_statistics: Vec<kbcs_bridge::enemy::Input> = serde_json::from_value(
+                value
+                    .get("enemyStats")
+                    .cloned()
+                    .unwrap_or_else(|| json!([])),
+            )?;
+            let rewards: Vec<kbcs_bridge::reward::Input> = serde_json::from_value(
+                value
+                    .get("legendRewards")
+                    .cloned()
+                    .unwrap_or_else(|| json!([])),
+            )?;
             let unit_damage: Vec<kbcs_bridge::DamageInput> = serde_json::from_value(
                 value
                     .get("unitDamage")
@@ -120,6 +135,13 @@ impl Service {
                     .cloned()
                     .unwrap_or_else(|| json!([])),
             )?;
+            let stage_experience: Vec<kbcs_bridge::experience::StageInput> =
+                serde_json::from_value(
+                    value
+                        .get("stageExperience")
+                        .cloned()
+                        .unwrap_or_else(|| json!([])),
+                )?;
             let materials: Vec<kbcs_bridge::materials::Input> = serde_json::from_value(
                 value
                     .get("materialDrops")
@@ -128,11 +150,14 @@ impl Service {
             )?;
             ensure!(
                 statistics.len() <= 4000
+                    && enemy_statistics.len() <= 4000
+                    && rewards.len() <= 64
                     && unit_damage.len() <= 64
                     && enemy_damage.len() <= 64
                     && metal_killer.len() <= 64
                     && poison.len() <= 64
                     && experience.len() <= 64
+                    && stage_experience.len() <= 64
                     && materials.len() <= 64,
                 "計算件数が上限を超えています"
             );
@@ -140,6 +165,14 @@ impl Service {
             let statistics = statistics
                 .iter()
                 .map(|input| kbcs_bridge::stat(input).map_err(error))
+                .collect::<Result<Vec<_>>>()?;
+            let enemy_statistics = enemy_statistics
+                .iter()
+                .map(|input| kbcs_bridge::enemy::stat(input).map_err(error))
+                .collect::<Result<Vec<_>>>()?;
+            let rewards = rewards
+                .iter()
+                .map(|input| kbcs_bridge::reward::legend_pick(input).map_err(error))
                 .collect::<Result<Vec<_>>>()?;
             let unit_damage = unit_damage
                 .iter()
@@ -161,6 +194,10 @@ impl Service {
                 .iter()
                 .map(|input| kbcs_bridge::experience::legend(input).map_err(error))
                 .collect::<Result<Vec<_>>>()?;
+            let stage_experience = stage_experience
+                .iter()
+                .map(|input| kbcs_bridge::experience::stage(input).map_err(error))
+                .collect::<Result<Vec<_>>>()?;
             let materials = materials
                 .iter()
                 .map(|input| kbcs_bridge::materials::plan(input).map_err(error))
@@ -168,7 +205,7 @@ impl Service {
             return Ok(Reply::json(
                 json!({"abi":kbcs_bridge::abi_version(),"ruleset":kbcs_bridge::ruleset_version(),
                 "stats":statistics.iter().map(|output|output.stages[5]).collect::<Vec<_>>(),
-                "unitDamage":unit_damage,"enemyDamage":enemy_damage,"metalKiller":metal_killer,"poison":poison,"legendExperience":experience,"materialDrops":materials}),
+                "legendRewards":rewards,"enemyStats":enemy_statistics,"unitDamage":unit_damage,"enemyDamage":enemy_damage,"metalKiller":metal_killer,"poison":poison,"legendExperience":experience,"stageExperience":stage_experience,"materialDrops":materials}),
             ));
         }
 
@@ -214,6 +251,13 @@ impl Service {
             });
             return Ok(Reply::json(json!({"accepted":true})));
         }
+        if path == "/api/motion-timeline" {
+            ensure!(method == "POST", "POSTが必要です");
+            let input: kbcs_bridge::motion::TimelineInput = serde_json::from_slice(body)?;
+            let frames = kbcs_bridge::motion::timeline(input.soul_frames, input.special_frames)
+                .map_err(|c| anyhow::anyhow!("モーション時計の入力不正: {c}"))?;
+            return Ok(Reply::json(json!({"frames":frames})));
+        }
         ensure!(method == "GET", "未対応の操作です");
         if path == "/api/status" {
             let metadata = Database::open(&self.root, &self.region)
@@ -227,35 +271,96 @@ impl Service {
                 json!({"busy":self.busy.load(Ordering::SeqCst),"message":progress.message,"error":progress.error,"metadata":metadata,"source":self.source}),
             ));
         }
-        if path == "/api/catalog" || path == "/api/enemies" || path == "/api/stages" {
-            let key = if path == "/api/enemies" {
+        if path == "/api/motion" {
+            let get = |key: &str| {
+                url.query_pairs()
+                    .find(|(k, _)| k == key)
+                    .map(|(_, v)| v.into_owned())
+            };
+            let database = Database::open(&self.root, &self.region)?;
+            if get("kind").as_deref() == Some("effect") {
+                return Ok(Reply::json(kbcs_data::effects::manifest(
+                    &database,
+                    &get("id").unwrap_or_else(|| "skill_wave_attack".into()),
+                )?));
+            }
+            return Ok(Reply::json(kbcs_data::motions::manifest(
+                &database,
+                &self.region,
+                &get("kind").unwrap_or_else(|| "unit".into()),
+                get("id").unwrap_or_else(|| "0".into()).parse()?,
+                get("form").unwrap_or_else(|| "0".into()).parse()?,
+            )?));
+        }
+        if path == "/api/stage-variant" {
+            let get = |key: &str| {
+                url.query_pairs()
+                    .find(|(k, _)| k == key)
+                    .map(|(_, v)| v.into_owned())
+                    .ok_or_else(|| anyhow::anyhow!("{key}が必要です"))
+            };
+            let database = Database::open(&self.root, &self.region)?;
+            return Ok(Reply::json(kbcs_data::stages::variant(
+                &database,
+                &self.region,
+                &get("map")?,
+                get("stage")?.parse()?,
+                &get("source")?,
+            )?));
+        }
+        if [
+            "/api/catalog",
+            "/api/enemies",
+            "/api/stages",
+            "/api/motion-effects",
+        ]
+        .contains(&path)
+        {
+            let category = if path == "/api/motion-effects" {
+                "effects"
+            } else if path == "/api/enemies" {
                 "enemies"
             } else if path == "/api/stages" {
                 "stages"
             } else {
                 "units"
             };
+            let map = url
+                .query_pairs()
+                .find(|(k, _)| k == "map")
+                .map(|(_, v)| v.into_owned());
+            let key = if category == "stages" {
+                format!("stages/{}", map.as_deref().unwrap_or("index"))
+            } else {
+                category.to_owned()
+            };
             let current = kbcs_data::store::current_path(&self.root, &self.region)?;
             let mut cache = self
                 .catalog
                 .lock()
                 .map_err(|_| anyhow::anyhow!("表示キャッシュロック失敗"))?;
-            if cache.get(key).is_none_or(|(path, _)| path != &current) {
+            if cache.get(&key).is_none_or(|(path, _)| path != &current) {
                 let database = Database::open_path(&current)?;
-                let value = if key == "enemies" {
+                let value = if category == "effects" {
+                    kbcs_data::effects::catalog(&database)?
+                } else if category == "enemies" {
                     kbcs_data::enemies::catalog(&database, &self.region)?
-                } else if key == "stages" {
-                    kbcs_data::stages::catalog(&database, &self.region)?
+                } else if category == "stages" {
+                    if let Some(map) = map.as_deref() {
+                        kbcs_data::stages::catalog_map(&database, &self.region, Some(map))?
+                    } else {
+                        kbcs_data::stages::search_catalog(&database, &self.region)?
+                    }
                 } else {
                     kbcs_data::view::catalog(&database, &self.region)?
                 };
-                cache.insert(key, (current, serde_json::to_vec(&value)?));
+                cache.insert(key.clone(), (current, serde_json::to_vec(&value)?));
             }
             return Ok(Reply {
                 status: 200,
                 mime: "application/json; charset=utf-8",
                 bytes: cache
-                    .get(key)
+                    .get(&key)
                     .map(|(_, bytes)| bytes.clone())
                     .unwrap_or_default(),
             });
@@ -358,3 +463,68 @@ pub fn serve(root: PathBuf, region: String, source: String, bind: &str) -> Resul
 }
 
 use std::io::Read;
+
+#[test]
+fn native_calculation_service_contract() {
+    let service = Service::new(PathBuf::new(), "jp".into(), String::new());
+    for (key, fixture) in [
+        (
+            "enemyStats",
+            include_str!("../../../native/kbcs-core/tests/enemy-stat-vectors.json"),
+        ),
+        (
+            "legendRewards",
+            include_str!("../../../native/kbcs-core/tests/reward-vectors.json"),
+        ),
+        (
+            "stageExperience",
+            include_str!("../../../native/kbcs-core/tests/band-experience-vectors.json"),
+        ),
+    ] {
+        let fixture: Value = serde_json::from_str(fixture).unwrap();
+        let rows = &fixture["vectors"].as_array().unwrap()
+            [..fixture["vectors"].as_array().unwrap().len().min(64)];
+        let body = serde_json::to_vec(
+            &json!({key:rows.iter().map(|row| &row["input"]).collect::<Vec<_>>()}),
+        )
+        .unwrap();
+        let reply = service.handle("POST", "/api/calculate", &body);
+        assert_eq!(reply.status, 200);
+        let result: Value = serde_json::from_slice(&reply.bytes).unwrap();
+        assert_eq!(result["abi"], 2);
+        assert_eq!(result["ruleset"], 1507021);
+        assert_eq!(result[key].as_array().unwrap().len(), rows.len());
+        for (row, output) in rows.iter().zip(result[key].as_array().unwrap()) {
+            if key == "enemyStats" || key == "stageExperience" {
+                assert_eq!(output["stages"], row["stages"]);
+            } else {
+                for field in ["winner", "consumed", "markAcquired", "radarBlocked"] {
+                    assert_eq!(output[field], row[field]);
+                }
+            }
+        }
+    }
+    let reply = service.handle(
+        "POST",
+        "/api/motion-timeline",
+        br#"{"soulFrames":49,"specialFrames":81}"#,
+    );
+    assert_eq!(reply.status, 200);
+    let result: Value = serde_json::from_slice(&reply.bytes).unwrap();
+    assert_eq!(result["frames"].as_array().unwrap().len(), 106);
+    assert_eq!(result["frames"][24]["phase"], 1);
+    assert_eq!(result["frames"][105]["phase"], 2);
+    for body in [
+        br#"{"soulFrames":-1,"specialFrames":0}"#.as_slice(),
+        br#"{"soulFrames":1,"specialFrames":1,"unknown":1}"#,
+    ] {
+        assert_eq!(
+            service.handle("POST", "/api/motion-timeline", body).status,
+            400
+        );
+    }
+    // ルートとPODの両方で未知項目を拒否し、DBを開かず検査できる。
+    for body in [br#"{"unknown":[]}"#.as_slice(), br#"{"enemyStats":[{"base":0,"rowPercent":100,"crownPercent":100,"crystalMax":0,"crystalTreasure":0,"castleAttack":0,"unknown":1}]}"#] {
+        assert_eq!(service.handle("POST", "/api/calculate", body).status, 400);
+    }
+}

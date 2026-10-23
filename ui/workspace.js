@@ -12,7 +12,7 @@ export function initializeWorkspace(){
   if(!shell||!main)return;
   const header=shell.querySelector('.site-header');
   const page=location.pathname.split('/').filter(Boolean).at(-1)||'home';
-  const titles={'unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
+  const titles={'unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
   const title=titles[page]||main.querySelector('h1')?.textContent||'KBCS';
   let saved={};
   try{saved=JSON.parse(localStorage.getItem('kbcs:workspace')||'{}')||{};}catch{}
@@ -74,6 +74,12 @@ export function initializeWorkspace(){
     move('#stage-navigation',left.content);
     move('#stage-detail-controls',settingsGroup);
     move('#stage-message',information);
+  }else if(page==='unit-motion'||page==='enemy-motion'||page==='effect-motion'){
+    left.panel.querySelector('h2').textContent='モーション';
+    right.panel.querySelector('h2').textContent='パーツ詳細';
+    move('#motion-explorer',left.content);move('#motion-inspector',right.content);
+    move('#motion-message',information);
+    main.classList.add('workspace-motion');
   }else if(page==='unit-detail'){
     move('#unit-form-tabs',left.content);
     const outline=create('nav','workspace-outline');outline.setAttribute('aria-label','キャラ詳細の項目');left.content.append(outline);
@@ -96,8 +102,8 @@ export function initializeWorkspace(){
     const conditions=element('enemy-condition-controls')?.closest('fieldset');if(conditions)settingsGroup.append(conditions);
     move('#enemy-capture-status',information);
   }
-  const profileEditor=createSimulationSettings(right.content);
-  window.addEventListener('kbcs:open-simulation-settings',()=>{state.right=true;if(innerWidth<800)state.left=false;store();apply();profileEditor.open();});
+  const profileEditor=page.endsWith('-motion')?null:createSimulationSettings(right.content);
+  window.addEventListener('kbcs:open-simulation-settings',()=>{state.right=true;if(innerWidth<800)state.left=false;store();apply();profileEditor?.open();});
   if(!settingsGroup.childElementCount)settingsGroup.remove();
   const available={left:left.content.childElementCount>0,right:right.content.childElementCount>0};
 

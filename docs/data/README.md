@@ -16,7 +16,7 @@
 
 名前・形態は生成索引を採用する。数値はunitCSVから直接読む。原本の説明CSVと手動補完も別々に保存し、生成索引の解釈を後で訂正できる。敵・ステージの仕様は調査資料へ記録し、未確認のテーブルは作成しない。
 
-## 保存とスキーマ7
+## 保存とスキーマ8
 
 公式snapshotは `<data-dir>/official/<region>-<digest>.sqlite`。`current.json` にregion→filenameを保存する。同じIDでも主キーは地域・キャラID・形態を組み合わせる。将来の複数版同時比較はsnapshot単位で開く。ユーザーの自作領域は `<data-dir>/user/` を予約するだけで、今回の公式更新コードは一切アクセスしない。
 
@@ -34,7 +34,7 @@
 
 HP・速度・射程・コスト等はINTEGER、欠測可能な発生・モーション長はNULL。すべてをJSONで保存しない。`raw_cells` は列数・空欄を保持する可変拡張領域で、原本bytesも別に保持する。ゼロ、空欄、未収録列（配列の範囲外）を区別する。負値・無効値の意味を勝手に消さない。JSONのraw_cellsはコメントを除いた数値行、原本bytesにはコメント・改行・BOMも残る。
 
-`PRAGMA user_version=7` と `IMPORTER_VERSION=8` を別々に管理。公式DBは再生成方式で、未知スキーマは拒否して再取り込みを案内する。変換仕様を修正したらIMPORTER_VERSIONも上げる。同じsnapshotを黙って古い解釈で再利用しない。ユーザーDBは将来別のマイグレーション体系を設計する。現時点で自作DBの表や空実装は追加しない。
+`PRAGMA user_version=8` と `IMPORTER_VERSION=12` を別々に管理。公式DBは再生成方式で、未知スキーマは拒否して再取り込みを案内する。変換仕様を修正したらIMPORTER_VERSIONも上げる。同じsnapshotを黙って古い解釈で再利用しない。ユーザーDBは将来別のマイグレーション体系を設計する。現時点で自作DBの表や空実装は追加しない。
 
 ## フィールド対応（列番号は0始まり）
 
@@ -67,7 +67,7 @@ HP・速度・射程・コスト等はINTEGER、欠測可能な発生・モー�
 1. `import`: create_newでupdate.lockを取得し、更新の多重実行を防ぐ。
 2. `Source::open/dataset`: source版固定、manifest・索引・パス・hash検証。
 3. `build/read_asset`: 必要原本を都度検証して保存し、1トランザクションで正規化。
-4. `store::validate`: schema、integrity_check、foreign_key_check、形態件数を確認。
+4. `store::validate`: schema、integrity_check、foreign_key_check、形態件数、ステージ対応と報酬範囲を確認。
 5. 書込可能ハンドルのsync_all後、完成DBを不変名へrename。
 6. currentの地域マップを一時ファイルへ保存・syncし、renameで置換。
 
@@ -140,3 +140,37 @@ stage_material_profileは0番台49マップのハズレ値、DropItem.csvの元�
 素材IDはGatyaitembuy.csvの種別列6=7とスロット列7から導出し、同版006f308cの16件に一致した。ID配列をRustへ固定していない。原本2ファイルと使用する素材アイコンを保持し、catalogへmap.materialsと名称・画像を出す。素材IDもステージ検索の報酬条件へ含める。
 
 stage_materials::importはstages::importのマップ・ステージ作成後に実行し、readは保存値から表示用の入力を組む。確率はDBへ固定しない。calculateNativeのmaterialDrops配列→Service→kbcs-bridge::materials::plan→C++が冠・ステージ別の抽選回数と確率を計算する。実データの全49行・冠196値・回数392値・重み・原本SHAはstage_database.pyで比較する。
+
+
+## 全系列ステージ（0.1.15 / schema8 / importer9）
+
+公開対象は同版原本に存在する全29系列、1298マップ・6476面。定義ファイル6333件と出現62488行を保存し、UIの一覧件数と区別する。日本編の共通定義、一覧外7定義、Lの113テンプレートを重複や欠落として除去しない。
+
+|表|責務|
+|---|---|
+|stage_map|系列、内部種別、マップ番号、取得/スコア保存番号、画面mode、原本ヘッダー|
+|stage_definition / stage_definition_spawn|原本パス単位の設定/物理値と14列の出現定義。元行・空欄・原セルも保持|
+|stage / stage_entry|一覧の面と定義の対応。未収録の統率力/XP/物理値はNULL、listed=0は一覧外|
+|stage_spawn|stage_entryから定義を結ぶ互換view。定義の二重保存を避ける|
+|stage_reward|normal/weight/score/clearを分離し、比較値・item・個数・元列・パス・locatorを保持|
+|stage_variant|D/L等の候補と根拠CSV/行。候補を実際の抽選結果と決めつけない|
+|stage_attachment|条件、固定編成preset、EX、特殊ルール、Pt、Lv封印等の補助原本。bytesはsource_fileにも保存|
+
+`stages::importer::import`が定義・一覧・報酬を保存し、`extras::import`が補助資料と候補を接続する。`search_catalog`は軽量な全系列索引、`catalog_map`は指定マップの出現表、`variant`は保存済み候補だけを検証して返す。stage検索アダプタはschema2。DBの値と検索索引に定義した候補集合を一致させる。
+
+未来編mode4〜6は通常スコア保存番号が−1でも専用章スコア保存先を持つ。原本005d996cの局所照合を経てスコア報酬を有効化する。日本編の通常敵倍率は100/150/400%を表示に解決し、出現の元14列を改変しない。XPはmode/kind/章ステージ番号を保持して共通C++入口へ渡す。
+
+原本全件の照合は`research/verify/all_stage_database.py`、0番台の回帰は`stage_database.py`、章の分岐は`chapter_enemies.py`と`chapter_score_gate.py`。閲覧DBの完成は、敵個体生成・期間/所持/解禁の実状態・完全な戦闘ランタイムの完成を意味しない。
+
+
+## モーション原本（0.1.16 / importer10）
+
+motions::importが取り込み済みform/enemyのmotion_pathから共有済みstemを求め、同じstemのimgcut/mamodel/全maanimとNumber PNGをsource_fileへ保持する。battle_soul/battle_demonsoulの共通セットも同じ版から保持する。schema8の既存source_fileを使用し、既存snapshotは不変のままimporterを上げて再生成する。
+
+`motions::manifest`はkind/id/formを検査し、本体・共通の魂・各モーション・ファイルのpath/元パス/size/SHA/sourceKind/textを返す。味方の魂IDは67/専用魂指定69、敵は54/63。_soulを08へ置き換えない。imgcut画像名には絶対パスや制作中の別名が残るため、現版005bcea8と同じく%s.pngを採用する。原textの記録は消さない。
+
+`kbcs motion --kind unit|enemy --id N --form 0..3`で同じ一覧をCLIから取得できる。HTTP/GUIも同じ関数を使い、元repositoryを閲覧時に参照しない。
+
+## その他モーション（importer12）
+
+0.1.17ではキャラ本体以外の全mamodel/maanim/imgcutと、対応が判明したImage/NumberのPNG、Data/param.tsvをsource_fileへ追加。モデルパーツidと最長stem一致からカタログを構成する。元の定義とSHAを保持し、対応不明の素材は未確認として残す。schema8を維持。effects領域の関数関係・素材対応の根拠はui/src/features/motion/docs/README.md。

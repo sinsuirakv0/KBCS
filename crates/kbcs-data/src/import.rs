@@ -484,6 +484,8 @@ fn build(
     crate::combos::import(source, dataset, connection)?;
     crate::enemies::import(source, dataset, connection, progress)?;
     crate::stages::import(source, dataset, connection, progress)?;
+    crate::motions::import(source, dataset, connection, progress)?;
+    crate::effects::import(source, dataset, connection, progress)?;
     ensure!(*form_count > 0, "取り込み結果が空です");
     Ok(())
 }

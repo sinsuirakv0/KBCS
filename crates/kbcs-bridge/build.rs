@@ -1,10 +1,15 @@
-fn main() {
+﻿fn main() {
     cc::Build::new()
         .cpp(true)
         .std("c++20")
         .include("../../native/kbcs-core/include")
         .file("../../native/kbcs-core/src/core.cpp")
+        .file("../../native/kbcs-core/src/random.cpp")
+        .file("../../native/kbcs-core/src/enemy.cpp")
+        .file("../../native/kbcs-core/src/reward.cpp")
         .file("../../native/kbcs-core/src/stage.cpp")
+        .file("../../native/kbcs-core/src/map.cpp")
+        .file("../../native/kbcs-core/src/motion.cpp")
         .file("../../native/kbcs-core/src/materials.cpp")
         .compile("kbcs-core");
     println!("cargo:rerun-if-changed=../../native/kbcs-core");

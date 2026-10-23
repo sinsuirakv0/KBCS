@@ -103,6 +103,8 @@ fn source(root: &Path, region: &str) -> Result<()> {
         ("res/Enemyname.tsv","わんこ".into()),
         ("res/EnemyPictureBook_ja.csv","名前,説明<br>検証".into()),
         ("ImageData/000_e02.maanim","[modelanim:animation]\n1\n1\n0,0\n2\n-1,0\n46,0".into()),
+        ("ImageData/000_f.imgcut", "[imgcut]\n0\nC:\\artist\\000_f.png\n1\n0,0,1,1".into()),
+        ("ImageData/000_f.mamodel", "[modelanim:model]\n3\n1\n-1,0,0,0,0,0,0,0,100,100,0,255,0\n100,360,255\n0".into()),
         ("Data/unitbuy.csv", settings.join(",")),
         ("Data/unitlevel.csv", vec!["100"; 20].join(",")),
         (
@@ -134,6 +136,19 @@ fn source(root: &Path, region: &str) -> Result<()> {
         ("res/StageName_RPR_ja.csv","PR入手先".into()),
         ("Data/MapStageDataPR_000.csv","1,0\n0\n0,0,0,0,0,100,1000,1,-1,-1".into()),
         ("Data/MapStageDataA_000.csv","1,0\n0\n0,0,0,0,0,100,1000,1,0,50,1000,1,0\n0,0,0,0,0,100,1000,1,0\n0,0,0,0,0,100,1000,1,-2,-2,-2,-2,-2,-2,-2,0\n 1：末尾の説明".into()),
+        ("Data/MapStageDataS_000.csv","1,2,0,0,0\n0\n50,12345,31,100,31,100,1,2,-2,-2,-2,-2,-2,-2,-2,1,8500,3,5,-1".into()),
+        ("res/StageName_RS_ja.csv","スコアの検証".into()),
+        ("Data/stageRS000_00.csv","0,0,0,0,0,0\n4000,1000,1,1,0,20,0,0,0,0\n2,0,1,300,150,100,0,9,0,100,.,0,0,0".into()),
+        ("Data/MapStageDataL_000.csv","36,-1,-1,0,0\n0\n20,240,0,100,0,100,1,1,-1".into()),
+        ("Data/stageL000_100.csv","0,0,0,0,0,0\n4500,2000,1,1,0,20,0,0,0,0\n2,0,1,2,3,100,0,9,0,100".into()),
+        ("Data/stage_conditions.csv","33000,0,0,100,100".into()),
+        ("Data/MapStageDataD_000.csv","22,-1,-1,0,0\n0\n50,900,0,100,0,100,1,1,-3,1,2,1,-1".into()),
+        ("Data/PlayDungeonD_000.csv","100001,-1,0,0,1,2,3,4,1".into()),
+        ("Data/MapStageDataClearCountReward.json",r#"{"MapID":{"1000":{"0":{"data":[{"DropItemID":-1,"Quantity":0},{"DropItemID":2,"Quantity":3}]}}}}"#.into()),
+        ("Data/stageNormal1_0.csv","-1,-1,-1\n-1\n30,0,31,100,31,0,1,1,-2,-2,-2,-2,-2,-2,-2,1,8500,3,10,-1\n-1,".into()),
+        ("Data/stageW04_00.csv","4000,1000,1,1,0,20,0,0,0,0\n2,0,1,2,3,100,0,9,0,100".into()),
+        ("Data/fixed_formation.csv","MapID,Level,StageNo,PresetFileName\n1000,0,0,Example.preset".into()),
+        ("Data/Example.preset",r#"{"chara":{"data":{"0":{"evolution":"1","level":"5","plus":"2"}}},"slot":{"data":{"0":{"cannon":"0","chara":["0"]}}}}"#.into()),
         ("Data/drop_chara.csv","reward,save,id\n1000,1,0".into()),
         ("Data/NyancomboData.csv","0,0,0,0,1,-1,-1,-1,-1,-1,-1,-1,-1,0,0\n0,-1,0,0,1,-1,-1,-1,-1,-1,-1,-1,-1,0,0".into()),
         ("res/Nyancombo_ja.csv","検証コンボ\n無効なコンボ".into()),
@@ -141,11 +156,60 @@ fn source(root: &Path, region: &str) -> Result<()> {
         ("res/Nyancombo2_ja.csv","【小】".into()),
         ("Data/NyancomboParam.tsv","10\t15\t20".into()),
     ];
+    let data = data.into_iter().chain([
+        (
+            "ImageData/skill_shield.mamodel",
+            "[mamodel]\n0\n1\n-1,9,0,0,0,0,0,0,100,100,0,255,0".into(),
+        ),
+        (
+            "ImageData/skill_shield_e.mamodel",
+            "[mamodel]\n0\n1\n-1,10,0,0,0,0,0,0,100,100,0,255,0".into(),
+        ),
+        (
+            "ImageData/skill009.imgcut",
+            "[imgcut]\n0\nskill999.png\n1\n0,0,1,1".into(),
+        ),
+        (
+            "ImageData/skill010.imgcut",
+            "[imgcut]\n0\nskill999.png\n1\n0,0,1,1".into(),
+        ),
+        (
+            "ImageData/skill_shield.maanim",
+            "[modelanim:animation]\n0\n0".into(),
+        ),
+        (
+            "ImageData/skill_shield_e.maanim",
+            "[modelanim:animation]\n0\n0".into(),
+        ),
+        (
+            "ImageData/bg_fixture.mamodel",
+            "[mamodel]\n0\n1\n-1,0,0,0,0,0,0,0,100,100,0,255,0".into(),
+        ),
+        (
+            "ImageData/bg_fixture.imgcut",
+            "[imgcut]\n0\nbg_alias.png\n1\n0,0,1,1".into(),
+        ),
+    ]);
     let mut files = serde_json::Map::new();
     for (logical, content) in data {
         let path = format!("{region}/Local/fixture/{logical}");
         write(root, &path, content.as_bytes())?;
         files.insert(logical.into(),json!({"path":path,"size":content.len(),"sha256":hash(content.as_bytes()),"sourceKind":"local"}));
+    }
+    for logical in [
+        "Number/000_f.png",
+        "Image/skill009.png",
+        "Image/skill010.png",
+        "Image/skill999.png",
+        "Image/bg_alias.png",
+    ] {
+        let path = format!("{region}/Local/fixture/{logical}");
+        let bytes = include_bytes!("fixtures/pixel.png");
+        write(root, &path, bytes)?;
+        files.insert(
+            logical.into(),
+            json!({"path":path,"size":bytes.len(),"sha256":hash(bytes),"sourceKind":"local"}),
+        );
     }
     let artifacts = [
         (
@@ -198,6 +262,35 @@ fn import_is_offline_repeatable_region_safe_and_preserves_old_db_on_failure() ->
     commit(&assets);
     let first = import::import(assets.to_str().unwrap(), &root, "jp", |_| {})?;
     let old = Database::open(&root, "jp")?;
+    let motion = kbcs_data::motions::manifest(&old, "jp", "unit", 0, 0)?;
+    assert_eq!(motion["body"]["image"], "Number/000_f.png");
+    assert!(
+        motion["files"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|v| v["path"] == "Number/000_f.png"
+                && v["sha256"] == hash(include_bytes!("fixtures/pixel.png")))
+    );
+    assert!(kbcs_data::motions::manifest(&old, "jp", "unit", 0, 4).is_err());
+    let effect = kbcs_data::effects::manifest(&old, "skill_shield_e")?;
+    assert_eq!(effect["character"]["name"], "生き残り（敵）");
+    assert_eq!(effect["body"]["image"], "Image/skill010.png");
+    assert_eq!(effect["body"]["animations"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        effect["body"]["animations"][0]["path"],
+        "ImageData/skill_shield_e.maanim"
+    );
+    assert!(kbcs_data::effects::manifest(&old, "../skill_shield_e").is_err());
+    let background = kbcs_data::effects::manifest(&old, "bg_fixture")?;
+    assert_eq!(background["body"]["image"], "Image/bg_alias.png");
+    assert!(
+        background["body"]["animations"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+
     assert_eq!(old.search("jp", "ねこ", false)?.len(), 1);
     assert_eq!(old.search("jp", "０００", false)?.len(), 1);
     let form = old.form("jp", 0, 0)?;
@@ -261,6 +354,56 @@ fn import_is_offline_repeatable_region_safe_and_preserves_old_db_on_failure() ->
     assert_eq!(stage["drops"][0]["weight"], 30);
     assert_eq!(stage["metadataRow"], 3);
     assert_eq!(stage["difficulty"], 1.2);
+    let score = stages["stages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["id"] == "S000-0")
+        .unwrap();
+    assert_eq!(score["formation"]["choices"][0]["units"][0]["level"], 5);
+    assert_eq!(score["formation"]["choices"][0]["units"][0]["plus"], 2);
+    assert_eq!(score["drops"].as_array().unwrap().len(), 1);
+    assert_eq!(score["scoreRewards"][0]["score"], 8500);
+    assert_eq!(score["clearRewards"][0]["clear"], 2);
+    assert_eq!(score["spawns"][0]["interval"], json!([600, 300]));
+    assert_eq!(score["spawns"][0]["raw"][10], ".");
+    let future = stages["stages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["id"] == "ITF1-0")
+        .unwrap();
+    assert_eq!(future["scoreRewards"][0]["score"], 8500);
+    assert_eq!(
+        stages["stages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|v| v["map"] == "ITF1")
+            .count(),
+        1
+    );
+    let labyrinth = stages["stages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["id"] == "L000-0")
+        .unwrap();
+    assert_eq!(labyrinth["variants"].as_array().unwrap().len(), 1);
+    assert!(labyrinth["width"].is_null());
+    let variant = kbcs_data::stages::variant(&old, "jp", "L000", 0, "Data/stageL000_100.csv")?;
+    assert_eq!(variant["width"], 4500);
+    assert_eq!(variant["energy"], 20);
+    assert!(kbcs_data::stages::variant(&old, "jp", "L000", 0, "Data/stageRN000_00.csv").is_err());
+    let index = kbcs_data::stages::search_catalog(&old, "jp")?;
+    assert!(index["stages"][0].get("spawns").is_none());
+    assert_eq!(
+        kbcs_data::stages::catalog_map(&old, "jp", Some("L000"))?["maps"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
     let materials = &stages["maps"][0]["materials"];
     assert_eq!(materials["multipliers"], json!([0.75, 1.0, 1.0, 1.0]));
     assert_eq!(materials["counts"].as_array().unwrap().len(), 8);

@@ -53,6 +53,15 @@ pub fn validate(connection: &Connection) -> Result<()> {
         connection.query_row("SELECT count(*) FROM form", [], |row| row.get::<_, i64>(0))? > 0,
         "キャラ形態が空です"
     );
+    // 公開前に表示面と原本定義の対応、報酬の有効範囲を確認する。
+    ensure!(
+        !connection.prepare("SELECT 1 FROM stage s LEFT JOIN stage_entry e ON e.region=s.region AND e.map_id=s.map_id AND e.stage_index=s.stage_index WHERE e.map_id IS NULL LIMIT 1")?.exists([])?,
+        "ステージ定義への対応が欠けています"
+    );
+    ensure!(
+        !connection.prepare("SELECT 1 FROM stage_reward WHERE item_id<0 OR amount<=0 OR kind NOT IN ('normal','weight','score','clear') LIMIT 1")?.exists([])?,
+        "ステージ報酬が不正です"
+    );
     Ok(())
 }
 

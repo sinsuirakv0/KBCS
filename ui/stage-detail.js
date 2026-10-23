@@ -1,7 +1,7 @@
-﻿import {loadStageDatabase,loadStageMap} from './src/shared/game/stages.js';
+﻿import {loadStageDatabase,loadStageVariant} from './src/shared/game/stages.js';
 import {loadEnemyDatabase} from './src/shared/game/enemies.js';
 import {loadUnitDatabase} from './src/shared/game/units.js';
-import {stageSummaryHtml,stageRulesHtml,stageRewardsHtml,stageSpawnsHtml} from './src/features/stages/view.js';
+import {stageSummaryHtml,stageRulesHtml,stageRewardsHtml,stageSpawnsHtml,stageFormationHtml} from './src/features/stages/view.js';
 import {stageMapUrl,resolveStageRoute} from './src/features/stages/model.js';
 import {escapeHtml,formatNumber} from './src/shared/game/database-view.js';
 import {readGameSettings} from './src/shared/browser/game-settings.js';
@@ -31,24 +31,33 @@ async function renderCalculations(visible){
   element('stage-xp-profile').textContent='勉強力Lv'+condition.studyLevel+' / お宝＋'+condition.treasure+'%';
   try{
     if(database.gameVersion!==catalog.version)throw Error('DBとXP計算の対応版が一致しません。');
-    const materialDrops=map.materials?visible.map(stage=>({count:map.materials.counts[stage.index],multiplier:map.materials.multipliers[crown-1],miss:map.materials.miss,weights:map.materials.weights})):[];
-    const data=await calculateNative({legendExperience:visible.map(stage=>({base:stage.xp,...condition})),materialDrops});
-    if(revision!==calculationRevision)return;
-    for(const [index,stage] of visible.entries()){
-      const output=data.legendExperience[index].stages;
-      const target=element('stage-output').querySelector('[data-stage-experience="'+stage.id+'"]');
-      target.textContent=formatNumber(output[4]);target.title=['基礎×9','繰返し減衰','勉強力・お宝','コンボ','おかめ'].map((label,index)=>label+'：'+formatNumber(output[index])).join('\n');
-      element('stage-sheet-'+stage.id).querySelector('[data-stage-xp-detail]').textContent=target.title.replaceAll('\n',' / ');
-      if(map.materials){
-        const plan=data.materialDrops[index],materials={...plan,items:map.materials.items.map(item=>({...item,...plan.items[item.slot]}))};
-        element('stage-rewards-'+stage.id).innerHTML=stageRewardsHtml(database,stage,units,map,crown,materials);
+    const available=visible.filter(stage=>stage.xp!=null);
+    for(let offset=0;offset<available.length;offset+=64){
+      const chunk=available.slice(offset,offset+64);
+      const materialStages=chunk.filter(stage=>map.materials&&Number.isFinite(map.materials.counts[stage.index]));
+      const materialDrops=materialStages.map(stage=>({count:map.materials.counts[stage.index],multiplier:map.materials.multipliers[crown-1],miss:map.materials.miss,weights:map.materials.weights}));
+      const data=await calculateNative({stageExperience:chunk.map(stage=>({mode:stage.nativeMode,kind:stage.nativeKind,stage:stage.index,base:stage.xp,...condition})),materialDrops});
+      if(revision!==calculationRevision)return;
+      for(const [index,stage]of chunk.entries()){
+        const output=data.stageExperience[index].stages,target=element('stage-output').querySelector('[data-stage-experience="'+stage.id+'"]');
+        if(!target)continue;
+        target.textContent=formatNumber(output[4]);target.title=['基礎値','繰返し減衰','勉強力・お宝','コンボ','おかめ'].map((label,index)=>label+'：'+formatNumber(output[index])).join('\n');
+        element('stage-sheet-'+stage.id).querySelector('[data-stage-xp-detail]').textContent=target.title.replaceAll('\n',' / ');
+        const materialIndex=materialStages.findIndex(value=>value.id===stage.id);
+        if(materialIndex>=0){const plan=data.materialDrops[materialIndex],materials={...plan,items:map.materials.items.map(item=>({...item,...plan.items[item.slot]}))};element('stage-rewards-'+stage.id).innerHTML=stageRewardsHtml(database,stage,units,map,crown,materials);}
       }
     }
+    for(const stage of visible.filter(stage=>stage.xp==null)){const target=element('stage-output').querySelector('[data-stage-experience="'+stage.id+'"]');if(target)target.textContent='—';}
+
   }catch(error){if(revision===calculationRevision)for(const node of element('stage-output').querySelectorAll('[data-stage-experience]'))node.textContent=error.message;}
 }
 function sourceHtml(stage){
   const row=(label,value)=>'<tr><th>'+label+'</th><td><code>'+escapeHtml(JSON.stringify(value))+'</code></td></tr>';
   return '<details class="stage-native-source"><summary>計算内訳・元データ</summary><div data-stage-xp-detail></div><div>'+escapeHtml(stage.source)+'</div><table class="stage-sheet"><tbody>'+row('設定',stage.rawSettings)+row('ヘッダー',stage.rawHeader)+row('報酬 '+map.source+' : '+stage.metadataRow,stage.rawRewards)+row('報酬モード / 末尾値',[stage.rewardMode,stage.rewardOnce])+(map.materials?row('開発素材 '+map.materials.source+' : '+map.materials.sourceRow,map.materials.raw):'')+'</tbody></table><div class="db-meta">報酬の比較値は最終取得確率ではありません。</div><div class="db-table-wrap"><table class="stage-sheet"><thead><tr><th>元行</th><th>読込後の14整数</th></tr></thead><tbody>'+stage.spawns.map(spawn=>row(spawn.sourceRow,spawn.native)).join('')+'</tbody></table></div></details>';
+}
+function patternHtml(stage){
+  if(!stage.variants?.length)return '';
+  return '<label class="stage-pattern-choice">'+escapeHtml(stage.patternLabel||'出現パターン')+' <select data-stage-pattern="'+stage.index+'"><option value="" disabled>選択してください（'+stage.variants.length+'候補）</option>'+stage.variants.map(value=>'<option value="'+escapeHtml(value.source)+'"'+(stage.patternSource===value.source?' selected':'')+'>'+escapeHtml(value.name)+'</option>').join('')+'</select></label>';
 }
 function render(){
   settings.seconds=element('stage-time').value==='seconds';
@@ -57,7 +66,7 @@ function render(){
   const visible=selected===''?bases:bases.filter(stage=>String(stage.index)===selected);
   element('stage-visible-count').textContent=map.key+' / '+visible.length+'ステージ / '+crown+'冠';
   element('stage-map-info').innerHTML=stageRulesHtml(database,{index:-1},map,crown,units,settings.seconds);
-  element('stage-output').innerHTML=visible.map(stage=>'<section class="stage-entry" id="stage-sheet-'+stage.id+'"><div class="stage-heading"><h2>'+(stage.index+1)+'. '+escapeHtml(stage.name)+'</h2><button type="button" data-stage-capture="'+stage.id+'">画像保存</button></div>'+stageSummaryHtml(stage,map,crown,settings)+stageSpawnsHtml(stage,map,crown,enemies,settings,{details:element('stage-spawn-details').checked})+'<div id="stage-rewards-'+stage.id+'">'+stageRewardsHtml(database,stage,units,map,crown)+'</div>'+sourceHtml(stage)+'</section>').join('');
+  element('stage-output').innerHTML=visible.map(stage=>'<section class="stage-entry" id="stage-sheet-'+stage.id+'"><div class="stage-heading"><h2>'+(stage.index+1)+'. '+escapeHtml(stage.name)+'</h2><button type="button" data-stage-capture="'+stage.id+'">画像保存</button></div>'+patternHtml(stage)+stageSummaryHtml(stage,map,crown,settings,enemies)+stageRulesHtml(database,stage,map,crown,units,settings.seconds,{includeMap:false})+stageFormationHtml(stage,units)+(stage.variants?.length&&!stage.patternSource?'<div class="stage-pattern-placeholder">出現パターンを選択してください。</div>':stageSpawnsHtml(stage,map,crown,enemies,settings,{details:element('stage-spawn-details').checked}))+'<div id="stage-rewards-'+stage.id+'">'+stageRewardsHtml(database,stage,units,map,crown)+'</div>'+sourceHtml(stage)+'</section>').join('');
   renderCalculations(visible);
   for(const button of element('stage-navigation').querySelectorAll('[data-stage-choice]'))button.setAttribute('aria-current',button.dataset.stageChoice===selected?'page':'false');
   saveState();
@@ -73,6 +82,12 @@ bindDetailNavigation('enemy-detail','/pages/tunit-detail/',(target,link)=>{
   const factor=(map?.stars[crown-1]??100)/100;
   return new URLSearchParams(spawn?{health:spawn.health*factor,attack:spawn.attack*factor}:{});
 });
+element('stage-output').addEventListener('change',async event=>{
+  const select=event.target.closest('[data-stage-pattern]');if(!select||!select.value)return;
+  const index=Number(select.dataset.stagePattern);select.disabled=true;
+  try{const stage=await loadStageVariant(map.key,index,select.value);bases=bases.map(value=>value.index===index?stage:value);render();}
+  catch(error){element('stage-message').textContent=error.message;select.disabled=false;}
+});
 element('stage-output').addEventListener('click',async event=>{
   const button=event.target.closest('[data-stage-capture]');if(!button)return;
   button.disabled=true;
@@ -85,7 +100,10 @@ async function load(){
   try{
     [database,enemies,units]=await Promise.all([loadStageDatabase(),loadEnemyDatabase(),loadUnitDatabase()]);
     const route=resolveStageRoute(database,params);map=route.map;
-    bases=await loadStageMap(database,map.key);
+    const detail=await fetch('/api/stages?'+new URLSearchParams({map:map.key})).then(response=>{if(!response.ok)throw Error('マップ詳細の読込に失敗しました。');return response.json();});
+    if(detail.buildId!==database.buildId||detail.revision!==database.revision)throw Error('DBが更新されています。ページを再読み込みしてください。');
+    map=detail.maps.find(value=>value.key===map.key);
+    bases=detail.stages;
     selected=route.selected?String(bases.find(stage=>stage.id===route.selected).index):'';
     crown=Math.max(1,Math.min(map.stars.length,Math.trunc(Number(params.get('crown')))||1));
     document.title=map.name+' | KBCS';element('stage-title').textContent=map.key+' '+map.name;

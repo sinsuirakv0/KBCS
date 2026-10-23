@@ -56,11 +56,38 @@ for base,clears,study,treasure,combo,okame in [
     assert actual==expected,(base,clears,actual,expected)
     vectors.append({'input':{'base':base,'clears':clears,'studyLevel':study,'treasure':treasure,'combo':combo,'okame':okame},
                     'result':actual,'stages':[initial,repeated,studied,combined,actual]})
+# 種別1は0番台の9倍・クリア数取得の両方を通らないことを確認する。
+def event(base,study,treasure,combo,okame):
+    write(0x32f934,3);write(0x83dfc,0)
+    write(0x38b220,base^0x01020304);write(0x38b16c,0x01020304)
+    def unexpected():raise AssertionError('イベントで繰返し減衰helperを呼んだ')
+    native.helpers={0x81f580:game,0x7cd100:1,0xa08564:unexpected,0x44abfc:unexpected,
+                    0x58b674:study-1,0xa5b084:treasure,0x88f9e4:combo,0x5c022c:okame}
+    actual=native.call(0x58bad0)
+    studied=base*(100+(study-1)*5+treasure)//100
+    combined=studied*(100+combo)//100
+    expected=combined*15//10 if okame else combined
+    assert actual==expected,(base,actual,expected)
+    return {'input':{'base':base,'studyLevel':study,'treasure':treasure,'combo':combo,'okame':okame},
+            'result':actual,'stages':[base,base,studied,combined,actual]}
+
+event_vectors=[event(*values) for values in [(3040,30,225,0,0),(3041,17,97,10,1),(1,2,1,5,1),
+                                           (0,1,0,0,0),(12345,20,134,25,0),(12345,30,225,30,1)]]
+witness_path=ROOT/'research/.local/stages-1572-band1000.json'
+event_stages=[]
+if witness_path.exists():
+    witness=json.loads(witness_path.read_text(encoding='utf-8-sig'))
+    for stage in witness['stages']:
+        if stage.get('orphan'):continue
+        for study,treasure,combo,okame in [(1,0,0,0),(30,225,15,1)]:
+            event_stages.append({'map':stage['map'],'stage':stage['stage'],
+                                 **event(stage['rewards']['cells'][1],study,treasure,combo,okame)})
 report={'version':'15.7.2','architecture':'arm64-v8a','sha256':SHA,
-        'scope':'Band 0 XP arithmetic; controlled game state, kind, clear count, study, treasure, combo and item helpers; not reward acquisition',
+        'scope':'Band 0 and band1000 kind1 XP arithmetic; controlled game state, kind, clear count, study, treasure, combo and item helpers; not reward acquisition',
         'evidence':{address:digest((native.cache/'code'/(address+'.c')).read_bytes()) for address in ['0058bad0','00a5b084']},
-        'treasures':treasures,'vectors':vectors}
+        'treasures':treasures,'vectors':vectors,'eventVectors':event_vectors,'eventStages':event_stages,
+        'eventWitnessSha256':digest(witness_path.read_bytes()) if witness_path.exists() else None}
 (ROOT/'research/.local/experience-1572.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8-sig')
 if args.publish:
-    (ROOT/'native/kbcs-core/tests/experience-vectors.json').write_text(json.dumps(report,separators=(',',':'))+'\n',encoding='utf-8')
-print(json.dumps({'experienceCases':len(vectors),'treasureCases':len(treasures)}))
+    (ROOT/'native/kbcs-core/tests/experience-vectors.json').write_text(json.dumps({k:v for k,v in report.items() if k!='eventStages'},separators=(',',':'))+'\n',encoding='utf-8')
+print(json.dumps({'experienceCases':len(vectors),'treasureCases':len(treasures),'eventVectors':len(event_vectors),'eventStageCases':len(event_stages)}))

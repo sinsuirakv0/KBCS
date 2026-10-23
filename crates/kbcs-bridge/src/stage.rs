@@ -5,6 +5,16 @@
 #[serde(transparent)]
 pub struct Row(pub [i32; 14]);
 
+impl Row {
+    pub fn decode(cells: &[i32]) -> Result<Self, u32> {
+        // 原本が使う14列だけを転送し、追加列を別の意味へ流用しない。
+        let mut output = Self([0; 14]);
+        let count = cells.len().min(14);
+        let code = unsafe { kbcs_core_stage_row_decode(cells.as_ptr(), count as i32, &mut output) };
+        if code == 0 { Ok(output) } else { Err(code) }
+    }
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct State {
@@ -30,6 +40,7 @@ pub struct Context {
 }
 
 unsafe extern "C" {
+    fn kbcs_core_stage_row_decode(cells: *const i32, count: i32, output: *mut Row) -> u32;
     fn kbcs_core_stage_initialize(
         rows: *const Row,
         states: *mut State,
@@ -141,11 +152,45 @@ fn native_stage_start_witnesses() {
     }
 }
 
-pub fn tick(
-    rows: &[Row],
-    states: &mut [State],
-    context: &mut Context,
-) -> Result<Option<usize>, u32> {
+// 候補が生存する間は行・状態を借用し、他のtickや差替えを防ぐ。
+pub struct PendingSpawn<'a> {
+    rows: &'a [Row],
+    states: &'a mut [State],
+    context: &'a mut Context,
+    index: usize,
+}
+impl PendingSpawn<'_> {
+    pub fn index(&self) -> usize {
+        self.index
+    }
+    pub fn row(&self) -> &Row {
+        &self.rows[self.index]
+    }
+
+    /// 成功した生成の間隔だけを反映する。失敗時は候補を破棄する。
+    /// ```compile_fail
+    /// fn twice(candidate: kbcs_bridge::stage::PendingSpawn<'_>) {
+    ///     candidate.commit(0, 0).unwrap();
+    ///     candidate.commit(0, 0).unwrap();
+    /// }
+    /// ```
+    pub fn commit(self, global_roll: i32, row_roll: i32) -> Result<(), u32> {
+        commit(
+            self.rows,
+            self.states,
+            self.context,
+            self.index,
+            global_roll,
+            row_roll,
+        )
+    }
+}
+
+pub fn tick<'a>(
+    rows: &'a [Row],
+    states: &'a mut [State],
+    context: &'a mut Context,
+) -> Result<Option<PendingSpawn<'a>>, u32> {
     if rows.len() != states.len() || rows.len() > 4096 {
         return Err(1);
     }
@@ -161,13 +206,18 @@ pub fn tick(
         )
     };
     if code == 0 {
-        Ok((candidate >= 0).then_some(candidate as usize))
+        Ok((candidate >= 0).then_some(PendingSpawn {
+            rows,
+            states,
+            context,
+            index: candidate as usize,
+        }))
     } else {
         Err(code)
     }
 }
 
-pub fn commit(
+fn commit(
     rows: &[Row],
     states: &mut [State],
     context: &mut Context,
@@ -228,28 +278,23 @@ fn native_stage_witnesses() {
         let expected_rows: Vec<usize> =
             serde_json::from_value(vector["result"]["spawnedRows"].clone()).unwrap();
         assert_eq!(
-            candidate.into_iter().collect::<Vec<_>>(),
+            candidate
+                .as_ref()
+                .map(PendingSpawn::index)
+                .into_iter()
+                .collect::<Vec<_>>(),
             expected_rows,
             "{}",
             input["name"]
         );
-        if let Some(index) = candidate
+        if let Some(candidate) = candidate
             && number("spawnResult", 0) >= 0
         {
             let maximum = input["randomMaximum"] == true;
-            commit(
-                &rows,
-                &mut states,
-                &mut context,
-                index,
-                if maximum { 4 } else { 0 },
-                if maximum {
-                    rows[index].0[4] - rows[index].0[3]
-                } else {
-                    0
-                },
-            )
-            .unwrap();
+            let span = candidate.row().0[4] - candidate.row().0[3];
+            candidate
+                .commit(if maximum { 4 } else { 0 }, if maximum { span } else { 0 })
+                .unwrap();
         }
         let actual: Vec<[i32; 3]> = states
             .iter()
@@ -281,10 +326,35 @@ fn native_stage_witnesses() {
         ..Default::default()
     };
     let before = (states, context);
-    assert_eq!(tick(&rows, &mut states, &mut context), Err(2));
+    assert!(matches!(tick(&rows, &mut states, &mut context), Err(2)));
     assert_eq!((states, context), before);
     states[0].wait = 0;
     let before = (states, context);
     assert_eq!(commit(&rows, &mut states, &mut context, 0, 5, 0), Err(1));
     assert_eq!((states, context), before);
+    let limited = [Row([2, 1, 0, 0, 0, 100, 0, 9, 0, 100, 0, 0, 0, 0])];
+    states[0].spawned = 1;
+    let before = (states, context);
+    assert_eq!(commit(&limited, &mut states, &mut context, 0, 0, 0), Err(1));
+    assert_eq!((states, context), before);
+}
+
+#[test]
+fn native_band_row_witnesses() {
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../native/kbcs-core/tests/band-row-vectors.json"
+    ))
+    .unwrap();
+    for vector in fixture["vectors"].as_array().unwrap() {
+        let cells: Vec<i32> = vector["cells"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_i64().unwrap_or(0) as i32)
+            .collect();
+        let expected: Row = serde_json::from_value(vector["native"].clone()).unwrap();
+        assert_eq!(Row::decode(&cells).unwrap().0, expected.0);
+    }
+    assert_eq!(Row::decode(&[]).unwrap().0, [0; 14]);
+    assert!(matches!(Row::decode(&[2, 0, i32::MAX]), Err(2)));
 }

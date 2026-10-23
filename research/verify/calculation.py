@@ -51,14 +51,18 @@ def hit(case):
  u=Uc(UC_ARCH_ARM64,UC_MODE_ARM);u.mem_map(0,len(image));u.mem_write(0,bytes(image))
  game=0x20000000;stack=0x30000000;stop=0x60000000;arena=0x40000000
  u.mem_map(game,0x800000);u.mem_map(stack,0x10000);u.mem_map(stop,4096);u.mem_map(arena,0x10000)
- result=None;calls=[];trace=[];allocated=arena
+ result=None;calls=[];trace=[];allocated=arena;checkpoints={}
+ unit_points={0x6e4d84:[0],0x6e4db0:[0],0x6e4dc8:[1],0x6e4eb8:[2],0x6e4f10:[3],0x6e4f6c:[4],0x6e4fc8:[5],0x6e5910:[6],0x6e5a38:[7],0x6e5b78:[8],0x6e5bf4:[9],0x6e5c70:[10],0x6e5cd4:[11],0x6e5dc0:[12],0x6e5ea0:[13],0x6e5ef4:[14],0x6e508c:[15,16,17,18],0x6e50b0:[19]}
+ if case.get('castle'):unit_points[0x6e4ff0]=[6,7,8,9,10,11,12,13,14]
+ enemy_points={0x6e7c74:[0],0x6e7c9c:[0],0x6e7cb8:[1],0x6e7d78:[2,3],0x6e7dd4:[4],0x6e7e30:[5],0x6e895c:[6],0x6e8ab8:[7],0x6e8cf8:[8],0x6e8da8:[9],0x6e8e58:[10],0x6e8edc:[11],0x6e8fa8:[12],0x6e9074:[13],0x6e90d4:[14],0x6e80cc:[15],0x6e812c:[16],0x6e8590:[17],0x6e8600:[18],0x6e862c:[19]}
  def ret(value=0):u.reg_write(UC_ARM64_REG_X0,value&0xffffffffffffffff);u.reg_write(UC_ARM64_REG_PC,u.reg_read(UC_ARM64_REG_LR))
  def hook(uc,address,size,data):
   nonlocal result,allocated
   if address==stop:u.emu_stop();return
+  for index in (enemy_points if case.get('incoming') else unit_points).get(address,[]):checkpoints[str(index)]=u.reg_read(UC_ARM64_REG_X23 if case.get('incoming') or address==0x6e50b0 else UC_ARM64_REG_X24)
   if (0x6e79bc<=address<0x6e92bc if case.get('incoming') else 0x6e4aec<=address<0x6e60f0):return
   args=[u.reg_read(r)&0xffffffff for r in regs];calls.append((hex(address),args[:5]))
-  values={0xa94678:1,0x81f580:game,0x5bbc10:0xffffffff,0x5bce20:2,0xa95a68:case.get('attack',13),0xa958b0:1 if case.get('strengthen',0) else 100,0xa95824:case.get('maxHp',100),0xa9876c:case.get('poison',0),0xa9e20c:case.get('poisonResistance',0),0xa9b8a8:case.get('poisonImmune',0),0xa998cc:50 if case.get('strengthen',0) else 0,0xa99958:case.get('strengthen',0),0xa9c3bc:int(case.get('weaken',100)<100),0xa9c49c:1,0xa9c528:case.get('weaken',100),0xa9a9b0:case.get('savage',0),0xa99c24:case.get('strong',0),0xa99de4:case.get('massive',0),0xa99fa4:case.get('extreme',0),0xa99d04:case.get('resistant',0),0xa99ec4:case.get('superResistant',0),0xa9a2cc:case.get('witch',0),0xa97068:case.get('witch',0),0xa9a3ac:case.get('eva',0),0xa970d8:case.get('eva',0),0xa9a48c:case.get('colossus',0),0xa976b8:case.get('colossus',0),0xa9a56c:160,0xa9a6dc:70,0xa96a38:int(case.get('baseReduction',0)>0),0xa9e068:case.get('resistance',0),0xa9e298:case.get('resistance',0),0xa9e324:case.get('resistance',0),0xa9b024:case.get('immune',0),0xa9b93c:case.get('immune',0),0xa9b9d0:case.get('immune',0),0xa999e4:2 if case.get('killStrengthen') else 0,0xa978ec:case.get('villain',0),0xa9aa88:case.get('behemoth',0),0xa97774:case.get('behemoth',0),0xa9ad10:case.get('sage',0),0xa97830:case.get('sage',0),0xa96cd8:case.get('metal',0),0xa5b1b4:case.get('fruit',300),0xa9fb88:case.get('raw',8)}
+  values={0xa94678:1,0x81f580:game,0x5bbc10:1 if case.get('castle') else 0xffffffff,0x5bce20:2,0xa95a68:case.get('attack',13),0xa958b0:1 if case.get('strengthen',0) else 100,0xa95824:case.get('maxHp',100),0xa9876c:case.get('poison',0),0xa9e20c:case.get('poisonResistance',0),0xa9b8a8:case.get('poisonImmune',0),0xa998cc:50 if case.get('strengthen',0) else 0,0xa99958:case.get('strengthen',0),0xa9c3bc:int(case.get('weaken',100)<100),0xa9c49c:1,0xa9c528:case.get('weaken',100),0xa9a9b0:case.get('savage',0),0xa99c24:case.get('strong',0),0xa99de4:case.get('massive',0),0xa99fa4:case.get('extreme',0),0xa99d04:case.get('resistant',0),0xa99ec4:case.get('superResistant',0),0xa9a2cc:case.get('witch',0),0xa97068:case.get('witch',0),0xa9a3ac:case.get('eva',0),0xa970d8:case.get('eva',0),0xa9a48c:case.get('colossus',0),0xa976b8:case.get('colossus',0),0xa9a56c:160,0xa9a6dc:70,0xa96a38:int(case.get('baseReduction',0)>0),0xa9e068:case.get('resistance',0),0xa9e298:case.get('resistance',0),0xa9e324:case.get('resistance',0),0xa9b024:case.get('immune',0),0xa9b93c:case.get('immune',0),0xa9b9d0:case.get('immune',0),0xa999e4:2 if case.get('killStrengthen') else 0,0xa978ec:case.get('villain',0),0xa9aa88:case.get('behemoth',0),0xa97774:case.get('behemoth',0),0xa9ad10:case.get('sage',0),0xa97830:case.get('sage',0),0xa96cd8:case.get('metal',0),0xa5b1b4:case.get('fruit',300),0xa9fb88:case.get('raw',8)}
   if address==0x44abe4:ret(max(args[0],args[1]));return
   if address==0x63a050:ret(case.get('baseReduction',0) if args[1]==100 else case.get('decorationReduction',0) if args[1] in [0xc9,0xcb] else case.get('decoration',0) if args[1]==0xcd else 0);return
   if address in allocations:
@@ -75,22 +79,23 @@ def hit(case):
    pointer=u.reg_read(UC_ARM64_REG_X1);first=u.mem_read(pointer,1)[0]
    if first&1:length=struct.unpack('<Q',u.mem_read(pointer+8,8))[0];pointer=struct.unpack('<Q',u.mem_read(pointer+16,8))[0]
    else:length=first//2;pointer+=1
-   name=bytes(u.mem_read(pointer,length)).decode('ascii',errors='replace');ret(parameters.get(name,args[2]));return
+   name=bytes(u.mem_read(pointer,length)).decode('ascii',errors='replace');ret(case.get('waveRate',parameters.get(name,args[2])) if name=='battle_wave_s_st' else parameters.get(name,args[2]));return
   if address==0xa962a8:ret(int(case.get('incoming') or args[0]==0));return
+  if address==0xa9a158:ret(case.get('castleBreaker',0));return
   if address==0x88f9e4:ret(case.get('combos',{}).get(str(args[1]),0));return
   if address==0x66398c:ret(case.get('killStrengthen',0));return
   if address==0x663c44:ret(case.get('orbs',{}).get(str(args[2]),0));return
-  if address==0xa9bbac:result=args[2];u.emu_stop();return
+  if address==0xa9bbac:result=args[2];checkpoints['20']=result;u.emu_stop();return
   ret(values.get(address,0))
  u.hook_add(UC_HOOK_CODE,hook)
  sp=stack+0x8000
  # param_1..8はレジスタ、param_9..19は8バイト間隔のスタック。
- for reg,value in zip(regs,[game,case.get('incomingType',0),1,1,0,0,case.get('critical',0),int(case.get('savage',0)>0)]):u.reg_write(reg,value)
- u.mem_write(sp,b'\0'*88);u.mem_write(sp+56,struct.pack('<Q',int(case.get('poison',0)>0)));u.mem_write(sp+80,struct.pack('<Q',100))
+ for reg,value in zip(regs,[game,case.get('incomingType',0),1,1,0,case.get('attackKind',0),case.get('critical',0),int(case.get('savage',0)>0)]):u.reg_write(reg,value)
+ u.mem_write(sp,b'\0'*88);u.mem_write(sp+56,struct.pack('<Q',int(case.get('poison',0)>0)));u.mem_write(sp+80,struct.pack('<Q',case.get('attackScale',100)))
  u.reg_write(UC_ARM64_REG_SP,sp);u.reg_write(UC_ARM64_REG_LR,stop)
  u.emu_start(0x6e79bc if case.get('incoming') else 0x6e4aec,stop+4,count=200000)
  if result is None:raise RuntimeError('No damage '+str(calls[-12:]))
- return result,calls
+ return result,calls,checkpoints
 allocations={int(row.split('\t')[0],16) for row in (cache/'catalog.tsv').read_text(encoding='utf-8-sig').splitlines() if 'operator.new' in row}
 assets=args.assets.resolve()
 current=json.loads((assets/'metadata/jp/current.json').read_text(encoding='utf-8-sig'))
@@ -123,8 +128,18 @@ cases += [{'attack':0,'incoming':1,'maxHp':101,'poison':20},{'attack':0,'incomin
 cases += [{'attack':103,'villain':1,'combos':{'25':2500}},{'attack':103,'incoming':1,'villain':1,'combos':{'25':2500}},{'attack':103,'critical':1,'strengthen':17,'killStrengthen':13,'weaken':57,'savage':43,'strong':1,'fruit':147},{'attack':10007,'witch':1,'eva':1,'colossus':1,'behemoth':1,'sage':1,'villain':1,'combos':{'22':100,'23':100,'25':2500}}]
 cases += [{'attack':103,'incoming':1,'baseReduction':1500},{'attack':103,'incoming':1,'incomingType':1,'strong':1,'fruit':147,'combos':{'14':15},'resistance':17,'orbs':{'1':8},'baseReduction':1333,'decorationReduction':1333},{'attack':103,'incoming':1,'incomingType':1,'resistance':17,'orbs':{'1':8},'baseReduction':1333,'decorationReduction':1333,'metal':1},{'attack':103,'incoming':1,'incomingType':1,'immune':1,'baseReduction':1500,'decorationReduction':1500}]
 results=[]
+cases += [{'attack':103,'castle':1,'castleBreaker':1,'critical':critical,'savage':savage} for critical in [0,1] for savage in [0,43]]
+cases += [{'attack':103,'strong':1,'massive':1,'fruit':147,'combos':{'14':15,'15':17},'orbs':{'0':13}}]
+cases += [{'attack':10007,'incoming':1,'strong':1,'resistant':1,'fruit':147,'combos':{'14':15,'16':17}}]
+cases += [{'attack':10007,'incoming':1,'witch':1,'eva':1,'combos':{'22':value,'23':value}} for value in [0,99,100]]
 for case in cases:
- value,calls=hit(case);results.append({'input':case,'damage':value,'calls':calls})
+ value,calls,checkpoints=hit(case);results.append({'input':case,'damage':value,'calls':calls,'checkpoints':checkpoints})
+preparations=[]
+for incoming in [0,1]:
+ for kind in [0,1,2]:
+  for attack,scale,wave in [(103,97,17),(1,99,20),(10007,121,39)]:
+   value,_,_=hit({'attack':attack,'incoming':incoming,'attackKind':kind,'attackScale':scale,'waveRate':wave})
+   preparations.append({'input':{'attack':attack,'kind':kind,'percent':scale,'wavePercent':wave},'incoming':incoming,'result':value})
 (root/'research/.local/hit-1572.json').write_text(json.dumps({'version':'15.7.2','architecture':'arm64-v8a','sha256':sha,'entry':'006e4aec','scope':'Native ARM64 direct-hit instructions; controlled helper returns, flags and actor data; not full game','vectors':results},indent=2),encoding='utf-8-sig')
 
 
@@ -207,10 +222,10 @@ if args.publish:
   case=row['input'];incoming=case.get('incoming',0);combos=case.get('combos',{});orbs=case.get('orbs',{})
   if case.get('poison'):
    poison.append({'input':{'maxHp':case['maxHp'],'percent':case['poison'],'resistance':case.get('poisonResistance',0),'decorationReduction':case.get('decoration',0),'immune':case.get('poisonImmune',0)},'damage':row['damage']});continue
-  hit_input={'attack':case['attack'],'rawAttack':case.get('raw',8),'critical':case.get('critical',0),'strengthen':case.get('strengthen',0),'killStrengthen':case.get('killStrengthen',0),'weaken':case.get('weaken',100),'savage':case.get('savage',0),'abilities':sum(flag for key,flag in flags.items() if case.get(key)),'fruit':case.get('fruit',300),'metal':case.get('metal',0),'strongCombo':combos.get('14',0),'witchCombo':combos.get('22',0),'evaCombo':combos.get('23',0),'villainRate':combos.get('25',0),'attackOrb':orbs.get('0',0),'defenseOrb':orbs.get('1',0),'behemothRate':parameters['battle_super_beast_hunter_df' if incoming else 'battle_super_beast_hunter'],'sageRate':parameters['battle_super_sage_hunter_damage2' if incoming else 'battle_super_sage_hunter_damage1'],'resistance':case.get('resistance',0),'baseReduction':case.get('baseReduction',0),'decorationReduction':case.get('decorationReduction',0),'immune':case.get('immune',0)}
-  vectors.append({'input':hit_input,'incoming':incoming,'damage':row['damage']})
+  hit_input={'attack':case['attack'],'rawAttack':case.get('raw',8),'critical':case.get('critical',0),'strengthen':case.get('strengthen',0),'killStrengthen':case.get('killStrengthen',0),'weaken':case.get('weaken',100),'savage':case.get('savage',0),'abilities':sum(flag for key,flag in flags.items() if case.get(key)),'fruit':case.get('fruit',300),'metal':case.get('metal',0),'strongCombo':combos.get('14',0),'massiveCombo':combos.get('15',0),'resistantCombo':combos.get('16',0),'witchCombo':combos.get('22',0),'evaCombo':combos.get('23',0),'villainRate':combos.get('25',0),'attackOrb':orbs.get('0',0),'defenseOrb':orbs.get('1',0),'behemothRate':parameters['battle_super_beast_hunter_df' if incoming else 'battle_super_beast_hunter'],'sageRate':parameters['battle_super_sage_hunter_damage2' if incoming else 'battle_super_sage_hunter_damage1'],'resistance':case.get('resistance',0),'baseReduction':case.get('baseReduction',0),'decorationReduction':case.get('decorationReduction',0),'immune':case.get('immune',0),'castle':case.get('castle',0),'castleBreaker':case.get('castleBreaker',0)}
+  vectors.append({'input':hit_input,'incoming':incoming,'damage':row['damage'],'checkpoints':row['checkpoints']})
  percentage=json.loads((root/'research/.local/percentage-1572.json').read_text(encoding='utf-8-sig'))
  cannon=json.loads((root/'research/.local/cannon-1572.json').read_text(encoding='utf-8-sig'))
- fixture={key:value for key,value in source.items() if key!='vectors'}|{'parameterSource':param,'cannonSources':cannon_sources,'manifestSha256':current['manifestSha256'],'growth':growth_vectors,'treasures':treasures,'vectors':vectors,'poison':poison,'metalKiller':percentage,'cannon':cannon}
+ fixture={key:value for key,value in source.items() if key!='vectors'}|{'preparations':preparations,'parameterSource':param,'cannonSources':cannon_sources,'manifestSha256':current['manifestSha256'],'growth':growth_vectors,'treasures':treasures,'vectors':vectors,'poison':poison,'metalKiller':percentage,'cannon':cannon}
  (root/'native/kbcs-core/tests/native-vectors.json').write_text(json.dumps(fixture,ensure_ascii=False,indent=2),encoding='utf-8-sig')
 print(f'Native verification: {len(growth_vectors)} base, {len(results)} hit/poison, {len(percentage["vectors"]) if isinstance(percentage,dict) else len(percentage)} metal queues, 20 curve levels, 5 treasure groups')
