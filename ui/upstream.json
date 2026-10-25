@@ -1,4 +1,4 @@
-{
+﻿{
   "repository": "sinsuirakv0/kbc-web",
   "files": {
     "src/features/stages/style.css": "f202a706e49bbaa5d31e879477b6d24b6a0314300e3ca49025e991092496d3ed",
@@ -43,7 +43,8 @@
     "src/features/units/filters.js": "8b6af31fa68b29fb1696bc26fcbf9ec29ead2b2a6b81bddb27807b1ad518e887",
     "src/app/main.js": "98e93671a39daeeffd6ff5886b9f6e3af807ca01fbb7005ca47759fba84e6e61",
     "icons/stages/crown-on.png": "7ef5f4e811f8974717450bc94dc417f3f99f34b0a528d0fa0b6072652818ad5c",
-    "icons/stages/crown-off.png": "93ce5e5a78c22d7bafc7348d4e83e2b6f6f1df2a06f0c31cf7f03d67270c9d80"
+    "icons/stages/crown-off.png": "93ce5e5a78c22d7bafc7348d4e83e2b6f6f1df2a06f0c31cf7f03d67270c9d80",
+    "src/features/stages/scene-controls.js": "a172aae8bd9e8051ff39cb03f18b8046799977af304c1450dc242cc5cdebfab9"
   },
   "enemies": {
     "compilerSha256": "34420116f831afa4238348938711c125a3080b6ca6b5580f3d22d0653ccb9a74",

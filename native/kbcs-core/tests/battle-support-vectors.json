@@ -1,0 +1,717 @@
+﻿{
+  "version": "15.7.2",
+  "abi": "arm64-v8a",
+  "sha256": "6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea",
+  "sources": {
+    "Data/CC_Castle_growth.csv": {
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/DataLocal/CC_Castle_growth.csv",
+      "priority": 0,
+      "sha256": "2fb9fc70ed26008ec6349d56beb14f5dbadd93bcbe98ab580c13dd470a7d84ea",
+      "size": 73,
+      "sourceKind": "local"
+    }
+  },
+  "growth": [
+    {
+      "level": 1,
+      "result": 0
+    },
+    {
+      "level": 2,
+      "result": 4000
+    },
+    {
+      "level": 10,
+      "result": 36000
+    },
+    {
+      "level": 11,
+      "result": 40000
+    },
+    {
+      "level": 20,
+      "result": 76000
+    },
+    {
+      "level": 21,
+      "result": 80000
+    },
+    {
+      "level": 30,
+      "result": 116000
+    }
+  ],
+  "castles": [
+    {
+      "input": {
+        "facilityLevel": 1,
+        "developmentLevel": 1,
+        "treasureBonus": 0,
+        "comboPercent": 0
+      },
+      "maximum": 1000,
+      "sniper": 50
+    },
+    {
+      "input": {
+        "facilityLevel": 4,
+        "developmentLevel": 1,
+        "treasureBonus": 0,
+        "comboPercent": 0
+      },
+      "maximum": 4000,
+      "sniper": 200
+    },
+    {
+      "input": {
+        "facilityLevel": 5,
+        "developmentLevel": 10,
+        "treasureBonus": 21000,
+        "comboPercent": 0
+      },
+      "maximum": 63000,
+      "sniper": 3150
+    },
+    {
+      "input": {
+        "facilityLevel": 8,
+        "developmentLevel": 20,
+        "treasureBonus": 12345,
+        "comboPercent": 10
+      },
+      "maximum": 110379,
+      "sniper": 5518
+    },
+    {
+      "input": {
+        "facilityLevel": 9,
+        "developmentLevel": 30,
+        "treasureBonus": 21000,
+        "comboPercent": 0
+      },
+      "maximum": 152000,
+      "sniper": 7600
+    },
+    {
+      "input": {
+        "facilityLevel": 20,
+        "developmentLevel": 1,
+        "treasureBonus": 21000,
+        "comboPercent": 0
+      },
+      "maximum": 69000,
+      "sniper": 3450
+    },
+    {
+      "input": {
+        "facilityLevel": 30,
+        "developmentLevel": 30,
+        "treasureBonus": 42000,
+        "comboPercent": 0
+      },
+      "maximum": 236000,
+      "sniper": 11800
+    },
+    {
+      "input": {
+        "facilityLevel": 30,
+        "developmentLevel": 30,
+        "treasureBonus": 42000,
+        "comboPercent": 20
+      },
+      "maximum": 283200,
+      "sniper": 14160
+    }
+  ],
+  "snipers": [
+    {
+      "input": {
+        "castleMaximum": 215000,
+        "metal": 0,
+        "dodgeActive": 0,
+        "dodgeChance": 0,
+        "roll": 0
+      },
+      "output": {
+        "damage": 10750,
+        "knockback": 1,
+        "randomConsumed": 5,
+        "dodged": 0
+      },
+      "randomBounds": [
+        100,
+        100,
+        60,
+        100,
+        60
+      ]
+    },
+    {
+      "input": {
+        "castleMaximum": 215019,
+        "metal": 0,
+        "dodgeActive": 0,
+        "dodgeChance": 0,
+        "roll": 99
+      },
+      "output": {
+        "damage": 10750,
+        "knockback": 1,
+        "randomConsumed": 5,
+        "dodged": 0
+      },
+      "randomBounds": [
+        100,
+        100,
+        60,
+        100,
+        60
+      ]
+    },
+    {
+      "input": {
+        "castleMaximum": 215000,
+        "metal": 1,
+        "dodgeActive": 0,
+        "dodgeChance": 0,
+        "roll": 0
+      },
+      "output": {
+        "damage": 1,
+        "knockback": 1,
+        "randomConsumed": 5,
+        "dodged": 0
+      },
+      "randomBounds": [
+        100,
+        100,
+        60,
+        100,
+        60
+      ]
+    },
+    {
+      "input": {
+        "castleMaximum": 215000,
+        "metal": 0,
+        "dodgeActive": 1,
+        "dodgeChance": 0,
+        "roll": 0
+      },
+      "output": {
+        "damage": 0,
+        "knockback": 0,
+        "randomConsumed": 0,
+        "dodged": 0
+      },
+      "randomBounds": []
+    },
+    {
+      "input": {
+        "castleMaximum": 215000,
+        "metal": 0,
+        "dodgeActive": 0,
+        "dodgeChance": 50,
+        "roll": 49
+      },
+      "output": {
+        "damage": 0,
+        "knockback": 0,
+        "randomConsumed": 1,
+        "dodged": 1
+      },
+      "randomBounds": [
+        100
+      ]
+    },
+    {
+      "input": {
+        "castleMaximum": 215000,
+        "metal": 0,
+        "dodgeActive": 0,
+        "dodgeChance": 50,
+        "roll": 50
+      },
+      "output": {
+        "damage": 10750,
+        "knockback": 1,
+        "randomConsumed": 5,
+        "dodged": 0
+      },
+      "randomBounds": [
+        100,
+        100,
+        60,
+        100,
+        60
+      ]
+    }
+  ],
+  "treasures": [
+    {
+      "percentages": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "result": 42000
+    },
+    {
+      "percentages": [
+        100,
+        100,
+        100,
+        0,
+        0,
+        0
+      ],
+      "result": 21000
+    },
+    {
+      "percentages": [
+        0,
+        0,
+        0,
+        100,
+        100,
+        100
+      ],
+      "result": 21000
+    },
+    {
+      "percentages": [
+        33,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "result": 2380
+    }
+  ],
+  "deployments": [
+    {
+      "input": {
+        "rarity": 0,
+        "slot": 0,
+        "cost": 75,
+        "mask": 6,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 6,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 2,
+        "slot": 0,
+        "cost": 75,
+        "mask": 6,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 3,
+        "slot": 0,
+        "cost": 75,
+        "mask": 6,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 4,
+        "slot": 0,
+        "cost": 75,
+        "mask": 6,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 5,
+        "slot": 0,
+        "cost": 75,
+        "mask": 6,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 4,
+        "cost": 75,
+        "mask": 0,
+        "slots": 1,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 5,
+        "cost": 75,
+        "mask": 0,
+        "slots": 1,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 500,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 500,
+        "maximum": 1000,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 499,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 500,
+        "maximum": 1000,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 1001,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 500,
+        "maximum": 1000,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 750,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 1000,
+        "maximum": 500,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 500,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 1000,
+        "maximum": 500,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 1000,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 1000,
+        "maximum": 500,
+        "group_type": -1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": 0,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": 0,
+        "in_group": 1,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": 1,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": 1,
+        "in_group": 0,
+        "phase": 0,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": 2,
+        "in_group": 1,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": false
+    },
+    {
+      "input": {
+        "rarity": 1,
+        "slot": 0,
+        "cost": 75,
+        "mask": 0,
+        "slots": 0,
+        "minimum": 0,
+        "maximum": 0,
+        "group_type": 2,
+        "in_group": 0,
+        "phase": 1,
+        "rarity_limit": -1,
+        "preceding": 0
+      },
+      "allowed": true
+    }
+  ],
+  "costs": [
+    {
+      "input": {
+        "raw": 75,
+        "reduction": 0,
+        "chapter": 0,
+        "multiplier": 0,
+        "fixed": -1,
+        "rarity_rate": 100
+      },
+      "cost": 75
+    },
+    {
+      "input": {
+        "raw": 75,
+        "reduction": 0,
+        "chapter": 1,
+        "multiplier": 0,
+        "fixed": -1,
+        "rarity_rate": 100
+      },
+      "cost": 112
+    },
+    {
+      "input": {
+        "raw": 75,
+        "reduction": 0,
+        "chapter": 2,
+        "multiplier": 0,
+        "fixed": -1,
+        "rarity_rate": 100
+      },
+      "cost": 150
+    },
+    {
+      "input": {
+        "raw": 101,
+        "reduction": 10,
+        "chapter": 1,
+        "multiplier": 0,
+        "fixed": -1,
+        "rarity_rate": 100
+      },
+      "cost": 136
+    },
+    {
+      "input": {
+        "raw": 101,
+        "reduction": 200,
+        "chapter": 1,
+        "multiplier": 0,
+        "fixed": -1,
+        "rarity_rate": 100
+      },
+      "cost": 0
+    },
+    {
+      "input": {
+        "raw": 101,
+        "reduction": 10,
+        "chapter": 1,
+        "multiplier": 125,
+        "fixed": -1,
+        "rarity_rate": 50
+      },
+      "cost": 56
+    },
+    {
+      "input": {
+        "raw": 101,
+        "reduction": 10,
+        "chapter": 1,
+        "multiplier": 0,
+        "fixed": 500,
+        "rarity_rate": 50
+      },
+      "cost": 500
+    }
+  ]
+}

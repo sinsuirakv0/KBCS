@@ -1,0 +1,25 @@
+﻿.stage-play-menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;gap:18px}.stage-play-menu>a,.stage-play-menu>button{width:260px;padding:15px;text-align:center;border:1px solid var(--border-color,#63728a);font-size:18px}.stage-play-menu>h1{font-size:22px}.formation-native{display:block;width:100%;touch-action:none;user-select:none}.formation-native [role=button]{cursor:pointer;outline:none}.formation-native [role=button]:focus-visible{filter:drop-shadow(0 0 3px #fff)}#formation-screen{background:#d9b04f;border:1px solid #473512}.formation-toolbar{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #63728a}.formation-toolbar input{max-width:280px}#formation-status{font-size:12px;margin-left:auto}#formation-status[data-error]{color:#ff8f8f}.formation-lower{display:grid;grid-template-columns:minmax(230px,1.2fr) minmax(220px,1fr) minmax(220px,1fr);gap:16px;padding-top:14px}.formation-lower>section{min-width:0}.formation-lower h2{font-size:16px;margin:0 0 12px}.formation-lower label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}.formation-lower input[type=number]{width:70px}.formation-lower select{max-width:70%}.formation-levels{display:flex;gap:20px}.formation-lower details{border-top:1px solid #63728a;margin-top:14px;padding-top:10px}.formation-library>input{width:100%;margin-bottom:10px}#formation-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:4px;max-height:54vh;overflow:auto}#formation-results button{display:flex;gap:6px;align-items:center;text-align:left;padding:4px;font-size:12px}#formation-results .unit-icon{flex-shrink:0}#formation-menu{width:310px;padding:20px;border:1px solid #63728a}#formation-menu::backdrop{background:#0009}#formation-menu>button{display:block;width:100%;padding:10px;margin:10px 0}#formation-menu>label{display:block}#formation-menu input{width:100%;margin:8px 0}#formation-menu form{float:right}#formation-menu h2{font-size:18px}body:has(#formation-screen) .page-main{padding:12px;overflow:auto}@media(max-width:900px){.formation-lower{grid-template-columns:1fr 1fr}#formation-profile{grid-column:1/-1}}@media(max-width:600px){.formation-lower{grid-template-columns:1fr}.formation-toolbar{flex-wrap:wrap}}
+
+.formation-native image{pointer-events:none}.formation-native rect[role=button]:hover{stroke:#fff8;stroke-width:1}.formation-native rect[role=button]:focus-visible{stroke:#fff;stroke-width:3}.formation-move{display:flex;gap:8px;margin-top:12px}
+
+/* 一覧と編集をサイドバーへ置いても、同じ寸法・罫線で扱う。 */
+.workspace-left .formation-library{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px}
+.workspace-left .formation-library>input{width:100%;margin:0;flex-shrink:0}
+.workspace-left .formation-library>label{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11px}
+.workspace-left #formation-results{grid-template-columns:repeat(auto-fill,minmax(116px,1fr));align-content:start;min-height:0;max-height:none;flex:1;overflow:auto;scrollbar-gutter:stable}
+#formation-results button{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;height:52px;gap:6px;padding:4px;min-width:0;overflow:hidden}
+#formation-results .formation-unit-icon{width:48px;height:37px}
+#formation-results button>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:16px;max-height:32px;overflow:hidden;overflow-wrap:anywhere}
+.formation-options h2{font-size:14px;margin:0 0 10px}
+.formation-options label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;min-width:0}
+.formation-options select{min-width:0;max-width:70%}
+.formation-options input[type=number]{width:60px;min-width:0}
+.formation-options details{border-top:1px solid var(--color-border);margin-top:12px;padding-top:8px}
+.formation-options .formation-levels{gap:8px;flex-wrap:wrap}
+.formation-options .formation-move{flex-wrap:wrap}
+.formation-options #formation-member{padding-bottom:14px;border-bottom:1px solid var(--color-border)}
+.formation-options #formation-profile{padding-top:10px}
+#formation-context{border-block:1px solid var(--color-border);padding:8px 0;margin-top:10px;font-size:12px}
+.formation-lower:empty{display:none}
+
+.workspace-left .formation-library>label{white-space:nowrap}.workspace-left .formation-library>label>select{min-width:0;flex:1;width:0;max-width:160px}

@@ -5,19 +5,25 @@ const create=(tag,className,html='')=>{const node=document.createElement(tag);no
 const move=(selector,target)=>{const node=typeof selector==='string'?document.querySelector(selector):selector;if(node)target.append(node);return node;};
 
 import {createSimulationSettings} from './simulation-settings.js';
+import {openSiteSettings} from './src/shared/browser/game-settings.js';
 import {createLevelControl} from './src/shared/browser/level-control.js';
 
 export function initializeWorkspace(){
   const shell=document.querySelector('.site-shell'),main=element('main');
   if(!shell||!main)return;
   const header=shell.querySelector('.site-header');
+  const navigation=header.querySelector('.site-nav');
+  navigation.innerHTML='<a href="/">ホーム</a><button type="button" data-page-back aria-label="戻る" title="戻る">←</button><button type="button" data-page-forward aria-label="次へ" title="次へ">→</button><button type="button" data-page-reload aria-label="ページを再読み込み" title="ページを再読み込み">↻</button>';
+  navigation.querySelector('[data-page-back]').addEventListener('click',()=>history.back());
+  navigation.querySelector('[data-page-forward]').addEventListener('click',()=>history.forward());
+  navigation.querySelector('[data-page-reload]').addEventListener('click',()=>location.reload());
   const page=location.pathname.split('/').filter(Boolean).at(-1)||'home';
-  const titles={'unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
+  const titles={'stage-sortie':'出撃準備','formation':'キャラクター編成','stage-play':'ステージ Play','unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
   const title=titles[page]||main.querySelector('h1')?.textContent||'KBCS';
   let saved={};
   try{saved=JSON.parse(localStorage.getItem('kbcs:workspace')||'{}')||{};}catch{}
   const boundedWidth=(value,fallback)=>Math.max(200,Math.min(440,Number(value)||fallback));
-  const state={left:saved.left!==false,right:saved.right===true,leftWidth:boundedWidth(saved.leftWidth,272),rightWidth:boundedWidth(saved.rightWidth,236)};
+  const state={left:saved.left!==false,right:saved.right!==false,leftWidth:boundedWidth(saved.leftWidth,272),rightWidth:boundedWidth(saved.rightWidth,236)};
   if(innerWidth<800&&state.left&&state.right)state.right=false;
   const store=()=>{try{localStorage.setItem('kbcs:workspace',JSON.stringify(state));}catch{}};
   shell.classList.add('workspace');
@@ -70,6 +76,25 @@ export function initializeWorkspace(){
     main.classList.add('workspace-search');
     move('#stage-filters',left.content);
     for(const id of ['stage-page-size','stage-show-enemies'])moveLabel(id,settingsGroup);
+  }else if(page==='formation'){
+    left.panel.querySelector('h2').textContent='キャラ一覧';
+    right.panel.querySelector('h2').textContent='キャラ・城砲設定';
+    move('.formation-library',left.content);move('#formation-member',right.content);move('#formation-profile',right.content);
+    right.content.classList.add('formation-options');
+  }else if(page==='stage-sortie'){
+    move('#sortie-stage-navigation',left.content);move('#sortie-details',right.content);
+    right.panel.querySelector('h2').textContent='ステージ詳細';
+    let previous;
+    document.addEventListener('kbcs:battle-mode',event=>{
+      const active=event.detail;body.classList.toggle('workspace-battle',active);
+      if(active){previous={left:state.left,right:state.right};state.left=false;state.right=false;}
+      else if(previous){Object.assign(state,previous);previous=null;}
+      left.panel.querySelector('h2').textContent=active?'シミュレーター':'このページ';
+      right.panel.querySelector('h2').textContent=active?'シミュレーター':'ステージ詳細';
+      for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
+      viewbar.querySelector('.workspace-tab').textContent=active?'戦闘':'出撃準備';
+      apply();
+    });
   }else if(page==='stage-detail'){
     move('#stage-navigation',left.content);
     move('#stage-detail-controls',settingsGroup);
@@ -102,10 +127,19 @@ export function initializeWorkspace(){
     const conditions=element('enemy-condition-controls')?.closest('fieldset');if(conditions)settingsGroup.append(conditions);
     move('#enemy-capture-status',information);
   }
-  const profileEditor=page.endsWith('-motion')?null:createSimulationSettings(right.content);
+  for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
+  const profileEditor=page.endsWith('-motion')||['formation','stage-play','stage-sortie'].includes(page)?null:createSimulationSettings(right.content);
   window.addEventListener('kbcs:open-simulation-settings',()=>{state.right=true;if(innerWidth<800)state.left=false;store();apply();profileEditor?.open();});
   if(!settingsGroup.childElementCount)settingsGroup.remove();
-  const available={left:left.content.childElementCount>0,right:right.content.childElementCount>0};
+  if(!left.content.childElementCount){
+    const outline=create('nav','workspace-outline');outline.setAttribute('aria-label','このページの項目');left.content.append(outline);
+    for(const [index,target]of [...main.querySelectorAll('h1,h2,details>summary')].entries()){
+      const anchor=target.tagName==='SUMMARY'?target.parentElement:target;
+      if(!anchor.id)anchor.id='workspace-section-'+index;addOutline(outline,anchor.id,target.textContent);
+    }
+  }
+  const displayButton=create('button','workspace-display-settings','表示設定');displayButton.type='button';displayButton.addEventListener('click',()=>openSiteSettings());right.content.append(displayButton);
+  const available={left:true,right:true};
 
   function apply(){
     for(const [side,panel] of [['left',left.panel],['right',right.panel]]){

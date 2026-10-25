@@ -1,4 +1,5 @@
-﻿import {readPageParams,writePageParams,clearPageParams,bindDetailNavigation} from "/native-state.js";
+﻿import {prepareUnitSearch} from '/native-unit-search.js';
+import {readPageParams,writePageParams,clearPageParams,bindDetailNavigation} from "/native-state.js";
 import { loadUnitDatabase } from "../../shared/game/units.js";
 import { defaultUnitSettings, readUnitSettings, rarityNames, unitDetailUrl } from "../../shared/game/unit-stats.js";
 import { selectUnitRows } from "./model.js";
@@ -16,6 +17,7 @@ const rangeKeys = rangeFields.map(([key])=>key);
 const selected = new Map();
 let database, rows = [], page = 1, queued = false;
 const talentLevels=new Map();
+let nativeProfiles=new Map(),nativeRevision=0;
 const pagination=createPagination(element('unit-prev').parentElement,value=>{page=value;render();});
 const params = readPageParams("unit-search");
 const state = {
@@ -97,6 +99,7 @@ function updateSelection() {
 function getSearchProfile(unit,form,settings=state) {
   const levels=talentLevels.get(unit.id);
   const profile=settings.applyTalents?calculateTalentStats(unit,form,database.growth[unit.growth],settings,{talents:true,talentLevels:levels},calculateUnitStats):{form,stats:calculateUnitStats(unit,form,database.growth[unit.growth],settings)};
+  const native=nativeProfiles.get(unit.id+':'+form.code);if(!native)throw Error('ネイティブのキャラステータスを準備中です。');profile.stats={...profile.stats,...native,attack:native.attacks.reduce((a,b)=>a+b,0)};profile.stats.dps=profile.stats.attackCycle>0?profile.stats.attack*30/profile.stats.attackCycle:null;
   if(!settings.includeTalents)return profile;
   const potential=applyUnitTalents(unit,form,levels,60,true).form;
   // 検索用の属性・特性だけ補い、表示ステータスと詳細へ渡す本能ON/OFFは変えない。
@@ -114,8 +117,9 @@ function propertiesHtml(form) {
   return '<td class="unit-properties-column"><span class="unit-property-list">'+form.targets.map(key=>propertyIconHtml(database,key,database.targets.find(value=>value.key===key)?.label||key,14)).join('')+'</span></td><td class="unit-properties-column"><span class="unit-property-list">'+form.abilities.map(ability=>abilityIconHtml(database,ability,state.seconds,14)).join('')+'</span></td>';
 }
 
-function render() {
+async function render() {
   if (!database) return;
+  const revision=++nativeRevision;try{const values=await prepareUnitSearch(database,{...state});if(revision!==nativeRevision)return;nativeProfiles=values;}catch(error){if(revision===nativeRevision){element('unit-message').textContent=error.message;element('unit-message').hidden=false;}return;}
   rows = selectUnitRows(database, state,getSearchProfile);
   element('unit-include-talent-resistance').closest('label').hidden=state.includeTalents;
   const pageSize = Number(element("unit-page-size").value);

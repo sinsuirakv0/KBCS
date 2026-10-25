@@ -116,7 +116,7 @@ pub(crate) fn import(
     source: &Source,
     dataset: &Dataset,
     connection: &Connection,
-    progress: &impl Fn(String),
+    progress: &(impl Fn(String) + Sync),
 ) -> Result<()> {
     if !dataset
         .files
@@ -127,6 +127,16 @@ pub(crate) fn import(
     }
     let region = &dataset.current.header.source_region;
     let load = |path: &str| read_asset(source, dataset, connection, path);
+    source.prefetch(
+        dataset,
+        &dataset
+            .files
+            .keys()
+            .filter(|path| definition_header_count(path).is_some())
+            .cloned()
+            .collect::<Vec<_>>(),
+        progress,
+    )?;
     let mut definitions = BTreeMap::new();
     for path in dataset.files.keys() {
         let Some(skip) = definition_header_count(path) else {

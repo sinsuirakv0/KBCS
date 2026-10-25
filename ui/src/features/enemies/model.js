@@ -1,4 +1,4 @@
-﻿import {calculateEnemyStats} from '../../shared/game/enemy-stats.js';
+﻿import {calculateEnemyStats} from '/native-enemy-statistics.js';
 export const rangeFields=[['hp','体力'],['attack','攻撃力'],['dps','DPS'],['range','射程'],['speed','速度'],['knockbacks','KB'],['drop','お金'],['attackCycle','攻撃頻度F'],['foreswing','攻撃発生F']];
 const normalize=value=>String(value).normalize('NFKC').toLocaleLowerCase('ja').replace(/\s+/g,' ').trim();
 export function matchesEnemyQuery(enemy,query) {

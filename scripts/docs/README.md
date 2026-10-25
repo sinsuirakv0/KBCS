@@ -12,3 +12,14 @@ settings-catalog.jsはASCIIで生成し、原本のパス/SHA、manifestと索�
 build.ps1は同梱uiをRustへ埋め込み、WebView2LoaderとMinGW依存を配布先へコピーする。UIだけの更新も再ビルドする。
 
 0.1.6：sync-settingsはparam.tsvとCC_BaseParts_growth / CC_DecoParts_growthを追加し、26原本を検証する。easing=0・非減少・1/10000の範囲を明示検査し、未対応の曲線を黙って解釈しない。出典descriptorをsettings-catalog.jsへ保持する。
+
+
+sync-equipment.py <assetsフォルダ> はresearch/verify/stages.Assetsの検証を共用してequipmentslot.csvを採用し、キャラ別の最大枠と元解放条件列をkbcs-data/resources/unit-equipment-slots.jsonへ保存する。版・buildId・元パス・SHAを保持し、UIカタログと編成保存時の検査が同じ定義を使う。通常アプリの起動時に原本取得やDB再構築を行う機能ではない。
+
+sync-battle-ui.py <assets>は検証済みJP15.7.2からHUDのimgcutと採用元SHAをui/images/native-battle/manifest.jsonへ同期する。HUDのPNG本体もsize/SHA-256を検証して同じフォルダへ同梱する。既存DBに未収録でも再取り込みせず利用できる。キャラ画像は既存asset APIを使う。
+
+
+0.1.30のsync-battle-ui.pyはimg001_ja/img002_ja/mapicon/uni/img100_ja/img015の6PNG、各imgcut、GatyaitemName.csvの6アイテム説明とlocalizable.tsvの通常スピード説明を検証して同期する。uniだけUnit/、他はImage/。生成manifestは版/buildId・元パス・SHAを持つ。不要なアトラスは同期対象へ加えない。
+
+
+sync-stage-music.py --revision <40桁SHA> はGitHub assetsの固定commitからcurrent/manifest/assets index/Sound_settingを検証し、APK同梱BGM18件を既存補完索引へ加える。size/SHA、元パス、曲ごとのrevision、MIMEとloopを保持。大きい索引の生成用キャッシュはresearch/.local/music-indexで、配布物へ含めない。公式DBを書き換えるスクリプトではない。

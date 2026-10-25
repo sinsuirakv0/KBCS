@@ -23,7 +23,7 @@ export function selectUnitRows(database, state,calculateProfile) {
     if (excludes.some(word => text.includes(word))) continue;
     const forms = state.form === "last" ? unit.forms.slice(-1) : state.form === "all" ? unit.forms : unit.forms.filter(form => form.code === state.form);
     for (const original of forms) {
-      const profile=(state.applyTalents||state.includeTalents)&&calculateProfile?calculateProfile(unit,original,state):null;
+      const profile=calculateProfile?calculateProfile(unit,original,state):null;
       const form=profile?.form||original;
       if (!matchesGroup(form.targets, state.targets, state.targetMode)) continue;
       if(state.exactTargets&&form.targets.some(key=>!state.targets.includes(key)))continue;

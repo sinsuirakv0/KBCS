@@ -1,4 +1,4 @@
-﻿fn main() {
+fn main() {
     cc::Build::new()
         .cpp(true)
         .std("c++20")
@@ -10,6 +10,11 @@
         .file("../../native/kbcs-core/src/stage.cpp")
         .file("../../native/kbcs-core/src/map.cpp")
         .file("../../native/kbcs-core/src/motion.cpp")
+        .file("../../native/kbcs-core/src/battle_support.cpp")
+        .file("../../native/kbcs-core/src/battle_screen.cpp")
+        .file("../../native/kbcs-core/src/render.cpp")
+        .file("../../native/kbcs-core/src/scene_effects.cpp")
+        .flag_if_supported("-ffp-contract=off")
         .file("../../native/kbcs-core/src/materials.cpp")
         .compile("kbcs-core");
     println!("cargo:rerun-if-changed=../../native/kbcs-core");

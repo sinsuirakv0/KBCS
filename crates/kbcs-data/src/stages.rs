@@ -97,12 +97,43 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
 }
 
 pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) -> Result<Value> {
+    catalog_selection(database, region, selected, None, false)
+}
+
+fn catalog_selection(
+    database: &Database,
+    region: &str,
+    selected: Option<&str>,
+    selected_stage: Option<i64>,
+    summary: bool,
+) -> Result<Value> {
     let connection = &database.connection;
     let metadata = database.metadata()?;
     let extras = extras::Extras::read(connection, region)?;
+    let selected_id = if let Some(key) = selected {
+        let mut query = connection
+            .prepare_cached("SELECT id,series,map_index FROM stage_map WHERE region=?")?;
+        let ids = query
+            .query_map([region], |r| {
+                Ok((
+                    r.get::<_, i64>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, i64>(2)?,
+                ))
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        Some(
+            ids.into_iter()
+                .find(|(_, series, index)| map_key(series, *index) == key)
+                .context("マップが見つかりません")?
+                .0,
+        )
+    } else {
+        None
+    };
     let mut definition_summaries = BTreeMap::new();
-    let mut summary_statement=connection.prepare("SELECT d.path,d.width,d.background,json_group_array(s.enemy_raw-2) FILTER(WHERE s.enemy_raw IS NOT NULL),coalesce(max(s.after_castle!=0),0),coalesce(max(s.kills!=0),0),coalesce(max(s.attack_percent!=0 AND s.attack_percent!=s.hp_percent),0),d.no_continue,d.boss_guard,d.time_raw,d.castle_raw FROM stage_definition d LEFT JOIN stage_definition_spawn s ON d.region=s.region AND d.path=s.definition_path WHERE d.region=? GROUP BY d.path")?;
-    for row in summary_statement.query_map([region], |r| {
+    let mut summary_statement=connection.prepare_cached("SELECT d.path,d.width,d.background,json_group_array(s.enemy_raw-2) FILTER(WHERE s.enemy_raw IS NOT NULL),coalesce(max(s.after_castle!=0),0),coalesce(max(s.kills!=0),0),coalesce(max(s.attack_percent!=0 AND s.attack_percent!=s.hp_percent),0),d.no_continue,d.boss_guard,d.time_raw,d.castle_raw FROM stage_definition d LEFT JOIN stage_definition_spawn s ON d.region=s.region AND d.path=s.definition_path WHERE d.region=?1 AND (?2 IS NULL OR d.path IN (SELECT definition_path FROM stage_entry WHERE region=?1 AND map_id=?2 AND (?3 IS NULL OR stage_index=?3) UNION SELECT definition_path FROM stage_variant WHERE region=?1 AND map_id=?2 AND (?3 IS NULL OR stage_index=?3))) GROUP BY d.path")?;
+    for row in summary_statement.query_map(params![region, selected_id, selected_stage], |r| {
         Ok((
             r.get::<_, String>(0)?,
             r.get::<_, i64>(1)?,
@@ -140,7 +171,7 @@ pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) ->
     }
     let mut maps = Vec::new();
     let mut stages = Vec::new();
-    let mut statement=connection.prepare("SELECT id,name,source_path,raw_headers,options_raw,options_row,series,native_kind,map_index,acquisition_id,score_id,mode FROM stage_map WHERE region=? ORDER BY id")?;
+    let mut statement=connection.prepare_cached("SELECT id,name,source_path,raw_headers,options_raw,options_row,series,native_kind,map_index,acquisition_id,score_id,mode FROM stage_map WHERE region=? ORDER BY id")?;
     let entries = statement.query_map([region], |row| {
         Ok((
             row.get::<_, i64>(0)?,
@@ -177,13 +208,13 @@ pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) ->
             continue;
         }
         let materials = crate::stage_materials::read(connection, region, id)?;
-        let mut statement = connection.prepare(
+        let mut statement = connection.prepare_cached(
             "SELECT multiplier FROM stage_crown WHERE region=? AND map_id=? ORDER BY crown",
         )?;
         let stars = statement
             .query_map(params![region, id], |row| row.get::<_, i64>(0))?
             .collect::<rusqlite::Result<Vec<_>>>()?;
-        let mut statement=connection.prepare("SELECT crown,stage_index,rarity_mask,source_row,raw_cells FROM stage_limit WHERE region=? AND map_id=? ORDER BY position")?;
+        let mut statement=connection.prepare_cached("SELECT crown,stage_index,rarity_mask,source_row,raw_cells FROM stage_limit WHERE region=? AND map_id=? ORDER BY position")?;
         let mut limits=statement.query_map(params![region,id],|row| Ok(json!({"crown":row.get::<_,i64>(0)?,"stage":row.get::<_,i64>(1)?,"rarities":row.get::<_,i64>(2)?,"sourceRow":row.get::<_,i64>(3)?,"raw":row.get::<_,String>(4)?})))?.collect::<rusqlite::Result<Vec<_>>>()?;
         for limit in &mut limits {
             let cells: Vec<String> =
@@ -201,7 +232,7 @@ pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) ->
             limit["group"] = json!(extras.group(value(8))?);
         }
         let mut stage_ids = Vec::new();
-        let mut statement=connection.prepare("SELECT stage_index,name,energy,xp_raw,width,castle_hp,spawn_min,spawn_max,background,max_enemies,castle_raw,time_raw,boss_guard,no_continue,difficulty,settings_raw,header_raw,rewards_raw,source_path,metadata_row FROM stage WHERE region=? AND map_id=? ORDER BY stage_index")?;
+        let mut statement=connection.prepare_cached("SELECT stage_index,name,energy,xp_raw,width,castle_hp,spawn_min,spawn_max,background,max_enemies,castle_raw,time_raw,boss_guard,no_continue,difficulty,settings_raw,header_raw,rewards_raw,source_path,metadata_row FROM stage WHERE region=? AND map_id=? ORDER BY stage_index")?;
         let entries = statement.query_map(params![region, id], |row| {
             let numbers = (2..14)
                 .map(|column| row.get::<_, Option<i64>>(column))
@@ -219,54 +250,62 @@ pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) ->
         })?;
         for entry in entries {
             let (index, name, n, difficulty, text, metadata_row) = entry?;
+            if selected_stage.is_some_and(|value| value != index) {
+                continue;
+            }
             let stage_id = format!("{key}-{index}");
             stage_ids.push(stage_id.clone());
-            let mut statement=connection.prepare("SELECT source_row,raw_cells,enemy_raw,count,first_raw,interval_min_raw,interval_max_raw,castle,layer_min,layer_max,boss,hp_percent,score,attack_percent,after_castle,kills FROM stage_spawn WHERE region=? AND map_id=? AND stage_index=? ORDER BY position")?;
-            let rows = statement.query_map(params![region, id, index], |row| {
-                Ok((
-                    row.get::<_, i64>(0)?,
-                    row.get::<_, String>(1)?,
-                    (2..16)
-                        .map(|column| row.get::<_, i32>(column))
-                        .collect::<rusqlite::Result<Vec<_>>>()?,
-                ))
-            })?;
             let mut spawns = Vec::new();
             let mut enemies = BTreeSet::new();
             let mut flags = BTreeSet::new();
-            for row in rows {
-                let (source_row, cells, v) = row?;
-                let mut loaded = v.clone();
-                for column in [2, 3, 4] {
-                    loaded[column] = loaded[column]
-                        .checked_mul(2)
-                        .context("出現待機の整数上限")?;
+            if !summary {
+                let mut statement=connection.prepare_cached("SELECT source_row,raw_cells,enemy_raw,count,first_raw,interval_min_raw,interval_max_raw,castle,layer_min,layer_max,boss,hp_percent,score,attack_percent,after_castle,kills FROM stage_spawn WHERE region=? AND map_id=? AND stage_index=? ORDER BY position")?;
+                let rows = statement.query_map(
+                    params![region, if summary { -1 } else { id }, index],
+                    |row| {
+                        Ok((
+                            row.get::<_, i64>(0)?,
+                            row.get::<_, String>(1)?,
+                            (2..16)
+                                .map(|column| row.get::<_, i32>(column))
+                                .collect::<rusqlite::Result<Vec<_>>>()?,
+                        ))
+                    },
+                )?;
+                for row in rows {
+                    let (source_row, cells, v) = row?;
+                    let mut loaded = v.clone();
+                    for column in [2, 3, 4] {
+                        loaded[column] = loaded[column]
+                            .checked_mul(2)
+                            .context("出現待機の整数上限")?;
+                    }
+                    let health = if series == "EOC" {
+                        [100, 150, 400][map_index as usize]
+                    } else {
+                        v[9]
+                    };
+                    let attack = if series == "EOC" {
+                        health
+                    } else if v[11] != 0 {
+                        v[11]
+                    } else {
+                        v[9]
+                    };
+                    if attack != health {
+                        flags.insert("splitMultiplier");
+                    }
+                    if v[12] != 0 {
+                        flags.insert("afterCastle");
+                    }
+                    if v[13] != 0 {
+                        flags.insert("kills");
+                    }
+                    enemies.insert(v[0] - 2);
+                    spawns.push(json!({"enemy":v[0]-2,"count":v[1],"first":loaded[2],"interval":[loaded[3],loaded[4]],"castle":v[5],"layers":[v[6],v[7]],"boss":v[8],"health":health,"attack":attack,"score":v[10],"afterCastle":v[12]!=0,"kills":v[13],"native":loaded,"raw":raw(cells)?,"sourceRow":source_row}));
                 }
-                let health = if series == "EOC" {
-                    [100, 150, 400][map_index as usize]
-                } else {
-                    v[9]
-                };
-                let attack = if series == "EOC" {
-                    health
-                } else if v[11] != 0 {
-                    v[11]
-                } else {
-                    v[9]
-                };
-                if attack != health {
-                    flags.insert("splitMultiplier");
-                }
-                if v[12] != 0 {
-                    flags.insert("afterCastle");
-                }
-                if v[13] != 0 {
-                    flags.insert("kills");
-                }
-                enemies.insert(v[0] - 2);
-                spawns.push(json!({"enemy":v[0]-2,"count":v[1],"first":loaded[2],"interval":[loaded[3],loaded[4]],"castle":v[5],"layers":[v[6],v[7]],"boss":v[8],"health":health,"attack":attack,"score":v[10],"afterCastle":v[12]!=0,"kills":v[13],"native":loaded,"raw":raw(cells)?,"sourceRow":source_row}));
             }
-            let mut statement=connection.prepare("SELECT comparison,item_id,amount,source_column,kind,source_path,source_locator FROM stage_reward WHERE region=? AND map_id=? AND stage_index=? ORDER BY position")?;
+            let mut statement=connection.prepare_cached("SELECT comparison,item_id,amount,source_column,kind,source_path,source_locator FROM stage_reward WHERE region=? AND map_id=? AND stage_index=? ORDER BY position")?;
             let drops=statement.query_map(params![region,id,index],|row|Ok(json!({"weight":row.get::<_,i64>(0)?,"chance":null,"id":row.get::<_,i64>(1)?,"count":row.get::<_,i64>(2)?,"sourceColumn":row.get::<_,i64>(3)?,"kind":row.get::<_,String>(4)?,"source":row.get::<_,String>(5)?,"sourceLocator":row.get::<_,String>(6)?})))?.collect::<rusqlite::Result<Vec<_>>>()?;
             if limits
                 .iter()
@@ -311,8 +350,18 @@ pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) ->
                 stage["scoreMode"] == true || stage["timeLimit"].as_i64().is_some_and(|v| v > 0)
             );
             let (definition,listed):(Option<String>,i64)=connection.query_row("SELECT definition_path,listed FROM stage_entry WHERE region=? AND map_id=? AND stage_index=?",params![region,id,index],|r|Ok((r.get(0)?,r.get(1)?)))?;
+            if summary
+                && let Some(info) = definition
+                    .as_ref()
+                    .and_then(|p| definition_summaries.get(p))
+            {
+                stage["enemies"] = info["enemies"].clone();
+                for flag in info["flags"].as_array().into_iter().flatten() {
+                    add_flag(stage, flag.as_str().context("フラグ不正")?, false)?;
+                }
+            }
             stage["listed"] = json!(listed != 0);
-            let mut statement=connection.prepare("SELECT definition_path,name,position FROM stage_variant WHERE region=? AND map_id=? AND stage_index=? ORDER BY position")?;
+            let mut statement=connection.prepare_cached("SELECT definition_path,name,position FROM stage_variant WHERE region=? AND map_id=? AND stage_index=? ORDER BY position")?;
             let variants=statement.query_map(params![region,id,index],|r|Ok(json!({"source":r.get::<_,String>(0)?,"name":r.get::<_,String>(1)?,"index":r.get::<_,i64>(2)?})))?.collect::<rusqlite::Result<Vec<_>>>()?;
             stage["missing"] = json!(definition.is_none() && variants.is_empty());
             if !variants.is_empty() {
@@ -513,8 +562,16 @@ pub fn catalog_map(database: &Database, region: &str, selected: Option<&str>) ->
         }
     }
     rewards::decorate(database, &mut rewards)?;
+    for stage in &mut stages {
+        let series = maps
+            .iter()
+            .find(|map| map["key"] == stage["map"])
+            .and_then(|map| map["series"].as_str())
+            .unwrap_or("");
+        crate::stage_media::annotate(stage, series);
+    }
     Ok(
-        json!({"schemaVersion":2,"gameVersion":metadata.get("version"),"revision":metadata.get("revision"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","scope":{"bands":maps.iter().filter_map(|m|m["nativeId"].as_i64()).map(|id|id/1000*1000).collect::<BTreeSet<_>>(),"nativeVersion":"15.7.2"},"series":maps.iter().filter_map(|m|m["series"].as_str()).collect::<BTreeSet<_>>().into_iter().map(|s|json!({"id":s,"label":series_label(s)})).collect::<Vec<_>>(),"maps":maps,"stages":stages,"rewards":rewards}),
+        json!({"schemaVersion":2,"gameVersion":metadata.get("version"),"revision":metadata.get("revision"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","scope":{"bands":maps.iter().filter_map(|m|m["nativeId"].as_i64()).map(|id|id/1000*1000).collect::<BTreeSet<_>>(),"nativeVersion":"15.7.2"},"series":maps.iter().filter_map(|m|m["series"].as_str()).collect::<BTreeSet<_>>().into_iter().map(|s|json!({"id":s,"label":series_label(s)})).collect::<Vec<_>>(),"maps":maps,"stages":stages,"rewards":rewards,"musicCatalog":crate::stage_media::music()}),
     )
 }
 
@@ -526,13 +583,14 @@ pub fn variant(
     index: i64,
     path: &str,
 ) -> Result<Value> {
-    let mut value = catalog_map(database, region, Some(map))?;
+    let mut value = catalog_selection(database, region, Some(map), Some(index), false)?;
     let map_id = value["maps"]
         .as_array()
         .and_then(|v| v.first())
         .and_then(|v| v["nativeId"].as_i64())
         .context("マップが見つかりません")?;
     let name: String=database.connection.query_row("SELECT name FROM stage_variant WHERE region=? AND map_id=? AND stage_index=? AND definition_path=?",params![region,map_id,index,path],|r|r.get(0)).optional()?.context("このステージの候補ではありません")?;
+    let series = value["maps"][0]["series"].as_str().unwrap_or("").to_owned();
     let stage = value["stages"]
         .as_array_mut()
         .and_then(|a| a.iter_mut().find(|s| s["index"] == index))
@@ -541,16 +599,61 @@ pub fn variant(
     for (key, v) in definition.as_object().context("戦闘定義不正")? {
         stage[key] = v.clone();
     }
+    let dynamic = [
+        "missing",
+        "noContinue",
+        "bossGuard",
+        "enemyCastle",
+        "timeLimit",
+        "splitMultiplier",
+        "kills",
+        "afterCastle",
+        "animatedBackground",
+    ];
+    let mut flags = stage["flags"].as_array().cloned().unwrap_or_default();
+    flags.retain(|v| !dynamic.contains(&v.as_str().unwrap_or("")));
+    for (condition, name) in [
+        (stage["noContinue"] == true, "noContinue"),
+        (stage["bossGuard"] == true, "bossGuard"),
+        (!stage["enemyCastle"].is_null(), "enemyCastle"),
+        (stage["timeLimit"].as_i64().unwrap_or(0) > 0, "timeLimit"),
+    ] {
+        if condition {
+            flags.push(json!(name));
+        }
+    }
+    for (field, name) in [("kills", "kills"), ("afterCastle", "afterCastle")] {
+        if stage["spawns"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .any(|s| s[field] == true || s[field].as_i64().unwrap_or(0) > 0)
+        {
+            flags.push(json!(name));
+        }
+    }
+    if stage["spawns"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .any(|s| s["health"] != s["attack"])
+    {
+        flags.push(json!("splitMultiplier"));
+    }
+    stage["flags"] = json!(flags);
+    stage["damageCondition"] =
+        json!(stage["scoreMode"] == true || stage["timeLimit"].as_i64().unwrap_or(0) > 0);
     stage["missing"] = json!(false);
     stage["patternSource"] = json!(path);
     stage["patternName"] = json!(name);
+    crate::stage_media::annotate(stage, &series);
     Ok(stage.clone())
 }
 
 fn definition(database: &Database, region: &str, path: &str) -> Result<Value> {
     let connection = &database.connection;
     let (settings,header,n)=connection.query_row("SELECT settings_raw,header_raw,width,castle_hp,spawn_min,spawn_max,background,max_enemies,castle_raw,time_raw,boss_guard,no_continue FROM stage_definition WHERE region=? AND path=?",params![region,path],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,(2..12).map(|i|r.get::<_,i64>(i)).collect::<rusqlite::Result<Vec<_>>>()?)))?;
-    let mut statement=connection.prepare("SELECT source_row,raw_cells,enemy_raw,count,first_raw,interval_min_raw,interval_max_raw,castle,layer_min,layer_max,boss,hp_percent,score,attack_percent,after_castle,kills FROM stage_definition_spawn WHERE region=? AND definition_path=? ORDER BY position")?;
+    let mut statement=connection.prepare_cached("SELECT source_row,raw_cells,enemy_raw,count,first_raw,interval_min_raw,interval_max_raw,castle,layer_min,layer_max,boss,hp_percent,score,attack_percent,after_castle,kills FROM stage_definition_spawn WHERE region=? AND definition_path=? ORDER BY position")?;
     let entries = statement.query_map(params![region, path], |r| {
         Ok((
             r.get::<_, i64>(0)?,
@@ -579,7 +682,7 @@ fn definition(database: &Database, region: &str, path: &str) -> Result<Value> {
 }
 
 pub fn search_catalog(database: &Database, region: &str) -> Result<Value> {
-    let mut value = catalog(database, region)?;
+    let mut value = catalog_selection(database, region, None, None, true)?;
     if let Some(stages) = value["stages"].as_array_mut() {
         for stage in stages {
             if let Some(object) = stage.as_object_mut() {
@@ -616,4 +719,18 @@ fn add_flag(stage: &mut Value, label: &str, common: bool) -> Result<()> {
         }
     }
     Ok(())
+}
+
+// 編成と報酬表示で、同じ原本の本能玉ID・名称・3層アイコンを使う。
+pub fn equipment_catalog(database: &Database) -> Result<Value> {
+    let raw: Value = serde_json::from_slice(&database.source("Data/equipmentlist.json")?.3)?;
+    let mut items = raw["ID"]
+        .as_array()
+        .context("本能玉の定義なし")?
+        .iter()
+        .enumerate()
+        .map(|(index, _)| ((30000 + index).to_string(), json!({"id":30000+index})))
+        .collect::<BTreeMap<_, _>>();
+    rewards::decorate(database, &mut items)?;
+    Ok(json!({"items":items.into_values().collect::<Vec<_>>()}))
 }

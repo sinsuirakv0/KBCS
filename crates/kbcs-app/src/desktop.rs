@@ -1,4 +1,4 @@
-use crate::service::Service;
+﻿use crate::service::Service;
 use anyhow::Result;
 use std::path::PathBuf;
 use tao::{
@@ -6,7 +6,20 @@ use tao::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
-use wry::{WebContext, WebViewBuilder};
+use wry::{NewWindowResponse, WebContext, WebViewBuilder};
+
+const BATTLE_HELP: &str =
+    "https://kbc-rakv0.pages.dev/information/appli/battlecats/help/index.html";
+fn open_battle_help(url: &str) {
+    if url == BATTLE_HELP {
+        use std::os::windows::process::CommandExt;
+        // 対象を固定し、外部ヘルプだけを既定のブラウザで開く。
+        let _ = std::process::Command::new("explorer.exe")
+            .arg(BATTLE_HELP)
+            .creation_flags(0x08000000)
+            .spawn();
+    }
+}
 
 pub fn run(root: PathBuf, region: String, source: String) -> Result<()> {
     let event_loop = EventLoop::new();
@@ -35,7 +48,12 @@ pub fn run(root: PathBuf, region: String, source: String) -> Result<()> {
                 responder.respond(response);
             });
         })
+        .with_new_window_req_handler(|url, _| {
+            open_battle_help(&url);
+            NewWindowResponse::Deny
+        })
         .with_navigation_handler(|url| {
+            open_battle_help(&url);
             url.starts_with("http://kbcs.localhost/") || url.starts_with("kbcs://localhost/")
         })
         .with_on_page_load_handler(|event, url| {

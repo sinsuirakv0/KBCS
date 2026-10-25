@@ -139,7 +139,7 @@ pub fn import(
     location: &str,
     root: &Path,
     region: &str,
-    progress: impl Fn(String),
+    progress: impl Fn(String) + Sync,
 ) -> Result<ImportReport> {
     fs::create_dir_all(root.join("official"))?;
     let lock_path = root.join("update.lock");
@@ -147,7 +147,7 @@ pub fn import(
     let _lock = Lock(lock_path);
     writeln!(lock_file, "{}", std::process::id())?;
     progress("データソース・採用元の検証".into());
-    let source = Source::open(location)?;
+    let source = Source::open_cached(location, root, region)?;
     let dataset = source.dataset(region)?;
     let header = &dataset.current.header;
     let identity = hash(
@@ -165,7 +165,16 @@ pub fn import(
         .join(format!("pending-{}-{unique}.sqlite", std::process::id()));
     let result = (|| -> Result<ImportReport> {
         if final_path.exists() {
-            store::validate(&Database::open_path(&final_path)?.connection)?;
+            // 既に公開検証済みの同一snapshotは再走査しない。手動検証はverifyで行う。
+            let database = Database::open_path(&final_path)?;
+            ensure!(
+                database
+                    .metadata()?
+                    .get("importer_version")
+                    .is_some_and(|v| v == IMPORTER_VERSION),
+                "保存済みDBの変換器版が不一致です"
+            );
+            progress("データは最新です。保存済みデータを再利用します".into());
         } else {
             let mut connection = Connection::open(&temporary)?;
             connection.execute_batch(include_str!("schema.sql"))?;
@@ -237,7 +246,7 @@ pub(crate) fn read_asset(
         .files
         .get(path)
         .with_context(|| format!("採用元に必須ファイルがありません: {path}"))?;
-    let bytes = source.checked(descriptor)?;
+    let bytes = source.checked_named(descriptor, path)?;
     retain(
         connection,
         path,
@@ -252,7 +261,7 @@ fn build(
     source: &Source,
     dataset: &Dataset,
     connection: &Connection,
-    progress: &impl Fn(String),
+    progress: &(impl Fn(String) + Sync),
     form_count: &mut usize,
 ) -> Result<()> {
     let header = &dataset.current.header;
@@ -486,6 +495,7 @@ fn build(
     crate::stages::import(source, dataset, connection, progress)?;
     crate::motions::import(source, dataset, connection, progress)?;
     crate::effects::import(source, dataset, connection, progress)?;
+    crate::stage_media::import(source, dataset, connection, progress)?;
     ensure!(*form_count > 0, "取り込み結果が空です");
     Ok(())
 }

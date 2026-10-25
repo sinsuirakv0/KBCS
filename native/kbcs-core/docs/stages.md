@@ -85,3 +85,9 @@ rewards.pyはkind3・通常フラグ0・特殊報酬分類0を条件に、005dbf
 ## 0.1.14：全番台の入口
 
 [39000番台までの照合](../../../research/docs/stages/all-bands.md)。map.cppがID変換・現在種別・14列読込、stage.cppが全種別のXP入口を共用する。Rustのstage_source::resolveが解決済み参照からパスを作る。再出現区間の逆転は原本2行で実在し、非正boundは0/乱数状態不変、bound1は状態更新となる。初期化の全体間隔入力は従来どおり順序付き両端を要求する。
+
+## 0.1.18: commitの再検査を原本へ合わせる
+
+006ef2b0の最終候補は後方からwait<=0を選ぶ。有限回数・撃破・城条件はtickの待機更新に作用する条件であり、commitで再適用しない。commitは選択位置、行/全体待機、停止、容量、抽選範囲、整数上限を検査する。Rust PendingSpawnの消費所有権は維持する。
+
+research/verify/stage_continuous.pyが同一状態で3tickを実行する。回数1/再待機0、城不成立/列12非0、個体枠なしの3ケース。成功では生成回数1→2→3、各tickのRNG boundはレイヤー10→全体1→行1。空きなしは生成0、RNG不変。原本009f1e64は枠探索・レイヤー抽選まで実行し、00aa0aa4以降の個体構築だけ成功へ制御する。全戦闘/全個体構築の照合ではない。小さい追跡fixtureはtests/stage-continuous-vectors.json。

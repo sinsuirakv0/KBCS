@@ -1,6 +1,8 @@
-﻿import {readPageParams,writePageParams,clearPageParams,bindDetailNavigation} from "/native-state.js";
+﻿import {readEnemySettings,writeEnemySettings} from '/native-enemy-statistics.js';
+import {calculateEnemyStats,prepareEnemyStatistics} from '/native-enemy-statistics.js';
+import {readPageParams,writePageParams,clearPageParams,bindDetailNavigation} from "/native-state.js";
 import {loadEnemyDatabase} from '../../shared/game/enemies.js';
-import {defaultEnemySettings,readEnemySettings,writeEnemySettings,calculateEnemyStats} from '../../shared/game/enemy-stats.js';
+import {defaultEnemySettings} from '../../shared/game/enemy-stats.js';
 import {escapeHtml} from '../../shared/game/database-view.js';
 import {saveElementImage} from '../../shared/browser/capture.js';
 import {matchesEnemyQuery} from './model.js';
@@ -56,7 +58,9 @@ function renderResults() {
   }
   element('enemy-comparison-output').innerHTML='<p>'+entries.map(({enemy},index)=>'<span style="color:var(--color-'+(index?'accent':'primary')+')">'+escapeHtml(enemy.name)+'</span>').join(' / ')+'</p>'+enemyRadarHtml(entries)+enemyComparisonHtml(database,entries,settings.seconds)+'<p class="db-meta">DPSは通常攻撃の合計を使用。波動・烈波・毒撃などの追加ダメージは含みません。</p>';
 }
-function render() {
+let revision=0;
+async function render() {
+  const current=++revision;try{await prepareEnemyStatistics([{enemy,settings},...(comparison.enabled&&peer?[{enemy:peer,settings:comparison.same?settings:comparison.settings}]:[])]);if(current!==revision)return;}catch(error){if(current===revision)element('enemy-sheet-output').textContent=error.message;return;}
   element('enemy-sheet-output').innerHTML=enemySheetHtml(database,enemy,calculateEnemyStats(enemy,settings),settings);
   element('enemy-compare-controls').hidden=!comparison.enabled;element('enemy-compare-conditions').hidden=comparison.same;
   renderResults();saveState();

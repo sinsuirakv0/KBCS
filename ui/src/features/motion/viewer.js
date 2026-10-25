@@ -1,20 +1,28 @@
-﻿import {createEffectSequence} from './effect-sequence.js';
-import {parseImgCut,parseMaModel,parseMaAnim,buildNativeDrawPackets} from './motion-engine.js';
+﻿import {nativePackets} from './native-pose.js';
+import {createEffectSequence} from './effect-sequence.js';
+import {parseImgCut,parseMaModel,parseMaAnim,evaluateMotion} from './motion-engine.js';
 import {NativeWebGLRenderer} from './native-webgl-renderer.js';
-import {loadUnitDatabase} from '../../shared/game/units.js';
-import {loadEnemyDatabase} from '../../shared/game/enemies.js';
 import {escapeHtml} from '../../shared/game/database-view.js';
 
 const el=id=>document.getElementById('motion-'+id),esc=escapeHtml;
 const params=new URLSearchParams(location.search),formCodes=['f','c','s','u'];
 const state={kind:params.has('enemy')?'enemy':document.querySelector('[data-motion-kind]').dataset.motionKind,id:document.querySelector('[data-motion-kind]').dataset.motionKind==='effect'?(params.get('id')||'skill_wave_attack'):Number(params.get('enemy')??params.get('id')??0),form:Math.max(0,formCodes.indexOf(params.get('form')||'f')),motion:'02',frame:0,playing:false,zoom:1,panX:0,panY:0,selected:0,resource:'body',hidden:new Set(),solo:false,tab:'parts',screen:[],poses:new Map(),timeline:[]};
-let units,enemies,effects,effectSequence=null,manifest,resources=new Map(),renderer,loading=0,lastTime=0,inspectorTime=0,sourceFile=null;
+const choiceCache=new Map(),manifestCache=new Map(),projectCache=new Map();
+let drawVersion=0,fitVersion=0;
+let effectSequence=null,manifest,resources=new Map(),renderer,loading=0,lastTime=0,inspectorTime=0,sourceFile=null;
 const propertyNames=['親','ID','画像','Z順','X','Y','ピボットX','ピボットY','XY拡縮','X拡縮','Y拡縮','回転','不透明度','X反転','Y反転'];
 const clipNames={'00':'移動','01':'待機','02':'攻撃','03':'KB','04':'潜行開始','05':'地中移動','06':'潜行終了','_soul':'専用の魂','soul':'魂','sequence':'KB → 魂'};
 const api=async(path,options)=>{const response=await fetch(path,options),value=await response.json();if(!response.ok)throw Error(value.error||'読込に失敗しました');return value;};
 const selectedResource=()=>resources.get(state.resource)||resources.get('body');
 function report(text,error=false){el('status').textContent=text;el('status').hidden=!text;el('status').classList.toggle('error',error);el('message').textContent=error?text:'';}
-function characters(){return (state.kind==='effect'?effects?.entries:state.kind==='unit'?units?.units:enemies?.enemies)||[];}
+function characters(){return choiceCache.get(state.kind)?.entries||[];}
+async function loadChoices(kind){
+  if(!choiceCache.has(kind))choiceCache.set(kind,await api(kind==='effect'?'/api/motion-effects':'/api/motion-choices?kind='+kind));
+}
+async function loadManifest(path){
+  if(manifestCache.has(path))return manifestCache.get(path);
+  const value=await api(path);if(manifestCache.size>=16)manifestCache.delete(manifestCache.keys().next().value);manifestCache.set(path,value);return value;
+}
 function updateChoices(){
   const query=el('query').value.normalize('NFKC').toLowerCase();
   el('category').hidden=state.kind!=='effect';
@@ -23,25 +31,34 @@ function updateChoices(){
   el('character').innerHTML=entries.map(item=>'<option value="'+item.id+'"'+(item.id===state.id?' selected':'')+(item.issue?' disabled':'')+'>'+String(item.id).padStart(3,'0')+' '+esc(item.name||item.forms?.[0]?.name||'')+(item.issue?' / 対応未確認':'')+'</option>').join('');
 }
 function updateForms(){
-  const unit=state.kind==='unit'?units.units.find(unit=>unit.id===state.id):null;
+  const unit=state.kind==='unit'?characters().find(unit=>unit.id===state.id):null;
   el('forms').innerHTML=unit?unit.forms.map(form=>'<button data-form="'+form.index+'" aria-pressed="'+(form.index===state.form)+'" title="'+esc(form.name)+'">第'+(form.index+1)+'形態</button>').join(''):'';
 }
 async function project(resource,files){
+  const paths=[resource.image,resource.cut,resource.model,...resource.animations.map(clip=>clip.path)];
+  const nativeRequest={kind:state.kind,id:state.id,form:state.form};
+  const key=JSON.stringify([nativeRequest,resource,...paths.map(path=>files.get(path)?.sha256)]);
+  if(projectCache.has(key)){const cached=projectCache.get(key);projectCache.delete(key);projectCache.set(key,cached);return cached;}
   const text=path=>files.get(path)?.text||'';
   const image=new Image();image.src='/api/asset/'+resource.image;await image.decode();
   const motions=Object.fromEntries(resource.animations.map(clip=>[clip.key,parseMaAnim(text(clip.path))]));
   if(!Object.keys(motions).length)motions['static']={tracks:[],maxFrame:0,frameCount:1};
-  const result={...resource,image,imgcut:parseImgCut(text(resource.cut)),model:parseMaModel(text(resource.model)),motions};
+  const result={...resource,nativeRequest,image,imgcut:parseImgCut(text(resource.cut)),model:parseMaModel(text(resource.model)),motions};
   for(const motion of Object.values(motions))for(const track of motion.tracks)if(track.partIndex<0||track.partIndex>=result.model.parts.length)throw Error('存在しないパーツ参照: '+resource.stem);
+  // デコード済み画像と解析結果を小さい範囲で再利用する。GPUのtextureは切替時に解放する。
+  const cost=result.image.naturalWidth*result.image.naturalHeight*4+paths.reduce((sum,path)=>sum+(files.get(path)?.size||0),0);
+  result.cacheCost=cost;
+  while(projectCache.size&&(projectCache.size>=8||[...projectCache.values()].reduce((sum,p)=>sum+p.cacheCost,0)+cost>32*1024*1024))projectCache.delete(projectCache.keys().next().value);
+  if(cost<=32*1024*1024)projectCache.set(key,result);
   return result;
 }
 async function loadCharacter(){
-  if(!units||!enemies||!effects)return;
   const version=++loading;effectSequence=null;state.playing=false;syncPlay();resources.forEach(p=>renderer?.releaseTexture(p.image));resources=new Map();manifest=null;state.screen=[];state.poses.clear();draw();report('素材を読み込んでいます。');
   el('source').hidden=true;el('export-cut').disabled=true;el('parts').replaceChildren();el('files').replaceChildren();el('cuts').replaceChildren();el('part-detail').textContent='読込中';el('clip').replaceChildren();
   try{
-    updateForms();
-    const value=await api('/api/motion?'+new URLSearchParams({kind:state.kind,id:state.id,form:state.form}));if(version!==loading)return;
+    const path='/api/motion?'+new URLSearchParams({kind:state.kind,id:state.id,form:state.form});
+    const [value]=await Promise.all([loadManifest(path),loadChoices(state.kind)]);if(version!==loading)return;
+    updateChoices();updateForms();
     const files=new Map(value.files.map(file=>[file.path,file]));
     const projects=await Promise.all([project(value.body,files),value.soul?project(value.soul,files):null]);
     if(version!==loading)return;
@@ -91,7 +108,8 @@ function partIndices(index){const p=selectedResource(),result=new Set([index]);i
 function choosePart(index,resource=state.resource){const changed=resource!==state.resource;state.resource=resource;state.selected=index;el('resource').value=resource;renderParts();if(changed)renderCuts();draw();}
 function inspect(){
   const p=selectedResource();if(!p)return;
-  const base=p.model.parts[state.selected],part=state.poses.get(p.key)?.find(part=>part.index===state.selected)||base;if(!part)return;
+  const base=p.model.parts[state.selected],instance=frameInstances().find(v=>v.p===p);
+  const part=instance?evaluateMotion(p,instance.key,instance.frame,{loop:false,facing:el('flip').getAttribute('aria-pressed')==='true'?-1:1}).find(v=>v.index===state.selected)||base:base;if(!part)return;
   const rows=[['番号',base.index],['名前',base.name||'—'],['親',part.parent],['画像',part.imageIndex],['Z順',part.zIndex],['座標',part.x+', '+part.y],['ピボット',part.pivotX+', '+part.pivotY],['拡縮',part.scaleX+', '+part.scaleY],['角度',part.angle+' / '+p.model.angleUnit],['不透明度',part.opacity+' / '+p.model.opacityUnit],['合成',['通常','加算','乗算','スクリーン'][part.glow]||part.glow],['表示設定',state.hidden.has(p.key+':'+part.index)?'非表示':'表示'],['画面',state.screen.some(packet=>packet.resource===p.key&&packet.partIndex===part.index)?'描画中':'非描画']];
   el('part-detail').innerHTML='<table class="motion-property-table"><tbody>'+rows.map(([key,value])=>'<tr><th>'+key+'</th><td>'+esc(value)+'</td></tr>').join('')+'</tbody></table>';
 }
@@ -112,55 +130,73 @@ function showFile(index){
 }
 function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;a.click();}
 function saveCut(index){const p=selectedResource(),cut=p.imgcut.cuts[index],canvas=document.createElement('canvas');canvas.width=cut.width;canvas.height=cut.height;canvas.getContext('2d').drawImage(p.image,cut.x,cut.y,cut.width,cut.height,0,0,cut.width,cut.height);download(canvas.toDataURL('image/png'),p.stem+'-cut-'+String(index).padStart(3,'0')+'.png');}
-function renderProject(p,key,frame,x=0,y=0){
-  const stage=el('stage'),width=stage.clientWidth,height=stage.clientHeight;
-  const result=buildNativeDrawPackets(p,key,frame,{originX:width*.5+state.panX+x*state.zoom,originY:height*.72+state.panY+y*state.zoom,scale:state.zoom,facing:el('flip').getAttribute('aria-pressed')==='true'?-1:1,loop:false,interpolate:el('interpolate').checked});
-  state.poses.set(p.key,result.parts);
+function frameInstances(){
+  const body=resources.get('body'),soul=resources.get('soul');if(!body)return [];
+  if(state.motion==='effect-sequence'&&effectSequence)return effectSequence.instances(Math.floor(state.frame)).map(instance=>({p:body,key:body.animations[instance.motion].key,frame:instance.frame,x:instance.x,y:0}));
+  if(state.motion==='sequence'){
+    const offset=state.timeline[Math.floor(state.frame)];if(!offset)return [];
+    if(offset.phase===0)return [{p:body,key:'03',frame:offset.frame,x:offset.x,y:offset.y}];
+    if(offset.phase===1)return [manifest.character.deathMotion&&body.motions._soul&&offset.frame<body.motions._soul.frameCount?{p:body,key:'_soul',frame:offset.frame,x:offset.x,y:0}:null,soul&&offset.frame<soul.motions.soul.frameCount?{p:soul,key:'soul',frame:offset.frame,x:offset.x,y:-97}:null].filter(Boolean);
+    return [];
+  }
+  const p=state.motion==='soul'?soul:body;
+  return p?.motions[state.motion]?[{p,key:state.motion,frame:state.frame,x:0,y:state.motion==='soul'?-97:0}]:[];
+}
+function renderProject(instance,values){
+  const {p,x,y}=instance,stage=el('stage'),originX=stage.clientWidth*.5+state.panX+x*state.zoom,originY=stage.clientHeight*.72+state.panY+y*state.zoom;
   const selected=partIndices(state.selected);
-  const packets=result.packets.filter(packet=>!state.hidden.has(p.key+':'+packet.partIndex)&&(!state.solo||p.key===state.resource&&selected.has(packet.partIndex)));
+  const packets=values.filter(packet=>!state.hidden.has(p.key+':'+packet.partIndex)&&(!state.solo||p.key===state.resource&&selected.has(packet.partIndex))).map(packet=>({...packet,positions:packet.positions.map((value,index)=>(index%2?originY:originX)+value*state.zoom)}));
   renderer.drawPackets(p.image,packets);state.screen.push(...packets.map(packet=>({...packet,resource:p.key})));
 }
-function draw(){
+async function draw(){
+  const version=++drawVersion;
   if(!renderer)return;
   const stage=el('stage'),width=stage.clientWidth,height=stage.clientHeight;if(!width||!height)return;
   const ratio=Math.min(2,devicePixelRatio||1),canvas=el('canvas'),overlay=el('overlay');
   for(const target of [canvas,overlay])if(target.width!==Math.round(width*ratio)||target.height!==Math.round(height*ratio)){target.width=Math.round(width*ratio);target.height=Math.round(height*ratio);}
+  const instances=frameInstances();let poses;
+  try{poses=await Promise.all(instances.map(instance=>nativePackets(instance.p,instance.key,instance.frame,el('flip').getAttribute('aria-pressed')==='true'?-1:1)));}
+  catch(error){if(version===drawVersion)report(error.message,true);return;}
+  if(version!==drawVersion)return;
   renderer.beginFrame(width,height,[.047,.079,.133,1]);state.screen=[];
   if(el('grid').checked){const positions=[];const step=50*state.zoom;for(let x=(width*.5+state.panX)%step;x<width;x+=step)positions.push(x,0,x,height);for(let y=(height*.72+state.panY)%step;y<height;y+=step)positions.push(0,y,width,y);renderer.drawColorGeometry(positions,[.2,.29,.4,.35],renderer.gl.LINES);renderer.drawColorGeometry([0,height*.72+state.panY,width,height*.72+state.panY],[.43,.55,.69,.7],renderer.gl.LINES);}
-  const body=resources.get('body'),soul=resources.get('soul');
-  if(body){
-    let label=clipNames[state.motion]||body.animations.find(clip=>clip.key===state.motion)?.name||(state.motion==='static'?'静止モデル':state.motion);
-    if(state.motion==='effect-sequence'&&effectSequence){
-      for(const instance of effectSequence.instances(Math.floor(state.frame)))renderProject(body,body.animations[instance.motion].key,instance.frame,instance.x);
-      label='一連の演出';
-    }else if(state.motion==='sequence'){
-      const offset=state.timeline[Math.floor(state.frame)];
-      if(offset?.phase===0)renderProject(body,'03',offset.frame,offset.x,offset.y);
-      if(offset?.phase===1){if(manifest.character.deathMotion&&body.motions._soul&&offset.frame<body.motions._soul.frameCount)renderProject(body,'_soul',offset.frame,offset.x);if(soul&&offset.frame<soul.motions.soul.frameCount)renderProject(soul,'soul',offset.frame,offset.x,-97);}
-      label=offset?.phase===0?'KB':offset?.phase===1?'魂':'退場';
-    }else if(state.motion==='soul'&&soul)renderProject(soul,'soul',state.frame,0,-97);
-    else if(body.motions[state.motion])renderProject(body,state.motion,state.frame);
+  instances.forEach((instance,index)=>renderProject(instance,poses[index]));
+  const body=resources.get('body');if(body){
+    const offset=state.motion==='sequence'?state.timeline[Math.floor(state.frame)]:null;
+    const label=state.motion==='effect-sequence'?'一連の演出':state.motion==='sequence'?(offset?.phase===0?'KB':offset?.phase===1?'魂':'退場'):clipNames[state.motion]||body.animations.find(clip=>clip.key===state.motion)?.name||'静止モデル';
     el('phase').textContent=label+' / '+Math.floor(state.frame)+'F / '+state.screen.length+'パーツ描画';
   }
   const ctx=overlay.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,width,height);
   if(!el('selection-outline').checked)return;
   for(const packet of state.screen.filter(p=>p.resource===state.resource&&p.partIndex===state.selected)){ctx.strokeStyle='#ffbf48';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<4;i++)ctx[i?'lineTo':'moveTo'](packet.positions[i*2],packet.positions[i*2+1]);ctx.closePath();ctx.stroke();}
 }
-function fit(){
+async function fit(){
+  const version=loading,fitRequest=++fitVersion;
   const p=state.motion==='soul'?resources.get('soul'):resources.get('body');if(!p)return;
   const key=p.motions[state.motion]?state.motion:Object.keys(p.motions)[0];
-  let result=buildNativeDrawPackets(p,key,state.frame,{originX:0,originY:0,scale:1,loop:false});if(state.motion==='effect-sequence'&&effectSequence){const samples=[];for(let frame=0;frame<effectSequence.duration;frame++)for(const instance of effectSequence.instances(frame))samples.push(...buildNativeDrawPackets(p,p.animations[instance.motion].key,instance.frame,{originX:instance.x,originY:0,scale:1,loop:false}).packets);result={packets:samples};}if(state.motion==='sequence'){const samples=[0,11,23].flatMap(frame=>{const step=state.timeline[frame];return buildNativeDrawPackets(p,'03',frame,{originX:step.x,originY:step.y,scale:1,loop:false}).packets;});const soul=resources.get('soul');if(soul)for(const frame of [0])samples.push(...buildNativeDrawPackets(soul,'soul',frame,{originX:138,originY:-97,scale:1,loop:false}).packets);result={packets:samples};}const points=result.packets.flatMap(p=>p.positions);if(!points.length)return;
+  let packets;
+  try{
+    packets=await nativePackets(p,key,state.frame);
+    if(state.motion==='effect-sequence'&&effectSequence){
+      const samples=[];for(let frame=0;frame<effectSequence.duration;frame++)for(const instance of effectSequence.instances(frame)){const values=await nativePackets(p,p.animations[instance.motion].key,instance.frame);samples.push(...values.map(packet=>({...packet,positions:packet.positions.map((value,index)=>value+(index%2?0:instance.x))})));}packets=samples;
+    }
+    if(state.motion==='sequence'){
+      packets=[];for(const frame of [0,11,23]){const step=state.timeline[frame],values=await nativePackets(p,'03',frame);packets.push(...values.map(packet=>({...packet,positions:packet.positions.map((value,index)=>value+(index%2?step.y:step.x))})));}
+      const soul=resources.get('soul');if(soul){const values=await nativePackets(soul,'soul',0);packets.push(...values.map(packet=>({...packet,positions:packet.positions.map((value,index)=>value+(index%2?-97:138))})));}
+    }
+  }catch(error){if(version===loading)report(error.message,true);return;}
+  if(version!==loading||fitRequest!==fitVersion)return;const points=packets.flatMap(p=>p.positions);if(!points.length)return;
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(let i=0;i<points.length;i+=2){minX=Math.min(minX,points[i]);maxX=Math.max(maxX,points[i]);minY=Math.min(minY,points[i+1]);maxY=Math.max(maxY,points[i+1]);}
   state.zoom=Math.max(.1,Math.min(5,el('stage').clientWidth*.65/Math.max(1,maxX-minX),el('stage').clientHeight*.65/Math.max(1,maxY-minY)));
   state.panX=-(minX+maxX)*state.zoom/2;state.panY=el('stage').clientHeight*(-.18)-(minY+maxY)*state.zoom/2;
   el('zoom').value=Math.round(state.zoom*100);el('zoom-label').textContent=Math.round(state.zoom*100)+'%';draw();
 }
 function toggleVisibility(index,visible){for(const id of partIndices(index)){const key=state.resource+':'+id;if(visible)state.hidden.delete(key);else state.hidden.add(key);}renderParts();draw();}
-function tick(time){const elapsed=lastTime?Math.min(.1,(time-lastTime)/1000):0;lastTime=time;if(state.playing&&manifest){state.frame+=elapsed*30*Number(el('speed').value);const count=frameCount();if(state.frame>=count){if(el('loop').checked)state.frame%=count;else{state.frame=count-1;state.playing=false;syncPlay();}}syncFrame();draw();if(time-inspectorTime>150){inspect();inspectorTime=time;}}requestAnimationFrame(tick);}
+async function tick(time){const elapsed=lastTime?Math.min(.1,(time-lastTime)/1000):0;lastTime=time;if(state.playing&&manifest){state.frame+=elapsed*30*Number(el('speed').value);const count=frameCount();if(state.frame>=count){if(el('loop').checked)state.frame%=count;else{state.frame=count-1;state.playing=false;syncPlay();}}syncFrame();await draw();if(time-inspectorTime>150){inspect();inspectorTime=time;}}requestAnimationFrame(tick);}
 
 el('export-cut').onclick=()=>saveCut(state.cut);
 el('kind').value=state.kind;
-el('kind').addEventListener('change',()=>{state.kind=el('kind').value;state.id=state.kind==='effect'?'skill_wave_attack':0;state.form=0;el('category').value='all';el('query').value='';updateChoices();loadCharacter();});
+el('kind').addEventListener('change',()=>{state.kind=el('kind').value;state.id=state.kind==='effect'?'skill_wave_attack':0;state.form=0;el('category').value='all';el('query').value='';loadCharacter();});
 el('query').addEventListener('input',updateChoices);
 el('category').addEventListener('change',updateChoices);
 el('effect-level').addEventListener('input',()=>{if(!manifest)return;el('effect-level').value=Math.max(1,Math.min(20,Math.trunc(Number(el('effect-level').value))||1));updateEffectSequence();setClip('effect-sequence');fit();});
@@ -182,8 +218,10 @@ el('source-close').onclick=()=>{el('source').hidden=true;draw();};el('download')
 el('play').onclick=()=>{if(manifest){state.playing=!state.playing;syncPlay();}};el('rewind').onclick=()=>setFrame(0);el('prev').onclick=()=>setFrame(Math.floor(state.frame)-1);el('next').onclick=()=>setFrame(Math.floor(state.frame)+1);
 el('frame').oninput=()=>setFrame(el('frame').value);el('scrub').oninput=()=>setFrame(el('scrub').value);el('fit').onclick=fit;
 el('zoom').oninput=()=>{state.zoom=Number(el('zoom').value)/100;el('zoom-label').textContent=el('zoom').value+'%';draw();};el('flip').onclick=()=>{el('flip').setAttribute('aria-pressed',String(el('flip').getAttribute('aria-pressed')!=='true'));draw();};el('grid').onchange=draw;el('interpolate').onchange=draw;
-el('save').onclick=()=>{draw();download(el('canvas').toDataURL('image/png'),(manifest?.character.stem||'motion')+'-'+state.motion+'-'+Math.floor(state.frame)+'.png');};
+el('save').onclick=async()=>{await draw();download(el('canvas').toDataURL('image/png'),(manifest?.character.stem||'motion')+'-'+state.motion+'-'+Math.floor(state.frame)+'.png');};
 el('selection-outline').onchange=draw;
+// ネイティブの整数フレームで再生する。補間は表示仕様が確定してから追加する。
+el('interpolate').checked=false;el('interpolate').disabled=true;el('interpolate').parentElement.hidden=true;
 let drag=null;
 el('stage').addEventListener('pointerdown',event=>{if(event.button!==0)return;el('stage').focus();drag={x:event.clientX,y:event.clientY,panX:state.panX,panY:state.panY};el('stage').setPointerCapture(event.pointerId);});
 el('stage').addEventListener('pointermove',event=>{if(!drag)return;state.panX=drag.panX+event.clientX-drag.x;state.panY=drag.panY+event.clientY-drag.y;draw();});
@@ -192,4 +230,4 @@ el('stage').addEventListener('pointercancel',()=>{drag=null;});
 el('stage').addEventListener('wheel',event=>{event.preventDefault();state.zoom=Math.min(5,Math.max(.1,state.zoom*Math.exp(-event.deltaY*.001)));el('zoom').value=Math.round(state.zoom*100);el('zoom-label').textContent=Math.round(state.zoom*100)+'%';draw();},{passive:false});
 el('stage').addEventListener('keydown',event=>{if(!manifest)return;const seek=event.shiftKey?10:1;if(event.code==='Space'){event.preventDefault();state.playing=!state.playing;syncPlay();}else if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();setFrame(Math.floor(state.frame)+(event.key==='ArrowLeft'?-seek:seek));}else if(event.key==='Home'){event.preventDefault();setFrame(0);}else if(event.key==='End'){event.preventDefault();setFrame(frameCount()-1);}else if(event.key.toLowerCase()==='f')fit();else if(event.key.toLowerCase()==='h')toggleVisibility(state.selected,state.hidden.has(state.resource+':'+state.selected));});
 new ResizeObserver(draw).observe(el('stage'));
-try{renderer=new NativeWebGLRenderer(el('canvas'));[units,enemies,effects]=await Promise.all([loadUnitDatabase(),loadEnemyDatabase(),api('/api/motion-effects')]);updateChoices();await loadCharacter();requestAnimationFrame(tick);}catch(error){report(error.message,true);}
+try{renderer=new NativeWebGLRenderer(el('canvas'));await loadCharacter();requestAnimationFrame(tick);}catch(error){report(error.message,true);}

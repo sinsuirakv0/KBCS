@@ -60,7 +60,7 @@
 
 ## 既存解釈との不一致
 
-`crates/kbcs-data/src/progression.rs`の入手先用GROUPSにはPR=32が残る。一方、現版`007cd120(-26, 0)`は39000、`007cd2ac(32000)`は−1。原本Map_optionとMap_Nameにも39000が存在する。labの現在のcatalog.mjsはPR=39。この不一致は確定したが、旧snapshot・変換器へは今回書き込んでいない。ステージ用のID契約を共通化する際に修正し、IMPORTER_VERSION更新と旧入手経路の回帰照合をセットにする。
+当時の記録：`crates/kbcs-data/src/progression.rs`の入手先用GROUPSにはPR=32が残っていた。現行はPR=39へ修正済み（da4fff44に収録）。以下は修正前の調査経緯として保持する。一方、現版`007cd120(-26, 0)`は39000、`007cd2ac(32000)`は−1。原本Map_optionとMap_Nameにも39000が存在する。labの現在のcatalog.mjsはPR=39。この不一致は確定したが、旧snapshot・変換器へは今回書き込んでいない。ステージ用のID契約を共通化する際に修正し、IMPORTER_VERSION更新と旧入手経路の回帰照合をセットにする。
 
 旧lab資料はJP15.7.1。そこでの意味付け・確率式・命令実行結果を、今回の15.7.2で検証済みと扱わない。保存した原本・現版疑似コード・現版命令の照合を分けて記録する。
 

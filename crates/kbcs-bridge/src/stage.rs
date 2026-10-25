@@ -334,9 +334,46 @@ fn native_stage_witnesses() {
     assert_eq!((states, context), before);
     let limited = [Row([2, 1, 0, 0, 0, 100, 0, 9, 0, 100, 0, 0, 0, 0])];
     states[0].spawned = 1;
+    states[0].wait = 1;
     let before = (states, context);
     assert_eq!(commit(&limited, &mut states, &mut context, 0, 0, 0), Err(1));
     assert_eq!((states, context), before);
+}
+
+#[test]
+fn native_continuous_spawn_witnesses() {
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../native/kbcs-core/tests/stage-continuous-vectors.json"
+    ))
+    .unwrap();
+    for vector in fixture["vectors"].as_array().unwrap() {
+        let rows = [serde_json::from_value::<Row>(vector["row"].clone()).unwrap()];
+        let mut states = [State::default()];
+        let mut context = Context {
+            max_enemies: 50,
+            castle_hp: 100,
+            castle_max_hp: 100,
+            ..Default::default()
+        };
+        let mut random =
+            crate::random::Random::new(vector["seed"].as_u64().unwrap() as u32).unwrap();
+        for step in vector["steps"].as_array().unwrap() {
+            let candidate = tick(&rows, &mut states, &mut context).unwrap().unwrap();
+            assert_eq!(candidate.index(), 0);
+            if vector["success"] == true {
+                random.bounded(10).unwrap();
+                let global = random.bounded(1).unwrap();
+                let row = random.bounded(1).unwrap();
+                candidate.commit(global, row).unwrap();
+            }
+            assert_eq!(
+                serde_json::json!([[states[0].wait, states[0].spawned, states[0].kills]]),
+                step["states"]
+            );
+            assert_eq!(serde_json::json!(context.global_wait), step["globalWait"]);
+            assert_eq!(u64::from(random.state()), step["state"].as_u64().unwrap());
+        }
+    }
 }
 
 #[test]

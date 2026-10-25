@@ -22,24 +22,36 @@ pub(crate) fn import(
     source: &Source,
     dataset: &Dataset,
     connection: &Connection,
-    progress: &impl Fn(String),
+    progress: &(impl Fn(String) + Sync),
 ) -> Result<()> {
     // 定義は全て保存。対応が未確認の画像へ勝手に結合しない。
     let stored: BTreeSet<String> = connection
         .prepare("SELECT path FROM source_file")?
         .query_map([], |r| r.get(0))?
         .collect::<rusqlite::Result<_>>()?;
-    for path in dataset.files.keys().filter(|p| {
-        !stored.contains(*p)
-            && (p.ends_with(".mamodel") || p.ends_with(".maanim") || p.ends_with(".imgcut"))
-    }) {
+    let pending: Vec<_> = dataset
+        .files
+        .keys()
+        .filter(|p| {
+            !stored.contains(*p)
+                && (p.ends_with(".mamodel") || p.ends_with(".maanim") || p.ends_with(".imgcut"))
+        })
+        .cloned()
+        .collect();
+    source.prefetch(dataset, &pending, progress)?;
+    for path in &pending {
         read_asset(source, dataset, connection, path)?;
     }
-    let entries = entries(connection, &dataset.files.keys().cloned().collect())?;
+    let entries = entries(connection, &dataset.files.keys().cloned().collect(), None)?;
     let images: BTreeSet<_> = entries
         .iter()
         .filter_map(|e| e["image"].as_str().map(str::to_owned))
         .collect();
+    source.prefetch(
+        dataset,
+        &images.iter().cloned().collect::<Vec<_>>(),
+        progress,
+    )?;
     for path in &images {
         read_asset(source, dataset, connection, path)?;
     }
@@ -116,7 +128,11 @@ fn label(stem: &str) -> String {
     }
 }
 
-fn entries(connection: &Connection, paths: &BTreeSet<String>) -> Result<Vec<Value>> {
+fn entries(
+    connection: &Connection,
+    paths: &BTreeSet<String>,
+    selected: Option<&str>,
+) -> Result<Vec<Value>> {
     let models: Vec<_> = paths
         .iter()
         .filter(|p| {
@@ -149,6 +165,10 @@ fn entries(connection: &Connection, paths: &BTreeSet<String>) -> Result<Vec<Valu
     for model in models {
         let full = model.trim_end_matches(".mamodel");
         let (directory, stem) = full.rsplit_once('/').context("モデルのパス不正")?;
+        // 所有関係は全モデルで解決し、内容の解析は要求された素材だけに絞る。
+        if selected.is_some_and(|id| id != stem) {
+            continue;
+        }
         let bytes: Vec<u8> =
             connection.query_row("SELECT bytes FROM source_file WHERE path=?", [model], |r| {
                 r.get(0)
@@ -272,22 +292,22 @@ fn entries(connection: &Connection, paths: &BTreeSet<String>) -> Result<Vec<Valu
     Ok(result)
 }
 
-fn stored_entries(database: &Database) -> Result<Vec<Value>> {
+fn stored_entries(database: &Database, selected: Option<&str>) -> Result<Vec<Value>> {
     let mut statement = database
         .connection
         .prepare("SELECT path FROM asset_reference ORDER BY path")?;
     let paths = statement
         .query_map([], |r| r.get::<_, String>(0))?
         .collect::<rusqlite::Result<BTreeSet<_>>>()?;
-    entries(&database.connection, &paths)
+    entries(&database.connection, &paths, selected)
 }
 
 pub fn catalog(database: &Database) -> Result<Value> {
-    Ok(json!({"metadata":database.metadata()?,"entries":stored_entries(database)?}))
+    Ok(json!({"metadata":database.metadata()?,"entries":stored_entries(database, None)?}))
 }
 
 pub fn manifest(database: &Database, id: &str) -> Result<Value> {
-    let entry = stored_entries(database)?
+    let entry = stored_entries(database, Some(id))?
         .into_iter()
         .find(|e| e["id"].as_str() == Some(id))
         .context("その他モーションがありません。DBを更新してください")?;

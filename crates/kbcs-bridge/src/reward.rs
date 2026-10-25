@@ -148,6 +148,26 @@ pub fn legend_pick(input: &Input) -> Result<Output, u32> {
 
 #[test]
 fn native_reward_witnesses() {
+    let crown = policy(&PolicyInput {
+        mode: 2,
+        save_id: 17,
+        reward_id: 1,
+        crown: 4,
+    })
+    .unwrap();
+    assert_eq!(crown["tracking"], "crown");
+    assert_eq!(crown["slot"], 3);
+    assert_eq!(crown["probes"][3]["result"]["radarBlocked"], 1);
+    assert_eq!(
+        policy(&PolicyInput {
+            mode: 1,
+            save_id: 17,
+            reward_id: 1,
+            crown: 4
+        })
+        .unwrap()["slot"],
+        0
+    );
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../../native/kbcs-core/tests/reward-vectors.json"
     ))
@@ -228,4 +248,62 @@ fn native_reward_witnesses() {
         let expected: WeightedFinishOutput = serde_json::from_value(vector.clone()).unwrap();
         assert_eq!(weight_finish(&input).unwrap(), expected);
     }
+}
+
+// 画面にもシミュレーターと同じ通常/初回報酬カーネルの判定を返す。
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct PolicyInput {
+    pub mode: i32,
+    pub save_id: i32,
+    pub reward_id: i32,
+    pub crown: i32,
+}
+pub fn policy(input: &PolicyInput) -> Result<serde_json::Value, u32> {
+    if !(1..=4).contains(&input.crown) || input.save_id < -1 {
+        return Err(1);
+    }
+    let class = match input.reward_id {
+        1000..=9999 => 1,
+        10000..=19999 => 2,
+        20000..=29999 => 3,
+        _ => 0,
+    };
+    let mut probes = Vec::new();
+    if (-2..=2).contains(&input.mode) {
+        for acquired in [0, 1] {
+            for radar in [0, 1] {
+                let context = StageContext {
+                    mode: input.mode,
+                    save_id: input.save_id,
+                    acquired,
+                    radar,
+                    chances: [100, -1, -1],
+                    rolls: [0; 3],
+                };
+                let normalized = prepare_stage_input(&context)?.ok_or(1u32)?;
+                probes.push(serde_json::json!({"acquired":acquired,"radar":radar,"result":stage_pick(&normalized)?}));
+            }
+        }
+    } else if [-3, -4].contains(&input.mode) {
+        for seen in [0, 1] {
+            for radar in [0, 1] {
+                probes.push(serde_json::json!({"acquired":seen,"radar":radar,"result":weight_finish(&WeightedFinishInput {mode:input.mode,seen,radar,winner:0})?}));
+            }
+        }
+    }
+    let tracking = if input.mode == -3 {
+        "history"
+    } else if ![1, 2].contains(&input.mode) || !(0..400).contains(&input.save_id) {
+        "none"
+    } else if class != 0 {
+        "ownership"
+    } else if input.mode == 2 {
+        "crown"
+    } else {
+        "shared"
+    };
+    Ok(
+        serde_json::json!({"mode":input.mode,"saveId":input.save_id,"rewardClass":class,"tracking":tracking,"slot":if input.mode==2 {input.crown-1}else{0},"probes":probes,"references":["005d996c","00a092a0","00a0956c"]}),
+    )
 }

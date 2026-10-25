@@ -18,6 +18,10 @@
 - 検証済みDBの切替、旧DBの保全、リージョン別の公開ポインタ。
 - C++20で体力・攻撃力・両方向の直接命中・メタルキラー・毒撃を計算し、特効・コンボ・土台/装飾を反映。現版ARM64で整数化を照合。出現待機の初期化・tick/commitと素材抽選も共用し、39000番台までのID/現在種別・参照先選択・出現行読込と、章/レジェンド/イベント/EXのXP入口を共用。各番台の専用進行と完全な戦闘の状態更新は未実装。
 
+## 0.1.21の追加
+
+ステージの背景・城・BGMと、既存C++の冠別報酬記録/抽選条件を表示する。背景拡大ではパン・ズーム・両城・演出再生を利用できる。味方・敵・その他モーションも同じC++の整数姿勢計算へ接続した。描画命令をGUIとheadless CLIで共用する。原本の版、検証範囲、残る差は[描画コア](native/kbcs-core/docs/render.md)と[実装記録](docs/plans/stage-details-native-render.md)を参照。
+
 ## Windowsでビルド・起動
 
 Windows 11、WebView2 Runtime、Rust 1.95以上とC/C++20コンパイラが必要。WebView2はシステムのRuntimeを利用し、Electronやブラウザ本体を同梱しない。標準のMSVCターゲットならVisual Studio Build ToolsのC++デスクトップ開発を利用できる。現在の検証環境はRust 1.98.1 `x86_64-pc-windows-gnullvm` とLLVM-MinGW。
@@ -26,20 +30,20 @@ LLVM-MinGWを使う場合（パスは環境に合わせる）:
 
 ```powershell
 ./scripts/build.ps1 -LlvmBin 'D:/path/to/llvm-mingw/bin'
-./.local/dist/0.1.17/kbcs.exe
+./.local/dist/0.1.21/kbcs.exe
 ```
 
 スクリプトはreleaseビルド、WebView2Loader.dllと必要なMinGWランタイムDLLの同梱を行う。初回はCargo依存パッケージの取得にネットワークが必要。通常のMSVC環境でも `./scripts/build.ps1` で配布フォルダを生成する。MSVCでの実機検証は未実施。
 
-GUIのホーム → データ管理でassetsのGitフォルダ、または `https://github.com/sinsuirakv0/KBC-rakv0-assets` を指定し「データを取り込む / 更新する」。ローカルGitは未コミットの追跡ファイル変更がないものを使用する。HTTP取得は公開リポジトリ向けで最初にcommit SHAを固定する。ネットワーク経路の全件導入の実測状況は[検証報告](docs/plans/initial-foundation.md)を確認する。
+GUIのホーム → データ管理の「データ取得・更新」で既存GitHub assetsの原本をAppDataへ取得する。原本キャッシュと構築済みDBを再利用するため、アプリ更新だけで再取り込みする必要はない。「手動取り込み」ではassetsのGitフォルダまたはGitHubリポジトリを指定できる。ローカルGitは未コミットの追跡ファイル変更がないものを使用する。HTTP取得は公開リポジトリ向けで最初にcommit SHAを固定する。ネットワーク経路の全件導入の実測状況は[検証報告](docs/plans/initial-foundation.md)を確認する。
 
 CLIでも同じ取り込み・照会を利用できる:
 
 ```powershell
-./.local/dist/0.1.17/kbcs.exe import --assets '../KBC-rakv0-assets' | Out-Host
-./.local/dist/0.1.17/kbcs.exe list --query 'ネコ' | Out-Host
-./.local/dist/0.1.17/kbcs.exe show --id 0 --form 2 | Out-Host
-./.local/dist/0.1.17/kbcs.exe verify | Out-Host
+./.local/dist/0.1.21/kbcs.exe import --assets '../KBC-rakv0-assets' | Out-Host
+./.local/dist/0.1.21/kbcs.exe list --query 'ネコ' | Out-Host
+./.local/dist/0.1.21/kbcs.exe show --id 0 --form 2 | Out-Host
+./.local/dist/0.1.21/kbcs.exe verify | Out-Host
 ```
 
 GUI用の実行ファイルはコンソールを作らない。PowerShellからCLI出力を表示する場合は上記のように `| Out-Host` を付ける。
@@ -49,7 +53,7 @@ DBの既定保存先は `%LOCALAPPDATA%/KBCS`。`--data-dir` または `KBCS_DAT
 サイド画面で注釈しながら調整するプレビュー:
 
 ```powershell
-./.local/dist/0.1.17/kbcs.exe preview --bind 127.0.0.1:4817 | Out-Host
+./.local/dist/0.1.21/kbcs.exe preview --bind 127.0.0.1:4817 | Out-Host
 ```
 
 [キャラ検索プレビュー](http://127.0.0.1:4817/pages/unit-search/) をCodexのブラウザパネルで開く。アプリと同じ埋込みHTML/CSS/JS・SQLiteを使用し、127.0.0.1だけで待ち受ける。通常のGUIはHTTPサーバーを起動せず、アプリ専用プロトコルを使用する。UIだけの変更もRust再ビルドで実行ファイルへ反映する。

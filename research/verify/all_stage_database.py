@@ -12,7 +12,7 @@ db=sqlite3.connect(path.resolve().as_uri()+'?mode=ro',uri=True)
 assert db.execute('pragma user_version').fetchone()[0]==8
 assert db.execute('pragma integrity_check').fetchone()[0]=='ok'
 assert not db.execute('pragma foreign_key_check').fetchall()
-metadata=dict(db.execute('select key,value from metadata'));assert metadata['version']=='15.7.2' and metadata['importer_version'] in ['9','10']
+metadata=dict(db.execute('select key,value from metadata'));assert metadata['version']=='15.7.2' and metadata['importer_version']==re.search(r'IMPORTER_VERSION: &str = "(\d+)"',(ROOT/'crates/kbcs-data/src/lib.rs').read_text(encoding='utf-8-sig')).group(1)
 assert metadata['build_id']==assets.current['buildId']
 actual={p for (p,) in db.execute('select path from stage_definition')};assert actual==set(witness['definitions'])
 spawns=0;headers=0
@@ -109,5 +109,5 @@ for name in equipment_sources:
  saved=db.execute('select sha256,bytes from source_file where path=?',(name,)).fetchone()
  assert saved is not None and digest(saved[1])==saved[0]==assets.files[name]['sha256'],name
 report={'database':str(path),'version':'15.7.2','schema':8,'importer':int(metadata['importer_version']),'nativeSha256':SHA,'maps':db.execute('select count(*) from stage_map').fetchone()[0],'stages':db.execute('select count(*) from stage').fetchone()[0],'definitions':headers,'spawns':spawns,'sources':len(witness['sources']),'rewardRowsCompared':reward_count,'variants':db.execute('select count(*) from stage_variant').fetchone()[0],'series':db.execute('select series,count(*) from stage_map group by series order by min(id)').fetchall(),'rewards':db.execute('select kind,count(*) from stage_reward group by kind').fetchall(),'witnessSha256':digest((ROOT/'research/.local/stage-bands-1572.json').read_bytes())}
-(ROOT/('research/.local/all-stage-database-'+('0.1.16' if metadata['importer_version']=='10' else '0.1.15')+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8-sig')
+(ROOT/('research/.local/all-stage-database-'+('importer-'+metadata['importer_version'])+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8-sig')
 print(json.dumps(report,ensure_ascii=False))

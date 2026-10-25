@@ -1,4 +1,4 @@
-﻿use anyhow::{Result, ensure};
+﻿use anyhow::{Context, Result, ensure};
 use include_dir::{Dir, include_dir};
 use kbcs_data::{import, store::Database};
 use serde_json::{Value, json};
@@ -47,6 +47,9 @@ pub struct Service {
     busy: Arc<AtomicBool>,
     progress: Arc<Mutex<Progress>>,
     catalog: Arc<Mutex<CatalogCache>>,
+    scenes: Arc<Mutex<BTreeMap<String, crate::scene::Scene>>>,
+    audio: Arc<Mutex<()>>,
+    poses: Arc<Mutex<BTreeMap<String, Arc<kbcs_bridge::render::Model>>>>,
 }
 
 type CatalogCache = BTreeMap<String, (PathBuf, Vec<u8>)>;
@@ -60,6 +63,9 @@ impl Service {
             busy: Arc::new(AtomicBool::new(false)),
             progress: Arc::new(Mutex::new(Progress::default())),
             catalog: Arc::new(Mutex::new(BTreeMap::new())),
+            scenes: Arc::new(Mutex::new(BTreeMap::new())),
+            audio: Arc::new(Mutex::new(())),
+            poses: Arc::new(Mutex::new(BTreeMap::new())),
         }
     }
 
@@ -73,6 +79,88 @@ impl Service {
     fn route(&self, method: &str, path: &str, body: &[u8]) -> Result<Reply> {
         let url = url::Url::parse(&format!("http://kbcs.localhost{path}"))?;
         let path = url.path();
+        if path == "/api/battle-screen" {
+            ensure!(
+                method == "POST" && body.len() <= 16384,
+                "戦闘画面の入力が不正です"
+            );
+            let request: kbcs_bridge::battle_screen::Request = serde_json::from_slice(body)?;
+            let result = kbcs_bridge::battle_screen::frame(&request)
+                .map_err(|code| anyhow::anyhow!("戦闘画面の入力・計算エラー: {code}"))?;
+            return Ok(Reply::json(serde_json::to_value(result)?));
+        }
+        if path == "/api/battle-support" {
+            ensure!(
+                method == "POST" && body.len() <= 4096,
+                "戦闘補助の入力が不正です"
+            );
+            let input: kbcs_bridge::battle_support::CastleInput = serde_json::from_slice(body)?;
+            let result = kbcs_bridge::battle_support::castle(&input)
+                .map_err(|code| anyhow::anyhow!("城体力の入力・計算エラー: {code}"))?;
+            return Ok(Reply::json(serde_json::to_value(result)?));
+        }
+        if path == "/api/deployment" {
+            ensure!(
+                method == "POST" && body.len() <= 65536,
+                "出撃制限の入力が不正です"
+            );
+            #[derive(serde::Deserialize)]
+            #[serde(deny_unknown_fields)]
+            struct DeploymentRequest {
+                costs: Vec<kbcs_bridge::battle_support::DeployCostInput>,
+                checks: Vec<kbcs_bridge::battle_support::DeploymentInput>,
+            }
+            let input: DeploymentRequest = serde_json::from_slice(body)?;
+            ensure!(
+                input.costs.len() <= 10 && input.checks.len() <= 20,
+                "出撃制限の件数が不正です"
+            );
+            let costs = input
+                .costs
+                .iter()
+                .map(kbcs_bridge::battle_support::deploy_cost)
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(|code| anyhow::anyhow!("生産コストの入力エラー: {code}"))?;
+            let checks = input
+                .checks
+                .iter()
+                .map(|check| {
+                    let mut check = check.clone();
+                    check.cost = *costs
+                        .get(check.slot as usize)
+                        .context("出撃枠のコストがありません")?;
+                    kbcs_bridge::battle_support::deployment(&check)
+                        .map_err(|code| anyhow::anyhow!("出撃制限の入力エラー: {code}"))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            return Ok(Reply::json(json!({"costs":costs,"checks":checks})));
+        }
+        if path == "/api/formations" {
+            let store = kbcs_data::formations::Store::open(&self.root)?;
+            if method == "POST" {
+                ensure!(body.len() <= 1_000_000, "編成ファイルが大きすぎます");
+                let input: kbcs_data::formations::WriteInput = serde_json::from_slice(body)?;
+                return Ok(Reply::json(store.write(&self.region, &input)?));
+            }
+            ensure!(method == "GET", "未対応の編成操作です");
+            let query = url.query_pairs().collect::<BTreeMap<_, _>>();
+            if query.get("list").is_some_and(|value| value == "1") {
+                return Ok(Reply::json(store.list(&self.region)?));
+            }
+            let current = query.get("current").map(|v| v.parse::<i64>()).transpose()?;
+            let direction = query
+                .get("direction")
+                .map(|v| v.parse::<i32>())
+                .transpose()?
+                .unwrap_or(0);
+            return Ok(Reply::json(store.read(&self.region, current, direction)?));
+        }
+        if path == "/api/formation-equipment" {
+            ensure!(method == "GET", "GETが必要です");
+            return Ok(Reply::json(kbcs_data::stages::equipment_catalog(
+                &Database::open(&self.root, &self.region)?,
+            )?));
+        }
         if path == "/api/calculate" {
             ensure!(method == "POST", "POSTが必要です");
             ensure!(body.len() <= 1_000_000, "計算入力が大きすぎます");
@@ -81,6 +169,7 @@ impl Service {
                 value
                     .as_object()
                     .is_some_and(|object| object.keys().all(|key| [
+                        "rewardPolicies",
                         "stats",
                         "enemyStats",
                         "legendRewards",
@@ -95,6 +184,20 @@ impl Service {
                     .contains(&key.as_str()))),
                 "未対応の計算項目です"
             );
+            let policies: Vec<kbcs_bridge::reward::PolicyInput> = serde_json::from_value(
+                value
+                    .get("rewardPolicies")
+                    .cloned()
+                    .unwrap_or_else(|| json!([])),
+            )?;
+            ensure!(policies.len() <= 128, "報酬条件が多すぎます");
+            let policies = policies
+                .iter()
+                .map(|input| {
+                    kbcs_bridge::reward::policy(input)
+                        .map_err(|code| anyhow::anyhow!("報酬条件の入力不正: {code}"))
+                })
+                .collect::<Result<Vec<_>>>()?;
             let statistics: Vec<kbcs_bridge::StatInput> =
                 serde_json::from_value(value.get("stats").cloned().unwrap_or_else(|| json!([])))?;
             let enemy_statistics: Vec<kbcs_bridge::enemy::Input> = serde_json::from_value(
@@ -203,12 +306,64 @@ impl Service {
                 .map(|input| kbcs_bridge::materials::plan(input).map_err(error))
                 .collect::<Result<Vec<_>>>()?;
             return Ok(Reply::json(
-                json!({"abi":kbcs_bridge::abi_version(),"ruleset":kbcs_bridge::ruleset_version(),
+                json!({"rewardPolicies":policies,"abi":kbcs_bridge::abi_version(),"ruleset":kbcs_bridge::ruleset_version(),
                 "stats":statistics.iter().map(|output|output.stages[5]).collect::<Vec<_>>(),
                 "legendRewards":rewards,"enemyStats":enemy_statistics,"unitDamage":unit_damage,"enemyDamage":enemy_damage,"metalKiller":metal_killer,"poison":poison,"legendExperience":experience,"stageExperience":stage_experience,"materialDrops":materials}),
             ));
         }
 
+        if path == "/api/asset-hashes" {
+            ensure!(
+                method == "POST" && body.len() <= 16384,
+                "原本照合の要求が不正です"
+            );
+            let paths: Vec<String> = serde_json::from_slice(body)?;
+            ensure!(paths.len() <= 64, "原本照合の件数が多すぎます");
+            let database =
+                Database::open_path(&kbcs_data::store::current_path(&self.root, &self.region)?)?;
+            let mut statement = database
+                .connection
+                .prepare("SELECT sha256 FROM asset_reference WHERE path=?")?;
+            let hashes = paths
+                .into_iter()
+                .map(|path| {
+                    let hash: String = statement.query_row([&path], |row| row.get(0))?;
+                    Ok((path, hash))
+                })
+                .collect::<Result<BTreeMap<_, _>>>()?;
+            return Ok(Reply::json(json!(hashes)));
+        }
+        if path == "/api/stage-scene" {
+            ensure!(
+                method == "POST" && body.len() <= 16384,
+                "ステージ描画の要求が不正です"
+            );
+            let input: crate::scene::Input = serde_json::from_slice(body)?;
+            let current = kbcs_data::store::current_path(&self.root, &self.region)?;
+            let database = Database::open_path(&current)?;
+            let key = format!("{}:{}", current.display(), input.key());
+            let mut scenes = self
+                .scenes
+                .lock()
+                .map_err(|_| anyhow::anyhow!("描画状態のロック失敗"))?;
+            if !scenes.contains_key(&key) {
+                let scene = crate::scene::Scene::new(&database, &input)?;
+                if scenes.len() >= 16
+                    && let Some(first) = scenes.keys().next().cloned()
+                {
+                    scenes.remove(&first);
+                }
+                scenes.insert(key.clone(), scene);
+            }
+            let result = scenes
+                .get_mut(&key)
+                .context("描画状態なし")?
+                .draw(&database, &input);
+            if result.is_err() {
+                scenes.remove(&key);
+            }
+            return Ok(Reply::json(result?));
+        }
         if path == "/api/import" {
             ensure!(method == "POST", "POSTが必要です");
             let value: Value = serde_json::from_slice(body)?;
@@ -258,6 +413,33 @@ impl Service {
                 .map_err(|c| anyhow::anyhow!("モーション時計の入力不正: {c}"))?;
             return Ok(Reply::json(json!({"frames":frames})));
         }
+        if path == "/api/motion-pose" {
+            ensure!(
+                method == "POST" && body.len() <= 16384,
+                "描画入力が不正です"
+            );
+            let input: crate::motion_pose::Input = serde_json::from_slice(body)?;
+            ensure!(
+                !input.frames.is_empty() && input.frames.len() <= 32,
+                "表示フレームが範囲外です"
+            );
+            let current = kbcs_data::store::current_path(&self.root, &self.region)?;
+            let database = Database::open_path(&current)?;
+            let key = format!("{}:{}", current.display(), input.key());
+            let cached = self.poses.lock().unwrap().get(&key).cloned();
+            let model = if let Some(model) = cached {
+                model
+            } else {
+                let model = Arc::new(crate::motion_pose::model(&database, &self.region, &input)?);
+                let mut poses = self.poses.lock().unwrap();
+                if poses.len() >= 64 {
+                    poses.clear();
+                }
+                poses.insert(key, model.clone());
+                model
+            };
+            return Ok(Reply::json(crate::motion_pose::frames(model, &input)?));
+        }
         ensure!(method == "GET", "未対応の操作です");
         if path == "/api/status" {
             let metadata = Database::open(&self.root, &self.region)
@@ -268,8 +450,24 @@ impl Service {
                 .lock()
                 .map_err(|_| anyhow::anyhow!("進捗ロック失敗"))?;
             return Ok(Reply::json(
-                json!({"busy":self.busy.load(Ordering::SeqCst),"message":progress.message,"error":progress.error,"metadata":metadata,"source":self.source}),
+                json!({"busy":self.busy.load(Ordering::SeqCst),"message":progress.message,"error":progress.error,"metadata":metadata,"source":self.source,"updateSource":kbcs_data::DEFAULT_SOURCE,"dataDir":self.root,"assetDir":self.root.join("assets")}),
             ));
+        }
+        if let Some(id) = path.strip_prefix("/api/stage-audio/") {
+            let _audio = self
+                .audio
+                .lock()
+                .map_err(|_| anyhow::anyhow!("音源キャッシュのロック失敗"))?;
+            let id = id
+                .strip_suffix(".mp3")
+                .or_else(|| id.strip_suffix(".ogg"))
+                .unwrap_or(id);
+            let audio = kbcs_data::stage_media::audio(&self.root, id.parse()?)?;
+            return Ok(Reply {
+                status: 200,
+                mime: audio.mime,
+                bytes: audio.bytes,
+            });
         }
         if path == "/api/motion" {
             let get = |key: &str| {
@@ -313,10 +511,18 @@ impl Service {
             "/api/enemies",
             "/api/stages",
             "/api/motion-effects",
+            "/api/motion-choices",
         ]
         .contains(&path)
         {
-            let category = if path == "/api/motion-effects" {
+            let motion_kind = url
+                .query_pairs()
+                .find(|(key, _)| key == "kind")
+                .map(|(_, value)| value.into_owned())
+                .unwrap_or_else(|| "unit".into());
+            let category = if path == "/api/motion-choices" {
+                "motion-choices"
+            } else if path == "/api/motion-effects" {
                 "effects"
             } else if path == "/api/enemies" {
                 "enemies"
@@ -331,38 +537,52 @@ impl Service {
                 .map(|(_, v)| v.into_owned());
             let key = if category == "stages" {
                 format!("stages/{}", map.as_deref().unwrap_or("index"))
+            } else if category == "motion-choices" {
+                format!("motion-choices/{motion_kind}")
             } else {
                 category.to_owned()
             };
             let current = kbcs_data::store::current_path(&self.root, &self.region)?;
-            let mut cache = self
+            let cached = self
                 .catalog
                 .lock()
-                .map_err(|_| anyhow::anyhow!("表示キャッシュロック失敗"))?;
-            if cache.get(&key).is_none_or(|(path, _)| path != &current) {
-                let database = Database::open_path(&current)?;
-                let value = if category == "effects" {
-                    kbcs_data::effects::catalog(&database)?
-                } else if category == "enemies" {
-                    kbcs_data::enemies::catalog(&database, &self.region)?
-                } else if category == "stages" {
-                    if let Some(map) = map.as_deref() {
-                        kbcs_data::stages::catalog_map(&database, &self.region, Some(map))?
-                    } else {
-                        kbcs_data::stages::search_catalog(&database, &self.region)?
-                    }
-                } else {
-                    kbcs_data::view::catalog(&database, &self.region)?
-                };
-                cache.insert(key.clone(), (current, serde_json::to_vec(&value)?));
+                .map_err(|_| anyhow::anyhow!("表示キャッシュロック失敗"))?
+                .get(&key)
+                .filter(|(path, _)| path == &current)
+                .map(|(_, bytes)| bytes.clone());
+            if let Some(bytes) = cached {
+                return Ok(Reply {
+                    status: 200,
+                    mime: "application/json; charset=utf-8",
+                    bytes,
+                });
             }
+            // 重い生成中は共有ロックを保持しない。別カタログの取得を妨げない。
+            let database = Database::open_path(&current)?;
+            let value = if category == "motion-choices" {
+                kbcs_data::motions::choices(&database, &self.region, &motion_kind)?
+            } else if category == "effects" {
+                kbcs_data::effects::catalog(&database)?
+            } else if category == "enemies" {
+                kbcs_data::enemies::catalog(&database, &self.region)?
+            } else if category == "stages" {
+                if let Some(map) = map.as_deref() {
+                    kbcs_data::stages::catalog_map(&database, &self.region, Some(map))?
+                } else {
+                    kbcs_data::stages::search_catalog(&database, &self.region)?
+                }
+            } else {
+                kbcs_data::view::catalog(&database, &self.region)?
+            };
+            let bytes = serde_json::to_vec(&value)?;
+            self.catalog
+                .lock()
+                .map_err(|_| anyhow::anyhow!("表示キャッシュロック失敗"))?
+                .insert(key, (current, bytes.clone()));
             return Ok(Reply {
                 status: 200,
                 mime: "application/json; charset=utf-8",
-                bytes: cache
-                    .get(&key)
-                    .map(|(_, bytes)| bytes.clone())
-                    .unwrap_or_default(),
+                bytes,
             });
         }
         if let Some(logical) = path.strip_prefix("/api/asset/") {
@@ -491,7 +711,7 @@ fn native_calculation_service_contract() {
         let reply = service.handle("POST", "/api/calculate", &body);
         assert_eq!(reply.status, 200);
         let result: Value = serde_json::from_slice(&reply.bytes).unwrap();
-        assert_eq!(result["abi"], 2);
+        assert_eq!(result["abi"], 3);
         assert_eq!(result["ruleset"], 1507021);
         assert_eq!(result[key].as_array().unwrap().len(), rows.len());
         for (row, output) in rows.iter().zip(result[key].as_array().unwrap()) {
@@ -523,6 +743,18 @@ fn native_calculation_service_contract() {
             400
         );
     }
+    let reply = service.handle(
+        "POST",
+        "/api/motion-pose",
+        br#"{"kind":"unit","id":0,"resource":"body","clip":"02","frames":[],"facing":1}"#,
+    );
+    assert_eq!(reply.status, 400);
+    assert!(
+        serde_json::from_slice::<Value>(&reply.bytes).unwrap()["error"]
+            .as_str()
+            .unwrap()
+            .contains("表示フレーム")
+    );
     // ルートとPODの両方で未知項目を拒否し、DBを開かず検査できる。
     for body in [br#"{"unknown":[]}"#.as_slice(), br#"{"enemyStats":[{"base":0,"rowPercent":100,"crownPercent":100,"crystalMax":0,"crystalTreasure":0,"castleAttack":0,"unknown":1}]}"#] {
         assert_eq!(service.handle("POST", "/api/calculate", body).status, 400);

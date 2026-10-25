@@ -138,3 +138,6 @@ python research/verify/stages.py --assets D:/KBC/KBC-rakv0-assets --python-libs 
 0.1.13はinventory.pyで実所持数の加算・変換・上限、ex_transition.pyで実RNGを含むEX抽選を照合する。event_rewards.pyは専用保存番号、stage_score.pyは保存番号なしのスキップと時計を追加。[関係と制限](../native/kbcs-core/docs/inventory-ex.md)。
 
 0.1.14の[39000番台までの共通入口・実測・未確認範囲](docs/stages/all-bands.md)。stage_source、stage::Row::decode、experience::stageを追加。原本の分類とファイル選択を、専用戦闘ランタイムの完成と混同しない。
+
+
+[JP15.7.2の音源経路](docs/audio-1572.md)はSound_setting、APK同梱音源、内部保存音源、追加ZIPのURL生成の静的追跡。KBCSのBGM補完と同版原本の採用を区別する。

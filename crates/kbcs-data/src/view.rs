@@ -161,7 +161,7 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
             })
             .map(|combo| combo.id)
             .collect();
-        units.push(json!({"id":summary.id,"aliases":[aliases],"rarity":summary.rarity,"maxLevel":original.max_level,"plusLevel":original.plus_level,"growth":growth.len()-1,"forms":forms,"talents":talents,"combos":unit_combos,"evolution":evolution,"acquisition":acquisition,"isSpirit":original.is_spirit,"kind":if original.is_spirit{"spirit"}else{&kind}}));
+        units.push(json!({"id":summary.id,"aliases":[aliases],"rarity":summary.rarity,"orbSlots":crate::equipment::capacity(&metadata["version"],summary.id)?,"maxLevel":original.max_level,"plusLevel":original.plus_level,"growth":growth.len()-1,"forms":forms,"talents":talents,"combos":unit_combos,"evolution":evolution,"acquisition":acquisition,"isSpirit":original.is_spirit,"kind":if original.is_spirit{"spirit"}else{&kind}}));
     }
     let mut summoners: BTreeMap<u32, Vec<(u32, usize, String)>> = BTreeMap::new();
     for unit in &units {

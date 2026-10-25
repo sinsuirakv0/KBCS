@@ -5,6 +5,10 @@ use std::{
     collections::BTreeMap,
     path::{Component, Path, PathBuf},
     process::Command,
+    sync::{
+        Mutex,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+    },
     time::Duration,
 };
 
@@ -119,6 +123,8 @@ pub struct Source {
     agent: ureq::Agent,
     pub revision: String,
     pub origin: String,
+    cache: Option<PathBuf>,
+    previous: Option<Mutex<crate::store::Database>>,
 }
 
 impl Source {
@@ -159,6 +165,8 @@ impl Source {
                 agent,
                 revision,
                 origin: location.into(),
+                cache: None,
+                previous: None,
             })
         } else {
             let root = Path::new(location)
@@ -183,11 +191,68 @@ impl Source {
                 agent,
                 revision,
                 origin: location.into(),
+                cache: None,
+                previous: None,
             })
         }
     }
 
+    pub fn open_cached(location: &str, root: &Path, region: &str) -> Result<Self> {
+        let mut source = Self::open(location)?;
+        let cache = root.join("assets");
+        std::fs::create_dir_all(cache.join("objects"))?;
+        source.cache = Some(cache);
+        source.previous = crate::store::Database::open(root, region)
+            .ok()
+            .map(Mutex::new);
+        Ok(source)
+    }
+
+    fn save_cache(&self, path: &Path, bytes: &[u8]) -> Result<()> {
+        static NEXT: AtomicUsize = AtomicUsize::new(0);
+        std::fs::create_dir_all(path.parent().context("キャッシュ保存先なし")?)?;
+        let temporary = path.with_extension(format!(
+            "{}-{}.tmp",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let result = (|| -> Result<()> {
+            std::fs::write(&temporary, bytes)?;
+            // キャッシュは検証してから使う。電源断で不完全でも次回取り直せる。
+            std::fs::rename(&temporary, path)?;
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = std::fs::remove_file(&temporary);
+        }
+        result
+    }
+
     pub fn read(&self, name: &str) -> Result<Vec<u8>> {
+        safe_path(name)?;
+        let path = self
+            .cache
+            .as_ref()
+            .filter(|_| matches!(self.location, Location::Remote(_)))
+            .map(|root| {
+                root.join("repositories")
+                    .join(hash(self.origin.as_bytes()))
+                    .join(&self.revision)
+                    .join(name)
+            });
+        if let Some(path) = &path
+            && let Ok(bytes) = std::fs::read(path)
+        {
+            return Ok(bytes);
+        }
+        let bytes = self.read_original(name)?;
+        if let Some(path) = path {
+            self.save_cache(&path, &bytes)?;
+        }
+        Ok(bytes)
+    }
+
+    fn read_original(&self, name: &str) -> Result<Vec<u8>> {
         safe_path(name)?;
         match &self.location {
             Location::Local(root) => {
@@ -206,14 +271,110 @@ impl Source {
                 .body_mut()
                 .with_config()
                 .limit(64 * 1024 * 1024)
-                .read_to_vec()?),
+                .read_to_vec()
+                .with_context(|| format!("原本の受信失敗: {name}"))?),
         }
     }
 
     pub fn checked(&self, descriptor: &Descriptor) -> Result<Vec<u8>> {
-        let bytes = self.read(&descriptor.path)?;
+        self.checked_named(descriptor, &descriptor.path)
+    }
+
+    pub fn checked_named(&self, descriptor: &Descriptor, logical: &str) -> Result<Vec<u8>> {
+        ensure!(
+            descriptor.sha256.len() == 64
+                && descriptor.sha256.bytes().all(|b| b.is_ascii_hexdigit()),
+            "不正な原本SHA-256"
+        );
+        let path = self
+            .cache
+            .as_ref()
+            .map(|root| root.join("objects").join(&descriptor.sha256));
+        let remote = matches!(self.location, Location::Remote(_));
+        // ローカルの開発用原本は毎回検証し、変更をキャッシュで隠さない。
+        if remote {
+            if let Some(path) = &path
+                && let Ok(bytes) = std::fs::read(path)
+                && verify(&bytes, descriptor).is_ok()
+            {
+                return Ok(bytes);
+            }
+            if let Some(previous) = &self.previous {
+                let bytes = previous
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("保存済み原本のロック失敗"))?
+                    .connection
+                    .query_row(
+                        "SELECT bytes FROM source_file WHERE path=? AND sha256=?",
+                        rusqlite::params![logical, descriptor.sha256],
+                        |row| row.get::<_, Vec<u8>>(0),
+                    )
+                    .ok();
+                if let Some(bytes) = bytes.filter(|bytes| verify(bytes, descriptor).is_ok()) {
+                    if let Some(path) = &path {
+                        self.save_cache(path, &bytes)?;
+                    }
+                    return Ok(bytes);
+                }
+            }
+        }
+        let bytes = self.read_original(&descriptor.path)?;
         verify(&bytes, descriptor)?;
+        if let Some(path) = path {
+            self.save_cache(&path, &bytes)?;
+        }
         Ok(bytes)
+    }
+
+    pub fn prefetch(
+        &self,
+        dataset: &Dataset,
+        paths: &[String],
+        progress: &(impl Fn(String) + Sync),
+    ) -> Result<()> {
+        if !matches!(self.location, Location::Remote(_)) || self.cache.is_none() {
+            return Ok(());
+        }
+        let next = AtomicUsize::new(0);
+        let complete = AtomicUsize::new(0);
+        let failed = AtomicBool::new(false);
+        std::thread::scope(|scope| {
+            let workers: Vec<_> = (0..8.min(paths.len()))
+                .map(|_| {
+                    scope.spawn(|| -> Result<()> {
+                        loop {
+                            if failed.load(Ordering::Relaxed) {
+                                break;
+                            }
+                            let index = next.fetch_add(1, Ordering::Relaxed);
+                            let Some(path) = paths.get(index) else {
+                                break;
+                            };
+                            let result = dataset
+                                .files
+                                .get(path)
+                                .context("取得対象が索引にありません")
+                                .and_then(|descriptor| self.checked_named(descriptor, path));
+                            if let Err(error) = result {
+                                failed.store(true, Ordering::Relaxed);
+                                return Err(error);
+                            }
+                            let count = complete.fetch_add(1, Ordering::Relaxed) + 1;
+                            if count.is_multiple_of(200) || count == paths.len() {
+                                progress(format!("原本を保存: {count}/{}", paths.len()));
+                            }
+                        }
+                        Ok(())
+                    })
+                })
+                .collect();
+            for worker in workers {
+                worker
+                    .join()
+                    .map_err(|_| anyhow::anyhow!("原本取得workerが終了しました"))??;
+            }
+            Ok(())
+        })
     }
 
     pub fn dataset(&self, region: &str) -> Result<Dataset> {
@@ -300,4 +461,61 @@ pub struct Dataset {
     pub files: BTreeMap<String, Descriptor>,
     pub characters: Vec<Character>,
     pub proofs: Vec<(String, Vec<u8>)>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn original_cache_reuses_database_and_repairs_corruption() -> Result<()> {
+        let root = std::env::temp_dir().join(format!(
+            "kbcs-original-cache-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(root.join("objects"))?;
+        let result = (|| -> Result<()> {
+            let bytes = b"saved original";
+            let descriptor = Descriptor {
+                path: "jp/server/original.csv".into(),
+                sha256: hash(bytes),
+                size: bytes.len() as u64,
+                source_kind: "server".into(),
+            };
+            let connection = rusqlite::Connection::open_in_memory()?;
+            connection.execute_batch(
+                "CREATE TABLE source_file(path TEXT PRIMARY KEY,sha256 TEXT,bytes BLOB)",
+            )?;
+            connection.execute(
+                "INSERT INTO source_file VALUES (?,?,?)",
+                rusqlite::params!["Data/unit.csv", descriptor.sha256, bytes.as_slice()],
+            )?;
+            // 到達不能な接続先でも保存済み原本だけで取得できることを確認する。
+            let mut source = Source {
+                location: Location::Remote("http://127.0.0.1:1".into()),
+                agent: ureq::Agent::new_with_defaults(),
+                revision: "test".into(),
+                origin: "test".into(),
+                cache: Some(root.clone()),
+                previous: Some(Mutex::new(crate::store::Database { connection })),
+            };
+            let path = root.join("objects").join(&descriptor.sha256);
+            std::fs::write(&path, b"corrupt")?;
+            assert_eq!(source.checked_named(&descriptor, "Data/unit.csv")?, bytes);
+            source.previous = None;
+            assert_eq!(source.checked_named(&descriptor, "Data/unit.csv")?, bytes);
+            assert_eq!(std::fs::read(path)?, bytes);
+            let invalid = Descriptor {
+                sha256: "../invalid".into(),
+                ..descriptor
+            };
+            assert!(source.checked(&invalid).is_err());
+            Ok(())
+        })();
+        std::fs::remove_dir_all(root)?;
+        result
+    }
 }

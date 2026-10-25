@@ -13,7 +13,7 @@ pub(crate) fn import(
     source: &Source,
     dataset: &Dataset,
     connection: &Connection,
-    progress: &impl Fn(String),
+    progress: &(impl Fn(String) + Sync),
 ) -> Result<()> {
     let mut statement =
         connection.prepare("SELECT motion_path FROM form UNION SELECT motion_path FROM enemy")?;
@@ -48,6 +48,23 @@ pub(crate) fn import(
             paths.insert(path.clone());
         }
     }
+    let mut downloads = paths.clone();
+    for path in &paths {
+        if let Some(stem) = path
+            .strip_prefix("ImageData/")
+            .and_then(|p| p.strip_suffix(".imgcut"))
+        {
+            let image = format!("Number/{stem}.png");
+            if dataset.files.contains_key(&image) {
+                downloads.insert(image);
+            }
+        }
+    }
+    source.prefetch(
+        dataset,
+        &downloads.into_iter().collect::<Vec<_>>(),
+        progress,
+    )?;
     let mut count = 0;
     for path in paths {
         read_asset(source, dataset, connection, &path)?;
@@ -71,6 +88,14 @@ pub(crate) fn import(
 }
 
 pub(crate) fn descriptor(database: &Database, path: &str, role: &str) -> Result<Value> {
+    if path.ends_with(".png") {
+        // 画像本体はasset要求で読む。manifestのためにBLOBを複製しない。
+        return Ok(database.connection.query_row(
+            "SELECT original_path,source_kind,sha256,length(bytes) FROM source_file WHERE path=?",
+            [path],
+            |r| Ok(json!({"path":path,"role":role,"original":r.get::<_,String>(0)?,"sourceKind":r.get::<_,String>(1)?,"sha256":r.get::<_,String>(2)?,"size":r.get::<_,i64>(3)?,"text":null})),
+        )?);
+    }
     let (original, kind, sha, bytes) = database.source(path)?;
     Ok(
         json!({"path":path,"role":role,"original":original,"sourceKind":kind,"sha256":sha,"size":bytes.len(),"text":if path.ends_with(".png"){None}else{Some(String::from_utf8(bytes)?)}}),
@@ -187,4 +212,47 @@ fn resource(
     Ok(Some(
         json!({"key":key,"stem":stem,"image":image,"cut":cut,"model":model,"animations":animations}),
     ))
+}
+
+// モーション選択に必要な名前と形態だけを読み、数値・本能・コンボを生成しない。
+pub fn choices(database: &Database, region: &str, kind: &str) -> Result<Value> {
+    ensure!(
+        kind == "unit" || kind == "enemy",
+        "モーション種別が不正です"
+    );
+    let mut entries = Vec::new();
+    if kind == "unit" {
+        let mut statement = database.connection.prepare(
+            "SELECT unit_id,form_index,name FROM form WHERE region=? ORDER BY unit_id,form_index",
+        )?;
+        let rows = statement.query_map([region], |r| {
+            Ok((
+                r.get::<_, u32>(0)?,
+                r.get::<_, u32>(1)?,
+                r.get::<_, String>(2)?,
+            ))
+        })?;
+        let mut current = None;
+        for row in rows {
+            let (id, index, name) = row?;
+            if current != Some(id) {
+                entries.push(json!({"id":id,"name":name,"forms":[]}));
+                current = Some(id);
+            }
+            entries.last_mut().unwrap()["forms"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"index":index,"name":name}));
+        }
+    } else {
+        let mut statement = database
+            .connection
+            .prepare("SELECT id,name FROM enemy WHERE region=? ORDER BY id")?;
+        for row in statement.query_map([region], |r| {
+            Ok(json!({"id":r.get::<_,u32>(0)?,"name":r.get::<_,String>(1)?}))
+        })? {
+            entries.push(row?);
+        }
+    }
+    Ok(json!({"metadata":database.metadata()?,"entries":entries}))
 }

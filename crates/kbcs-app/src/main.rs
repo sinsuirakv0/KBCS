@@ -2,6 +2,8 @@
 
 #[cfg(windows)]
 mod desktop;
+mod motion_pose;
+mod scene;
 mod service;
 
 use anyhow::{Context, Result};
@@ -45,7 +47,7 @@ fn main() -> Result<()> {
         .map(PathBuf::from)
         .unwrap_or_else(default_data_dir);
     let region = option("--region").unwrap_or_else(|| "jp".into());
-    let source = option("--assets").unwrap_or_else(|| "../KBC-rakv0-assets".into());
+    let source = option("--assets").unwrap_or_else(|| kbcs_data::DEFAULT_SOURCE.into());
     match arguments.first().map(String::as_str) {
         Some("import") => println!(
             "{}",
@@ -78,7 +80,7 @@ fn main() -> Result<()> {
             println!("C++ ABI: {}", kbcs_bridge::abi_version());
         }
         Some("--help") | Some("help") => println!(
-            "kbcs [import|list|show|verify|catalog|motion|preview] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
+            "kbcs [import|list|show|verify|catalog|motion|scene|preview] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
         ),
         Some("preview") => service::serve(
             root,
@@ -86,6 +88,31 @@ fn main() -> Result<()> {
             source,
             &option("--bind").unwrap_or_else(|| "127.0.0.1:4817".into()),
         )?,
+        Some("scene") => {
+            let database = Database::open(&root, &region)?;
+            let inputs: Vec<scene::Input> = serde_json::from_slice(&std::fs::read(
+                option("--input").context("--inputに描画条件のJSON配列を指定してください")?,
+            )?)?;
+            let mut scenes = std::collections::BTreeMap::new();
+            for input in inputs {
+                let key = input.key();
+                if !scenes.contains_key(&key) {
+                    scenes.insert(key.clone(), scene::Scene::new(&database, &input)?);
+                }
+                let value = scenes.get_mut(&key).unwrap().draw(&database, &input)?;
+                let value = if arguments.iter().any(|s| s == "--summary") {
+                    serde_json::json!({"background":input.background,"frame":input.frame,
+                        "commands":value["commands"].as_array().map(Vec::len),
+                        "missing":value["missing"],"issues":value["issues"],"core":value["core"]})
+                } else {
+                    value
+                };
+                println!("{}", serde_json::to_string(&value)?);
+                if scenes.len() > 16 {
+                    scenes.clear();
+                }
+            }
+        }
         Some("motion") => {
             let database = Database::open(&root, &region)?;
             let value = if option("--kind").as_deref() == Some("effect") {
@@ -110,6 +137,7 @@ fn main() -> Result<()> {
                 None | Some("units") => kbcs_data::view::catalog(&database, &region)?,
                 Some("enemies") => kbcs_data::enemies::catalog(&database, &region)?,
                 Some("stages") => kbcs_data::stages::catalog(&database, &region)?,
+                Some("stage-index") => kbcs_data::stages::search_catalog(&database, &region)?,
                 Some("effects") => kbcs_data::effects::catalog(&database)?,
                 Some(value) => anyhow::bail!("未知のデータ種別: {value}"),
             };

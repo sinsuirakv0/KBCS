@@ -99,6 +99,9 @@ fn source(root: &Path, region: &str) -> Result<()> {
     unit_row.resize(119, "");
     unit_row[118] = "50";
     let data = [
+        ("Data/bg.csv","id,r,g,b,r,g,b,r,g,b,r,g,b,cut,top\n1001,0,0,0,0,0,0,0,0,0,0,0,0,0,0".into()),
+        ("Data/bg1001.json",String::new()),
+        ("ImageData/bg00.imgcut","[imgcut]\n0\nunused.png\n1\n0,0,1,1".into()),
         ("Data/t_unit.csv",[reserved.clone(),reserved.clone(),enemy.join(","),reserved].join("\n")),
         ("res/Enemyname.tsv","わんこ".into()),
         ("res/EnemyPictureBook_ja.csv","名前,説明<br>検証".into()),
@@ -262,8 +265,16 @@ fn import_is_offline_repeatable_region_safe_and_preserves_old_db_on_failure() ->
     commit(&assets);
     let first = import::import(assets.to_str().unwrap(), &root, "jp", |_| {})?;
     let old = Database::open(&root, "jp")?;
+    assert_eq!(
+        kbcs_data::stage_media::scene_source(&old, 1001)?["files"]["Data/bg1001.json"],
+        ""
+    );
     let motion = kbcs_data::motions::manifest(&old, "jp", "unit", 0, 0)?;
     assert_eq!(motion["body"]["image"], "Number/000_f.png");
+    let choices = kbcs_data::motions::choices(&old, "jp", "unit")?;
+    assert_eq!(choices["entries"][0]["id"], 0);
+    assert_eq!(choices["entries"][0]["forms"][0]["index"], 0);
+    assert!(kbcs_data::motions::choices(&old, "jp", "effect").is_err());
     assert!(
         motion["files"]
             .as_array()
@@ -337,6 +348,33 @@ fn import_is_offline_repeatable_region_safe_and_preserves_old_db_on_failure() ->
     assert_eq!(enemies[1].name, "敵 1");
     assert_eq!(enemies[1].attack_cycle, None);
     let stages = kbcs_data::stages::catalog(&old, "jp")?;
+    let index = kbcs_data::stages::search_catalog(&old, "jp")?;
+    let canonical = |mut value: Value| {
+        for stage in value["stages"].as_array_mut().unwrap() {
+            for key in [
+                "spawns",
+                "rawHeader",
+                "rawSettings",
+                "rawRewards",
+                "source",
+                "metadataRow",
+            ] {
+                stage.as_object_mut().unwrap().remove(key);
+            }
+            if let Some(flags) = stage["flags"].as_array_mut() {
+                flags.sort_by_key(Value::to_string);
+            }
+            if let Some(patterns) = stage["patterns"].as_array_mut() {
+                for pattern in patterns {
+                    if let Some(flags) = pattern["flags"].as_array_mut() {
+                        flags.sort_by_key(Value::to_string);
+                    }
+                }
+            }
+        }
+        value
+    };
+    assert_eq!(canonical(index), canonical(stages.clone()));
     assert_eq!(stages["maps"][0]["stars"], json!([100, 150, 200, 300]));
     assert_eq!(stages["maps"][0]["limits"][0]["rarities"], 6);
     let stage = &stages["stages"][0];

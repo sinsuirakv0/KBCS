@@ -1,0 +1,40 @@
+﻿.sortie-header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border-color,#63728a);padding-bottom:12px}.sortie-header h1{font-size:22px;margin:4px 0}.sortie-map{font-size:12px;color:#a9bbd0}.sortie-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:12px}.sortie-panel{border:1px solid #63728a;padding:14px;min-width:0}.sortie-panel h2{font-size:15px;margin:0 0 12px}.sortie-panel label{display:flex;gap:10px;align-items:center;margin:10px 0}.sortie-crowns{display:flex;gap:6px}.sortie-crowns button{display:flex;align-items:center;gap:5px;padding:6px 10px}.sortie-crowns [aria-pressed=true]{background:#294365;border-color:#dfb74d}.sortie-enemies{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}.sortie-enemy{display:flex;gap:8px;align-items:center;font-size:13px;border:1px solid #4a5c76;padding:8px}.sortie-formation{display:grid;max-width:550px;grid-template-columns:repeat(5,1fr);gap:4px;margin:12px 0}.sortie-unit-icon{width:100%;height:auto;aspect-ratio:110/85;overflow:hidden;display:block;background:#23334c}.sortie-slot-empty{border:1px solid #4a5c76;aspect-ratio:110/85;display:grid;place-items:center;color:#8491a7}.sortie-items{display:grid;grid-template-columns:1fr 1fr;gap:4px}.sortie-items label{border:1px solid #4a5c76;padding:7px;margin:0;gap:5px;font-size:12px}.sortie-items input{width:auto;flex-shrink:0}.sortie-items img{width:27px;height:27px;object-fit:contain}.sortie-summary{display:grid;grid-template-columns:1fr auto;gap:5px;font-size:13px}.sortie-summary dt,.sortie-summary dd{margin:0}.sortie-launch{width:100%;padding:12px;margin-top:12px;font-size:18px;font-weight:bold;background:#c99d35;color:#101620;border:1px solid #ffdc7c}.sortie-message{font-size:12px;min-height:1.5em}.sortie-stage-list{display:flex;flex-direction:column;gap:3px}.sortie-stage-list button{text-align:left;padding:9px}.sortie-stage-list [aria-current=true]{background:#294365;border-color:#dfb74d}.sortie-blackout{position:fixed;inset:0;z-index:10000;background:#000;color:#fff;display:grid;place-items:center}.sortie-blackout[hidden],.sortie-initial[hidden]{display:none}.sortie-blackout>div{width:min(360px,85vw);text-align:center}.sortie-blackout progress{width:100%;margin:15px 0}.sortie-initial{margin-top:16px;border:1px solid #63728a}.sortie-initial canvas{display:block;width:100%;aspect-ratio:3/2;background:#000}.sortie-initial-bar{display:flex;justify-content:space-between;gap:12px;padding:10px;font-size:13px}.sortie-status-error{color:#ff9e9e}@media(max-width:850px){.sortie-layout{grid-template-columns:1fr}.sortie-enemies{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+
+#sortie-options>label:has(#sortie-formation){display:grid;grid-template-columns:minmax(0,1fr) auto}
+#sortie-options select{min-width:0;max-width:100%}
+#sortie-options>details{font-size:12px}
+#sortie-restricted,#sortie-limit-summary{color:var(--color-accent);font-size:12px}
+#sortie-limit-summary:empty{display:none}
+#sortie-enemies{margin-top:8px}
+.workspace-right #sortie-details{padding:0;border:0;font-size:12px}
+#sortie-details h2{border-bottom:1px solid var(--color-border);padding:8px 0;margin:0 0 8px}
+#sortie-details .sortie-summary{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#sortie-details dd{text-align:right;overflow-wrap:anywhere}
+#sortie-details .stage-sheet{table-layout:fixed}
+#sortie-details .stage-sheet th,#sortie-details .stage-sheet td{display:block;width:auto;overflow-wrap:anywhere}
+#sortie-details .stage-sheet td{border-top:0}
+#sortie-details pre{white-space:pre-wrap;overflow-wrap:anywhere}
+#sortie-details .stage-media{grid-template-columns:minmax(0,1fr) 60px}
+#sortie-details .stage-music{grid-column:1/-1;border-left:0;border-top:1px solid var(--color-border)}
+#sortie-details .stage-media-castle>img{max-width:100%;height:64px}
+@container kbcs-content (min-width:620px){.sortie-items{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.workspace-battle #sortie-stage-navigation,.workspace-battle #sortie-details,.workspace-battle .workspace-panel-content>button{display:none}
+.workspace-battle .page-main{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.workspace-battle #sortie-content{flex:1;min-height:0;display:flex;flex-direction:column}
+.workspace-battle #sortie-message{display:none}
+.battle-screen{display:flex;flex:1;min-height:0;flex-direction:column;background:#000}
+.battle-screen[hidden],.battle-menu[hidden]{display:none}
+.battle-stage{position:relative;display:flex;flex:1;min-height:0;align-items:center;justify-content:center;overflow:hidden;container-type:size}
+.battle-stage canvas{display:block;width:min(100cqw,150cqh);height:auto;object-fit:fill;touch-action:none;user-select:none}
+.battle-menu{position:absolute;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.battle-menu h2{color:#fff;font-size:26px;margin:0 0 8px}
+.battle-menu button{min-width:240px;padding:10px;background:#f6bf19;color:#181100;border:3px solid #161100;border-radius:10px;font-weight:bold}
+.battle-toolbar{display:flex;align-items:center;gap:8px;flex-shrink:0;padding:4px 8px;border-top:1px solid var(--color-border);background:var(--color-surface);font-size:12px}
+.battle-toolbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.workspace-battle .page-main{position:relative}
+.workspace-battle .sortie-blackout{position:absolute}
+
+/* 操作はC++の矩形とCanvasへ統一し、同じ操作をキーボードにも公開する。 */
+.battle-menu{inset:auto;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;border:0;gap:0}

@@ -10,6 +10,7 @@ export function readPageParams(page){
   let params=new URLSearchParams();
   try{params=new URLSearchParams(sessionStorage.getItem(stateKey(page,route))||'');}catch{}
   const navigation=new URLSearchParams();
+  if(page==='stage-search'){params.delete('play');if(route.get('play')==='1'){params.set('play','1');navigation.set('play','1');}}
   if(page==='stage-detail'&&route.has('crown'))params.set('crown',route.get('crown'));
   if(isDetail(page))for(const key of (page==='stage-detail'?['map','stage']:['id','form']))if(route.has(key)){
     params.set(key,route.get(key));navigation.set(key,route.get(key));

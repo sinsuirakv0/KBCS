@@ -1,6 +1,8 @@
-﻿import {readPageParams,writePageParams,clearPageParams,bindDetailNavigation} from "/native-state.js";
+﻿import {readEnemySettings,writeEnemySettings} from '/native-enemy-statistics.js';
+import {prepareEnemyStatistics} from '/native-enemy-statistics.js';
+import {readPageParams,writePageParams,clearPageParams,bindDetailNavigation} from "/native-state.js";
 import {loadEnemyDatabase} from '../../shared/game/enemies.js';
-import {readEnemySettings,writeEnemySettings,enemyDetailUrl} from '../../shared/game/enemy-stats.js';
+import {enemyDetailUrl} from '../../shared/game/enemy-stats.js';
 import {escapeHtml,formatNumber,formatTime,iconChoiceHtml,bindIconHints} from '../../shared/game/database-view.js';
 import {rangeFields,selectEnemyRows} from './model.js';
 import {enemyImageHtml,enemyAttributesHtml,enemyAbilitiesHtml} from './view.js';
@@ -8,7 +10,7 @@ import {readGameSettings,initializeGameSettings} from '../../shared/browser/game
 import {createPagination} from '../../shared/browser/pagination.js';
 const element=id=>document.getElementById(id),params=readPageParams("enemy-search");
 const state={...readEnemySettings(params,readGameSettings()),query:params.get('q')||'',attributes:(params.get('attributes')||'').split(',').filter(Boolean),abilities:(params.get('abilities')||'').split(',').filter(Boolean),attributeMode:params.get('attributeMode')==='all'?'all':'any',abilityMode:params.get('abilityMode')==='any'?'any':'all',attackType:['単体','範囲'].includes(params.get('attackType'))?params.get('attackType'):'',negate:params.get('negate')==='true',ranges:Object.fromEntries(rangeFields.map(([key])=>[key,[params.get(key+'Min')||'',params.get(key+'Max')||'']])),sort:['id','name',...rangeFields.map(([key])=>key)].includes(params.get('sort'))?params.get('sort'):'id',direction:params.get('direction')==='desc'?'desc':'asc'};
-let database,rows=[],page=1;
+let database,rows=[],page=1,revision=0;
 const pagination=createPagination(element('enemy-prev').parentElement,value=>{page=value;renderRows();});
 const columns=[['id','ID'],['icon',''],['name','名前'],['attributes','属性・種族'],['abilities','特性'],['hp','体力'],['attack','攻撃力'],['dps','DPS'],['range','射程'],['knockbacks','KB'],['speed','速度'],['drop','お金'],['attackCycle','攻撃頻度'],['foreswing','攻撃発生']];
 function saveState() {
@@ -39,7 +41,7 @@ function readControls() {
   state.seconds=element('enemy-time').value==='seconds';
   for(const [key] of rangeFields)state.ranges[key]=['min','max'].map(direction=>element('enemy-'+key+'-'+direction).value);
 }
-function update(){readControls();page=1;rows=selectEnemyRows(database,state);saveState();renderRows();}
+async function update(){readControls();const current=++revision;page=1;try{await prepareEnemyStatistics(database.enemies.map(enemy=>({enemy,settings:state})));if(current!==revision)return;}catch(error){if(current===revision){element('enemy-status').textContent=error.message;element('enemy-status').hidden=false;}return;}rows=selectEnemyRows(database,state);saveState();renderRows();}
 function initialize() {
   const chips=options=>options.map(({key,label})=>iconChoiceHtml(database,{key,label,checked:(state.attributes.includes(key)||state.abilities.includes(key))})).join('');
   state.attributes=state.attributes.filter(key=>[...database.attributes,...database.species].some(item=>item.key===key));state.abilities=state.abilities.filter(key=>database.abilities.some(item=>item.key===key));

@@ -33,3 +33,32 @@
 0.1.16 / importer10：motions::importが共有済みstemの全モデル・cut・maanim・Number PNGと共通魂を保存する。manifestはキャラ/形態と原本ファイル一覧を構築する。制作PCの絶対パスを含むimgcutでもstemで画像を結ぶ回帰を、既存2取り込み試験へ追加した。公式snapshotを変更せず原本追加の再生成で公開する。
 
 0.1.17 / importer12：effects::import/catalog/manifestはその他モデルの素材所有・画像対応・原本保持を扱う。skillのパーツid、敵専用/共有maanim、最長stem、同名PNG優先/実在ヘッダー名のfallbackを既存取り込み試験へ追加。未知の対応は未確認として残す。
+
+## 0.1.18: ステージ索引の取得
+
+stages::catalog_selectionはsummary時にstage_spawn明細を生成せず、定義別の集約から敵/フラグを取得する。catalog_mapは詳細用、search_catalogは索引用、variantは対象1ステージだけを構築する。候補差替え後に定義由来のflags/damageConditionを再生成する。SQLはprepare_cachedで反復コンパイルを避ける。音楽など報酬メタデータ由来の値は定義差替えで変更しない。schema8/importer12と原本は変更していない。全6,476ステージの旧索引との正規化比較は差分0。
+
+
+## 0.1.19: 素材読込
+
+motions::choicesはform/enemyから選択肢だけを生成する。motions::descriptorはPNGの出典/SHA/length(bytes)だけを読み画像BLOBを複製しない。effects::entriesのselectedは所有関係の計算後、内容解析前にモデルを限定する。取り込みと全一覧はselected=Noneを使い従来どおり全件を扱う。
+
+
+## 0.1.20: 原本の永続保存
+
+source::open_cachedはAppDataのassetsと既存DBを参照する。checked_namedはSHAキャッシュ→既存DBの論理パス/SHA→固定commitの原本取得→検証/保存の順。prefetchは取得対象を最大8workerへ配り、失敗時にキューを止める。motions/effects/stages importerの既存の対象選定を再利用する。同一snapshotのimportは全DB検証を繰り返さず、通常の新規DB公開検証とverify CLIは維持する。
+
+## 0.1.21: ステージメディア
+
+stage_media::importがbg.csv/JSONと明示された依存、背景・城画像、モデル/分割/アニメーションを検証済みsource_fileへ保存する。annotateが城系列とBGM切替条件、scene_sourceが選択背景の原本集合、image_sizeがPNGヘッダー寸法を返す。スキーマ8、変換器13。
+
+音源は既存Webの補完索引stage-music.json（188曲）。KBC-rakv0-testの固定commit 78612d9c405dc99661b32525b482aed87ff96857を参照する。ゲーム原本音声の同版検証済みという意味ではない。stage_media::audioが初回だけ取得しAppData/assets/music/<revision>へMP3とSHAを保存し、再利用時に照合する。主データの取得元GitHub assetsとは別の補完資料である。
+
+## ユーザー編成 0.1.22
+
+公式snapshotとは別に[formations::Store](formations.md)が編成ファイルを保存する。
+
+
+## 0.1.31: APK同梱BGM
+
+[ネイティブ音源調査](../../../research/docs/audio-1572.md)のとおり、assets原本のOgg18曲をMP3補完より優先する。曲ごとの固定commit・size/SHAを索引へ持たせ、stage_media::audioは形式/実MIMEを返す。保存はAppData/assets/music/<曲のrevision>。旧MP3の保存先は維持し、公式DBの再構築は不要。source indexの今後の変更はscripts/sync-stage-music.pyで再検証する。CAFは効果音であり、BGMへ追加しない。

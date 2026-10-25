@@ -29,3 +29,15 @@ effects::import → 全定義と対応画像をhash検証保存 → effects::cat
 effect-sequence.jsはsave/motion/frontendから無変更で流用。波動/小波動はLv個の伝播、烈波/小烈波は開始15F→20×Lv→終了10F、爆波は00→01を再生する。現snapshotのData/param.tsvから小波動間隔・爆波の各Fを読み、絶対時刻で無限トラックを評価する。Lv1〜20は閲覧用制御。素材単体も選択可。戦闘の当たり判定・ダメージ・追従・音声・状態の発動/解除はこの閲覧画面で追加しない。状態演出を一律の持続時間で継ぎ合わせない。
 
 選択パーツの黄色い枠は初期非表示。右の「選択枠を表示」で必要な場合だけ切り替える。選択や表示マスク、元の描画packetには影響しない。
+
+## 0.1.19: 素材読込の待機を減らす
+
+viewer.jsは選択中の種類だけの選択肢とmanifestを並行取得する。unit/enemyの選択肢は/api/motion-choices?kind=unit|enemyで名前/ID/形態だけを読む。数値・本能・コンボを含む全カタログの生成を初期表示の前提にしない。その他の一覧は従来/api/motion-effectsを使う。種類を変えたときだけ未取得の選択肢を読む。
+
+ページ内のmanifestを最大16件、画像デコード/モデル/アニメーション解析結果を最大8件・見積32MiBで保持する。画像の見積はRGBA寸法と原本size、解析JSオブジェクトの実メモリ上限を保証する値ではない。原本SHAとresourceをキーにし、失敗は保存しない。切替時のGPU texture解放は継続する。ページ再読込でキャッシュは消える。DBを更新したときはページを再読込する。
+
+Rustのeffects::manifestは全素材の所有関係を解決するが、model/cutの内容は選択した1素材だけ解析する。他モデル由来maanimとの最長一致ルールは維持する。PNGのdescriptorはlength(bytes)と出典だけを取得し、manifest生成のために画像BLOBを読み出さない。実画像は従来asset APIから取得する。DB/schema/importerと素材の中身は変えない。
+
+## 0.1.21: C++姿勢への接続
+
+viewer.jsの描画・自動フィットはnative-pose.js→/api/motion-pose→render::Model→kbcs_core_poseを使用する。整数フレームの頂点を16Fずつ先読みし、パーツ数に応じて上限を絞る。UIは表示マスク・画面操作・UV転送を担当する。旧evaluateMotionは選択パーツの解析表示だけに使う。KB/魂の時計は従来のC++、複数エフェクトを並べる段取りは既存effect-sequenceである。表示補間は無効にし、検証済みの整数フレームで再生する。

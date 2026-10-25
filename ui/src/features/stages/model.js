@@ -30,6 +30,7 @@ export function selectStageRows(database,enemyDatabase,state){
   const rows=database.stages.filter(stage=>{
     const map=maps.get(stage.map);
     if(state.series&&state.series!==map.series)return false;
+    if(state.crown>map.stars.length)return false;
     const name=normalizeStageQuery([stage.name,map.name,stage.id,map.key,series.get(map.series)].join(' '));
     if(!terms.every(term=>/^\d+$/.test(term)?map.nativeId===Number(term):/^\d+-\d+$/.test(term)?map.nativeId===Number(term.split('-')[0])&&stage.index===Number(term.split('-')[1]):name.includes(term.replace('_','-'))))return false;
     if(!matches(state.gimmicks,stage.flags,true))return false;
@@ -47,7 +48,8 @@ export function selectStageRows(database,enemyDatabase,state){
     const attributes=[...new Set(present.flatMap(enemy=>[...enemy.attributes,...enemy.species]))];
     if(!matches(state.attributes,attributes,state.attributeMode==='all'))return false;
     if(state.attributesOnly&&state.attributes.length&&attributes.some(key=>!state.attributes.includes(key)))return false;
-    if(!matches(state.gimmicks,pattern.flags,true))return false;
+    const flags=state.crown?[...pattern.flags.filter(flag=>flag!=='restriction'),...(applicableLimits(map,stage,state.crown).length?['restriction']:[])]:pattern.flags;
+    if(!matches(state.gimmicks,flags,true))return false;
     if(background.length&&!background.includes(pattern.background))return false;
     const width=state.ranges.width||[];if(width.some((value,index)=>value!==''&&value!=null&&(pattern.width==null||(index===0?pattern.width<Number(value):pattern.width>Number(value)))))return false;
     return true;
@@ -56,7 +58,7 @@ export function selectStageRows(database,enemyDatabase,state){
     if(music.length&&!stage.music.some(id=>music.includes(id)))return false;
     for(const [key]of stageRanges.filter(([key])=>key!=='width'))for(const [index,value]of (state.ranges[key]||[]).entries())if(value!==''&&value!=null&&(stage[key]==null||(index===0?stage[key]<Number(value):stage[key]>Number(value))))return false;
     return true;
-  }).map(stage=>({stage,map:maps.get(stage.map)}));
+  }).map(stage=>{const map=maps.get(stage.map);return {stage:state.crown?{...stage,flags:[...stage.flags.filter(flag=>flag!=='restriction'),...(applicableLimits(map,stage,state.crown).length?['restriction']:[])]}:stage,map};});
   if(state.sort==='id')return state.direction==='desc'?rows.reverse():rows;
   const direction=state.direction==='desc'?-1:1;
   return rows.sort((a,b)=>{

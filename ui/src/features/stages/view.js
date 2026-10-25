@@ -1,7 +1,8 @@
-﻿import {escapeHtml,formatNumber,formatTime} from '../../shared/game/database-view.js';
+﻿import {calculateEnemyStats,stageEnemySettings} from '/native-enemy-statistics.js';
+import {escapeHtml,formatNumber,formatTime} from '../../shared/game/database-view.js';
 import {enemyImageHtml,enemyAttributesHtml} from '../../shared/game/enemy-view.js';
 import {imageHtml} from '../../shared/game/unit-view.js';
-import {enemyDetailUrl,calculateEnemyStats} from '../../shared/game/enemy-stats.js';
+import {enemyDetailUrl} from '../../shared/game/enemy-stats.js';
 import {rarityNames} from '../../shared/game/unit-stats.js';
 import {applicableLimits,effectiveSpawn,stageDetailUrl} from './model.js';
 
@@ -10,7 +11,7 @@ const percent=value=>decimal.format(value)+'%';
 const row=(label,value)=>'<tr><th scope="row">'+label+'</th><td>'+value+'</td></tr>';
 const table=body=>'<table class="stage-sheet"><tbody>'+body+'</tbody></table>';
 export function stageSummaryHtml(stage,map,crown=1,settings={seconds:true},enemies){
-  const seconds=settings.seconds,spawn=stage.spawns.find(spawn=>spawn.enemy===stage.enemyCastle),enemy=spawn&&enemies?.enemies[spawn.enemy],options=spawn?{...settings,...effectiveSpawn(spawn,map,crown)}:settings;
+  const seconds=settings.seconds,spawn=stage.spawns.find(spawn=>spawn.enemy===stage.enemyCastle),enemy=spawn&&enemies?.enemies[spawn.enemy],options=spawn?stageEnemySettings(spawn,map,crown,settings):settings;
   const castle=enemy?formatNumber(calculateEnemyStats(enemy,options).hp)+'<small> <a href="'+escapeHtml(enemyDetailUrl(enemy,options))+'">敵ID '+enemy.id+'</a></small>':(stage.castleHealth==null?'—':formatNumber(stage.castleHealth));
   const wideRow=(label,value)=>'<tr><th scope="row">'+label+'</th><td colspan="3">'+value+'</td></tr>';
   return '<table class="stage-sheet" aria-label="'+escapeHtml(stage.name)+'"><tbody><tr><th>統率力</th><td class="stage-number">'+formatNumber(stage.energy)+'</td><th>敵最大数</th><td class="stage-number">'+(stage.maxEnemies==null?'—':formatNumber(stage.maxEnemies))+'</td></tr><tr><th>城体力</th><td class="stage-number">'+(stage.timeLimit?'スコア制':castle)+'</td><th>ステージ幅</th><td class="stage-number">'+(stage.width==null?'—':formatNumber(stage.width))+'</td></tr><tr><th>難易度</th><td>'+(stage.difficulty==null?'—':'★'+stage.difficulty)+'</td><th>コンテニュー</th><td>'+(stage.width==null?'—':stage.noContinue?'不可':'可')+'</td></tr>'+
@@ -21,7 +22,7 @@ function unitLink(units,id,formIndex){
   const unit=units.units.find(unit=>unit.id===id),form=unit?.forms.find(form=>form.index===formIndex)||unit?.forms[0];
   return unit?'<a href="/pages/unit-detail/?id='+id+'&form='+(form?.code||'f')+'">'+imageHtml(units,form,32,25)+escapeHtml(form.name)+'</a>':'ID '+id;
 }
-function limitHtml(limit,units){
+export function limitHtml(limit,units){
   const parts=[];
   if(limit.rarities)parts.push('レア度：'+rarityNames.filter((_,index)=>limit.rarities&(1<<index)).join('・'));
   if(limit.maxUnits)parts.push('同時出撃 '+limit.maxUnits+'体まで');
@@ -31,10 +32,11 @@ function limitHtml(limit,units){
   return parts.join(' / ')||'指定なし';
 }
 function conditionHtml(condition,database){
-  if(condition.message)return escapeHtml(condition.message);
+  const raw='<details><summary>条件ID '+condition.code+' の判定内訳</summary><pre>'+escapeHtml(JSON.stringify(condition.group??{code:condition.code,minStage:condition.minStage},null,2))+'</pre></details>';
+  if(condition.message)return escapeHtml(condition.message)+raw;
   const codes=condition.group?.condition||[condition.code];
   const values=codes.map(code=>{const value=Math.abs(code),type=Math.floor(value/100000),map=database.maps.find(map=>map.nativeId===value%100000);return map?'<a href="/pages/stage-search/?q='+map.key+'">'+escapeHtml(map.name)+'</a> '+(code<0?'未達成':'クリア')+(condition.group?.stage!=null?'（ステージ'+(condition.group.stage+1)+'）':'')+(type!==1&&type!==3?' <span class="db-meta">条件区分'+type+'</span>':''):'条件ID '+code;});
-  return values.join(' / ')+(condition.group?.count?'（'+condition.group.count+'条件以上）':'');
+  return values.join(' / ')+(condition.group?.count?'（'+condition.group.count+'条件以上）':'')+raw;
 }
 function ruleValueHtml(rule,seconds){
   const p=rule.parameters,rarities=values=>values.map((value,index)=>rarityNames[index]+' '+value).join(' / ');
@@ -54,11 +56,11 @@ function ruleValueHtml(rule,seconds){
     default:return '<details><summary>データ内の設定値</summary><span class="db-meta">ルールID '+rule.id+' / '+p.join(', ')+'</span></details>';
   }
 }
-export function stageRulesHtml(database,stage,map,crown,units,seconds,{includeMap=true}={}){
-  const limits=applicableLimits(map,stage,crown).filter(limit=>includeMap||limit.stage>=0),conditions=map.conditions.filter(condition=>(includeMap||condition.minStage!=null)&&(condition.minStage==null||stage.index>=condition.minStage));
+export function stageRulesHtml(database,stage,map,crown,units,seconds,{includeMap=true,selectedLimits=applicableLimits(map,stage,crown),showOtherCrowns=true}={}){
+  const limits=selectedLimits.filter(limit=>includeMap||limit.stage>=0),conditions=map.conditions.filter(condition=>(includeMap||condition.minStage!=null)&&(condition.minStage==null||stage.index>=condition.minStage));
   const other=map.stars.flatMap((_,index)=>index+1===crown?[]:applicableLimits(map,stage,index+1).filter(limit=>includeMap||limit.stage>=0).map(limit=>({crown:index+1,limit})));
   const body=((includeMap||limits.length)?row('出撃制限',limits.length?limits.map(limit=>limitHtml(limit,units)).join('<br>'):'この冠の指定なし'):'')+
-    (other.length?row('他の冠','<details><summary>出撃制限を確認</summary>'+other.map(({crown,limit})=>'<div>'+crown+'冠：'+limitHtml(limit,units)+'</div>').join('')+'</details>'):'')+
+    (showOtherCrowns&&other.length?row('他の冠','<details><summary>出撃制限を確認</summary>'+other.map(({crown,limit})=>'<div>'+crown+'冠：'+limitHtml(limit,units)+'</div>').join('')+'</details>'):'')+
     (includeMap&&map.rules.length?row('特殊ルール','<details><summary>'+escapeHtml(map.ruleName||'ルールの説明')+'</summary>'+(map.ruleDescription?'<div class="stage-description">'+escapeHtml(map.ruleDescription)+'</div>':'')+'<ul>'+map.rules.map(rule=>'<li>'+escapeHtml(rule.label)+'：'+ruleValueHtml(rule,seconds)+'</li>').join('')+'</ul></details>'):'')+
     (includeMap&&map.scoreBonus?row('スコアボーナス','<strong>'+escapeHtml(map.scoreBonus.name)+'</strong><div class="stage-description">'+escapeHtml(map.scoreBonus.description)+'</div>'):'')+
     (stage.pointRules?row('イベントPt','<details><summary>'+escapeHtml(stage.pointRules.name)+'</summary>'+stage.pointRules.sections.filter(section=>section.description).map(section=>'<strong>'+escapeHtml(section.name)+'</strong><div class="stage-description">'+escapeHtml(section.description)+'</div>').join('')+'</details>'):'')+
@@ -100,7 +102,7 @@ export function stageSpawnsHtml(stage,map,crown,enemyDatabase,settings,{details=
   const seconds=settings.seconds;
   const cells=stage.spawns.map((original,index)=>{
     const spawn=effectiveSpawn(original,map,crown),enemy=enemyDatabase.enemies[spawn.enemy],options={...settings,health:spawn.health,attack:spawn.attack};
-    const status=enemy?calculateEnemyStats(enemy,options):null,url=enemy?enemyDetailUrl(enemy,options):'';
+    const status=stats&&enemy?calculateEnemyStats(enemy,stageEnemySettings(original,map,crown,settings)):null,url=enemy?enemyDetailUrl(enemy,options):'';
     const range=values=>values[0]===values[1]?formatTime(values[0],seconds):values.map(value=>formatTime(value,seconds)).join('〜');
     const gate=stage.damageCondition?formatNumber(spawn.castle)+'以上':percent(spawn.castle)+'以下';
     return '<tr data-stage-spawn="'+index+'"><td class="stage-enemy-icon">'+(enemy?'<a href="'+escapeHtml(url)+'" aria-label="'+escapeHtml(enemy.name)+'の詳細">'+enemyImageHtml(enemyDatabase,enemy,28)+'</a>':'—')+'</td><td class="stage-enemy-cell">'+(enemy?'<a href="'+escapeHtml(url)+'">'+escapeHtml(enemy.name)+'</a>':'敵ID '+spawn.enemy)+(spawn.boss?'<small>ボス'+(spawn.boss===2?' / 指定2':'')+'</small>':'')+'</td><td><div class="enemy-properties">'+(enemy?enemyAttributesHtml(enemyDatabase,enemy):'')+'</div></td><td>'+percent(spawn.health)+(spawn.health!==spawn.attack?'<small>攻撃 '+percent(spawn.attack)+'</small>':'')+'</td><td>'+(spawn.count===0?'無制限':spawn.count)+'</td><td>'+gate+'</td><td>'+formatTime(spawn.first,seconds)+(spawn.afterCastle?'<small>城条件達成後</small>':'')+'</td><td>'+(spawn.count===1?'—':range(spawn.interval))+'</td>'+

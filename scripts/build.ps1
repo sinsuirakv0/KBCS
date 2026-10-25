@@ -1,7 +1,7 @@
 ﻿param(
     [string]$LlvmBin = $env:KBCS_LLVM_BIN,
     [switch]$DebugBuild,
-    [string]$OutputDirectory = '.local/dist/0.1.17'
+    [string]$OutputDirectory = '.local/dist/0.1.31'
 )
 
 $ErrorActionPreference = 'Stop'

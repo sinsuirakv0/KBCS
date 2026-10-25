@@ -7,8 +7,8 @@ const campaigns=['日本編','未来編','宇宙編'];
 const normalized=text=>String(text).normalize('NFKC').toLocaleLowerCase().replace(/\s+/g,'');
 const input=(value,max,label,attributes,min=0)=>'<input type="number" min="'+min+'" max="'+max+'" step="1" value="'+value+'" aria-label="'+escapeHtml(label)+'" '+attributes+'>';
 
-export function createSimulationSettings(host){
-  let profile=readSimulationProfile(readGameSettings());
+export function createSimulationSettings(host,options={}){
+  let profile=options.profile??readSimulationProfile(readGameSettings());
   const root=document.createElement('div');root.className='simulation-settings';
   const facilityRows=catalog.facilities.map(item=>'<div class="simulation-facility" data-facility-row="'+item.id+'" data-search="'+escapeHtml(item.name+' '+item.description)+'"><div class="simulation-facility-name" title="'+escapeHtml(item.description)+'"><img src="'+item.icon+'" alt="" width="28" height="28"><span>'+escapeHtml(item.name)+'</span></div><div class="simulation-level"><span>Lv</span>'+input(profile.facilities[item.id].level,item.maxLevel,item.name+'のレベル','data-facility="'+item.id+'" data-part="level"',1)+(item.maxPlus?'<span>＋</span>'+input(profile.facilities[item.id].plus,item.maxPlus,item.name+'の＋レベル','data-facility="'+item.id+'" data-part="plus"'):'')+'</div></div>').join('');
   const treasureSections=[];
@@ -18,6 +18,7 @@ export function createSimulationSettings(host){
   }
   root.innerHTML='<details class="simulation-section" id="simulation-facilities"><summary>施設Lv<span>10項目</span></summary><input type="search" data-facility-filter aria-label="施設を絞り込み" placeholder="施設名・効果で絞り込み"><div class="simulation-actions"><button type="button" data-preset="facility-max">表示中を最大</button><button type="button" data-preset="facility-min">表示中を初期Lv</button></div><div class="simulation-facility-list">'+facilityRows+'</div></details>'+
     '<details class="simulation-section" id="simulation-treasures"><summary>お宝<span data-treasure-count>99項目</span></summary><input type="search" data-treasure-filter aria-label="お宝を絞り込み" placeholder="お宝名・効果で絞り込み"><div class="simulation-filters"><select data-campaign-filter aria-label="お宝の編"><option value="">すべての編</option>'+campaigns.map((name,index)=>'<option value="'+index+'">'+name+'</option>').join('')+'</select><select data-chapter-filter aria-label="お宝の章"><option value="">すべての章</option><option value="1">1章</option><option value="2">2章</option><option value="3">3章</option></select></div><label class="simulation-incomplete"><input type="checkbox" data-incomplete>100%未満のみ</label><div class="simulation-actions"><button type="button" data-preset="treasure-max">絞込分を100%</button><button type="button" data-preset="treasure-min">絞込分を0%</button></div>'+treasureSections.join('')+'<p data-treasure-empty hidden>該当するお宝はありません。</p></details><p class="simulation-save-state" role="status" aria-live="polite"></p><details class="simulation-scope"><summary>現在の反映範囲</summary><p>体力・攻撃力・再生産・敵の獲得金・クリスタル・仮面は現在の表へ反映します。属性果実・土台・装飾はダメージ計算へ反映します。勉強力・経験値のお宝はステージXPへ反映します。ほかの項目も保存し、戦闘や統率力などの処理を追加するときに使います。</p><p>定義：JP '+catalog.version+'。旧合計値は1章から順に配分して引き継ぎます。</p></details>';
+  if(options.onChange)root.querySelector('.simulation-scope').remove();
   host.append(root);
   const cannon=document.createElement('details');cannon.className='simulation-section simulation-cannon';
   const cannonNames=['なし','スロウ砲','鉄壁砲','かみなり砲','水鉄砲','エンジェル砲','キャノンブレイク砲','呪い砲'];
@@ -27,8 +28,8 @@ export function createSimulationSettings(host){
   const visible=selector=>[...root.querySelectorAll(selector)].filter(row=>!row.hidden&&!row.closest('.simulation-chapter[hidden]'));
   const dispatch=()=>window.dispatchEvent(new CustomEvent('kbcs:simulation-change',{detail:deriveSimulationSettings(profile)}));
   const save=()=>{
-    const saved=writeSimulationProfile(profile);status.textContent=saved?'保存済み':'保存できませんでした';
-    if(saved)dispatch();
+    const saved=options.onChange?(options.onChange(profile),true):writeSimulationProfile(profile);status.textContent=options.onChange?'':saved?'保存済み':'保存できませんでした';
+    if(saved&&!options.onChange)dispatch();
     updateCounts();
   };
   function updateCounts(){
@@ -75,7 +76,7 @@ export function createSimulationSettings(host){
     fill();save();filterTreasures();
   });
   function fill(){for(const field of root.querySelectorAll('[data-facility],[data-treasure],[data-cannon]'))field.value=field.dataset.cannon?profile.cannon[field.dataset.cannon][field.dataset.part]:field.dataset.treasure?profile.treasures[field.dataset.treasure]:profile.facilities[field.dataset.facility][field.dataset.part];}
-  window.addEventListener('storage',event=>{if(event.key==='kbcs:simulation-profile'){profile=readSimulationProfile();fill();filterTreasures();dispatch();}});
+  if(!options.onChange)window.addEventListener('storage',event=>{if(event.key==='kbcs:simulation-profile'){profile=readSimulationProfile();fill();filterTreasures();dispatch();}});
   fill();updateCounts();
   return {open(){root.querySelector('#simulation-treasures').open=true;root.scrollIntoView({block:'nearest'});root.querySelector('[data-treasure-filter]').focus();}};
 }

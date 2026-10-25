@@ -1153,12 +1153,13 @@ dependencies = [
 
 [[package]]
 name = "kbcs-app"
-version = "0.1.17"
+version = "0.1.31"
 dependencies = [
  "anyhow",
  "include_dir",
  "kbcs-bridge",
  "kbcs-data",
+ "serde",
  "serde_json",
  "tao",
  "tiny_http",
@@ -1168,7 +1169,7 @@ dependencies = [
 
 [[package]]
 name = "kbcs-bridge"
-version = "0.1.17"
+version = "0.1.31"
 dependencies = [
  "cc",
  "serde",
@@ -1177,7 +1178,7 @@ dependencies = [
 
 [[package]]
 name = "kbcs-data"
-version = "0.1.17"
+version = "0.1.31"
 dependencies = [
  "anyhow",
  "csv",

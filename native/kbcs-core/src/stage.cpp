@@ -201,12 +201,11 @@ extern "C" uint32_t kbcs_core_stage_commit(const KbcsStageRow *rows, KbcsStageSt
   const auto &row = rows[candidate].cells;
   auto &state = states[candidate];
   if (context->global_wait > 0 || state.wait > 0 || context->active_enemies >= context->max_enemies ||
-      (row[1] != 0 && state.spawned >= row[1]) || state.kills < row[13] ||
       global_roll > (context->global_max > context->global_min ? context->global_max-context->global_min : 0) ||
       row_roll > (row[4] > row[3] ? row[4]-row[3] : 0)) return 1;
-  const bool ready=context->damage_condition ? context->castle_damage >= row[5]
-      : context->castle_hp <= (int64_t(row[5])*context->castle_max_hp)/100;
-  if (!ready) return 1;
+  // 候補は待機だけで決まる。回数上限・城条件を再検査すると原本の0待機経路を落とす。
+  for (int32_t index=candidate+1; index<count; ++index)
+    if (states[index].wait <= 0) return 1;
   if (state.spawned == INT32_MAX) return 2;
   // 敵生成の成功後だけ呼ぶ。失敗時は間隔乱数を引かず、この関数も呼ばない。
   context->global_wait = context->global_min + global_roll;

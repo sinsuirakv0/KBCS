@@ -1,6 +1,6 @@
 ﻿#include "kbcs_core.h"
 
-extern "C" uint32_t kbcs_core_abi_version(void) { return 2; }
+extern "C" uint32_t kbcs_core_abi_version(void) { return 3; }
 extern "C" uint32_t kbcs_core_ruleset_version(void) { return 1507021; }
 
 // 非負のゲーム値だけを受け、各段で整数化する。桁あふれを未定義動作にしない。

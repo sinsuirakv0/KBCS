@@ -34,7 +34,7 @@
 
 HP・速度・射程・コスト等はINTEGER、欠測可能な発生・モーション長はNULL。すべてをJSONで保存しない。`raw_cells` は列数・空欄を保持する可変拡張領域で、原本bytesも別に保持する。ゼロ、空欄、未収録列（配列の範囲外）を区別する。負値・無効値の意味を勝手に消さない。JSONのraw_cellsはコメントを除いた数値行、原本bytesにはコメント・改行・BOMも残る。
 
-`PRAGMA user_version=8` と `IMPORTER_VERSION=12` を別々に管理。公式DBは再生成方式で、未知スキーマは拒否して再取り込みを案内する。変換仕様を修正したらIMPORTER_VERSIONも上げる。同じsnapshotを黙って古い解釈で再利用しない。ユーザーDBは将来別のマイグレーション体系を設計する。現時点で自作DBの表や空実装は追加しない。
+`PRAGMA user_version=8` と `IMPORTER_VERSION=13` を別々に管理。公式DBは再生成方式で、未知スキーマは拒否して再取り込みを案内する。変換仕様を修正したらIMPORTER_VERSIONも上げる。同じsnapshotを黙って古い解釈で再利用しない。ユーザーDBは将来別のマイグレーション体系を設計する。現時点で自作DBの表や空実装は追加しない。
 
 ## フィールド対応（列番号は0始まり）
 
@@ -174,3 +174,20 @@ motions::importが取り込み済みform/enemyのmotion_pathから共有済みst
 ## その他モーション（importer12）
 
 0.1.17ではキャラ本体以外の全mamodel/maanim/imgcutと、対応が判明したImage/NumberのPNG、Data/param.tsvをsource_fileへ追加。モデルパーツidと最長stem一致からカタログを構成する。元の定義とSHAを保持し、対応不明の素材は未確認として残す。schema8を維持。effects領域の関数関係・素材対応の根拠はui/src/features/motion/docs/README.md。
+
+## 原本の永続保存（0.1.20）
+
+通常の取得元は従来のKBC-rakv0-assets GitHubリポジトリ。Releasesの加工済みDBへ変更していない。HEADを1回解決し、そのcommitに固定した原本を使う。AppData/KBCS/assets/objects/<SHA256>へ必要になった原本を保存する。取得済み原本は毎回size/SHAを検査し、壊れていれば採用しない。既存snapshotのsource_fileに同じ論理パス/SHAの原本があれば再ダウンロードせず移す。Git checkoutやexeの保存場所には依存しない。
+
+current/manifest/索引はassets/repositories/<取得元hash>/<commit>/<path>へ保存する。更新チェックではHEADだけは通信し、既存commitの索引を再利用する。新commitの索引は新たに取得する。DBのidentityは従来のrevision/buildId/manifest SHA/importer版から作り、アプリのパッケージ版は含まない。同一snapshotがあればschema/importer版を確認して再利用し、毎回の全件integrity/FK走査は省く。完全な検査はCLI verifyで行える。新規DBの公開前検証は維持する。
+
+不足するステージ定義・モーション定義/画像の既知の取得対象を最大8並列で先読みする。解析・SQLite更新は従来の単一transactionで順番に行う。1workerの失敗で残りのキュー投入を停止し、進行中の通信だけ完了を待つ。成功分の原本キャッシュは残り、次回に再利用する。生成失敗時に旧DB/公開ポインタを切り替えない。ローカル手動取り込みでは元ファイルを毎回検査し、キャッシュによって元フォルダの変更を隠さない。
+
+assetsはキャッシュであり、原本は引き続きsnapshotのsource_fileへ保持する。新規の原本版/変換器版ではDB再生成が必要。初回に存在しない素材はダウンロードが必要であり、初回の全転送時間をゼロにはしない。アプリを更新するだけなら再取得・再生成しない。保存済みDBは従来どおりネットワークなしで閲覧できる。
+
+## ユーザー編成（0.1.22）
+
+予約していたuser領域へformations.sqliteを追加した。公式DB schema8/importer13と独立したuser_version=1で、版付きJSON文書と楽観ロック用revisionを保存する。詳細は[ユーザー編成](../../crates/kbcs-data/docs/formations.md)。公式更新やアプリ配布で編成を作り直さない。
+
+
+0.1.27のunit catalogはorbSlotsを追加する。公式schema8を変更せず、採用元SHA付きData/equipmentslot.csvの同版組込み定義からキャラ別最大枠を得る。生成はscripts/sync-equipment.py、消費はequipment::capacity→view::catalog / formations::Document::validate。同版以外を推測して適用しない。
