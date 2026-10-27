@@ -114,6 +114,29 @@ pub struct SpriteInput {
     pub cut: [i32; 4],
 }
 unsafe extern "C" {
+    fn kbcs_core_pose_contact(
+        input: *const PoseInput,
+        parts: *const Part,
+        count: i32,
+        tracks: *const Track,
+        track_count: i32,
+        keys: *const Key,
+        key_count: i32,
+        out: *mut i32,
+    ) -> u32;
+    fn kbcs_core_model_contact(
+        input: *const PoseInput,
+        parts: *const Part,
+        count: i32,
+        out: *mut i32,
+    ) -> u32;
+    fn kbcs_core_motion_lengths(
+        tracks: *const Track,
+        count: i32,
+        keys: *const Key,
+        key_count: i32,
+        out: *mut i32,
+    ) -> u32;
     fn kbcs_core_scene_paint(
         input: *const PaintInput,
         layout: *mut Layout,
@@ -135,9 +158,11 @@ unsafe extern "C" {
         output: *mut Command,
     ) -> u32;
 }
-pub fn paint(input: &PaintInput) -> Result<(Layout, Vec<Command>), u32> {
+pub fn paint<'a>(
+    input: &PaintInput,
+    output: &'a mut [Command],
+) -> Result<(Layout, &'a [Command]), u32> {
     let mut layout = Layout::default();
-    let mut output = vec![Command::default(); 16384];
     let mut written = 0;
     let code = unsafe {
         kbcs_core_scene_paint(
@@ -151,8 +176,7 @@ pub fn paint(input: &PaintInput) -> Result<(Layout, Vec<Command>), u32> {
     if code != 0 {
         return Err(code);
     }
-    output.truncate(written as usize);
-    Ok((layout, output))
+    Ok((layout, output.get(..written as usize).ok_or(2u32)?))
 }
 pub fn sprite(layout: &Layout, input: &SpriteInput) -> Result<Command, u32> {
     let mut command = Command::default();
@@ -197,7 +221,7 @@ pub struct Model {
     tracks: Vec<Track>,
     keys: Vec<Key>,
     units: [i32; 3],
-    config: Option<[i32; 6]>,
+    configs: Vec<[i32; 6]>,
 }
 fn columns<const N: usize>(line: &str) -> Result<[i32; N], String> {
     let values = line
@@ -238,6 +262,19 @@ fn count(lines: &[&str], cursor: &mut usize, max: usize) -> Result<usize, String
     Ok(value)
 }
 impl Model {
+    pub fn clock_lengths(&self) -> Result<[i32; 2], u32> {
+        let mut out = [0; 2];
+        let code = unsafe {
+            kbcs_core_motion_lengths(
+                self.tracks.as_ptr(),
+                self.tracks.len() as i32,
+                self.keys.as_ptr(),
+                self.keys.len() as i32,
+                out.as_mut_ptr(),
+            )
+        };
+        if code == 0 { Ok(out) } else { Err(code) }
+    }
     pub fn parse(
         cut_text: &str,
         model_text: &str,
@@ -281,14 +318,11 @@ impl Model {
         } else {
             [100, 360, 255]
         };
-        let mut config = None;
+        let mut configs = Vec::new();
         if version >= 3 {
             let n = count(&source, &mut cursor, 4096)?;
-            for index in 0..n {
-                let value = columns(line(&source, &mut cursor)?)?;
-                if index == 0 {
-                    config = Some(value);
-                }
+            for _ in 0..n {
+                configs.push(columns(line(&source, &mut cursor)?)?);
             }
         }
         let (mut tracks, mut keys) = (Vec::new(), Vec::new());
@@ -335,7 +369,7 @@ impl Model {
             tracks,
             keys,
             units,
-            config,
+            configs,
         })
     }
     pub fn length(&self) -> i32 {
@@ -364,6 +398,80 @@ impl Model {
     ) -> Result<Vec<Packet>, u32> {
         self.pose_with_root(frame, repeat, anchor, facing, None)
     }
+    pub fn native_point(&self, frame: i32, config_index: usize) -> Result<[i32; 2], u32> {
+        let config = *self.configs.get(config_index).ok_or(1u32)?;
+        let input = PoseInput {
+            units: self.units,
+            frame,
+            repeat: 0,
+            anchor: 0,
+            facing: 1,
+            config,
+            root_override: 0,
+            root: [0.; 5],
+        };
+        let mut out = [0; 2];
+        let code = unsafe {
+            kbcs_core_pose_contact(
+                &input,
+                self.parts.as_ptr(),
+                self.parts.len() as i32,
+                self.tracks.as_ptr(),
+                self.tracks.len() as i32,
+                self.keys.as_ptr(),
+                self.keys.len() as i32,
+                out.as_mut_ptr(),
+            )
+        };
+        if code == 0 { Ok(out) } else { Err(code) }
+    }
+    pub fn contact(&self, config_index: usize) -> Result<[i32; 2], u32> {
+        let config = *self.configs.get(config_index).ok_or(1u32)?;
+        let input = PoseInput {
+            units: self.units,
+            frame: 0,
+            repeat: 0,
+            anchor: 0,
+            facing: 1,
+            config,
+            root_override: 0,
+            root: [0.; 5],
+        };
+        let mut out = [0; 2];
+        let code = unsafe {
+            kbcs_core_model_contact(
+                &input,
+                self.parts.as_ptr(),
+                self.parts.len() as i32,
+                out.as_mut_ptr(),
+            )
+        };
+        if code == 0 { Ok(out) } else { Err(code) }
+    }
+    pub fn pose_config(
+        &self,
+        frame: i32,
+        config_index: usize,
+        facing: i32,
+    ) -> Result<Vec<Packet>, u32> {
+        self.pose_internal(frame, false, true, facing, None, config_index, true)
+    }
+    pub fn pose_scaled(&self, frame: i32, scale: [i32; 2]) -> Result<Vec<Packet>, u32> {
+        let part = &self.parts.first().ok_or(1u32)?.cells;
+        self.pose_with_root(
+            frame,
+            false,
+            false,
+            1,
+            Some([
+                1.,
+                f64::from(part[8]) * f64::from(scale[0]) / f64::from(self.units[0]) / 1000.,
+                f64::from(part[9]) * f64::from(scale[1]) / f64::from(self.units[0]) / 1000.,
+                f64::from(part[10]) * 360. / f64::from(self.units[1]),
+                f64::from(part[11]) * 255. / f64::from(self.units[2]),
+            ]),
+        )
+    }
     pub fn pose_with_root(
         &self,
         frame: i32,
@@ -372,13 +480,30 @@ impl Model {
         facing: i32,
         root: Option<[f64; 5]>,
     ) -> Result<Vec<Packet>, u32> {
+        self.pose_internal(frame, repeat, anchor, facing, root, 0, false)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn pose_internal(
+        &self,
+        frame: i32,
+        repeat: bool,
+        anchor: bool,
+        facing: i32,
+        root: Option<[f64; 5]>,
+        config_index: usize,
+        native_anchor: bool,
+    ) -> Result<Vec<Packet>, u32> {
         let input = PoseInput {
             units: self.units,
             frame,
             repeat: i32::from(repeat),
-            anchor: i32::from(anchor && self.config.is_some()),
+            anchor: if anchor && self.configs.get(config_index).is_some() {
+                if native_anchor { 2 } else { 1 }
+            } else {
+                0
+            },
             facing,
-            config: self.config.unwrap_or_default(),
+            config: self.configs.get(config_index).copied().unwrap_or_default(),
             root_override: i32::from(root.is_some()),
             root: root.unwrap_or([1., 1., 1., 0., 255.]),
         };

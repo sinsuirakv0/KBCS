@@ -5,6 +5,8 @@ fn main() {
         .include("../../native/kbcs-core/include")
         .file("../../native/kbcs-core/src/core.cpp")
         .file("../../native/kbcs-core/src/random.cpp")
+        .file("../../native/kbcs-core/src/production.cpp")
+        .file("../../native/kbcs-core/src/actor.cpp")
         .file("../../native/kbcs-core/src/enemy.cpp")
         .file("../../native/kbcs-core/src/reward.cpp")
         .file("../../native/kbcs-core/src/stage.cpp")
@@ -15,7 +17,9 @@ fn main() {
         .file("../../native/kbcs-core/src/render.cpp")
         .file("../../native/kbcs-core/src/scene_effects.cpp")
         .flag_if_supported("-ffp-contract=off")
+        .flag_if_supported("-fwrapv")
         .file("../../native/kbcs-core/src/materials.cpp")
         .compile("kbcs-core");
-    println!("cargo:rerun-if-changed=../../native/kbcs-core");
+    println!("cargo:rerun-if-changed=../../native/kbcs-core/src");
+    println!("cargo:rerun-if-changed=../../native/kbcs-core/include");
 }

@@ -1,4 +1,6 @@
-﻿pub mod battle_screen;
+﻿pub mod actor;
+pub mod battle;
+pub mod battle_screen;
 use serde::{Deserialize, Serialize};
 
 pub mod battle_support;
@@ -7,6 +9,7 @@ pub mod experience;
 pub mod inventory;
 pub mod materials;
 pub mod motion;
+pub mod production;
 pub mod random;
 pub mod reward;
 pub mod score;
@@ -283,7 +286,7 @@ pub fn enemy_poison(input: &PoisonInput) -> Result<PoisonOutput, u32> {
 
 #[test]
 fn native_witnesses() {
-    assert_eq!(abi_version(), 3);
+    assert_eq!(abi_version(), 4);
     assert_eq!(ruleset_version(), 1507021);
     let fixture: serde_json::Value = serde_json::from_str(
         include_str!("../../../native/kbcs-core/tests/native-vectors.json")
@@ -453,3 +456,5 @@ fn native_witnesses() {
 pub mod render;
 
 pub mod render_effects;
+
+pub mod cannon;

@@ -13,6 +13,73 @@ fn text(database: &Database, path: &str) -> Result<String> {
 fn basename(path: &str) -> &str {
     path.rsplit('/').next().unwrap_or(path)
 }
+// 009f560cの戦闘タイトル用テクスチャ。検索画面のマップ名画像とは別。
+pub fn battle_title(database: &Database, map: &Value, stage: &Value) -> Result<Value> {
+    let index = map["number"].as_i64().context("タイトルのマップ番号なし")?;
+    let number = stage["index"].as_i64().context("タイトルの面番号なし")?;
+    let kind = map["nativeKind"].as_i64().context("タイトルの種別なし")?;
+    let (name, cut) = if map["nativeMode"] == 3 {
+        let prefix = match kind {
+            0 => "n",
+            1 => "s",
+            2 => "c",
+            3 => "t",
+            4 => "r",
+            -4 => "v",
+            -6 => "m",
+            -9 => "na",
+            -10 => "b",
+            -11 => "d",
+            -16 => "a",
+            -17 => "h",
+            -18 => "ca",
+            -19 => "dm",
+            -20 => "q",
+            -21 => "l",
+            -22 => "nd",
+            -23 => "sr",
+            -24 => "g",
+            -26 => "pr",
+            _ => "",
+        };
+        let name = format!("mapsn{index:03}_{number:02}_{prefix}_ja");
+        (name.clone(), format!("ImageData/{name}.imgcut"))
+    } else if map["nativeMode"] == 99 {
+        (
+            format!("mapsn{index:03}_{number:02}_ex_ja"),
+            "ImageData/mapsnALL_all.imgcut".into(),
+        )
+    } else {
+        let prefix = match kind {
+            -2 | -12 => "ec",
+            -3 | -13 => "wc",
+            -7 | -14 | -15 | -25 => "sc",
+            _ => return Ok(Value::Null),
+        };
+        (
+            format!("{prefix}{number:03}_n_ja"),
+            "ImageData/mapsnALL_all.imgcut".into(),
+        )
+    };
+    let paths: Vec<String> = ["Map", "Image"]
+        .map(|folder| format!("{folder}/{name}.png"))
+        .into();
+    // PNGは取込済みbytesではなく索引だけの場合がある。表示時は共通asset取得を使う。
+    let mut exists = database.connection.prepare(
+        "SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?1 UNION ALL SELECT 1 FROM asset_reference WHERE path=?1)",
+    )?;
+    let image = paths.into_iter().find(|path| {
+        exists
+            .query_row([path], |row| row.get::<_, bool>(0))
+            .unwrap_or(false)
+    });
+    match image {
+        Some(image) => Ok(
+            json!({"image":image,"cut":cuts(database, &cut)?.first().context("タイトルの分割なし")?,"source":cut}),
+        ),
+        None => Ok(Value::Null),
+    }
+}
 fn definition(bytes: &[u8]) -> Result<Value> {
     let text = std::str::from_utf8(bytes)?
         .trim_start_matches('\u{feff}')
@@ -106,11 +173,20 @@ pub(crate) fn import(
     Ok(())
 }
 pub fn cuts(database: &Database, path: &str) -> Result<Vec<[i32; 4]>> {
-    text(database, path)?
-        .trim_start_matches('\u{feff}')
+    let text = text(database, path)?;
+    let text = text.trim_start_matches('\u{feff}');
+    let count = text
+        .lines()
+        .nth(3)
+        .context("画像分割数がありません")?
+        .trim()
+        .parse::<usize>()?;
+    ensure!(count <= 16384, "画像分割数が多すぎます");
+    // 原本には分割表の後ろに[java]等の参考コードが続く場合がある。
+    let result = text
         .lines()
         .skip(4)
-        .filter(|line| !line.trim().is_empty())
+        .take(count)
         .map(|line| {
             let cells = line
                 .split(',')
@@ -119,9 +195,11 @@ pub fn cuts(database: &Database, path: &str) -> Result<Vec<[i32; 4]>> {
                 .collect::<std::result::Result<Vec<_>, _>>()?;
             cells
                 .try_into()
-                .map_err(|_| anyhow::anyhow!("背景の分割列が不足しています"))
+                .map_err(|_| anyhow::anyhow!("画像の分割列が不足しています"))
         })
-        .collect()
+        .collect::<Result<Vec<_>>>()?;
+    ensure!(result.len() == count, "画像分割表が途中で終わっています");
+    Ok(result)
 }
 pub fn numeric_rows(bytes: &[u8]) -> Result<Vec<(usize, Vec<Option<i64>>)>> {
     Ok(crate::stages::rows(bytes, None)?
@@ -243,6 +321,76 @@ pub struct Audio {
     pub mime: &'static str,
     pub bytes: Vec<u8>,
 }
+fn decoded_audio(mime: &'static str, bytes: Vec<u8>) -> Result<Audio> {
+    if mime != "audio/x-caf" {
+        return Ok(Audio { mime, bytes });
+    }
+    // 同版CAFは非圧縮little-endian PCM。サンプルを変更せずWAVへ包み直す。
+    ensure!(bytes.starts_with(b"caff\0\x01\0\0"), "CAFヘッダー不一致");
+    let mut at = 8;
+    let mut description = None;
+    let mut data = None;
+    while at + 12 <= bytes.len() {
+        let kind = &bytes[at..at + 4];
+        let size = i64::from_be_bytes(bytes[at + 4..at + 12].try_into()?);
+        at += 12;
+        let size = if size == -1 && kind == b"data" {
+            bytes.len() - at
+        } else {
+            usize::try_from(size)?
+        };
+        let end = at.checked_add(size).context("CAF長の範囲外")?;
+        ensure!(end <= bytes.len(), "CAFが途中で切れています");
+        if kind == b"desc" {
+            description = Some(&bytes[at..end]);
+        }
+        if kind == b"data" {
+            ensure!(size >= 4, "CAF dataなし");
+            data = Some(&bytes[at + 4..end]);
+        }
+        at = end;
+    }
+    let desc = description.context("CAF descなし")?;
+    ensure!(
+        desc.len() == 32 && &desc[8..12] == b"lpcm",
+        "CAF PCM形式不一致"
+    );
+    let rate = f64::from_be_bytes(desc[..8].try_into()?);
+    let field = |at| -> Result<u32> { Ok(u32::from_be_bytes(desc[at..at + 4].try_into()?)) };
+    let channels = field(24)?;
+    ensure!(
+        rate.is_finite()
+            && (1. ..=192000.).contains(&rate)
+            && rate.fract() == 0.
+            && field(12)? == 2
+            && field(20)? == 1
+            && (1..=2).contains(&channels)
+            && field(28)? == 16
+            && field(16)? == channels * 2,
+        "未対応のCAF PCM形式"
+    );
+    let data = data.context("CAF dataなし")?;
+    ensure!(
+        data.len().is_multiple_of(channels as usize * 2),
+        "PCMフレーム長不一致"
+    );
+    let length = u32::try_from(data.len())?;
+    let mut wave = Vec::with_capacity(data.len() + 44);
+    wave.extend_from_slice(b"RIFF");
+    wave.extend_from_slice(&(length + 36).to_le_bytes());
+    wave.extend_from_slice(b"WAVEfmt \x10\0\0\0\x01\0");
+    wave.extend_from_slice(&(channels as u16).to_le_bytes());
+    wave.extend_from_slice(&(rate as u32).to_le_bytes());
+    wave.extend_from_slice(&((rate as u32) * channels * 2).to_le_bytes());
+    wave.extend_from_slice(&((channels * 2) as u16).to_le_bytes());
+    wave.extend_from_slice(b"\x10\0data");
+    wave.extend_from_slice(&length.to_le_bytes());
+    wave.extend_from_slice(data);
+    Ok(Audio {
+        mime: "audio/wav",
+        bytes: wave,
+    })
+}
 pub fn audio(root: &std::path::Path, id: i64) -> Result<Audio> {
     let catalog = music();
     let track = &catalog["tracks"][id.to_string()];
@@ -253,11 +401,14 @@ pub fn audio(root: &std::path::Path, id: i64) -> Result<Audio> {
         .context("音源版なし")?;
     let (mime, extension) = match track["mime"].as_str() {
         Some("audio/ogg") => ("audio/ogg", "ogg"),
+        Some("audio/x-caf") => ("audio/x-caf", "caf"),
         None | Some("audio/mpeg") => ("audio/mpeg", "mp3"),
         _ => anyhow::bail!("未対応の音源形式です"),
     };
     let valid = |bytes: &[u8]| {
-        let header = if extension == "ogg" {
+        let header = if extension == "caf" {
+            bytes.starts_with(b"caff")
+        } else if extension == "ogg" {
             bytes.starts_with(b"OggS")
         } else {
             bytes.starts_with(b"ID3") || bytes.first() == Some(&0xff)
@@ -280,7 +431,7 @@ pub fn audio(root: &std::path::Path, id: i64) -> Result<Audio> {
             || std::fs::read_to_string(&receipt)
                 .is_ok_and(|sha| sha == crate::source::hash(&bytes)))
     {
-        return Ok(Audio { mime, bytes });
+        return decoded_audio(mime, bytes);
     }
     let agent: ureq::Agent = ureq::Agent::config_builder()
         .timeout_global(Some(std::time::Duration::from_secs(60)))
@@ -301,7 +452,7 @@ pub fn audio(root: &std::path::Path, id: i64) -> Result<Audio> {
     std::fs::write(&temporary, &bytes)?;
     std::fs::rename(temporary, &path)?;
     std::fs::write(receipt, crate::source::hash(&bytes))?;
-    Ok(Audio { mime, bytes })
+    decoded_audio(mime, bytes)
 }
 
 pub(crate) fn annotate(stage: &mut Value, series: &str) {

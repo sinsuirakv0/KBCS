@@ -1,10 +1,16 @@
 ﻿#![cfg_attr(windows, windows_subsystem = "windows")]
 
+mod battle;
+mod battle_rewards;
+mod battle_wire;
+mod cache;
 #[cfg(windows)]
 mod desktop;
 mod motion_pose;
+mod runtime;
 mod scene;
 mod service;
+mod workers;
 
 use anyhow::{Context, Result};
 use kbcs_data::{import, store::Database};
@@ -73,6 +79,72 @@ fn main() -> Result<()> {
                 serde_json::to_string_pretty(&database.form(&region, id, form)?)?
             );
         }
+        Some("battle-replay") => {
+            let input: serde_json::Value = serde_json::from_str(
+                std::fs::read_to_string(option("--input").context("--inputが必要です")?)?
+                    .trim_start_matches('\u{feff}'),
+            )?;
+            let mut service = service::Service::new(root, region, source);
+            service.persist_rewards = false;
+            let reply = service.handle(
+                "POST",
+                "/api/battle-session",
+                &serde_json::to_vec(&input["start"])?,
+            );
+            anyhow::ensure!(
+                reply.status == 200,
+                "{}",
+                String::from_utf8_lossy(&reply.bytes)
+            );
+            if arguments.iter().any(|s| s == "--validate-assets") {
+                let start: serde_json::Value = serde_json::from_slice(&reply.bytes)?;
+                for path in start["textures"]
+                    .as_array()
+                    .context("画像一覧なし")?
+                    .iter()
+                    .chain(start["title"].get("image"))
+                {
+                    // 予約済みの空テクスチャ枠は取得対象に含めない。
+                    if path.is_null() {
+                        continue;
+                    }
+                    let path = path.as_str().context("画像パスなし")?;
+                    let image = service.handle("GET", &format!("/api/asset/{path}"), &[]);
+                    anyhow::ensure!(
+                        image.status == 200 && image.bytes.starts_with(b"\x89PNG\r\n\x1a\n"),
+                        "戦闘画像: {path}: {}",
+                        String::from_utf8_lossy(&image.bytes[..image.bytes.len().min(200)])
+                    );
+                }
+            }
+            let mut results = Vec::new();
+            for (index, request) in input["requests"]
+                .as_array()
+                .context("requestsが必要です")?
+                .iter()
+                .enumerate()
+            {
+                let reply = service.handle(
+                    "POST",
+                    "/api/battle-session/frame",
+                    &serde_json::to_vec(request)?,
+                );
+                anyhow::ensure!(
+                    reply.status == 200,
+                    "request {index}: {} / previous {}",
+                    String::from_utf8_lossy(&reply.bytes),
+                    results
+                        .last()
+                        .map(|value: &serde_json::Value| value["state"]["frame"].to_string())
+                        .unwrap_or_default()
+                );
+                let mut frame: serde_json::Value = serde_json::from_slice(&reply.bytes)?;
+                let count = frame["scene"]["commands"].as_array().map_or(0, Vec::len);
+                frame["scene"] = serde_json::json!({"commands":count});
+                results.push(frame);
+            }
+            println!("{}", serde_json::to_string(&results)?);
+        }
         Some("verify") => {
             let database = Database::open(&root, &region)?;
             kbcs_data::store::validate(&database.connection)?;
@@ -80,7 +152,7 @@ fn main() -> Result<()> {
             println!("C++ ABI: {}", kbcs_bridge::abi_version());
         }
         Some("--help") | Some("help") => println!(
-            "kbcs [import|list|show|verify|catalog|motion|scene|preview] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
+            "kbcs [import|list|show|verify|catalog|motion|scene|preview|battle-replay] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
         ),
         Some("preview") => service::serve(
             root,
@@ -99,7 +171,8 @@ fn main() -> Result<()> {
                 if !scenes.contains_key(&key) {
                     scenes.insert(key.clone(), scene::Scene::new(&database, &input)?);
                 }
-                let value = scenes.get_mut(&key).unwrap().draw(&database, &input)?;
+                let value =
+                    serde_json::to_value(scenes.get_mut(&key).unwrap().draw(&database, &input)?)?;
                 let value = if arguments.iter().any(|s| s == "--summary") {
                     serde_json::json!({"background":input.background,"frame":input.frame,
                         "commands":value["commands"].as_array().map(Vec::len),
@@ -136,7 +209,9 @@ fn main() -> Result<()> {
             let value = match option("--kind").as_deref() {
                 None | Some("units") => kbcs_data::view::catalog(&database, &region)?,
                 Some("enemies") => kbcs_data::enemies::catalog(&database, &region)?,
-                Some("stages") => kbcs_data::stages::catalog(&database, &region)?,
+                Some("stages") => {
+                    kbcs_data::stages::catalog_map(&database, &region, option("--map").as_deref())?
+                }
                 Some("stage-index") => kbcs_data::stages::search_catalog(&database, &region)?,
                 Some("effects") => kbcs_data::effects::catalog(&database)?,
                 Some(value) => anyhow::bail!("未知のデータ種別: {value}"),

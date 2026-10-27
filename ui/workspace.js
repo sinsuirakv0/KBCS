@@ -18,7 +18,7 @@ export function initializeWorkspace(){
   navigation.querySelector('[data-page-forward]').addEventListener('click',()=>history.forward());
   navigation.querySelector('[data-page-reload]').addEventListener('click',()=>location.reload());
   const page=location.pathname.split('/').filter(Boolean).at(-1)||'home';
-  const titles={'stage-sortie':'出撃準備','formation':'キャラクター編成','stage-play':'ステージ Play','unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
+  const titles={'inventory':'持ち物','stage-sortie':'出撃準備','formation':'キャラクター編成','stage-play':'ステージ Play','unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
   const title=titles[page]||main.querySelector('h1')?.textContent||'KBCS';
   let saved={};
   try{saved=JSON.parse(localStorage.getItem('kbcs:workspace')||'{}')||{};}catch{}
@@ -82,7 +82,7 @@ export function initializeWorkspace(){
     move('.formation-library',left.content);move('#formation-member',right.content);move('#formation-profile',right.content);
     right.content.classList.add('formation-options');
   }else if(page==='stage-sortie'){
-    move('#sortie-stage-navigation',left.content);move('#sortie-details',right.content);
+    move('#sortie-stage-navigation',left.content);move('#sortie-details',right.content);move('#battle-controls',viewbar);
     right.panel.querySelector('h2').textContent='ステージ詳細';
     let previous;
     document.addEventListener('kbcs:battle-mode',event=>{
@@ -92,7 +92,7 @@ export function initializeWorkspace(){
       left.panel.querySelector('h2').textContent=active?'シミュレーター':'このページ';
       right.panel.querySelector('h2').textContent=active?'シミュレーター':'ステージ詳細';
       for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
-      viewbar.querySelector('.workspace-tab').textContent=active?'戦闘':'出撃準備';
+      viewbar.querySelector('.workspace-tab').textContent=active?'戦闘':'出撃準備';element('battle-controls').hidden=!active;for(const button of element('battle-controls').querySelectorAll('button'))button.disabled=active;viewbar.classList.toggle('battle-viewbar',active);
       apply();
     });
   }else if(page==='stage-detail'){
@@ -128,7 +128,7 @@ export function initializeWorkspace(){
     move('#enemy-capture-status',information);
   }
   for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
-  const profileEditor=page.endsWith('-motion')||['formation','stage-play','stage-sortie'].includes(page)?null:createSimulationSettings(right.content);
+  const profileEditor=page.endsWith('-motion')||['formation','stage-play','stage-sortie','inventory'].includes(page)?null:createSimulationSettings(right.content);
   window.addEventListener('kbcs:open-simulation-settings',()=>{state.right=true;if(innerWidth<800)state.left=false;store();apply();profileEditor?.open();});
   if(!settingsGroup.childElementCount)settingsGroup.remove();
   if(!left.content.childElementCount){

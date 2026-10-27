@@ -54,3 +54,7 @@ python research/verify/reward_finish.py --python-libs D:/KBC/KBC-rakv0-lab/unit-
 実所持数の付与、報酬種別ごとの上限/変換・解放、保存先選択と新規履歴ノード、結果画面全体、スコアの時計、期間/解禁/連戦は引き続き対象外。1000番台のDB/UI公開もまだ行っていない。
 
 0.1.13の保存先訂正・時計・実所持数更新・EX抽選の関係と範囲は[inventory-ex.md](inventory-ex.md)。
+
+## 戦闘への接続後の監査（2026-10-28）
+
+この文書前半の「未接続」は0.1.12時点の範囲。現在の所有戦闘の通常時間スコア・道場・ステージ別能力ボーナス・PR Ptと報酬保存は[battle-result.md](battle-result.md)、[battle-special.md](battle-special.md)を参照する。通常時間報酬の式を道場/PRへ流用していない。2026-10-28にScoreBonusMapの全12マップ1200条件、撃破720条件、既存Pt/Fever/時計の原本局所照合を再実行した。GUI表示の式はC++描画命令に接続し、同じ結果/タイマーを使用する。

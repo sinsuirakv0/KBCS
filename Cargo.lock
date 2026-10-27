@@ -1153,9 +1153,10 @@ dependencies = [
 
 [[package]]
 name = "kbcs-app"
-version = "0.1.31"
+version = "0.1.35"
 dependencies = [
  "anyhow",
+ "flate2",
  "include_dir",
  "kbcs-bridge",
  "kbcs-data",
@@ -1164,12 +1165,13 @@ dependencies = [
  "tao",
  "tiny_http",
  "url",
+ "windows-sys 0.61.2",
  "wry",
 ]
 
 [[package]]
 name = "kbcs-bridge"
-version = "0.1.31"
+version = "0.1.35"
 dependencies = [
  "cc",
  "serde",
@@ -1178,7 +1180,7 @@ dependencies = [
 
 [[package]]
 name = "kbcs-data"
-version = "0.1.31"
+version = "0.1.35"
 dependencies = [
  "anyhow",
  "csv",

@@ -4,7 +4,7 @@ use kbcs_bridge::{
     render_effects,
 };
 use kbcs_data::{stage_media, store::Database};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 
@@ -17,6 +17,8 @@ fn zoom() -> f64 {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Input {
+    #[serde(default)]
+    pub session: String,
     pub background: i64,
     pub width: f64,
     pub castle: Option<i64>,
@@ -43,8 +45,13 @@ pub struct Input {
 impl Input {
     pub fn key(&self) -> String {
         format!(
-            "{}:{}:{:?}:{}:{:?}",
-            self.background, self.width, self.castle, self.castle_set, self.enemy_castle
+            "{}:{}:{:?}:{}:{:?}:{}",
+            self.background,
+            self.width,
+            self.castle,
+            self.castle_set,
+            self.enemy_castle,
+            self.session
         )
     }
 }
@@ -81,7 +88,22 @@ struct Asset {
     model: Model,
     texture: i32,
 }
+#[derive(Serialize)]
+pub struct Frame<'a> {
+    pub layout: render::Layout,
+    pub commands: Vec<Command>,
+    pub textures: &'a [Option<String>],
+    pub animated: bool,
+    pub missing: &'a [String],
+    pub issues: usize,
+    pub frame: i32,
+    pub core: &'static str,
+    pub ruleset: u32,
+    #[serde(rename = "computeMs")]
+    pub compute_ms: f64,
+}
 pub struct Scene {
+    paint_buffer: Vec<Command>,
     background: Value,
     source: Value,
     textures: Vec<Option<String>>,
@@ -97,6 +119,41 @@ pub struct Scene {
     missing: Vec<String>,
 }
 impl Scene {
+    pub fn player_parts(
+        &mut self,
+        database: &Database,
+        cannon: u8,
+        base: i32,
+        decoration: i32,
+    ) -> Result<()> {
+        for (index, part, id) in [(2, 3, decoration), (3, 2, base), (4, 0, i32::from(cannon))] {
+            let path = format!("Number/nyankoCastle_{part:03}_{id:02}.png");
+            self.sizes[index] = stage_media::image_size(database, &path)?;
+            self.textures[index] = Some(path);
+        }
+        Ok(())
+    }
+    pub fn owned_castle(&mut self) {
+        self.actor = None;
+    }
+    pub fn textures(&self) -> &[Option<String>] {
+        &self.textures
+    }
+    pub fn castle_geometry(&self) -> [i32; 3] {
+        self.castle
+    }
+    pub fn texture(&mut self, path: &str) -> i32 {
+        if let Some(index) = self
+            .textures
+            .iter()
+            .position(|p| p.as_deref() == Some(path))
+        {
+            return index as i32;
+        }
+        let index = self.textures.len();
+        self.textures.push(Some(path.into()));
+        index as i32
+    }
     pub fn new(database: &Database, input: &Input) -> Result<Self> {
         ensure!(
             input.width.is_finite()
@@ -177,6 +234,7 @@ impl Scene {
             -1
         };
         let mut scene = Self {
+            paint_buffer: vec![Command::default(); 16384],
             background,
             source,
             textures,
@@ -323,7 +381,8 @@ impl Scene {
         );
         Ok(())
     }
-    pub fn draw(&mut self, database: &Database, input: &Input) -> Result<Value> {
+    pub fn draw(&mut self, database: &Database, input: &Input) -> Result<Frame<'_>> {
+        let started = std::time::Instant::now();
         ensure!(
             (0..=1000000).contains(&input.frame),
             "表示フレームが範囲外です"
@@ -354,35 +413,40 @@ impl Scene {
         } else {
             [0, 0, 0, 0, 0, 0, -1]
         };
-        let (layout, mut commands) = render::paint(&PaintInput {
-            scene: SceneInput {
-                width: input.width,
-                center: input.center.unwrap_or(input.width),
-                zoom: input.zoom,
-                cut_height: cut[3],
-                castle: self.castle,
-                focus: input.focus,
-                viewport_width: input.viewport_width,
-                battle_rows: input.battle_rows,
+        let (layout, background_commands) = render::paint(
+            &PaintInput {
+                scene: SceneInput {
+                    width: input.width,
+                    center: input.center.unwrap_or(input.width),
+                    zoom: input.zoom,
+                    cut_height: cut[3],
+                    castle: self.castle,
+                    focus: input.focus,
+                    viewport_width: input.viewport_width,
+                    battle_rows: input.battle_rows,
+                },
+                cut,
+                top: array(&self.background["top"]).unwrap_or_default(),
+                colors: colors
+                    .try_into()
+                    .map_err(|_| anyhow::anyhow!("背景色の列数不正"))?,
+                overlay,
+                self_sizes: [
+                    self.sizes[2][0],
+                    self.sizes[2][1],
+                    self.sizes[3][0],
+                    self.sizes[3][1],
+                    self.sizes[4][0],
+                    self.sizes[4][1],
+                ],
+                show_enemy: i32::from(input.show_enemy && self.textures[1].is_some()),
+                show_player: i32::from(input.show_player),
             },
-            cut,
-            top: array(&self.background["top"]).unwrap_or_default(),
-            colors: colors
-                .try_into()
-                .map_err(|_| anyhow::anyhow!("背景色の列数不正"))?,
-            overlay,
-            self_sizes: [
-                self.sizes[2][0],
-                self.sizes[2][1],
-                self.sizes[3][0],
-                self.sizes[3][1],
-                self.sizes[4][0],
-                self.sizes[4][1],
-            ],
-            show_enemy: i32::from(input.show_enemy && self.textures[1].is_some()),
-            show_player: i32::from(input.show_player),
-        })
+            &mut self.paint_buffer,
+        )
         .map_err(core)?;
+        // 原本の描画上限ぶんは所有者が再利用し、有効な命令だけを返す。
+        let mut commands = background_commands.to_vec();
         if input.show_enemy
             && let Some(actor) = &self.actor
         {
@@ -400,7 +464,7 @@ impl Scene {
                 320.,
                 440.,
                 0.,
-                0,
+                0..=0,
             )?;
             commands.splice(index..index, actor_commands.drain(..));
         }
@@ -420,14 +484,9 @@ impl Scene {
             ];
             for particle in particles {
                 if particle.kind != 0 {
-                    let command = render_effects::weather(
-                        &layout,
-                        &particle,
-                        &self.cuts,
-                        &self.common,
-                        sizes,
-                    )
-                    .map_err(core)?;
+                    let command =
+                        render_effects::weather(&layout, particle, &self.cuts, &self.common, sizes)
+                            .map_err(core)?;
                     if command.count > 0 {
                         commands.push(command);
                     }
@@ -437,7 +496,7 @@ impl Scene {
                     .assets
                     .get(particle.asset as usize)
                     .context("演出素材ID不正")?;
-                for index in particle.spacing_min..=particle.spacing_max {
+                {
                     let mut packets = Self::model_commands(
                         asset,
                         &layout,
@@ -454,7 +513,7 @@ impl Scene {
                         particle.x,
                         particle.y,
                         particle.spacing,
-                        index,
+                        particle.spacing_min..=particle.spacing_max,
                     )?;
                     for packet in &mut packets {
                         packet.layer = if particle.front != 0 { 3 } else { 1 };
@@ -465,9 +524,18 @@ impl Scene {
         }
         commands.sort_by_key(|v| v.layer);
         let animated = self.classic >= 0 || !self.assets.is_empty() || self.actor.is_some();
-        Ok(
-            json!({"layout":layout,"commands":commands,"textures":self.textures,"animated":animated,"missing":self.missing,"issues":self.issues,"frame":input.frame,"core":"C++","ruleset":kbcs_bridge::ruleset_version()}),
-        )
+        Ok(Frame {
+            layout,
+            commands,
+            textures: &self.textures,
+            animated,
+            missing: &self.missing,
+            issues: self.issues,
+            frame: input.frame,
+            core: "C++",
+            ruleset: kbcs_bridge::ruleset_version(),
+            compute_ms: started.elapsed().as_secs_f64() * 1000.,
+        })
     }
     #[allow(clippy::too_many_arguments)]
     fn model_commands(
@@ -480,9 +548,13 @@ impl Scene {
         x: f64,
         y: f64,
         spacing: f64,
-        index: i32,
+        indexes: std::ops::RangeInclusive<i32>,
     ) -> Result<Vec<Command>> {
-        asset
+        if indexes.is_empty() {
+            return Ok(Vec::new());
+        }
+        // 姿勢は間隔配置の全個体で同じ。世界座標変換だけを元の順番で繰り返す。
+        let local = asset
             .model
             .pose_with_root(frame, repeat, anchor, 1, root)
             .map_err(core)?
@@ -505,8 +577,15 @@ impl Scene {
                 for (target, source) in command.points.iter_mut().zip(packet.points) {
                     *target = f64::from(source);
                 }
-                render::instance(layout, &command, x, y, spacing, index).map_err(core)
+                Ok(command)
             })
-            .collect()
+            .collect::<Result<Vec<_>>>()?;
+        let mut result = Vec::new();
+        for index in indexes {
+            for command in &local {
+                result.push(render::instance(layout, command, x, y, spacing, index).map_err(core)?);
+            }
+        }
+        Ok(result)
     }
 }

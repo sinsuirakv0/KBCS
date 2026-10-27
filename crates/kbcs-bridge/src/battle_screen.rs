@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+﻿use serde::{Deserialize, Serialize};
 
 #[repr(C)]
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
@@ -69,6 +69,8 @@ pub struct State {
     pub info_slot: i32,
     pub saved_rows: i32,
     pub hud_frame: i32,
+    #[serde(default)]
+    pub battle_mode: i32,
 }
 #[repr(C)]
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
@@ -683,4 +685,43 @@ fn native_screen_witnesses() {
             );
         }
     }
+    // 3倍の設定を維持して、手動では指定した論理Fだけを進める。
+    let stepped = call(
+        config.clone(),
+        State {
+            speed_mode: 2,
+            cannon: 100,
+            ..base.clone()
+        },
+        Input {
+            control: 10,
+            ticks: 1,
+            ..Input::default()
+        },
+    );
+    assert_eq!(
+        (
+            stepped.state.frame,
+            stepped.state.cannon,
+            stepped.state.speed_mode
+        ),
+        (1, 99, 2)
+    );
+    let batch = call(
+        config.clone(),
+        stepped.state,
+        Input {
+            control: 10,
+            ticks: 10,
+            ..Input::default()
+        },
+    );
+    assert_eq!(
+        (
+            batch.state.frame,
+            batch.state.cannon,
+            batch.state.speed_mode
+        ),
+        (11, 89, 2)
+    );
 }

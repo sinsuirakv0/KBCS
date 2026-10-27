@@ -19,6 +19,7 @@ pub struct Combo {
     #[serde(rename = "type")]
     pub kind: i64,
     pub grade: i64,
+    pub group: i64,
     pub active: bool,
     pub name: String,
     pub effect: String,
@@ -115,7 +116,39 @@ pub(crate) fn import(source: &Source, dataset: &Dataset, connection: &Connection
     Ok(())
 }
 
+// 009e4e14はtype3の明示リストだけを対象限定コンボへ使う。
+pub fn target_groups(connection: &Connection) -> Result<std::collections::BTreeMap<i64, Vec<i32>>> {
+    let bytes: Vec<u8> = connection.query_row(
+        "SELECT bytes FROM source_file WHERE path='Data/Charagroup.csv'",
+        [],
+        |row| row.get(0),
+    )?;
+    let mut groups = std::collections::BTreeMap::new();
+    for row in csv_rows(&bytes)? {
+        if row.get(2).map(String::as_str) != Some("3") {
+            continue;
+        }
+        let id = row[0].parse()?;
+        let units = row
+            .iter()
+            .skip(3)
+            .map(|v| Ok(v.parse()?))
+            .collect::<Result<Vec<i32>>>()?;
+        groups.insert(id, units);
+    }
+    Ok(groups)
+}
+
 pub fn read(connection: &Connection, region: &str) -> Result<Vec<Combo>> {
+    let bytes: Vec<u8> = connection.query_row(
+        "SELECT bytes FROM source_file WHERE path='Data/NyancomboData.csv'",
+        [],
+        |row| row.get(0),
+    )?;
+    let groups = numeric_rows(&bytes)?
+        .into_iter()
+        .map(|(_, row)| required(&row, 2))
+        .collect::<Result<Vec<_>>>()?;
     let mut statement = connection
         .prepare("SELECT id,type,grade,name,effect FROM combo WHERE region=? ORDER BY id")?;
     let mut rows = statement.query([region])?;
@@ -128,6 +161,9 @@ pub fn read(connection: &Connection, region: &str) -> Result<Vec<Combo>> {
             id,
             kind: row.get(1)?,
             grade: row.get(2)?,
+            group: *groups
+                .get(id as usize)
+                .ok_or_else(|| anyhow::anyhow!("コンボ対象列なし"))?,
             active: true,
             name: row.get(3)?,
             effect: row.get(4)?,

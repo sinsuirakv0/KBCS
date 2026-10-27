@@ -138,6 +138,20 @@ extern "C" uint32_t kbcs_core_stage_initialize(const KbcsStageRow *rows, KbcsSta
   return 0;
 }
 
+// 006d9e44..006d9fc0。通常の出現tickと異なり、待機・撃破条件は再検査しない。
+extern "C" uint32_t kbcs_core_stage_castle_guard(const KbcsStageRow *rows,const KbcsStageState *states,
+    int32_t count,const KbcsStageContext *context,int32_t pending_damage,int32_t *preserve){
+  if(!context||!preserve||count<0||count>4096||(count&&(!rows||!states))||*preserve<0||*preserve>1)return 1;
+  int value=*preserve;
+  for(int i=0;i<count;++i){const auto &row=rows[i].cells;
+    const int threshold=int32_t(uint32_t(row[5])*uint32_t(context->castle_max_hp))/100;
+    const bool ready=context->damage_condition?context->castle_damage>=row[5]
+        :int32_t(uint32_t(context->castle_hp)-uint32_t(pending_damage))<=threshold;
+    if(ready&&(!row[1]||states[i].spawned<row[1])&&row[8]&&context->castle_hp>1)value=1;
+  }
+  *preserve=value;return 0;
+}
+
 // 読込済み14整数と呼出側の状態を借用する。原本解析・敵生成・乱数生成は行わない。
 static uint32_t validateStage(const KbcsStageRow *rows, const KbcsStageState *states,
     int32_t count, const KbcsStageContext *context) {

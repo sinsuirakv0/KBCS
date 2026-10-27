@@ -1,9 +1,11 @@
+pub mod battle_options;
 pub mod combos;
 pub mod effects;
 pub mod enemies;
 pub mod equipment;
 pub mod formations;
 pub mod import;
+pub mod inventory;
 pub mod model;
 pub mod motions;
 pub mod progression;

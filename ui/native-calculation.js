@@ -7,7 +7,7 @@ export async function calculateNative(payload){
   const result=await response.json();
   if(!response.ok)throw Error(result.error||'計算できませんでした。');
   if(result.ruleset!==catalog.versionCode)throw Error('この版の計算コアは未対応です。');
-  if(result.abi!==2)throw Error('計算コアの版が一致しません。');
+  if(result.abi!==4)throw Error('計算コアの版が一致しません。');
   return result;
 }
 

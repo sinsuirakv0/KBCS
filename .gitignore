@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 target/
 .local/
+
+.codex-remote-attachments/

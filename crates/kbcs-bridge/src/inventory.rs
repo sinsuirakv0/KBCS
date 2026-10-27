@@ -16,6 +16,10 @@ pub struct Grant {
     pub change: i32,
 }
 unsafe extern "C" {
+    fn kbcs_core_character_reward(
+        input: *const CharacterInput,
+        output: *mut CharacterOutput,
+    ) -> u32;
     fn kbcs_core_item_add(
         definitions: *const Definition,
         counts: *mut i32,
@@ -24,6 +28,29 @@ unsafe extern "C" {
         amount: i32,
         output: *mut Grant,
     ) -> u32;
+}
+#[repr(C)]
+pub struct CharacterInput {
+    pub kind: i32,
+    pub seen: i32,
+    pub plus: i32,
+    pub limit: i32,
+    pub third: i32,
+    pub fourth: i32,
+}
+#[repr(C)]
+#[derive(Default)]
+pub struct CharacterOutput {
+    pub result: i32,
+    pub seen: i32,
+    pub plus: i32,
+    pub third: i32,
+    pub fourth: i32,
+}
+pub fn character(input: &CharacterInput) -> Result<CharacterOutput, u32> {
+    let mut out = CharacterOutput::default();
+    let code = unsafe { kbcs_core_character_reward(input, &mut out) };
+    if code == 0 { Ok(out) } else { Err(code) }
 }
 pub fn add(
     definitions: &[Definition],

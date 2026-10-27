@@ -50,3 +50,18 @@ GET /api/formations?current=ID&direction=-1|0|1 は前/現在/次、POSTは{id,r
 
 
 0.1.31の/api/stage-audio/IDは実MIME(audio/oggまたはaudio/mpeg)を返す。.mp3/.ogg付きの旧経路も同じIDとして受ける。POST /api/asset-hashesは最大64の論理パスについて、現在DBのasset_referenceのSHAだけを返す。buildIdが音源追加等で変わっても、同梱UI画像/imgcutを全照合して再利用するための読取API。
+
+
+0.1.32の固定ワーカー・シーン単位ロック・LRU・常時計測は[performance.md](performance.md)。戦闘Frameを型付きSerializeし、CLIと同じ計算結果を返す。
+
+2026-10-28: `battle_rewards::Receipt`は開始時にDBの版・原本ステージ・報酬・名前/キャラ対応を解決し、勝敗後にC++の抽選結果からStoreの原子的な結果保存へ渡す。表示数・累計・クリア数・スコア・キャラ所持を同時保存する。失敗はreceiptErrorへ示し再試行、戦闘描画を強制停止しない。`battle-replay`だけはmemory Storeに固定し、ユーザーの持ち物を変えない。GET/PUT `/api/inventory`、GET `/api/inventory/catalog`、POST `/api/battle-popup`はService共通。通知の時計/座標はC++、原本文面と保存はRust、文字と画像の描画はUI。
+
+2026-10-26: POST/DELETE /api/battle-sessionとPOST /api/battle-session/frameはC++所有戦闘を使う。実DB/編成のプロフィール解決、排他、描画と追加画像の暗転中読み込みを接続。[契約と未接続の範囲](../../../native/kbcs-core/docs/battle-runtime.md)。battle-replay CLIは既存アプリを操作せず同じServiceへ入力を通す。
+
+
+2026-10-27: battle::Sessionは砲/スニャイパーの原本素材を暗転中に揃え、所有C++へ設定を渡す。BGM/SE/段数は公式DBと別のbattle_optionsへ保存。戦闘描画エラーにモデル名・side/slot/action/frameを加え、原因を上部へ表示する。ND032の旧停止はカイのmaanim逆順キーを拒否したためで、render.cpp/原本0044c884へ修正。上下位置は原点のフィールド解釈を訂正した。根拠/照合範囲はnative/kbcs-core/docs/render.mdとbattle-runtime.md、再開先はdocs/plans/resume.md。
+
+
+2026-10-27: battle::Sessionは実DBのmap.rulesの11をC++へ渡し、runtime.costs/produced/lastCosts/computerを返す。JSの初期価格や乱数へ戻さない。詳細は../../../native/kbcs-core/docs/computer.md。
+
+戦闘SessionはPointStageSettings/StagePointRulesMap、NyancomboDataのgroup列/Charagroup type3を読み、解決済みRules/ProfileをC++へ渡す。[特殊戦闘](../../../native/kbcs-core/docs/battle-special.md)参照。旧DBへ原本の不足を補う場合もsource::assetの固定revision/SHAを使う。公式snapshotを書き換えない。

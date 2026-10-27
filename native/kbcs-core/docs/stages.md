@@ -2,6 +2,8 @@
 
 2026-10-21、JP15.7.2 ARM64。対象SHAと解析の入口は[番台別調査](../../../research/docs/stages/README.md)。現版`006ef2b0`の待機更新・出現行選択・成功後の更新を`src/stage.cpp`へ移植した。原本の読込、戦闘開始、敵個体の生成、ボス演出、報酬は別の処理。
 
+2026-10-25：[production](production.md)がtick→実構築→間隔抽選→commit→seenを単一のC++入口へ接続する。従来の低水準入口と照合済み分岐は変更していない。
+
 ## 関数と状態
 
 `kbcs-bridge::stage::tick` → `kbcs_core_stage_tick`が、行状態と全体状態を更新して候補行を最大1件返す。候補−1は出現なし。`Row`はネイティブ読込後の14整数であり、CSVの生の14セルではない。待機列2/3/4は×2済みで、終端行は渡さない。
@@ -91,3 +93,6 @@ rewards.pyはkind3・通常フラグ0・特殊報酬分類0を条件に、005dbf
 006ef2b0の最終候補は後方からwait<=0を選ぶ。有限回数・撃破・城条件はtickの待機更新に作用する条件であり、commitで再適用しない。commitは選択位置、行/全体待機、停止、容量、抽選範囲、整数上限を検査する。Rust PendingSpawnの消費所有権は維持する。
 
 research/verify/stage_continuous.pyが同一状態で3tickを実行する。回数1/再待機0、城不成立/列12非0、個体枠なしの3ケース。成功では生成回数1→2→3、各tickのRNG boundはレイヤー10→全体1→行1。空きなしは生成0、RNG不変。原本009f1e64は枠探索・レイヤー抽選まで実行し、00aa0aa4以降の個体構築だけ成功へ制御する。全戦闘/全個体構築の照合ではない。小さい追跡fixtureはtests/stage-continuous-vectors.json。
+
+
+2026-10-28: `kbcs_core_stage_castle_guard`は006d9e44の攻撃後の出現条件走査。通常のstage_tickはHP反映前の出現、guardは保留ダメージ後のHPから城HP保持旗を作る。両者の検査条件を共通化して待機/撃破/上限を加えない。所有Battleが表示更新ごとに旗をresetし、healthへ渡す。詳細と1Fの訂正はbattle-result.md。

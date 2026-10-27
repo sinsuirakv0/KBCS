@@ -4568,6 +4568,1206 @@
           "sourceKind": "local"
         }
       }
+    },
+    "img004_ja": {
+      "image": "Image/img004_ja.png",
+      "url": "/images/native-battle/img004_ja.png",
+      "rects": [
+        [
+          1,
+          1,
+          478,
+          109
+        ],
+        [
+          412,
+          112,
+          99,
+          40
+        ],
+        [
+          397,
+          154,
+          114,
+          36
+        ],
+        [
+          1,
+          112,
+          304,
+          108
+        ],
+        [
+          371,
+          112,
+          39,
+          39
+        ],
+        [
+          365,
+          192,
+          146,
+          36
+        ],
+        [
+          373,
+          234,
+          138,
+          21
+        ],
+        [
+          233,
+          234,
+          138,
+          21
+        ],
+        [
+          1,
+          239,
+          77,
+          16
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          211,
+          257,
+          237,
+          49
+        ],
+        [
+          80,
+          222,
+          112,
+          40
+        ],
+        [
+          1,
+          308,
+          476,
+          111
+        ]
+      ],
+      "sources": {
+        "Image/img004_ja.png": {
+          "sha256": "c5f9700c58208c90fbcfd07dae54b3b977a74402479f2ce8381f4a4fd61dc992",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img004_ja.png"
+        },
+        "ImageData/img004_ja.imgcut": {
+          "sha256": "8d85fbc450a0405109fa9acd902810e3f67e8d49770397947d147ae486360a9a",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img004_ja.imgcut"
+        }
+      }
+    },
+    "img004_DOJO_ja": {
+      "image": "Image/img004_DOJO_ja.png",
+      "url": "/images/native-battle/img004_DOJO_ja.png",
+      "rects": [
+        [
+          1,
+          1,
+          476,
+          111
+        ],
+        [
+          412,
+          117,
+          1,
+          1
+        ],
+        [
+          397,
+          154,
+          1,
+          1
+        ],
+        [
+          1,
+          115,
+          1,
+          1
+        ],
+        [
+          472,
+          151,
+          39,
+          39
+        ],
+        [
+          365,
+          192,
+          146,
+          36
+        ],
+        [
+          373,
+          234,
+          138,
+          21
+        ],
+        [
+          233,
+          234,
+          138,
+          21
+        ],
+        [
+          1,
+          239,
+          77,
+          16
+        ]
+      ],
+      "sources": {
+        "Image/img004_DOJO_ja.png": {
+          "sha256": "eea04f158e4c3771d2eaa58a5da5b85035d64322affcd9e45328439069a70186",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img004_DOJO_ja.png"
+        },
+        "ImageData/img004_DOJO_ja.imgcut": {
+          "sha256": "1b034bc5e1cc903416cf3e525d94a5f3c433dd393257d15bed23735520509acf",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img004_DOJO_ja.imgcut"
+        }
+      }
+    },
+    "img101": {
+      "image": "Image/img101.png",
+      "url": "/images/native-battle/img101.png",
+      "rects": [
+        [
+          1,
+          1,
+          112,
+          48
+        ],
+        [
+          115,
+          1,
+          112,
+          48
+        ],
+        [
+          229,
+          1,
+          112,
+          48
+        ],
+        [
+          1,
+          51,
+          254,
+          48
+        ],
+        [
+          1,
+          101,
+          254,
+          48
+        ],
+        [
+          1,
+          151,
+          254,
+          48
+        ],
+        [
+          1,
+          291,
+          64,
+          55
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          342,
+          1,
+          169,
+          24
+        ],
+        [
+          342,
+          26,
+          169,
+          24
+        ],
+        [
+          2,
+          201,
+          43,
+          43
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          48,
+          201,
+          75,
+          43
+        ],
+        [
+          125,
+          201,
+          35,
+          43
+        ],
+        [
+          280,
+          163,
+          28,
+          29
+        ],
+        [
+          280,
+          132,
+          28,
+          29
+        ],
+        [
+          280,
+          101,
+          28,
+          29
+        ],
+        [
+          280,
+          194,
+          28,
+          29
+        ],
+        [
+          280,
+          226,
+          28,
+          29
+        ],
+        [
+          310,
+          163,
+          200,
+          28
+        ],
+        [
+          310,
+          132,
+          200,
+          28
+        ],
+        [
+          310,
+          101,
+          200,
+          28
+        ],
+        [
+          310,
+          194,
+          200,
+          28
+        ],
+        [
+          310,
+          227,
+          200,
+          28
+        ],
+        [
+          1,
+          51,
+          254,
+          48
+        ],
+        [
+          17,
+          59,
+          16,
+          32
+        ],
+        [
+          307,
+          51,
+          48,
+          48
+        ],
+        [
+          323,
+          59,
+          16,
+          32
+        ],
+        [
+          257,
+          51,
+          48,
+          48
+        ],
+        [
+          273,
+          59,
+          16,
+          32
+        ],
+        [
+          357,
+          51,
+          48,
+          48
+        ],
+        [
+          373,
+          59,
+          16,
+          32
+        ],
+        [
+          407,
+          51,
+          48,
+          48
+        ],
+        [
+          423,
+          59,
+          16,
+          32
+        ],
+        [
+          457,
+          51,
+          48,
+          48
+        ],
+        [
+          473,
+          59,
+          16,
+          32
+        ],
+        [
+          276,
+          257,
+          32,
+          29
+        ],
+        [
+          310,
+          257,
+          200,
+          28
+        ],
+        [
+          1,
+          246,
+          51,
+          43
+        ],
+        [
+          54,
+          246,
+          51,
+          43
+        ],
+        [
+          107,
+          246,
+          51,
+          43
+        ],
+        [
+          160,
+          246,
+          51,
+          43
+        ],
+        [
+          213,
+          246,
+          51,
+          43
+        ],
+        [
+          162,
+          218,
+          26,
+          26
+        ],
+        [
+          174,
+          231,
+          1,
+          1
+        ],
+        [
+          190,
+          218,
+          21,
+          26
+        ],
+        [
+          67,
+          291,
+          48,
+          48
+        ],
+        [
+          83,
+          299,
+          16,
+          32
+        ],
+        [
+          117,
+          291,
+          131,
+          50
+        ],
+        [
+          250,
+          291,
+          184,
+          50
+        ],
+        [
+          436,
+          312,
+          41,
+          23
+        ],
+        [
+          436,
+          287,
+          41,
+          23
+        ],
+        [
+          213,
+          221,
+          24,
+          23
+        ],
+        [
+          224,
+          232,
+          2,
+          1
+        ],
+        [
+          1,
+          348,
+          200,
+          28
+        ],
+        [
+          203,
+          347,
+          28,
+          29
+        ],
+        [
+          463,
+          337,
+          48,
+          48
+        ],
+        [
+          479,
+          345,
+          16,
+          32
+        ],
+        [
+          1,
+          378,
+          1,
+          1
+        ],
+        [
+          342,
+          1,
+          51,
+          24
+        ],
+        [
+          423,
+          1,
+          38,
+          24
+        ],
+        [
+          488,
+          1,
+          23,
+          24
+        ],
+        [
+          489,
+          26,
+          22,
+          24
+        ],
+        [
+          250,
+          343,
+          202,
+          49
+        ]
+      ],
+      "sources": {
+        "Image/img101.png": {
+          "sha256": "208777566a969cd1afe3c850a17b76f42fea89cdbc4583728c4ca53d004f8eef",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img101.png"
+        },
+        "ImageData/img101.imgcut": {
+          "sha256": "8cf6edf748aeddece5f125e616d6af19f34e5396545c501ff59391f65ab28d51",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img101.imgcut"
+        }
+      }
+    },
+    "img101_nekoDojo": {
+      "image": "Image/img101_nekoDojo.png",
+      "url": "/images/native-battle/img101_nekoDojo.png",
+      "rects": [
+        [
+          1,
+          1,
+          112,
+          48
+        ],
+        [
+          115,
+          1,
+          112,
+          48
+        ],
+        [
+          229,
+          1,
+          112,
+          48
+        ],
+        [
+          1,
+          51,
+          254,
+          48
+        ],
+        [
+          1,
+          101,
+          254,
+          48
+        ],
+        [
+          1,
+          151,
+          254,
+          48
+        ],
+        [
+          1,
+          200,
+          64,
+          55
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          342,
+          1,
+          169,
+          24
+        ],
+        [
+          342,
+          26,
+          169,
+          24
+        ],
+        [
+          67,
+          201,
+          43,
+          43
+        ],
+        [
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          113,
+          201,
+          75,
+          43
+        ],
+        [
+          190,
+          201,
+          35,
+          43
+        ],
+        [
+          280,
+          163,
+          28,
+          29
+        ],
+        [
+          280,
+          132,
+          28,
+          29
+        ],
+        [
+          280,
+          101,
+          28,
+          29
+        ],
+        [
+          280,
+          194,
+          28,
+          29
+        ],
+        [
+          280,
+          226,
+          28,
+          29
+        ],
+        [
+          310,
+          163,
+          200,
+          28
+        ],
+        [
+          310,
+          132,
+          200,
+          28
+        ],
+        [
+          310,
+          101,
+          200,
+          28
+        ],
+        [
+          310,
+          194,
+          200,
+          28
+        ],
+        [
+          310,
+          227,
+          200,
+          28
+        ],
+        [
+          1,
+          51,
+          254,
+          48
+        ],
+        [
+          17,
+          59,
+          16,
+          32
+        ],
+        [
+          307,
+          51,
+          48,
+          48
+        ],
+        [
+          323,
+          59,
+          16,
+          32
+        ],
+        [
+          257,
+          51,
+          48,
+          48
+        ],
+        [
+          273,
+          59,
+          16,
+          32
+        ],
+        [
+          357,
+          51,
+          48,
+          48
+        ],
+        [
+          373,
+          59,
+          16,
+          32
+        ],
+        [
+          407,
+          51,
+          48,
+          48
+        ],
+        [
+          423,
+          59,
+          16,
+          32
+        ]
+      ],
+      "sources": {
+        "Image/img101_nekoDojo.png": {
+          "sha256": "894cb92490acad752026c9d95d701e0f0b6de6b63acc9fa1816eda77e6defd5c",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img101_nekoDojo.png"
+        },
+        "ImageData/img101_nekoDojo.imgcut": {
+          "sha256": "62658cb51a853e7c5127104701ac0d42a53888cd4864e34c279a40821c2093d0",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img101_nekoDojo.imgcut"
+        }
+      }
+    },
+    "img005_1": {
+      "image": "Image/img005_1.png",
+      "url": "/images/native-battle/img005_1.png",
+      "rects": [
+        [
+          1,
+          1,
+          12,
+          62
+        ],
+        [
+          15,
+          1,
+          54,
+          65
+        ],
+        [
+          71,
+          1,
+          36,
+          65
+        ],
+        [
+          109,
+          1,
+          36,
+          65
+        ],
+        [
+          147,
+          1,
+          137,
+          53
+        ],
+        [
+          286,
+          1,
+          146,
+          53
+        ],
+        [
+          1,
+          68,
+          86,
+          51
+        ],
+        [
+          33,
+          17,
+          18,
+          30
+        ],
+        [
+          6,
+          6,
+          2,
+          52
+        ],
+        [
+          83,
+          17,
+          12,
+          30
+        ],
+        [
+          121,
+          17,
+          12,
+          30
+        ],
+        [
+          449,
+          1,
+          62,
+          62
+        ],
+        [
+          385,
+          65,
+          62,
+          62
+        ],
+        [
+          449,
+          65,
+          62,
+          62
+        ],
+        [
+          147,
+          56,
+          122,
+          31
+        ],
+        [
+          89,
+          68,
+          41,
+          48
+        ],
+        [
+          107,
+          86,
+          4,
+          12
+        ],
+        [
+          277,
+          56,
+          106,
+          21
+        ],
+        [
+          277,
+          79,
+          106,
+          21
+        ],
+        [
+          132,
+          89,
+          45,
+          28
+        ],
+        [
+          151,
+          101,
+          7,
+          4
+        ],
+        [
+          277,
+          102,
+          106,
+          21
+        ],
+        [
+          1,
+          121,
+          196,
+          28
+        ],
+        [
+          315,
+          129,
+          196,
+          28
+        ],
+        [
+          245,
+          89,
+          29,
+          29
+        ],
+        [
+          1,
+          151,
+          182,
+          30
+        ],
+        [
+          208,
+          89,
+          35,
+          35
+        ],
+        [
+          224,
+          105,
+          3,
+          3
+        ],
+        [
+          179,
+          89,
+          27,
+          21
+        ],
+        [
+          336,
+          159,
+          176,
+          28
+        ]
+      ],
+      "sources": {
+        "Image/img005_1.png": {
+          "sha256": "585a525ad6e67d3c644a80dcb1368472d801171a2a3a09452bce1d2fc7f9fb2e",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img005_1.png"
+        },
+        "ImageData/img005_1.imgcut": {
+          "sha256": "2418588f3cb98d6945c651698ee27749bb1bd31610152251b4ef6f0e973a4886",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img005_1.imgcut"
+        }
+      }
+    },
+    "img006_ja": {
+      "image": "Image/img006_ja.png",
+      "url": "/images/native-battle/img006_ja.png",
+      "rects": [
+        [
+          1,
+          1,
+          254,
+          48
+        ],
+        [
+          1,
+          51,
+          254,
+          55
+        ],
+        [
+          246,
+          108,
+          112,
+          48
+        ],
+        [
+          427,
+          172,
+          84,
+          60
+        ],
+        [
+          361,
+          58,
+          150,
+          55
+        ],
+        [
+          361,
+          115,
+          150,
+          55
+        ],
+        [
+          1,
+          140,
+          68,
+          30
+        ],
+        [
+          1,
+          108,
+          68,
+          30
+        ],
+        [
+          251,
+          158,
+          62,
+          97
+        ],
+        [
+          257,
+          1,
+          95,
+          95
+        ],
+        [
+          361,
+          1,
+          150,
+          55
+        ],
+        [
+          341,
+          172,
+          84,
+          60
+        ],
+        [
+          196,
+          108,
+          48,
+          48
+        ],
+        [
+          146,
+          108,
+          48,
+          48
+        ],
+        [
+          113,
+          108,
+          31,
+          49
+        ],
+        [
+          80,
+          108,
+          31,
+          49
+        ],
+        [
+          415,
+          234,
+          96,
+          18
+        ],
+        [
+          317,
+          234,
+          96,
+          18
+        ],
+        [
+          221,
+          159,
+          27,
+          26
+        ],
+        [
+          163,
+          160,
+          22,
+          22
+        ],
+        [
+          78,
+          51,
+          97,
+          55
+        ],
+        [
+          163,
+          160,
+          55,
+          42
+        ],
+        [
+          1,
+          207,
+          247,
+          48
+        ],
+        [
+          98,
+          160,
+          62,
+          36
+        ],
+        [
+          1,
+          171,
+          76,
+          25
+        ],
+        [
+          1,
+          257,
+          47,
+          21
+        ],
+        [
+          50,
+          257,
+          19,
+          21
+        ],
+        [
+          71,
+          257,
+          37,
+          21
+        ],
+        [
+          110,
+          257,
+          22,
+          21
+        ],
+        [
+          485,
+          254,
+          26,
+          27
+        ]
+      ],
+      "sources": {
+        "Image/img006_ja.png": {
+          "sha256": "65363b81fcd3aaafb4e249de48e605315a3a127c0f79b9433c0128836ee06a2b",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img006_ja.png"
+        },
+        "ImageData/img006_ja.imgcut": {
+          "sha256": "31eee2ea4e12005bf82deb2b350dac496a7692e09a58f6f5e6e38c35b8b362f2",
+          "originalPath": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img006_ja.imgcut"
+        }
+      }
     }
   },
   "items": [
@@ -4636,5 +5836,991 @@
     "sha256": "de3e704b07651ed56e58f214ddb6f7322b9684d487e65e2fa9f25fab3bde403e",
     "size": 14944,
     "sourceKind": "local"
+  },
+  "sounds": [
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": false,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 40
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 40
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 100
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 100
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 40
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 40
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 100
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 100
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 25
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 25
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 25
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 25
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 25
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 25
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 50
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 40
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 40
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 10
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 45
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 30
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    },
+    {
+      "bgm": false,
+      "loop": false,
+      "priority": 20
+    },
+    {
+      "bgm": true,
+      "loop": true,
+      "priority": -1
+    }
+  ],
+  "soundSource": {
+    "path": "Data/Sound_setting.tsv",
+    "sha256": "8a507363d7fcc3f5c46dde60f725c26e5c34c81dda068bffbe11b03bcc73ebe8"
   }
 }

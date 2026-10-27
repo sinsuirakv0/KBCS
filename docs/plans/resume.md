@@ -1,4 +1,319 @@
-﻿# 再開メモ（2026-10-25 / 0.1.31 背景・カメラ・音源）
+﻿# 再開メモ（2026-10-28 / 0.1.35公開準備）
+
+ユーザーがバージョン更新とGitHubへのソース一式のPushを明示承認。0.1.35、タグ`kbcs-v0.1.35`で公開する。生成済みC++ inc、Rust、UI、検証コード/fixture、解析資料を含む。会話添付、AppData、ビルド/cache/巨大実験生成物は除外。アプリと同コミットのsource ZIPをReleaseへ添付する。
+
+- 最終exe: `.local/dist/0.1.35/kbcs.exe`、SHA256 `388af72d2758693255816c50c47d70633a4350531c99e3791683d1ea3832a88d`、12677632 bytes。必要DLLとverification.jsonを同梱。バージョン以外の戦闘式は直前のscore-uiから変更していない。生成C++の空行末尾の空白6箇所だけ正規化し、生成器にも反映（C++ token列の同一を検査）。
+- 新版でworkspace33＋compile_fail1、clippy all-targets warnings禁止、WebAudioライフサイクル、N000実DBの750F勝利/PNG取得が通過。diff空白/BOM/credential検査も通過。GUIを起動せず、ユーザーの実行中アプリ/タブや実所持品は操作していない。
+- [GPT調査用の現状と残課題](review-v0.1.35.md)を追加。README/architecture/native入口の古い未接続/ABI記述を現在の所有Battleと区別した。主な残りは自作マップ、levelSealの戦闘接続、専用controllerの残分岐、一部画面揺れ/専用演出/動的SE。未検証の全main/全F/GPU/可変共有モデル境界と分ける。
+- 後続の公開結果はGitのmain/tagとGitHub Releaseを正とする。取得済み原本キャッシュとローカル実験報告はresearch/.localに保持し、削除していない。
+
+# 再開メモ（2026-10-28 / 道場上部UI・ステージ名・結果帯）
+
+画面確認はユーザー担当。起動中アプリ/タブは操作・再起動・差替えなし。GitHub書込なし。以前の大量の未コミット作業は保持している。
+
+- 確認用アプリ: `.local/dist/0.1.34-score-ui/kbcs.exe`。SHA256 `6ca2745c5d3d11ea247b0fdeb19be3999b2cb6574a052597ca428662d8be4ff4`、12677120 bytes。前回の1F/SE修正を含む。DLLと試験/制約のハッシュは同梱verification.jsonへ保存。
+- `actor_top.inc`追加。006ddfb8/006e11f0..1b9cからタイトル(x62/y10)、道場Score/残時間、PR Pt/残時間/FeverをC++共用描画へ接続。死亡時の表示phaseを受け、表示hook5で補間/拡縮を進める。原本img001/FeverEffectの部品/数字/横伸縮を使い、JSに式を複製しない。
+- タイトルPNGはsource_fileにbytesがなくasset_referenceにだけあるため、旧存在確認ではnullになっていた。両表を確認し、既存SHA固定asset取得→scene.texture→暗転中のtextures読込へ接続。宇宙編kind -7/-14/-15/-25はsc。DB再取込不要。タイトルをスコア枠より先に同じGPUへ描き、終了時陰影/帯の下へ置く。
+- 結果横帯は005e97d8/005ee758の乗算mode2/RGB40,40,77/alpha255。透明HUD Canvasへ合成していたため不透明に見えた。C++overlay→同じGPU描画先の単色geometryへblendを渡す。敗北陰影も移した。任意の透明率で代用しない。
+- スコア式の追加差分は監査で見つからなかった。ScoreBonusMap全12マップ・20種・対象数5通りの1200条件、撃破720、道場時計40、PR Pt204/Fever800/時計72等を原本ARMへ比較。実マップのraw定義→Rules.bonus→同期scope→word232→protect後加点の契約を保持する。全mainや全能力組合せまで一致済みとは扱わない。
+- 原本描画の補間128/配置152条件一致。数字formatter/9分割は実命令、gfx出力を捕捉。幅960/1280、900F境界、mode0/4、Fever点滅を含む。probeは解決済みの所有表示状態を入れる描画専用fixture。最新DLL SHA `e627b3ac603821726b98b893d40ef7f7d390cfe9de422ed081a9eff0806c544a`、probe `ef54256e99375ab927d7b3eee77f86f13645215ce12ca15ad4292d3e12e77ffc`。
+- 最終exeで実DB接続18ケース: 全12ボーナス定義をRulesと照合、T000は9000F/mode4、R030は5400F/mode4、PR通常/Feverは5400F/mode1、S060は9092点、N000は勝利。画像PNG検査も全通過。初期HP/資金/編成を制御し、battle-replayのmemory報酬Storeを使用。実ユーザー所持品は増やさない。
+- workspace33件＋compile_fail1、all-target clippy warnings禁止、JS4ファイル構文検査、diff空白検査通過。日本語変更ファイルはBOM付きUTF-8（rustfmt後に復元）。実画面/Android GPU画素/全ステージ連続の一致はユーザー確認と今後の課題であり「スコア完璧」と主張しない。
+- 関数関係はnative/docs/battle-screen.md、battle-result.md、stage-score.md、render.md、data/docs/README.md、ui/docs/stage-sortie.mdへ追記。大きい入力/報告はresearch/.local/battle-score-*、battle-top-1572.json。古い「UI未接続」の記述は日付時点の履歴として読む。
+
+# 再開メモ（2026-10-28 / 戦闘操作・終了境界のSE）
+
+ユーザーが画面確認を担当。起動中アプリ/タブは操作・再起動・差替えしていない。GitHub書込なし。
+
+- 確認用アプリ: `.local/dist/0.1.34-battle-audio/kbcs.exe`。EXE SHA256 `5c6d6a5b19f17b9446ceda4785336544b5652ab0dd169b302da557269adc5290`、12663808 bytes。verification.jsonへ検証を保存。下記の1F修正も含む。
+- `battle_screen.cpp`→音源hook→所有Battleのframe/id通知。財布成功19/最大・資金不足15、砲種別音＋19/充填・行動中15/充填完了28、押下10、ポーズ・アイテム・オプション解放11を接続。音量は原本callback3の解放時に変更し、SE0/復帰時の11もその音量を使う。5表示更新の操作待機は維持。振動は無効。
+- `00459f04`のgame modeゲートが共通ラッパーから欠落していたため修正。effects/areasも原本のf04/efcを区別。死亡23/24・反射召喚159等のefc呼出を終了後一律に削除しない。勝敗時の00459bb4(-1)はBGMのみ停止する。
+- 通常命中は全被弾を集計し、勝敗判定後、mode0なら城22か個体20/21の一回抽選。無音でもRNGを消費。勝利Fは命中音抽選なし。1F所有試験にもHP1のFで22/勝利Fで22なしを追加。
+- WebAudioは同じ音源の再生し直しとloopを適用。終了/ミュート後に古い取得待ちが鳴ること、新しい終了音が古い取得待ちに塞がれることを防止。既に鳴っている全SEを勝敗時に停止しない。51音の索引を確認。
+- 原本ARM局所130条件一致、C++所有入力回帰、WebAudio mock、1F通常/倍速、workspace全テストとclippy warnings禁止、JS構文検査が通過。音声デバイス/全mainの連続実行は未確認。Android priority/voice資源解放、ID29の動的差替えは既存制約として残る。詳しくはresearch/docs/audio-1572.mdとnativeのbattle-screen/runtime docs。
+
+# 再開メモ（2026-10-28 / 1Fの実戦接続修正）
+
+ユーザー再指摘: ボス衝撃波も一瞬の出現/魂も起きない。KBC-webは再現できている。原本・Web・C++を再比較した。
+
+- 前回の局所試験は城100→50→0で、未出現ボス前の致死攻撃を通していなかった。下の古い「1F確認済み」はこの不足した試験を指す。今回の情報を優先する。
+- 原因: 原本006d9e44..9fc0の出現予定走査とgame+39a228の接続が欠落。healthのHP1保持分岐はあるが所有Battleが常に0を渡していた。WebにはbossPendingでHP1を残す簡略処理がある。
+- `kbcs_core_stage_castle_guard`を追加し、保護後/特殊城HP複写前に原本の条件で旗を立て、healthへ渡した。HP>1、残り出現回数、boss非0、保留ダメージ後HP/特殊累積ダメージを使用。待機や撃破条件は加えない。32bit演算を保持。006d7208同様、表示更新の先頭だけで旗をresetする。
+- 旧DLLと新DLLで同じ`native/kbcs-core/tests/battle-one-frame.cpp`を実行。通常出撃/実際の2段攻撃を通し、旧は7Fで城破壊/ボスraw0、新は7FでHP1→8Fでボス生成/味方行動7/ボス行動4/HP0/時計0/SE45/shock描画要求/勝利。倍速は同一表示内の旗保持も検査。
+- ARM走査1024条件一致、更新した局所2F試験8更新一致。Webの既存battle.test.js通過。詳細: native/kbcs-core/docs/battle-result.md。確認用ビルド: .local/dist/0.1.34-one-frame/kbcs.exe。実画面はユーザーが確認し、起動中アプリ/ブラウザは操作しない。
+
+# 再開メモ（2026-10-28 / 原本の結果画面・報酬保存・1F境界）
+
+確認用releaseは `.local/dist/0.1.34-battle-results/kbcs.exe`（12,658,176 bytes、SHA256 `98b8cc0920eeef2593300b795a27d5edd6927404062feb6b883fe49447b349ac`）。同フォルダのverification.jsonへDLL/EXEのハッシュと検証を記録。画面確認はユーザーが担当。起動中のユーザーアプリ/タブは操作・再起動・差替えしていない。GitHub書込なし。原本JP15.7.2/1507021/arm64-v8a/SHA6122e248…を継続する。
+
+- 最新補足: 特定のキャラ/ステージではなく、ボス衝撃波開始Fと城HP0が重なる条件を再現する。`battle_one_frame.py`が出現→衝撃波→HP反映→城判定を2F連続で比較。味方行動7と勝利mode1が同じFに成立し、城HP1/衝撃波無効の対照も一致。一律の1F遅延は追加しない。攻撃/生成入力は制御した局所連続試験で、全mainの実行ではない。
+- `actor_ending.inc`が通常/PR/敗北/道場の時計・カメラ・通知を所有する。通常下部移動82、道場96（旧640記述を訂正）、2段終了zoom8803。phase7のボタンは006ddfb8側のimg101 cut3＋img006_ja cut1。道場img101_nekoDojo。押下と5表示更新後の遷移を接続。
+- 通知は独自の画像modalを廃止し、005e53dc/005e82fc/00885170の原本文字列、img005_1の9分割、y401/文字30/行間36/開く倍率[0,50,80,90,100]へ接続。phase8、SE29/11、閉じ5更新。素材は4種類ずつ2種類で改行、回数報酬はbackstage_result1。
+- キャラ所持を保存して再現することはユーザー明示承認済み。user/inventory.sqliteのcharacterとclaimへ基本Lv/＋値/所持/第3・第4解放/共有入手旗を保存。編成の最大設定と独立。006e34b0の正規1000/1100番台では入手済みresult1へ進み、＋値を勝手に増やさない。存在する加算コードだけからの推測を撤回し、ARM48条件で一致。報酬1002は独立旗、drop_chara列1の別名は共有旗。
+- `inventory::Store::finish`が表示数/累計/所持/初回旗/結果を同じtransactionで確定。同戦闘番号の再取得は保存済み結果。表示数は自由設定、累計は独立。ホームに持ち物、2タブ。API/catalogの1128件を実DBで取得。CSVはGatyaitembuy見出し/コメント列12以降とdrop_chara見出しを除外し、不正セルの原因を修正。追加報酬の末尾空欄も未定義として処理する。
+- `Receipt`はDBのステージを再取得して検査し、XP/通常・重み報酬/素材/スコア/回数報酬を解決。保存失敗はreceiptErrorと再試行へ。battle-replayはmemory Storeを使用し、実所持数を増やさない。通常previewの接続確認はresearch/.local/battle-results-previewだけを使った。
+- BGMは敵城HP crossing停止→45論理F後に後半曲、開始待機は表示F、Sound_settingのloopを使用。既定終了SE8/9、道場57/189、eventDisplayDataのtype0抽選/type1全再生。optionsの音量永続化は維持。
+- 検証: workspace全テスト、clippy warnings禁止、JS構文検査。battle_ending.py（controller/zoom/BGM50条件/popup配置16＋時計16）、battle_result.py、character_reward.py48条件、battle_one_frame.py8更新がARM一致。実DBの通常勝利/スコア勝利/道場5400F/PR勝利をheadless実行。S139を2回勝利し、初回入手＋再取得非加算と表示12/累計0の独立を検査。通知4件→OK→5更新後action302、結果再取得で二重加算なし。
+- 大きい報告はresearch/.local/{battle-ending-1572,battle-one-frame-1572,character-reward-1572,result-release-replays,result-persistence-connection,result-popup-connection}.json。原本のアカウント全進行・通信/広告通知・Androidフォント字形までの完全一致を主張しない。全mainの連続実行と同一ではなく、制御した局所比較と実DBの接続検査を区別する。詳しい関数/部品はnative/kbcs-core/docs/battle-result.mdとdata/docs。
+
+# 再開メモ（2026-10-27 / 追加生産・PR・対象限定コンボ）
+
+確認用release: `.local/dist/0.1.34-battle-special/kbcs.exe`（12,129,280 bytes、SHA256 `e77fe965d766ace14c0f472eeb70c36ecd5689c7423401c2b7d848abfdc98319`）。必要DLLとverification.jsonを同梱。ABI4。起動中アプリ/ブラウザ/プレビューは操作・再起動・差替えなし。GitHub書込なし。既存の大きな作業ツリー/添付/researchを保持する。
+
+- 最新要望は不足を見つけて順に埋めること。今ターンは追加生産、条件付き本能玉/再生産・価格、PR専用Pt/Fever/時間勝利/敗北mode7、対象限定コンボ、DB計算のABI番号不一致を修正。詳細と関数関係は `native/kbcs-core/docs/battle-special.md`。
+- JP15.7.2/1507021/arm64-v8a/SHA6122e248…を継続。0044a8d8等の戦闘RNGを共有。ルール8は通常生成成功時に予約し、次のlogicalの時間判定前に末尾から更新。待機1→0のFには生成しない。満員失敗でも消費し、生産数を一時的に1減らして構築し復元する。余分な費用/再生産/通常生産総数を加えない。敗北で予約clear、勝利時に一律停止しない。
+- 005c2f88のkind/periodはparam.tsvから解決。構築前と通常生産成功後の呼出を分け、初期能力と次回待機へ反映する。本能玉5..等の条件付き初期能力、19の短縮、22のコスト。固定時間ルール1は短縮を迂回する。普通の属性玉0..4の命中効果はこの生産条件で無効にしない。
+- 00aa0568をproduction_costへ接続。原本loaded cost/本能25/章/率を使い、固定4→本能玉22→個別コンボ27→レア度5の整数化。現在価格をHUD/CPU/支払い/返金で共用し、その後で動的価格11を掛ける。UIの初期コストを所有戦闘の確定値にしない。
+- NyancomboData.csv列2→0088fde0 object+0x10。group!=-1は009e4e14のCharagroup type3所属を要求。既存source_fileから読むためDB再生成なし。現版group10は831..836/857/858。全体と対象別を分け、Rules.unit_combos/同期BattleRulesScopeで速度/stat/命中getter、Rustの再生産combo11、順序付き価格combo27へつなぐ。固定配列の未使用枠をJSONへ展開しない。
+- PR000(nativeKind-26/id39000)はPointStageSettingsの対応を確認。旧DBに原本bytesがなければasset_referenceの固定revision/SHAからAppDataへ取得。StagePointRulesMapの区間率で出撃/最終撃破Ptを計算する。有限時間の実命令はFCVTZS W20で、疑似コードのuintではない。
+- ルール12の4番目はFever用の別ルールID6であり6F固定ではない。現版は600Fの間6レア度の再生産率が0。logical先頭で00645288、表示Fで00645444、表示末尾hook5で0064556cを進め、描画/HTTP batch回数で差を作らない。SE194。勝敗時00645630相当でending=1、表示phaseを5へ進める。
+- PRのtimerは00a0cdbc、期限は006d7e6cから勝利mode1。5400Fでelapsed5399。城敗北はmode7。結果画面の所持Pt/報酬保存は別。ホスト常設欄へPt/時間/Fever/追加予約を追加した。
+- DBのnative-calculation.jsに古いABI2判定が残っていた。サービス/コア/橋/診断/テストをABI4へ揃えた。CLIの画像検査はtexturesの予約null枠を飛ばす。
+- battle_special.py: C++へ3364件（condition48/plan216/queue80/cost1944/Pt204/Fever800/PR時計72）一致。さらに原本の対象getter45件を採取し、実DBのRulesと比較。勝敗654、CPU2560更新も最終DLLへ再照合。DLL SHA `100909b9d4e5b3aa2393ee15df70952663574831850c580ccbbd0b957833cd95`。
+- 最終exeのPR0は5400F/24657Ptで勝利、Fever編成は5400F/102886Ptで勝利・SE194/600F切替と復帰、空編成の城破壊は919Fでmode7。SR017/027は追加予約/生成あり。group10の5キャラと対象外94で価格/初期速度を検査。--validate-assetsも通過。接続報告はresearch/.local/battle-special-connection-report.json。
+- 最終exeのFever5700F（70対2100応答）とSR017 3150F（35対1050応答）は全state/個体251語/RNG/SE順/結果/予約/Ptがbatch対1表示Fで一致。初期資金/自城HP等を制御した実DB接続fixtureで、本家全Fの証明ではない。
+- workspace31＋compile_fail1、all-target clippy -D warnings、rustfmt、JS構文、NodeでABI4受理/ABI3拒否が通過。日本語変更ファイルはBOM付きUTF-8。大きい原本/入力/報告はresearch/.local。GUIの目視確認はユーザー担当。
+
+残り: 本家の結果画面全体/結果音声、報酬抽選・所持数/最高記録の保存、Feverの原本ゲージ/モデル描画、ステージ固有Lv封印・専用controllerの残分岐、可変共有モデル境界/画面振動/全mainとGPU画素の照合。今回の接続を全完成と扱わない。
+
+Fever描画の次の入口: 006ddfb8、BattleTextureContext+0x16598のImage/FeverEffect.pngとimgcut、+0x165a8のmamodel、+0x16650のmaanim（実asset_referenceに4ファイルあり）。006455fcがframe、00645604がphaseによるroot値、中央viewportWidth/2・height/2へ00448e7c。モデルroot+0x7cの値を差替えるため、既存poseのどの欄かを推測せず確認する。HUDはcut8/9、mask7、overlay6。既存描画/座標へ憶測で追加しない。
+
+---
+
+# 再開メモ（2026-10-27 / 勝敗・道場Score・出撃制限）
+
+確認用release: `.local/dist/0.1.34-battle-result/kbcs.exe`（12,083,200 bytes、SHA256 `c0fe8856ff5f5e0f6b513ac2bcf1cf38f5aa0c1d38cbfd03a6db771f6d9d1ad6`）。必要なDLLとverification.jsonも同フォルダ。起動中のアプリ/ブラウザ/プレビューは操作・停止・差替えなし。GitHub書込なし。既存の大きな作業ツリー/添付を保持。画面はユーザーが確認する。
+
+- 最新要望: 勝敗、道場系Score、特殊な出撃制限を接続。`native/kbcs-core/docs/battle-result.md`へ原本・順序・関数関係・検証範囲を記録。
+- JP15.7.2/1507021/ARM64/SHA6122e248…。新しいactor_result.incに勝敗/時計/動的制限/ボーナスgetterを置き、owner→bridge→Session→常設操作欄へ接続。stage nativeKindをnativeModeと分ける。C++/RustのConfigへRules、ScreenState末尾へbattle_mode（旧JSONは省略時0）。FFIは同時再ビルドする。
+- 原本006db46cは敵城破壊が先。同時0なら味方城を1に戻してmode1。敵城が非0で味方城0ならmode2、T/R道場はmode4。勝利の通常敵は行動4/時計0/HP0へ。特殊城はword111が0のとき行動17。005e02b0の味方散開はDAT002b2bb0=(4,0)、個体ごとに5回RNGを消費する。
+- 行動前に道場timer、health後に城判定。終了後も個体/二次攻撃/演出時計を継続する一方、出現/出撃/CPU/財布・砲操作を止め、収入・砲充填・再生産時計は戦闘中の末尾に限定。次の表示Fから速度を通常へ。stateless画面APIの経済更新は維持。
+- 道場はnativeKind3/4の005e1400通常経路。timer/limit/score/mode/quietを既存enemy_knockbackへ渡す。普通の道場とScoreBonusMapありの入金分岐、固定資金で入金なしも分ける。実ボーナス点数÷対象数を命中getterで解決し、word232をprotect後に加算/解除。同期thread_local scopeで単体命中のイベント捕捉契約を保持する。
+- 通常スコア報酬はscoreRewards＋有効scoreIdの勝利時に既存stage_scoreを呼ぶ。nativeKind−6は原本の時間二乗スコア。WebのscoreModeや正のtimeLimitだけでPR(−26)を道場にしない。
+- 動的制限は009e57b8のraw>1かつ生産slot<10をレア度別に数え、死/魂の枠もraw0まで数える。ルール3は0無制限、7は通常生産総数で0出撃不可/なし−1。ルール0ありなら009e583cは資金だけを判定し3/7を通らない。ステージ上限0と物理50枠を区別し、上限を50へ置換しない。精霊召喚も静的/ステージ同時数条件は通す。
+- 表示Fごとに生産警告(wait,status)を更新しCPU modeへ接続。上限時(0,1)、入口拒否(30,2)。手動/CPU/HUDで可否を共用。runtime.result/deployment/rulesを追加、JSに式を複製しない。
+- battle_result.pyの同版ARM64局所654件（bonus36、limit486、城優先36、敗北個体/RNG48、勝利個体8、時計40）が一致。敵死亡720件とCPU2560更新も再照合。報酬/セーブhandlerとgetter/既存seen treeは制御した比較で、全main一致の主張ではない。
+- 最終exeの実DB接続: N000勝利761F/敗北536F、S060は908FでScore9092、R030は5400Fで時間終了/elapsed5399/Score31072。SR002はレア度同時数1を守り退場後に再生産、SR005は総生産60で止まり物理50枠も通過した。
+- 6ケースのbatch対1表示Fが全state/個体251語/RNG/結果/制限/SE順まで一致（900/660/1050/5430/2400/870F）。速度3の道場締切後も演出を継続し結果を固定。CPU既存fixtureも3390Fで一致（勝敗で倍速が解除されるため旧4140Fとは異なる）。初期資金/自城HP/価格を一部制御した接続fixtureで、本家全フレーム比較ではない。
+- 最終DLL: research/.local/battle-result.dll、SHA `4e2cbc736a401775aecf08cdb147eb77248a65627a37491aa3264fd1d3ddbc7f`。workspace31＋compile_fail1、all-target clippy -D warnings、rustfmt、JS構文通過。日本語変更ファイルはBOM付きUTF-8。大きい入力/報告はresearch/.local。
+
+残り: 本家結果画面全体/結果音声、報酬付与・保存・報酬抽選RNG、PR専用の記録/フィーバー/終了controllerとmode7等、ルール8の追加生産予約。可変共有モデルの境界、残る特殊VFX/画面振動と全main/GPU画素の照合も別。今回の勝敗/道場/ルール3・7接続と、これらの完成を混同しない。
+
+---
+
+# 再開メモ（2026-10-27 / ニャンピュータ・生産価格）
+
+確認用release: `.local/dist/0.1.34-battle-control/kbcs.exe`（12,066,816 bytes、SHA256 `2e100a1891932f916029831a1d5ab842ee0bd0784e8cdcf30a6b091bb6fadea4`）。DLLとverification.jsonも同フォルダ。起動中アプリ/ブラウザ/プレビューは操作・停止・差替えしていない。GitHub書込なし。既存の大きな作業ツリー/添付は保持。ユーザーが画面を確認する。
+
+- 最新要望: 未完了部分を続行。通常のニャンピュータと、生産ごとに変わる価格をC++所有戦闘へ接続した。
+- 原本はJP15.7.2/1507021/ARM64/SHA6122e248…。006ee6c8をactor_computer.incの67行へ正規化し、kbcs_battle.hのInput/State/Outputを追加。候補保持、30%の財布側選択、候補数1の抽選、砲の150待機→2抽選、城付近の別判定、ページ待ち/逆転、精霊activeの除外を維持する。原本の発射失敗は選択1を保持、成功したfire側だけが解除する。
+- battle_screenのhook 3は表示更新ごとに一度、論理Fループ後・ガード後・手動入力前。一時停止/暗転/押下ガード中は呼ばない。倍速の各論理Fへ自動判断を増やさない。通常のdeploy/fireを共有し、CPUの構築/発射失敗通知は原本指定に合わせて抑止する。
+- battle_computer.py: 640条件×4=2,560更新を同版ARM64の006ee6c8へ比較。全候補/保持値/砲判断/ページ要求/操作/RNGが一致。射程helper005bf6c8/005bf658も実行。可否/プロフィール/財布/価格/再生産、生成/発射、音声、009e57b8集計は制御した局所照合。全main一致の証明ではない。
+- 005be130→production_price→KbcsBattle::costへ特殊ルール11を追加。last_cost=0ならbase（生産回数の非0ではない）。mode0/1の整数化とcapを保持。非0last_costで3列不足はエラー1/出力不変。実データA081（24081）は[0,200,99999]。価格の120正常条件/72不正列条件が原本と一致。
+- 価格は実支払い、CPU判断、返金getter、runtime.costsで共用。手動押下を初期価格だけで事前拒否せず、所有deployで再検査する。JSのコスト表示/金欠判定もruntime.costs（1/100円）。statsへcomputer/produced/lastCostsを追加した。
+- 最終exeでCPU試験4,140F（74batch対2,202単F）が全永続状態/個体251語/RNG/通知順まで一致。初期財布0→Lv8、下段7/9枠の自動出撃、1段/ページ待ち、2倍/3倍/通常、CPU OFF/ON、一時停止、砲通番2を通過。battle-computer-input-session-report.json。
+- A081実DBの1,500F（51対1,512）が一致。出撃数[4,14,1,1]で次価格[540000,1740000,1341000,1485000]、直前価格と生産数からの更新も全応答で検査。battle-price-input-session-report.json、battle-control-connection-report.json。既存の手動入力/二次攻撃1,539F（66対1,562）も一致（battle-effects-input-session-report.jsonは今回のexeへ更新）。
+- 最終DLLはresearch/.local/battle-control.dll、SHA a5525a4810e63ea587c55d8cf76ce0829d32ff9c8ef452c52f527f6e2b3aeef8。workspace31＋compile_fail1、全target clippy -D warnings、変更JS構文、git diff --checkを通過。日本語ファイルはBOM付きUTF-8。
+
+詳細: native/kbcs-core/docs/computer.md、battle-runtime.md、production.md。
+
+残り: computer Input.modeは原本game+2971f0（生産警告時計）を受けるが、所有側は通常0。特殊な生産拒否警告の時計、全レア度別/総生産制限、追加生産は未接続。勝敗/時間制限/報酬、可変共有モデルの境界、全main/GPU画素、残る特殊演出/音声backendの資源圧迫条件も未完了。下の「ニャンピュータ/特殊価格未接続」は今回の通常接続で更新する。
+
+次の原本入口: 006db46cは敵城HP=0を先に判定（同時0なら味方城を1へ）して005d996c、敵城非0/味方城0なら005e02b0。通常mode1/2のほか特殊mode4/7。制限時間は論理更新前で005bbba0=9ee64×1800、005e1400の開始flag/特殊種別/71a0c4条件も追う。HP0で全処理を凍結する近似を入れず、結果演出中の個体/時計も原本照合してから接続する。
+
+---
+
+# 再開メモ（2026-10-27 / ボス衝撃波・境界・VFX/SE・スニャイパー画像）
+
+確認用release: `.local/dist/0.1.34-battle-effects/kbcs.exe`（12,055,552 bytes、SHA256 `349c98ae4e10949b374290ff6c5f602ed722c30c09f20ab1d08fcee57f0aa36c`）。同フォルダに必要なDLLとverification.json。ユーザーが表示確認を担当する。起動中アプリ/ブラウザ/プレビューは操作・停止・差替えしていない。GitHub書込なし。前からの巨大な作業ツリー/添付を保持。
+
+- 今回の要望: 城HPの左値がslashへ重なる、召喚OKの青色、ボス衝撃波、敵ボスと味方の後退限界、特性/被弾演出とSE。追加で、スニャイパー付き開始時の `The source image cannot be decoded.` を修正。
+- HP右端の14px二重補正を除去。召喚可能アイコンを原本005d0a68のRGB(157,215,255)で乗算し、OK画像の明滅もwait由来にした。
+- actor_bossを所有logicalの攻撃後・波動前へ置いた。初回SE45、無効/行動条件、行動7、時計更新/上限。actor_boss.pyで同版ARM64の288更新が一致。表示基点boss_effect_anchorも006e042c..006e0588の108条件が一致。Yのscale補正を10で二重に割らない。
+- 00a9490cのボス限定の敵城補正を追加。既存knockback/displacement検証をモデル点だけ制御して00a9490c本体も実行する形へ拡張し、味方mode1152＋敵mode3456条件が一致。初期モデル点を使う現状と、可変共有モデル/全mainの連続照合は区別する。
+- 所有VFX: critical200、ゾンビキラー/バリア/悪魔シールド各30、渾身/毒撃/メタルキラー/遅延の可変リスト。固定poolはplain、可変リストはencodedの時計。12F被弾の000_a、色/加算、妨害・生き残り・強化・無効・持続barrier/shieldと反射烈波の召喚待ちを接続。status→波動→烈波→反射待ち→爆波の順も維持。描画命令colors[3]=1をtexture乗算色の指定に使う。
+- 位置抽選RNGをcritical確保→渾身→毒撃→メタルキラー→critical座標→通常被弾→healthの順に追加した。音声・表示の有無で省略しない。SEは原本helperを同期scopeで捕捉し、runtime.soundsへ当該advanceのframe/id通知を返す。batch試験は単F区間のSEを連結して通知順も比較する。battle-audio.jsは取得/decodeで戦闘を待たせない。
+- 009f560cからclocks39本を解決。actor_motion_lengths.pyは試験側のtrackメモリ重複を訂正（C++の長さ式はそのまま）、135人工＋39実ファイルが一致。バリア3/シールド5の書式文字列ループもexporterへ記録。
+- スニャイパー失敗の原因はImage/img043.pngがasset_referenceにだけありsource_fileにないこと。/api/assetが500 JSONを返しImage.decodeで失敗していた。source::assetはDB metadataの固定origin/revisionと索引SHAからAppData/assets/objects/<SHA>へ遅延取得する。公式DB再構築/書換なし、最新HEADへ切り替えない。最終exeのbattle-replay --validate-assetsを通し、img043のSHA、全PNG chunk CRC、IDAT展開(256×128 RGBA)を確認。report=research/.local/battle-sniper-assets-report.json。
+- 同版CAF9本を音源索引へ追加。LPCM16 little-endian/1〜2chをWAVへ包み直す。原本9本と返却WAVのPCMがbyte一致（audio-pcm-report.json）。SE65/137/139も原本を優先。キャッシュは元CAFとSHAを保存。
+- 最終releaseで通常入力1539Fのbatch66応答対単F1562応答が全個体語/状態/描画記録/通知順まで一致。ND032実編成は4800F/841応答、最大27個体、衝撃波と妨害/生き残り表示を含め停止なし。reports=battle-effects-input-session-report.json、battle-effects-nd032-final-report.json。
+- N045-2/DM000-0/NA021-5を各2012F進め、critical、バリア、シールド破壊/再展開、毒撃を通過。別N045入力でbarrier breaker0x2398/SE70も確認。これは実DBへ人工的な低コストを与えた接続試験で、実機全戦闘との比較ではない。reports=battle-visual-cases-report.json、battle-visual-barrier-report.json。
+- workspace31試験＋compile_fail1、全target clippy -D warnings、変更JS構文、git diff --checkを通過。日本語ファイルのBOMを復元した。
+
+詳細はnative/kbcs-core/docs/battle-runtime.md、render.md、crates/kbcs-data/docs/README.md、research/docs/audio-1572.md。全main連続実行、GPU最終画素、可変モデルの接触境界、残る特殊演出/画面振動、Android音声バックエンドの資源圧迫時priority/voice解放は未証明。ニャンピュータ、特殊価格、勝敗/時間制限/報酬の接続も以前から残る。表示確認はユーザーが行う。下の過去メモの「ボス/全SE未接続」は今回の追加で更新する。
+
+---
+
+# 再開メモ（2026-10-27 / ND032停止・上下位置・HUD・城砲接続）
+
+配布候補 `.local/dist/0.1.34-battle-session-fix/kbcs.exe`（release）。ユーザーが表示確認を担当し、起動中アプリ/ブラウザ/プレビューは操作・停止・差替えしていない。GitHub書込なし。既存の大きな作業ツリーと添付ファイルを保持。
+
+- ユーザー報告: 0.1.34-battle-session、ND032-0「バラバラバラン草原」で約2700F後に暗転/更新停止、エマ/天使ゴンザレスの上下位置が違う。
+- 原因1: `render.cpp`が106_s02.maanim（カイ）の逆順キー47→46を拒否。旧exeへ保存済みエマ入り編成を通すと初攻撃でエラー1を再現（人工入力では397F/398F。時点は出撃/資金次第であり2700F固定ではない）。0044c884の原本順の区間探索へ変更した。
+- 原因2: 0044b854の4c/54等は原点の基礎/加算値だった。位置まで引いていたのを訂正。0044af4cの根matrixは位置加算だけで、モデル基礎X/Yを含めない。エマ559_sの基準点[-72,0]、天使ゴンザレス115_eの[125,153]を原本に比較。`model_contact.py`は実メモリレイアウトを使う試験へ訂正、300条件+実モデル2+カイ145Fが一致。旧「位置と原点を両方引く」解釈を使わない。
+- releaseのND032回帰は原本コスト/保存編成で4800F、味方最大21/敵最大17、対象のraw117/561を含み停止なし。旧exeの同入力は397F後にエラー1。別入力のdebugビルドは9975F/最大計53個体も通過。reports: `research/.local/battle-nd032-regression-report.json`、`battle-nd032-regression-input-session-report.json`。
+- スニャイパー: actor_sniper.inc、005ce564/005ced48の照準・弾・煙・命中を所有battleへ接続。3720更新/8発/480命中のARM64局所比較と有効アイテムの1539F batch/single比較。城MAXHP/20、メタル1。GPU画素/全SEは未検証。
+- 城砲: actor_cannon.inc/actor_cannon_draw.inc、bridge cannon.rs、App Sessionへ8種を接続。0063a050等の原本表を同版SHA付きbattle-inputs.jsonへ追加。古い公式DBにCSV bytesがない場合も使う。005d6740のint* +0xfbを1004byteへ直し、鉄壁寿命はword117へ書く。216命中/676行動/128発射/24複数対象接触がARM64と一致。全8種のUI入力→所有状態→描画命令を402Fヘッドレス実行、発射通番1と鉄壁生成を確認。setup成長全域/全main/GPUの完全一致とは区別する。
+- 精霊再召喚も所有battleへ接続済み（actor_summon.py 216条件、既存headless proof）。
+- HUD: 専用ステージ名画像・再生産・城HP・精霊可否。battle_hud.pyの318矩形条件。BGM/SE/段数はAppData/user/battle-options.sqliteへ保存。振動なし。通知を上部固定行へ移し押下でCanvasサイズが変わらないようにした。エラー時にメニューhiddenを解除せず、上部へ文面/診断JSONを出す。
+- `cargo test --workspace --locked`31件+compile_fail1、全target clippy -D warnings、変更JSの構文検査が通過。日本語ファイルBOMを保持。最終exeのSHAと証跡はresearch/.localのreportと配布フォルダを参照。
+
+次に残るのはニャンピュータ、ボス城衝撃/全体制御、特殊価格ルール、勝敗/時間制限/報酬、全被弾VFX/SE、全mainの連続照合とGPU画素。描画と戦闘の状態/RNGは分離し、原本15.7.2 ARM64/SHA6122e248…を固定する。下の古いメモに残る「精霊/砲/スニャイパー未接続」はこの追補で更新。
+
+---
+
+# 再開メモ（2026-10-26 / 命中本体・C++所有戦闘・画面接続）
+
+0.1.34へ追加。起動中アプリ/プレビューは操作・停止・差替えしていない。GitHub書込なし。既存の性能/API/DB/編成/描画/転送の変更を保持。テスト用releaseは `.local/dist/0.1.34-battle-session/kbcs.exe`、SHA256 `5cc893f13444694af0c93cb2ab12db441ab3f068955a8f80b51f0696dce63e8c`。同フォルダのDLLと一緒に使用する。
+
+[所有状態・API・入力・描画・残り](../../native/kbcs-core/docs/battle-runtime.md)、[命中本体](../../native/kbcs-core/docs/hit-runtime.md)。006e4aec/006e79bc/006e60f0をactor_hit_source.py→export_actor.py→actor_generated.incへ移植（生成586関数）。従来の21段階数値APIはDB用のまま、実命中は入口/回避/無効/対象/妨害/予約を含む原本本体へ接続。Hitsはメタルキラー列と生成通番別寄与者列を所有する。
+
+actor_battle.incが102個体、出現行/再生産、RNG、命中/波動/烈波/反射待ち/爆波と死亡烈波21を所有する。Rust battle::Sessionは版/SHA確認、実DB/編成/宝/コンボ/本能/玉/土台/装飾/param/モデルの解決、排他、描画転送を担当。battle-screen.js→POST /api/battle-session→/frameへ接続し、暗転中に追加画像をデコードする。返却されたHP・個体数・再生産待ちを表示。DELETE/pagehideで解放。JSから個体/財布状態を毎回上書きせず、HUD内部の各論理Fと出撃要求hookで処理する。
+
+重要な入力補正: raw=DB ID+2、unit row=0、読込済みcells6はコスト1/100円/敵報酬、cells7は再生産F、再生産コンボ11。宝maximumEffect=0は品質自体を加算し、章限定/クリスタルを他章へ持ち出さない。Lv1段別攻撃と相手属性に一致する玉を命中ごとに解決。特殊敵城49列とword112の条件、財布加算直後の上限、砲の最大word11/現在word12を区別する。共通魂と復帰演出のファイル/時計を共用しない。
+
+現版JP15.7.2/1507021/ARM64/SHA6122e248…へ命中1,245条件（40代表fixture）、波動32条件/4,800更新/68命中呼出、モーション長135人工条件/12実ファイル、基準点300単一部品条件を局所照合。全251語×102枠/RNG/該当履歴等を比較する。魔女/使徒などの単独特性、コンボ0/99/100、城slot0への城破壊＋クリティカル/渾身も含む。全main連続一致や全姿勢の証明ではない。research/.local/actor-{hit,wave-step}-1572.json、model-contact-1572.json等にDLL SHAと制御境界を保存。
+
+最終releaseで効果編成N000を1,539F、66 batch応答対1,562単F応答で比較し、全個体語/永続HUD/待機/RNG/二次描画記録が一致。一時停止/コマ送り、波動/烈波/小烈波/爆波を含む。ゾンビ実ステージN033は3,920F/最大12敵、潜行11..15/復帰16を確認。通常編成1,920F/106対1,932応答の一致は前のdebug実行ファイルによる記録。レポートはbattle-effects-input-session-report.json、battle-zombie-session-report.json、battle-replay-input-session-report.json。CLIは描画packetを件数へ省略するのでpacket一致とは扱わない。
+
+workspace31試験＋compile_fail1、全target clippy -D warnings、JS構文/差分確認を通過。再実行は `battle-replay --input research/.local/battle-effects-input.json`、batch比較は `python research/verify/battle_session.py --executable .local/dist/0.1.34-battle-session/kbcs.exe --input research/.local/battle-effects-input.json`。GUIを起動・操作しない。大容量実測はresearch/.local、代表値だけnative/testsへ保存。日本語ファイルはBOM付きUTF-8。
+
+次に残るのは精霊再召喚、にゃんこ砲、スニャイパー/ニャンピュータ、ボスの城衝撃/全体制御、特殊ステージの生産回数別価格、勝敗/制限時間/報酬への遷移、全被弾演出/SE。精霊を通常生産で代用しない（エラー4）。モデル境界は初期姿勢を使用しており、可変共有モデルと全mainの連続順序を追加照合する。通常出撃と命中の画面接続済みを、全戦闘完成・実機完全一致と報告しない。以下の「命中本体/GUIが次」は過去の記録。
+
+---
+
+# 再開メモ（2026-10-26 / 烈波・反射待ち・爆波の所有状態）
+
+0.1.34へソース追加。起動中アプリ/プレビュー/UIは操作・停止・差替えしていない。既存の性能/API/DB/編成/描画/転送変更を保持し、GitHub書込なし。全特性の画面接続は未完了。
+
+[二次攻撃の契約・原本・検証](../../native/kbcs-core/docs/secondary.md)。actor_secondary.incをactor.cpp内へ追加し、C++ opaque KbcsActorAreasが烈波/反射待ち/爆波と対象履歴を所有する。Rust actor/secondary.rsのAreasはcreate/Drop、append、step、snapshot、retirement_blockedを提供。既存apply_hit<F,H>へpanic捕捉を共通化した。失敗後はAreasのappend/stepを拒否し、部分状態で戦闘を継続しない。
+
+006d6d04の005d3af8→005d4158→005d4988を同じFでSurges→Reflections→Explosionsの順に呼ぶ。命中は同期callbackで006eaef0/006eb364の引数を返す。SecondaryHit.attack_typeは原本param2（烈波2/爆波3）、hit.kindはparam6（通常0/小烈波2）。既存の21段階ダメージ数値コアだけを接続して入口条件を省略しない。
+
+烈波の周期別履歴と、爆波の5区画別履歴を対象slot1..50の配列へ正規化。原本の生成通番へ変更しない。applied偽でも命中履歴を登録。反射は成功/未履歴/kind1以外/対象212の条件を保持し、239が真なら212/239を解除。反射烈波はその次Fから進める。反射待ちは生成Fに寿命判定を飛ばす。frame/width/damageはparam.tsvから取得する明示入力、Defaultの0を本家設定として使わない。
+
+同版15.7.2 ARM64/SHA6122e248…へ96条件、17424phase更新、1258命中呼出を照合して全個体・効果・履歴・SE/振動・RNGが一致。report=research/.local/actor-secondary-1572.json（actor-test-secondary.dllのSHA）。命中本体、model/param getter、allocator/文字列/SE等は制御した比較で、全戦闘ではない。代表11ケース258チェックポイント（個体は初期値からの差分）を既存Rust1試験へ追加した。
+
+退場待ちは原本の経路差を保持。味方経路は波動state1/烈波、敵経路は波動state2/烈波/反射待ち。波動のsideを追加条件にしない。爆波はこの原本区間の走査対象にないため独自に足さない。actor_owner.pyで512条件が一致、report=actor-owner-1572.json（actor-test-owner.dllのSHA）。代表16件とcallbackエラー/panic後の再実行拒否を同じRust1試験へ統合。bridge23＋compile_fail1と全target clippy -D warningsが通過。生成関数531。外部資料/原本/Ghidraプロジェクトは変更しない。
+
+次は006e4aec/006e79bc本体の入口/回避/無効/対象外・攻撃種別と状態更新を既存数値コアへ接続する。波動005d287c/005d2c18の進行/命中/遮断、死亡烈波21の生成、精霊、実プロフィール、C++全戦闘所有者、陣営の実dispatchとGUI接続も残る。反射待ちstate1の除去分岐は保持したが書込元は未特定（005d4824は描画のみ、009eadc8は初期化時の解放）。原本のbool引数はSTRBなので、Unicornの命中ABI捕捉ではスタック上位byteをフラグへ含めない。
+
+---
+
+# 再開メモ（2026-10-26 / 烈波・爆波生成まで）
+
+0.1.34へソース追加。起動中アプリ/プレビュー/画面は操作・停止・差替えしていない。GitHub書込なし。既存の性能/API/DB/編成/描画/転送の変更を保持する。全特性の戦闘接続は未完了。[状態・原本・照合範囲](../../native/kbcs-core/docs/actors.md)。
+
+C++ actor_emit_areaとRust actor::emit_areaを追加。攻撃callback中にemit_direct→Waves::emit→emit_areaを同じ個体/RNGで同期実行する。生成記録は次の攻撃段より前に所有者へ登録する。烈波48byte/爆波36byteの数値部分と生成の有無を返し、原本末尾の空の履歴木や生ポインタはABIへ含めない。所有ランタイム・寿命/命中/反射の実装は残る。
+
+0044ab70→0044a8d8はabs(span)を直接渡す。+1を補わない。幅0は位置RNG不変、幅1は進む。INT_MINは32bit CNEG後も負のままで非正範囲。味方X−offset/敵X＋offsetを基準に、正のspanでは味方減算/敵加算、非正では逆。烈波174..177/mini211、爆波224..226。12フラグの保存順と、直接命中前のparameter保存を保つ。
+
+research/verify/actor_area.pyで同版15.7.2 ARM64の006e92bc/006ea1c0を先頭から最後まで、2016条件×2回連続=4032更新で照合。全個体・波動200枠/命中履歴・烈波/爆波の生成byte（内部ポインタを正規化）・既存記録・RNGが一致。内部vectorの空/拡張/空き容量も実行。実際の命中内部はapplied/発生元/RNG変更を制御した比較であり、全戦闘の一致ではない。確保失敗も未照合。report=research/.local/actor-area-1572.json、DLL=actor-test-area.dll（SHAをreportへ保存）。代表92記録を既存Rust1試験へ追加。bridge23＋compile_fail1と全target clippy -D warningsが通過。
+
+次は命中006e4aec/006e79bcの入口条件/攻撃種別/回避等と、既存21段階のダメージ数値コアを接続する。波動の進行/命中/ストッパー/反射、烈波005d3af8→006eaef0の履歴木/命中/反射、爆波の寿命/命中、死亡烈波21も残る。死亡烈波は006eb464/006eccf4の行動21に別経路があり、通常攻撃の生成確率やkind0を流用しない。開始時刻battle_death_volcano_timeと専用getter00a98b00/00a98b8c/00a98c18/00a98d30を確認する。
+
+版固定export_actor.pyは524関数。4箇所のgetter→abs→RNGの連続BL命令も同版SOに対して検査する。命中数値だけを先に流用して分岐を省略しない。GUI個体生成への接続、実プロフィール/編成入力の取得、C++所有ランタイム、全体dispatchと論理F順序も未完了。以前の再開メモの「烈波/爆波生成が次」はこの追補で更新する。
+
+---
+
+# 再開メモ（2026-10-26 / 攻撃段・対象選出・直接命中入口・波動生成）
+
+0.1.34のソース追加。起動中GUI/プレビュー/画面は操作・停止・差替えせず、GitHubへ書込なし。全特性の戦闘接続は未完了。[原本・更新順・契約・検証範囲](../../native/kbcs-core/docs/actors.md)。既存の性能改善、DB/編成/描画/転送の変更を保持した。
+
+C++ actor_attack（006d8584/006d8cf8）、actor_emit_direct（006e92bc/006ea1c0の直接命中区間）、actor_emit_wave（続く波動生成）を追加。Rust Pool::attack→同期callback→actor::emit_direct→Waves::emitで同じ個体配列/RNGを借用できる。命中callbackのエラー/panicで後続段を止める。C++例外を境界外へ出さず、Rust panicはC ABIを抜けてから再開する。途中の戦闘は継続しない。
+
+同版ARM64へ攻撃段/対象選出1888、直接命中入口864、波動生成までの連続区間720の計3472条件が一致。実測はresearch/.local/actor-{attack,direct,wave}-1572.json（各DLLのSHA・制御helperを保持）。代表48/29/19件は既存Rustの1試験へ統合。命中関数006e4aec/006e79bcは引数捕捉とapplied/状態/RNG更新の制御であり、命中内部の一致とは区別する。波動は200枠の全byte・51×200命中履歴・RNGを比較。無効段の関数returnも終端とした。bridge23試験＋compile_fail1、全target clippy -D warningsを通過。Rust検証結果は集計actor-validation-1572.jsonへ保存。
+
+攻撃段数は21/121/122の先頭からの分岐を保持。最初0なら段数0、2段目0なら3段目非0でも段数1。味方は最初の一致段だけ、敵は同時刻の複数段をcallback後に再確認。最終段では対象なしでも基準12→待機18と正の115減算を先に行う。単体は対象のX±14の選択ソート→先頭同率の数でRNG、範囲は0〜50の走査順。1候補でもRNGを省略しない。待機→攻撃2の同じF更新も前回から維持。
+
+直接命中の12抽選は対象間で共有。味方の直接命中へ敵専用の毒撃9/遅延11を渡さず、後続効果用には元の12値を保存する。parameter218は味方のみ対象走査前に取得。appliedの時だけ対象96を更新し、味方198/対象行動14の別経路も保持する。kind0/rate100の直接命中入口だけで、波動等の別攻撃種別を流用しない。
+
+波動は効果段フラグ有効かつ確率39>0で乱数100を先に取得。成功ならkind/stateの両方0の最初の枠を確保し、満杯でも抽選は消費。初期kind/stateは味方1/敵2、miniは182==1。レコード48byte、flags順は抽選順と異なる[0,1,2,3,4,6,8,7,5,9,10,11]。予約3byteを残し、当該枠の51対象の履歴だけを解除。同版SOの002b2820=1/002b2938=2をexporterで検査する。
+
+次は同じ発生関数の烈波（味方006e9768〜/敵006ea62c〜）と爆波（味方006e999c〜/敵006ea860〜）。00a98838、00a988c4/00a98950、00a989dc、00a987f8と、00a98f70、00a98ffc/00a99088の取得を追う。Ghidraが省略した0044ab70→0044a8d8の引数を実命令で復元し、座標の向きと抽選範囲、元の12値/parameterを保持する。現在は直接命中→波動までで、烈波/爆波のRNGはまだ進めていない。全発生をつなぐ前に画面へ生成を接続しない。
+
+その後、命中006e4aec/006e79bcの入口条件/攻撃種別/回避等を数値カーネルと連結し、波動の進行/命中/ストッパー/反射、死亡烈波21、効果所有者の寿命/解放保留、精霊、砲・スニャイパー、実プロフィール生成とC++所有ランタイムを進める。全体の行動dispatchは陣営0を直接006eb464、陣営1を006eccf4→unit-modeなら006eb464へ委譲する。mode別抽出カーネルの検証を全体dispatchの検証と混同しない。
+
+---
+# 再開メモ（2026-10-26 / 敵KB終了・死亡・潜行/攻撃待機）
+
+0.1.34へソース追加。起動中アプリ/プレビュー/画面を操作・停止・差替えしていない。既存API/描画/転送/DB/編成は維持し、GitHub書込なし。直近の指示は「全特性を原本の条件・分岐を見落とさず実装」「再開」。全特性の戦闘接続は未完了。
+
+[状態コアの契約・原本・再実行](../../native/kbcs-core/docs/actors.md)。actor_enemy_knockbackは敵3の移動/終了、ゾンビキラー/有限・無限蘇生、盾再生成、寄与者の撃破数・報酬選出、スコア/記録/財布要求。actor_retireは通常死亡4の時計・解放保留、味方の同ID確認/生産印解除、砲待機短縮要求。actor_intentは両陣営の行動後の待機/寿命/潜行開始と城への潜行終了。actor_attack_waitは陣営別の待機1から攻撃2等への遷移。C++と安全なRust Pool入口を追加した。
+
+JP15.7.2 / 1507021 / ARM64 / SHA6122e248…の実命令へ、敵KB720・通常死亡640・行動後判定432・攻撃待機864の計2656条件を比較し一致。全個体と該当する報酬/記録/スコア/通知/生産/砲待機、RNG不変を確認。元DLLのSHAと制御getter/入口レジスタ等はresearch/.local/actor-{enemy-death,retirement,intent,wait}-1572.jsonに保存。代表値はRust既存の1試験へまとめた。追加前からの歩行3216/味方KB1152/敵ふっとばし3456も同版と一致済み。fixture再投入を含むworkspace31＋compile_fail1、その後のbridge23＋compile_fail1、全target clippy -D warningsを通過。
+
+重要な接続順: 出現→clock→個体ごとのbegin/行動（味方全体→敵全体）→intent→各個体のattack_wait→同じFの攻撃2時計/段発生/対象選出→命中→保護/HP/死亡集計/react。待機1で時計を進めても、2へ移った同じFに攻撃時計を更新する。敵の加算玉243を解除するのは敵の全51枠走査後。寄与者通番は重複を除かず、空き枠への一致も原本どおり数える。retireのblockedは攻撃効果の所有者/寿命から求め、単なる表示OFFで解放しない。
+
+次は006d6d04の攻撃2（味方006d8584〜、敵006d8cf8〜）の段発生・対象列挙/単体抽選と、006e92bc/006ea1c0→006e4aec/006e79bcを接続する。単体選択の同距離候補数1でもRNGを省略しない。城/攻撃対象限定・能力/種別の入口分岐を残す。死亡烈波21、所有効果の寿命/解放保留取得、精霊009f4a74、波動/烈波/爆波・砲・スニャイパー、実プロフィール生成と画面の所有ランタイムは未接続。
+
+全体の行動dispatchはmainが陣営0を直接006eb464、陣営1を006eccf4へ渡し、後者だけがunit-modeで006eb464へ委譲する。既存の借用walk/begin/retireはmode別抽出の検証入口。全体接続でunit_modesだけを見てdispatchを決めない。実ステージのmode取得/呼出経路と連続実行を確認してから接続する。
+
+版固定のexport_actor.py→actor_generated.inc/actor_rom.inc。原本の分岐・getter関係を保持し、配布にPython/SO/Unicornを要求しない。Context未解決エラーは戦闘を停止する。研究原本/旧全件検証3658条件は保持。日本語ファイルのBOMはcargo fmt後に復元する。
+
+---
+# 再開メモ（2026-10-25 / 個体の生成・特性・被弾後状態）
+
+0.1.34へソースのみ追加。配布アプリ/起動中GUI/プレビューは差替え・操作していない。HTTP戦闘API/描画/ワイヤ/DB/編成を維持し、GitHub書込なし。直近の指示は「全特性を順に、原本の条件・分岐を見落とさず実装」「再開」。全特性の戦闘接続は未完了であり、ここを完成扱いしない。
+
+[状態コアの設計・入力・再実行](../../native/kbcs-core/docs/actors.md)。actor.cppは版固定Context、actor_generated.incはexport_actor.pyによる原本分岐の出力、actor_rom.incは同版定数。Rust actor::Poolは原本251語×2陣営×51枠を所有し、各入口だけ借用する。将来のC++所有ランタイムとは別。配布時にPython/SO/Unicornは不要。
+
+009f1e64全体の構築、数値ローダー、通常/遠方/全方位の捕捉、属性/呪い、12種の抽選、7妨害と耐性/装飾/超賢者、妨害等の時計、個体更新前の保存/解除、モーション時計/行動復帰、被弾予約/城無敵、バリア/盾の吸収、HP/再生産遅延/生存、KB/ふっとばし/ワープと魂の共通遷移を追加した。本能・玉・宝・コンボ・装飾・モデル等は明示した解決済み入力。編成からこれらを作る取得経路全体は未接続。
+
+JP15.7.2/1507021/ARM64、SO SHA6122e248…を検査して照合。全原本を含む生成3658条件は既存のall-assets-final記録（その時点のDLLのSHAを保持）。最終DLLでは境界生成248、捕捉/属性/抽選/妨害、時計48更新、モーション1584、復帰264、共通遷移720、更新前192、被弾予約58、保護864、HP1068、KB804、原本ローダー味方4/敵804枠が一致。全102枠×251語、該当区間の乱数/SE/表示要求/集計要求を比較する。ローカル入口・外部getterを制御した検証で、全フレーム戦闘の証明ではない。
+
+workspace31試験＋compile_fail1、全target clippy -D warningsを通過。代表値の再投入はRustの1試験actor::tests::native_actor_statesへまとめた。実測記録research/.local/actor-validation-1572.json、actors-1572.json、actor-{loaders,protection,health,reaction}-1572.json。大きい全原本報告はresearch/.local、代表fixtureのみnative/testsへ保存。
+
+次は個体の全行動/攻撃のスケジュール、命中入口006e4aec/006e79bcの全条件と型別攻撃、死亡/KB/蘇生/潜行/精霊、波動/烈波/爆波等の発生・伝播をつなぐ。006eb464/006eccf4の未移植部分、009f4a74の精霊/連続生産、編成/本能玉等の実プロフィール生成も残る。prepareだけの成功や、任意の簡易移動・攻撃で穴を埋めない。
+
+接続順は006d6d04を守る。各論理Fの出現→clock→個体ごとのbegin→行動→命中/予約→保護→被弾表示/RNG→health→HP0丸め/死亡集計→react→生産待ち等。healthのprevious_hpはKB比較に保持。バリア等の妨害差戻しはbeginで保存した残りへ戻す。生存の抽選は非致死/使用済みでも消費する経路がある。死亡時表示は30枠の空きでRNG消費が変わるため、表示OFFでも演出の状態/確保を省略しない。画面への生成は既存HUDバッチの最後のrequest_slotを処理する接続にせず、論理/入力tickの内部へ置く。
+
+word7=maxHP/8=currentHP、73=生存率/77=使用状態、246=遅延確率/248=予約遅延。モーション境界は00a9490cのモデル・城を含む取得経路から解決する。Ghidraの省略引数/void戻り値を実命令で補った箇所はexporterとactors.mdへ記録。00a9490cの取得経路本体はまだ移植していない。
+
+---
+# 再開メモ（2026-10-25 / 出撃・敵出現のC++入口）
+
+0.1.34へのソース追加。実行中GUI/プレビュー4850等は操作・停止・差替えしていない。ユーザーの実測は戦闘API28.5ms/p95 37.2ms。今回の戦闘API/描画/ワイヤ/DB/編成に変更なし、GitHub書込なし。
+
+native/kbcs-core/include/kbcs_production.h、src/production.cpp、bridge::productionを追加。[契約・原本との差・確認範囲](../../native/kbcs-core/docs/production.md)。009f1e64の枠探索/初期座標/レイヤー抽選、ボス位置、00aa08f8→0058c05cの再生産値、009f4a74の通常生産成功後の資金/回数/待機、再生産時計をC++へ移植。敵はstage_tick→実構築callback→全体/行RNG→commit→seenを単一入口にした。敵城初期化は失敗でも最初の一致行だけを消費する。
+
+15.7.2 ARM64/SHA6122e248…の実命令37条件をresearch/verify/production.pyで採取。production-vectors.jsonと既存連続出現3×3tickをRustの2試験で比較。workspace30試験+compile_fail1、追加後の関連2試験、全target clippy通過。完全な個体構築の照合ではない。記録はresearch/.local/production-1572.json。
+
+次は009f1e64の能力/本能玉/バリア・盾/初期行動と、009f4a74の精霊・連続生産。構築callbackをprepareの成功だけで返さない。現在のGUIは従来どおり個体未接続。画面へ接続するときはC++所有ランタイムの各論理F/入力tick内で実行する。まとめたbattle_screen::frameの最後のrequest_slotだけを処理すると時刻がずれるため、その接続はしない。
+
+---
+# 再開メモ（2026-10-25 / 0.1.34 戦闘APIの確保・転送）
+
+最新版は`.local/dist/0.1.34-release/kbcs.exe`、プレビュー4850/PID6276。`.local/publication-0.1.34.json`にSHA/検査結果。初期0.1.34（4848）と非圧縮最終試作（4849）は比較用で、確認には4850/releaseを使う。ユーザーが操作する指定を維持し、このターンはUI入力・画面切替・再読み込みを行っていない。既存アプリ/プレビュー・公式DB・編成は維持、GitHub書込なし。
+
+/api/battle-frameのpacked:trueは明示LEのKBF1。大きな本文はcompressed:trueの時だけgzip可逆圧縮のKBG1にできる。32バイトの計測ヘッダーを残し、JSは機能検出したDecompressionStreamで本文を展開、TypedArrayで借用する。JSON/非圧縮入口は維持。Rustの粒子出力と背景paintの最大領域（後者約3MiB）を所有者ごとに再利用し、毎Fの大きな確保/0埋め/解放を省く。C++の式・更新順・乱数・ABI3は変更しない。[仕様と計測](../../crates/kbcs-app/docs/performance.md)。
+
+PR000の1000要求（旧0.1.33/新0.1.34、HTTP単体）でp95 21.20→14.14ms、最大326.56→26.04ms。転送は約195KB→23KB。追加1199要求の受信最大28.29ms、展開/復元込みp95 23.27ms、最大44.72ms。300ms級の本文待ちは再計測で0件。実WebView/GPUのFPS保証ではない。state/layout/scene216ケース一致、関連28試験+compile_fail1、clippy/JS/release/配信8ファイル一致。原記録.local/checks-0.1.34.json、.local/profile-wire-tail.json。圧縮前記録も保持。
+
+個体生成・移動・攻撃・砲撃等の未接続項目は従来どおり。次にユーザーが新しいアプリを操作する場合も、こちらから操作せず、依頼された計測を記録する。
+
+---
+# 再開メモ（2026-10-25 / 0.1.33 FPS観測と統合API）
+
+起動中0.1.32をユーザー依頼で確認し、更新APIと背景APIの直列待ちを確認。/api/battle-frameへ統合、シーンごとの読取専用DB接続を再利用。初回0.1.33の78出力が旧経路と一致。静止背景のcached指定/段数変更保証を加えた最終ビルドは`.local/dist/0.1.33-final/kbcs.exe`、clippy/release通過。初回0.1.33のプレビューは4847（PIDは.local/preview-0.1.33.pid）。既存4845/4846等は維持、GitHub書込なし。
+
+最後の指示は「私が操作します、あなたは記録だけ」。以後こちらからUI入力/再起動/画面切替はしない。初回`.local/dist/0.1.33/kbcs.exe`のGUIでユーザーがPR000を操作中。旧0.1.32 GUIは比較前にこちらが一時停止した。最終版GUIへの差し替えやcached指定のAPI追加試験はしていない。ユーザー操作中の負荷を乱さず、次の指示を待つ。
+
+記録は`.local/runtime-observations-20261025.json`、配布記録`.local/publication-0.1.33.json`。表示13点は22.0〜30.1FPS、中央値28.0、API21.7〜60.3ms。30FPSの安定化は未完了。瞬間表示の記録であり、操作条件固定のA/B試験ではない。[性能設計](../../crates/kbcs-app/docs/performance.md)に関数関係と未検証範囲を記載。
+
+---
+# 再開メモ（2026-10-25 / 0.1.32 戦闘の常時操作・計測と負荷分離）
+
+最新アプリは`.local/dist/0.1.32-final/kbcs.exe`、プレビュー4846/PID21716。旧4845/PID9776は維持。画面確認はユーザー担当で、今回はこちらから画面操作・スクリーンショット検査は実施しない。公式DB・編成の再構築/変更、GitHub書込なし。mainの既存公開済みcommitは56914943。今回の変更は未コミット。記録は`.local/publication-0.1.32.json`。
+
+戦闘viewbarへ常時表示の操作/情報バーを追加。ホスト停止、1F/10F、オプション、段数/枠切替、カメラ初期化、診断JSON、準備へ戻る。FPS、進行比、API/描画提出時間、遅れF、CPU/RAM、画像/要求キュー。ネイティブcontrol10による手動更新は速度アイテム設定を保ったまま1更新1F。停止はネイティブオプションと区別し、停止中のカメラは0F。既存ABI3を維持。詳細は[性能設計](../../crates/kbcs-app/docs/performance.md)。
+
+要求ごとのスレッド作成を固定UI/計算/I/Oワーカーと上限64キューへ置換。容量つきLRU、シーン/モデル/音源の個別ロック、session単位の背景状態。型付き借用FrameからJSONへ直接出力し、同粒子群のローカル姿勢を共用。ライブ背景を専用WebGL面へ、HUDは透明2Dへ分離し、コピー/毎Fのcanvas再確保/画像の二重デコードを削減。暗転は開始BGMだけを待ち、後の曲は取消可能な別取得。途中BGM切替の本体接続は未実装。
+
+旧版とPR000/N000各0〜30Fの描画命令62件が一致、独立session16要求一致、3倍中1F一致。API往復中央値はPR000 60.53→45.74ms、N000 12.25→12.75ms。画面FPS改善や全ステージの速度保証ではない。関連試験計27件+compile_fail1件、clippy、最終JS5構文、release、配信7ファイル一致を確認。原記録`.local/checks-0.1.32.json`。0.1.31以前の個体生成・移動・攻撃等の未接続項目は引き続き残る。
+
+---
+# 再開メモ（2026-10-25 / 0.1.31 背景・カメラ・音源）
 
 最新は`.local/dist/0.1.31/kbcs.exe`、プレビュー4845/PID9776。PR000のルートを確認用に開く。旧4844/PID19572と旧アプリ、公式DB、ユーザー編成は維持。GitHub書込/公式DB再構築なし。`.local/publication-0.1.31.json`にSHA/検査記録。画面はユーザーが確認し、こちらは操作/スクリーンショット検査を行わない。
 

@@ -62,3 +62,22 @@ stage_media::importがbg.csv/JSONと明示された依存、背景・城画像�
 ## 0.1.31: APK同梱BGM
 
 [ネイティブ音源調査](../../../research/docs/audio-1572.md)のとおり、assets原本のOgg18曲をMP3補完より優先する。曲ごとの固定commit・size/SHAを索引へ持たせ、stage_media::audioは形式/実MIMEを返す。保存はAppData/assets/music/<曲のrevision>。旧MP3の保存先は維持し、公式DBの再構築は不要。source indexの今後の変更はscripts/sync-stage-music.pyで再検証する。CAFは効果音であり、BGMへ追加しない。
+
+
+2026-10-27: `source::asset`はsource_fileに画像本体がないとき、asset_referenceの原本パス/size/SHAとDB metadataのorigin/revisionから遅延取得する。最新HEADを解決し直さず、AppData/KBCS/assets/objects/<SHA>へ検証済みbytesを原子的に保存する。公式SQLiteは書き換えない。/api/assetはこの入口へ接続した。img043.pngが索引にだけ存在し、500のJSON応答を画像としてdecodeしていたスニャイパーの開始失敗を修正。既存のcache試験にDB本体なし/索引＋cacheのオフライン取得と不正パスを追加した。battle-replay --validate-assetsで実際の画像APIも通せる。
+
+stage_media::audioは同版CAF9本を含む固定commitの原本を参照する。CAF（little-endian 16bit LPCM/1〜2ch）を検証し、サンプルを再量子化せずWAVヘッダーへ包み直してaudio/wavを返す。cacheは元CAF/SHAのまま。別の圧縮形式をLPCMと解釈しない。原本9本のPCMと、API関数が返すWAVのPCMが一致した（research/.local/audio-pcm-report.json）。
+
+combos::readのgroupは既存source_file/NyancomboData.csv列2から補う。target_groupsはCharagroup.csvのtype3の明示IDだけを返し、編成制限用type0/2を混ぜない。テーブル再作成なしで対象限定コンボを戦闘入力へ解決する。
+
+## 持ち物と結果保存（2026-10-28）
+
+`inventory::Store`は公式DBと別のuser/inventory.sqliteを所有する。itemのdisplay_countはユーザー編集可能、earnedは獲得累計。battleの結果JSON、claimの初回旗、recordのクリア数/最高記録、characterの所持/基本Lv/＋値/第3・第4解放を保持する。`begin`で戦闘番号を採番し、`finish`は結果・加算・旗・所持状態を同じtransactionで確定する。同じ番号の再呼出は保存済み結果を返す。通知の取得前後の数はtransaction内で決め、再取得で二重加算しない。
+
+`catalog`はGatyaitembuyの先頭見出しを除き最初の12列だけ数値として読む。列12以降の日本語コメントを数値化しない。drop_charaも見出しを除く。これが持ち物で発生した「数値CSVの不正なセル」の原因だった。名前は内部アイテム行、公開IDは列3、キャラ入手旗はdrop_chara列1。原本名と変換先IDを混同しない。
+
+キャラ状態は戦闘の編成設定から独立する。進化権だけでは所持済みにしない。取得旗が異なる同じunitもあり、unitのownedだけから各報酬の初回旗を推測しない。`finish`は取得前状態との一致を検査し、同じtransactionの後続報酬には直前の状態を渡す。
+
+## 戦闘タイトル画像の参照（2026-10-28）
+
+`stage_media::battle_title`は009f560cの種別別ファイル名を解決し、Map/ImageのPNGとimgcutを返す。PNGはsource_fileのbytes保存対象でなくasset_referenceにだけ存在することがある。存在確認を両表へ広げ、共通asset取得の固定revision/SHA・AppDataキャッシュを使う。画像をDBへ再取込する必要はない。宇宙編のkind -7/-14/-15/-25はscを使う。画像はSessionの初期texturesへ登録し、暗転中の一括読込とbattle-replay --validate-assetsの対象になる。

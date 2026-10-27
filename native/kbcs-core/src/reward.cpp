@@ -103,3 +103,14 @@ extern "C" uint32_t kbcs_core_item_add(const KbcsItemDefinition *definitions, in
   *output=result;
   return 0;
 }
+
+// 006e34b0。正規のdrop_chara範囲では重複時に＋値加算へ進まない。
+extern "C" uint32_t kbcs_core_character_reward(const KbcsCharacterRewardInput *input,KbcsCharacterRewardOutput *output){
+ if(!input||!output||input->kind<0||input->kind>3||input->seen<0||input->seen>1||input->plus<0||input->plus>50000||input->limit<0||input->limit>50000||input->third<0||input->third>1||input->fourth<0||input->fourth>1)return 1;
+ const auto &i=*input;KbcsCharacterRewardOutput o{1,i.seen,i.plus,i.third,i.fourth};
+ if(i.kind<2){
+  if(!i.seen){o.seen=1;o.result=2;}
+ }else if(i.kind==2&&!i.third){o.third=1;o.result=6;}
+ else if(i.kind==3&&!i.fourth){o.fourth=1;o.result=6;}
+ *output=o;return 0;
+}

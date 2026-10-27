@@ -17,11 +17,12 @@
 const TEXTURE_FRAGMENT_SHADER = `
   precision mediump float;
   uniform sampler2D u_texture;
+  uniform vec3 u_tint;
   varying vec2 v_uv;
   varying float v_opacity;
 
   void main() {
-    gl_FragColor = texture2D(u_texture, v_uv) * v_opacity;
+    gl_FragColor = texture2D(u_texture, v_uv) * v_opacity * vec4(u_tint, 1.0);
   }
 `;
 
@@ -47,13 +48,13 @@ const COLOR_FRAGMENT_SHADER = `
 const PREVIEW_BACKGROUND = [46 / 255, 49 / 255, 58 / 255, 1];
 
 export class NativeWebGLRenderer {
-  constructor(canvas) {
+  constructor(canvas, options = {}) {
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl", {
       alpha: false,
       antialias: true,
       premultipliedAlpha: true,
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: options.preserveDrawingBuffer ?? true,
     });
     if (!this.gl) throw new Error("WebGLを初期化できません");
 
@@ -64,6 +65,7 @@ export class NativeWebGLRenderer {
     this.indexBuffer = gl.createBuffer();
     this.colorBuffer = gl.createBuffer();
     this.textureCache = new WeakMap();
+    this.textures = options.trackTextures ? new Set() : null;
     this.packetCapacity = 0;
     this.vertexData = new Float32Array(0);
     this.indexData = new Uint16Array(0);
@@ -99,8 +101,8 @@ export class NativeWebGLRenderer {
     for (let packetIndex = 0; packetIndex < packets.length; packetIndex += 1) {
       const packet = packets[packetIndex];
       let batch = batches.at(-1);
-      if (!batch || batch.blendMode !== packet.blendMode) {
-        batch = { blendMode: packet.blendMode, indexOffset: packetIndex * 6, indexCount: 0 };
+      if (!batch || batch.blendMode !== packet.blendMode || batch.tintKey !== (packet.tintKey || "")) {
+        batch = { tintKey: packet.tintKey || "", tint: packet.tint || [1,1,1], blendMode: packet.blendMode, indexOffset: packetIndex * 6, indexCount: 0 };
         batches.push(batch);
       }
       batch.indexCount += 6;
@@ -137,6 +139,7 @@ export class NativeWebGLRenderer {
     gl.vertexAttribPointer(this.textureProgram.opacity, 1, gl.FLOAT, false, 20, 16);
 
     for (const batch of batches) {
+      gl.uniform3fv(this.textureProgram.tint, batch.tint);
       setNativeBlendMode(gl, batch.blendMode);
       gl.drawElements(
         gl.TRIANGLES,
@@ -173,7 +176,7 @@ export class NativeWebGLRenderer {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, gl.STATIC_DRAW);
   }
 
-  drawColorGeometry(positions, color, mode) {
+  drawColorGeometry(positions, color, mode, blendMode = 0) {
     const gl = this.gl;
     gl.useProgram(this.colorProgram.program);
     gl.uniform2f(this.colorProgram.resolution, this.logicalWidth, this.logicalHeight);
@@ -184,7 +187,7 @@ export class NativeWebGLRenderer {
       color[2] * color[3],
       color[3],
     );
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    setNativeBlendMode(gl, blendMode);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(this.colorProgram.position);
@@ -196,6 +199,7 @@ export class NativeWebGLRenderer {
   releaseTexture(image) {
     const texture=this.textureCache.get(image);
     if(texture)this.gl.deleteTexture(texture);
+    this.textures?.delete(texture);
     this.textureCache.delete(image);
   }
 
@@ -205,6 +209,7 @@ export class NativeWebGLRenderer {
 
     const gl = this.gl;
     const texture = gl.createTexture();
+    this.textures?.add(texture);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
@@ -215,6 +220,12 @@ export class NativeWebGLRenderer {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     this.textureCache.set(image, texture);
     return texture;
+  }
+  dispose() {
+    for(const texture of this.textures||[])this.gl.deleteTexture(texture);
+    this.textures?.clear();
+    for(const buffer of [this.vertexBuffer,this.indexBuffer,this.colorBuffer])this.gl.deleteBuffer(buffer);
+    this.gl.deleteProgram(this.textureProgram.program);this.gl.deleteProgram(this.colorProgram.program);
   }
 }
 
@@ -240,6 +251,7 @@ function createProgram(gl, vertexSource, fragmentSource) {
     opacity: gl.getAttribLocation(program, "a_opacity"),
     resolution: gl.getUniformLocation(program, "u_resolution"),
     texture: gl.getUniformLocation(program, "u_texture"),
+    tint: gl.getUniformLocation(program, "u_tint"),
     color: gl.getUniformLocation(program, "u_color"),
   };
 }

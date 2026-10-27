@@ -1,4 +1,5 @@
-﻿use anyhow::{Context, Result, ensure};
+﻿use crate::cache::Cache;
+use anyhow::{Context, Result, ensure};
 use include_dir::{Dir, include_dir};
 use kbcs_data::{import, store::Database};
 use serde_json::{Value, json};
@@ -6,7 +7,7 @@ use std::{
     collections::BTreeMap,
     path::PathBuf,
     sync::{
-        Arc, Mutex,
+        Arc, Mutex, Weak,
         atomic::{AtomicBool, Ordering},
     },
 };
@@ -19,6 +20,38 @@ pub struct Reply {
     pub bytes: Vec<u8>,
 }
 impl Reply {
+    fn battle(
+        mut frame: BattleFrame<'_>,
+        packed: Option<(std::time::Instant, bool)>,
+    ) -> Result<Self> {
+        if let Some((started, compressed)) = packed {
+            let commands = frame
+                .scene
+                .as_mut()
+                .map(|scene| std::mem::take(&mut scene.commands))
+                .unwrap_or_default();
+            return Ok(Self {
+                status: 200,
+                mime: "application/x-kbcs-battle-frame",
+                bytes: crate::battle_wire::encode(&frame, &commands, started, compressed)?,
+            });
+        }
+        Self::serialized(&frame)
+    }
+    fn serialized(value: &impl serde::Serialize) -> Result<Self> {
+        Ok(Self {
+            status: 200,
+            mime: "application/json; charset=utf-8",
+            bytes: serde_json::to_vec(value)?,
+        })
+    }
+    pub fn overloaded() -> Self {
+        Self {
+            status: 503,
+            mime: "application/json",
+            bytes: br#"{"error":"Requests are busy; retry shortly"}"#.to_vec(),
+        }
+    }
     fn json(value: Value) -> Self {
         Self {
             status: 200,
@@ -47,12 +80,65 @@ pub struct Service {
     busy: Arc<AtomicBool>,
     progress: Arc<Mutex<Progress>>,
     catalog: Arc<Mutex<CatalogCache>>,
-    scenes: Arc<Mutex<BTreeMap<String, crate::scene::Scene>>>,
-    audio: Arc<Mutex<()>>,
-    poses: Arc<Mutex<BTreeMap<String, Arc<kbcs_bridge::render::Model>>>>,
+    scenes: Arc<Mutex<Cache<SceneSlot>>>,
+    audio: Arc<Mutex<BTreeMap<i64, Weak<Mutex<()>>>>>,
+    poses: Arc<Mutex<Cache<ModelSlot>>>,
+    battles: Arc<Mutex<BTreeMap<String, BattleSlot>>>,
+    pub persist_rewards: bool,
+    pub workers: Arc<crate::workers::Workers>,
+    runtime: Arc<Mutex<crate::runtime::Monitor>>,
 }
 
-type CatalogCache = BTreeMap<String, (PathBuf, Vec<u8>)>;
+type CatalogCache = Cache<(PathBuf, Vec<u8>)>;
+type SceneSlot = Slot<(Database, crate::scene::Scene)>;
+type ModelSlot = Slot<Arc<kbcs_bridge::render::Model>>;
+type BattleSlot = Arc<Mutex<crate::battle::Session>>;
+
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct BattleRequest {
+    battle: kbcs_bridge::battle_screen::Request,
+    scene: Option<crate::scene::Input>,
+    #[serde(default)]
+    cached: bool,
+    #[serde(default)]
+    packed: bool,
+    #[serde(default)]
+    compressed: bool,
+}
+struct BattleResult<'a> {
+    frame: &'a kbcs_bridge::battle_screen::Frame,
+    core_ms: f64,
+    packed: Option<(std::time::Instant, bool)>,
+}
+#[derive(serde::Serialize)]
+struct BattleFrame<'a> {
+    #[serde(flatten)]
+    battle: &'a kbcs_bridge::battle_screen::Frame,
+    scene: Option<crate::scene::Frame<'a>>,
+    #[serde(rename = "coreMs")]
+    core_ms: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    runtime: Option<Value>,
+}
+
+type Slot<T> = Arc<Mutex<Option<T>>>;
+fn cache_slot<T>(cache: &Mutex<Cache<Slot<T>>>, key: String) -> Result<Slot<T>> {
+    let mut cache = cache
+        .lock()
+        .map_err(|_| anyhow::anyhow!("キャッシュのロック失敗"))?;
+    if let Some(slot) = cache.get(&key) {
+        return Ok(slot.clone());
+    }
+    let slot = Arc::new(Mutex::new(None));
+    cache.insert(key, slot.clone(), 0);
+    Ok(slot)
+}
+pub fn dispatch(service: &Service, path: &str, job: impl FnOnce(Service, bool) + Send + 'static) {
+    let workers = service.workers.clone();
+    let service = service.clone();
+    workers.submit(path, move |accepted| job(service, accepted));
+}
 
 impl Service {
     pub fn new(root: PathBuf, region: String, source: String) -> Self {
@@ -62,10 +148,14 @@ impl Service {
             source,
             busy: Arc::new(AtomicBool::new(false)),
             progress: Arc::new(Mutex::new(Progress::default())),
-            catalog: Arc::new(Mutex::new(BTreeMap::new())),
-            scenes: Arc::new(Mutex::new(BTreeMap::new())),
-            audio: Arc::new(Mutex::new(())),
-            poses: Arc::new(Mutex::new(BTreeMap::new())),
+            catalog: Arc::new(Mutex::new(Cache::new(128, 128 * 1024 * 1024))),
+            scenes: Arc::new(Mutex::new(Cache::new(16, usize::MAX))),
+            audio: Arc::new(Mutex::new(BTreeMap::new())),
+            poses: Arc::new(Mutex::new(Cache::new(64, usize::MAX))),
+            battles: Arc::new(Mutex::new(BTreeMap::new())),
+            persist_rewards: true,
+            workers: Arc::new(crate::workers::Workers::new()),
+            runtime: Arc::new(Mutex::new(crate::runtime::Monitor::default())),
         }
     }
 
@@ -76,9 +166,224 @@ impl Service {
         }
     }
 
+    fn scene_reply(
+        &self,
+        input: &crate::scene::Input,
+        battle: Option<BattleResult<'_>>,
+    ) -> Result<Reply> {
+        let current = kbcs_data::store::current_path(&self.root, &self.region)?;
+        let key = format!("{}:{}", current.display(), input.key());
+        let slot = cache_slot(&self.scenes, key)?;
+        let mut cached = slot
+            .lock()
+            .map_err(|_| anyhow::anyhow!("描画状態のロック失敗"))?;
+        if cached.is_none() {
+            // 同じsnapshotの読取専用接続はシーンと共用し、毎F開き直さない。
+            let database = Database::open_path(&current)?;
+            let scene = crate::scene::Scene::new(&database, input)?;
+            *cached = Some((database, scene));
+        }
+        let (database, scene) = cached.as_mut().unwrap();
+        let reply = scene.draw(database, input).and_then(|frame| match battle {
+            Some(battle) => Reply::battle(
+                BattleFrame {
+                    battle: battle.frame,
+                    scene: Some(frame),
+                    core_ms: battle.core_ms,
+                    runtime: None,
+                },
+                battle.packed,
+            ),
+            None => Reply::serialized(&frame),
+        });
+        if reply.is_err() {
+            *cached = None;
+        }
+        reply
+    }
+
     fn route(&self, method: &str, path: &str, body: &[u8]) -> Result<Reply> {
         let url = url::Url::parse(&format!("http://kbcs.localhost{path}"))?;
         let path = url.path();
+        if path == "/api/runtime" {
+            let mut value = self
+                .runtime
+                .lock()
+                .map_err(|_| anyhow::anyhow!("計測のロック失敗"))?
+                .sample();
+            value["workers"] = self.workers.summary();
+            value["caches"] = json!({"scene":self.scenes.lock().unwrap().summary(),"model":self.poses.lock().unwrap().summary(),"catalog":self.catalog.lock().unwrap().summary()});
+            return Ok(Reply::json(value));
+        }
+        if path == "/api/battle-options" {
+            ensure!(
+                method == "GET" || method == "PUT",
+                "戦闘設定の操作が不正です"
+            );
+            ensure!(body.len() <= 1024, "戦闘設定が大きすぎます");
+            let update = if method == "PUT" {
+                Some(serde_json::from_slice(body)?)
+            } else {
+                None
+            };
+            return Reply::serialized(&kbcs_data::battle_options::access(&self.root, update)?);
+        }
+        if path == "/api/inventory" {
+            ensure!(method == "GET" || method == "PUT", "持ち物の操作が不正です");
+            ensure!(body.len() <= 1024, "持ち物の入力が大きすぎます");
+            let store = kbcs_data::inventory::Store::open(&self.root)?;
+            if method == "PUT" {
+                store.update_display(&serde_json::from_slice(body)?)?;
+            }
+            return Ok(Reply::json(
+                json!({"items":store.items()?,"characters":store.characters()?}),
+            ));
+        }
+        if path == "/api/battle-popup" {
+            ensure!(
+                method == "POST" && body.len() <= 16384,
+                "通知配置の入力が不正です"
+            );
+            let inputs: Vec<kbcs_bridge::battle::PopupInput> = serde_json::from_slice(body)?;
+            ensure!(inputs.len() <= 5, "通知配置が多すぎます");
+            let values = inputs
+                .iter()
+                .map(|input| {
+                    kbcs_bridge::battle::popup_layout(input)
+                        .map_err(|c| anyhow::anyhow!("通知配置: {c}"))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            return Reply::serialized(&values);
+        }
+        if path == "/api/inventory/catalog" {
+            ensure!(method == "GET", "持ち物の操作が不正です");
+            return Ok(Reply::json(kbcs_data::inventory::catalog(
+                &Database::open(&self.root, &self.region)?,
+            )?));
+        }
+        if path == "/api/battle-session" {
+            if method == "DELETE" {
+                let id = url
+                    .query_pairs()
+                    .find(|(key, _)| key == "session")
+                    .context("戦闘IDなし")?
+                    .1
+                    .into_owned();
+                self.battles
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("戦闘ロック失敗"))?
+                    .remove(&id);
+                return Ok(Reply::json(json!({"closed":true})));
+            }
+            ensure!(
+                method == "POST" && body.len() <= 1_000_000,
+                "戦闘開始入力が不正です"
+            );
+            let request: crate::battle::Start = serde_json::from_slice(body)?;
+            let id = request.scene.session.clone();
+            ensure!(!id.is_empty() && id.len() <= 128, "戦闘ID不正");
+            let session = crate::battle::Session::new(
+                &self.root,
+                &self.region,
+                request,
+                self.persist_rewards,
+            )?;
+            let stats = session.stats()?;
+            let textures = session.scene.textures().to_vec();
+            let title = session.title.clone();
+            let mut battles = self
+                .battles
+                .lock()
+                .map_err(|_| anyhow::anyhow!("戦闘ロック失敗"))?;
+            ensure!(
+                battles.len() < 8 && !battles.contains_key(&id),
+                "戦闘を閉じてから開始してください"
+            );
+            battles.insert(id.clone(), Arc::new(Mutex::new(session)));
+            return Ok(Reply::json(
+                json!({"session":id,"runtime":stats,"textures":textures,"title":title}),
+            ));
+        }
+        if path == "/api/battle-session/frame" {
+            let started = std::time::Instant::now();
+            ensure!(
+                method == "POST" && body.len() <= 32768,
+                "戦闘入力が不正です"
+            );
+            let mut request: crate::battle::Request = serde_json::from_slice(body)?;
+            let session = self
+                .battles
+                .lock()
+                .map_err(|_| anyhow::anyhow!("戦闘ロック失敗"))?
+                .get(&request.session)
+                .cloned()
+                .context("戦闘が終了しています")?;
+            let mut session = session
+                .lock()
+                .map_err(|_| anyhow::anyhow!("戦闘更新ロック失敗"))?;
+            ensure!(
+                request.scene.key() == session.key,
+                "戦闘中のステージ変更はできません"
+            );
+            session
+                .core
+                .viewport(request.scene.viewport_width)
+                .map_err(|code| anyhow::anyhow!("画面幅: {code}"))?;
+            session.ending_camera(&mut request.scene)?;
+            let camera = session.layout(&request.scene)?;
+            session
+                .core
+                .camera(&camera)
+                .map_err(|code| anyhow::anyhow!("戦闘カメラ: {code}"))?;
+            let battle = session.core.advance(&request.input).map_err(|code| {
+                anyhow::anyhow!(
+                    "戦闘更新: {code} / frame,phase,side,slot={:?}",
+                    session.core.diagnostic()
+                )
+            })?;
+            let core_ms = started.elapsed().as_secs_f64() * 1000.;
+            session.settle()?;
+            let mut runtime = session.stats()?;
+            if request.debug {
+                let (actors, _) = session
+                    .core
+                    .actors()
+                    .map_err(|code| anyhow::anyhow!("個体読取: {code}"))?;
+                runtime["words"] = json!(
+                    actors
+                        .iter()
+                        .map(|side| side
+                            .iter()
+                            .map(|actor| actor.words.as_slice())
+                            .collect::<Vec<_>>())
+                        .collect::<Vec<_>>()
+                );
+            }
+            if request.debug {
+                runtime["visuals"] = serde_json::to_value(
+                    session
+                        .core
+                        .visuals()
+                        .map_err(|code| anyhow::anyhow!("効果読取: {code}"))?,
+                )?;
+            }
+            request.scene.frame = battle.state.frame;
+            request.scene.battle_rows = battle.state.rows;
+            session.ending_camera(&mut request.scene)?;
+            // 描画がSceneを借用する前に、同じ配置でHUDを作る。
+            let hud_layout = session.layout(&request.scene)?;
+            runtime["hud"] = serde_json::to_value(session.hud(&hud_layout)?)?;
+            let frame = session.draw(&request.scene)?;
+            return Reply::battle(
+                BattleFrame {
+                    battle: &battle,
+                    scene: Some(frame),
+                    core_ms,
+                    runtime: Some(runtime),
+                },
+                request.packed.then_some((started, request.compressed)),
+            );
+        }
         if path == "/api/battle-screen" {
             ensure!(
                 method == "POST" && body.len() <= 16384,
@@ -87,7 +392,49 @@ impl Service {
             let request: kbcs_bridge::battle_screen::Request = serde_json::from_slice(body)?;
             let result = kbcs_bridge::battle_screen::frame(&request)
                 .map_err(|code| anyhow::anyhow!("戦闘画面の入力・計算エラー: {code}"))?;
-            return Ok(Reply::json(serde_json::to_value(result)?));
+            return Reply::serialized(&result);
+        }
+        if path == "/api/battle-frame" {
+            let request_started = std::time::Instant::now();
+            ensure!(
+                method == "POST" && body.len() <= 32768,
+                "戦闘フレームの入力が不正です"
+            );
+            let mut request: BattleRequest = serde_json::from_slice(body)?;
+            let started = std::time::Instant::now();
+            let battle = kbcs_bridge::battle_screen::frame(&request.battle)
+                .map_err(|code| anyhow::anyhow!("戦闘画面の入力・計算エラー: {code}"))?;
+            let core_ms = started.elapsed().as_secs_f64() * 1000.;
+            if request.cached && battle.state.rows == request.battle.state.rows {
+                request.scene = None;
+            }
+            if let Some(scene) = &mut request.scene {
+                // 確定した論理F・段数を描く。未来の背景を先読みして乱数を進めない。
+                scene.frame = battle.state.frame;
+                scene.battle_rows = battle.state.rows;
+                scene.viewport_width = request.battle.config.viewport_width;
+                return self.scene_reply(
+                    scene,
+                    Some(BattleResult {
+                        frame: &battle,
+                        core_ms,
+                        packed: request
+                            .packed
+                            .then_some((request_started, request.compressed)),
+                    }),
+                );
+            }
+            return Reply::battle(
+                BattleFrame {
+                    battle: &battle,
+                    scene: None,
+                    core_ms,
+                    runtime: None,
+                },
+                request
+                    .packed
+                    .then_some((request_started, request.compressed)),
+            );
         }
         if path == "/api/battle-support" {
             ensure!(
@@ -339,31 +686,9 @@ impl Service {
                 "ステージ描画の要求が不正です"
             );
             let input: crate::scene::Input = serde_json::from_slice(body)?;
-            let current = kbcs_data::store::current_path(&self.root, &self.region)?;
-            let database = Database::open_path(&current)?;
-            let key = format!("{}:{}", current.display(), input.key());
-            let mut scenes = self
-                .scenes
-                .lock()
-                .map_err(|_| anyhow::anyhow!("描画状態のロック失敗"))?;
-            if !scenes.contains_key(&key) {
-                let scene = crate::scene::Scene::new(&database, &input)?;
-                if scenes.len() >= 16
-                    && let Some(first) = scenes.keys().next().cloned()
-                {
-                    scenes.remove(&first);
-                }
-                scenes.insert(key.clone(), scene);
-            }
-            let result = scenes
-                .get_mut(&key)
-                .context("描画状態なし")?
-                .draw(&database, &input);
-            if result.is_err() {
-                scenes.remove(&key);
-            }
-            return Ok(Reply::json(result?));
+            return self.scene_reply(&input, None);
         }
+
         if path == "/api/import" {
             ensure!(method == "POST", "POSTが必要です");
             let value: Value = serde_json::from_slice(body)?;
@@ -426,17 +751,19 @@ impl Service {
             let current = kbcs_data::store::current_path(&self.root, &self.region)?;
             let database = Database::open_path(&current)?;
             let key = format!("{}:{}", current.display(), input.key());
-            let cached = self.poses.lock().unwrap().get(&key).cloned();
-            let model = if let Some(model) = cached {
-                model
-            } else {
-                let model = Arc::new(crate::motion_pose::model(&database, &self.region, &input)?);
-                let mut poses = self.poses.lock().unwrap();
-                if poses.len() >= 64 {
-                    poses.clear();
+            let slot = cache_slot(&self.poses, key)?;
+            let model = {
+                let mut cached = slot
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("モデルのロック失敗"))?;
+                if cached.is_none() {
+                    *cached = Some(Arc::new(crate::motion_pose::model(
+                        &database,
+                        &self.region,
+                        &input,
+                    )?));
                 }
-                poses.insert(key, model.clone());
-                model
+                cached.as_ref().unwrap().clone()
             };
             return Ok(Reply::json(crate::motion_pose::frames(model, &input)?));
         }
@@ -454,15 +781,28 @@ impl Service {
             ));
         }
         if let Some(id) = path.strip_prefix("/api/stage-audio/") {
-            let _audio = self
-                .audio
-                .lock()
-                .map_err(|_| anyhow::anyhow!("音源キャッシュのロック失敗"))?;
             let id = id
                 .strip_suffix(".mp3")
                 .or_else(|| id.strip_suffix(".ogg"))
-                .unwrap_or(id);
-            let audio = kbcs_data::stage_media::audio(&self.root, id.parse()?)?;
+                .unwrap_or(id)
+                .parse::<i64>()?;
+            let slot = {
+                let mut pending = self
+                    .audio
+                    .lock()
+                    .map_err(|_| anyhow::anyhow!("音源一覧のロック失敗"))?;
+                pending.retain(|_, slot| slot.strong_count() > 0);
+                let slot = pending
+                    .get(&id)
+                    .and_then(Weak::upgrade)
+                    .unwrap_or_else(|| Arc::new(Mutex::new(())));
+                pending.insert(id, Arc::downgrade(&slot));
+                slot
+            };
+            let _audio = slot
+                .lock()
+                .map_err(|_| anyhow::anyhow!("音源のロック失敗"))?;
+            let audio = kbcs_data::stage_media::audio(&self.root, id)?;
             return Ok(Reply {
                 status: 200,
                 mime: audio.mime,
@@ -578,7 +918,7 @@ impl Service {
             self.catalog
                 .lock()
                 .map_err(|_| anyhow::anyhow!("表示キャッシュロック失敗"))?
-                .insert(key, (current, bytes.clone()));
+                .insert(key, (current, bytes.clone()), bytes.len());
             return Ok(Reply {
                 status: 200,
                 mime: "application/json; charset=utf-8",
@@ -588,7 +928,7 @@ impl Service {
         if let Some(logical) = path.strip_prefix("/api/asset/") {
             kbcs_data::source::safe_path(logical)?;
             let database = Database::open(&self.root, &self.region)?;
-            let (_, _, _, bytes) = database.source(logical)?;
+            let bytes = kbcs_data::source::asset(&database, &self.root, logical)?;
             return Ok(Reply {
                 status: 200,
                 mime: if logical.ends_with(".png") {
@@ -648,7 +988,13 @@ pub fn serve(root: PathBuf, region: String, source: String, bind: &str) -> Resul
     println!("KBCS preview: http://{bind}/");
     for mut request in server.incoming_requests() {
         let service = service.clone();
-        std::thread::spawn(move || {
+        let path = request.url().to_owned();
+        dispatch(&service, &path, move |service, accepted| {
+            if !accepted {
+                let _ =
+                    request.respond(tiny_http::Response::from_string("Busy").with_status_code(503));
+                return;
+            }
             let mut body = Vec::new();
             if let Err(error) = request.as_reader().take(1024 * 1024).read_to_end(&mut body) {
                 eprintln!("{error}");
@@ -686,6 +1032,54 @@ use std::io::Read;
 
 #[test]
 fn native_calculation_service_contract() {
+    let options_root =
+        std::env::temp_dir().join(format!("kbcs-battle-options-{}", std::process::id()));
+    let options_service = Service::new(options_root.clone(), "jp".into(), String::new());
+    assert_eq!(
+        options_service
+            .handle("GET", "/api/battle-options", b"")
+            .status,
+        200
+    );
+    let options = br#"{"bgmLevel":0,"seLevel":1,"rows":1}"#;
+    assert_eq!(
+        options_service
+            .handle("PUT", "/api/battle-options", options)
+            .status,
+        200
+    );
+    let reopened = Service::new(options_root.clone(), "jp".into(), String::new());
+    let saved = reopened.handle("GET", "/api/battle-options", b"");
+    assert_eq!(
+        serde_json::from_slice::<Value>(&saved.bytes).unwrap(),
+        serde_json::from_slice::<Value>(options).unwrap()
+    );
+    assert_eq!(
+        reopened
+            .handle(
+                "PUT",
+                "/api/battle-options",
+                br#"{"bgmLevel":4,"seLevel":1,"rows":1}"#
+            )
+            .status,
+        400
+    );
+    assert_eq!(
+        reopened
+            .handle(
+                "PUT",
+                "/api/battle-options",
+                br#"{"bgmLevel":0,"seLevel":1,"rows":1,"unknown":1}"#
+            )
+            .status,
+        400
+    );
+    // 自分で作った試験用SQLiteだけを閉じて削除する。
+    drop(reopened);
+    drop(options_service);
+    std::fs::remove_file(options_root.join("user/battle-options.sqlite")).unwrap();
+    std::fs::remove_dir(options_root.join("user")).unwrap();
+    std::fs::remove_dir(options_root).unwrap();
     let service = Service::new(PathBuf::new(), "jp".into(), String::new());
     for (key, fixture) in [
         (
@@ -711,7 +1105,7 @@ fn native_calculation_service_contract() {
         let reply = service.handle("POST", "/api/calculate", &body);
         assert_eq!(reply.status, 200);
         let result: Value = serde_json::from_slice(&reply.bytes).unwrap();
-        assert_eq!(result["abi"], 3);
+        assert_eq!(result["abi"], 4);
         assert_eq!(result["ruleset"], 1507021);
         assert_eq!(result[key].as_array().unwrap().len(), rows.len());
         for (row, output) in rows.iter().zip(result[key].as_array().unwrap()) {

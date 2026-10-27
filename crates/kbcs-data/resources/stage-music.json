@@ -416,8 +416,15 @@
     "65": {
       "id": 65,
       "name": "水鉄砲発射音",
-      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-test/78612d9c405dc99661b32525b482aed87ff96857/assets/mp3/065.mp3",
-      "version": "6.0"
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd065.caf",
+      "version": "6.0",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd065.caf",
+      "sha256": "f7ebebd15fdaf9547184b99b2b3d6d01a047e2d1327c78c6483a19cb3aa9876f",
+      "size": 108834,
+      "mime": "audio/x-caf",
+      "loop": false
     },
     "66": {
       "id": 66,
@@ -848,8 +855,15 @@
     "137": {
       "id": 137,
       "name": "悪魔シールド破壊音 (シールドブレイク)",
-      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-test/78612d9c405dc99661b32525b482aed87ff96857/assets/mp3/137.mp3",
-      "version": "10.8"
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd137.caf",
+      "version": "10.8",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd137.caf",
+      "sha256": "f076e3fef5617d5502f696e8d412959888bd4aaf0a62ffc63a73a94b5200865a",
+      "size": 248772,
+      "mime": "audio/x-caf",
+      "loop": false
     },
     "138": {
       "id": 138,
@@ -860,8 +874,15 @@
     "139": {
       "id": 139,
       "name": "悪魔シールド破壊音 (物理破壊)",
-      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-test/78612d9c405dc99661b32525b482aed87ff96857/assets/mp3/139.mp3",
-      "version": "10.8"
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd139.caf",
+      "version": "10.8",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd139.caf",
+      "sha256": "4e291ae14bc67bd72c31a94c676e2a5d257ecee2c81501803516ebb063bfd108",
+      "size": 167104,
+      "mime": "audio/x-caf",
+      "loop": false
     },
     "140": {
       "id": 140,
@@ -1271,6 +1292,78 @@
       "mime": "audio/ogg",
       "loop": true,
       "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd195.ogg"
+    },
+    "188": {
+      "id": 188,
+      "name": "",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd188.caf",
+      "sha256": "5a34006b2d0760393045b610d1b3e34a1ae74c62f7fcf7628b31741ced58d81e",
+      "size": 110252,
+      "mime": "audio/x-caf",
+      "loop": false,
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd188.caf"
+    },
+    "189": {
+      "id": 189,
+      "name": "",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd189.caf",
+      "sha256": "b42f968e12598c56d543ad1785836194360ec51fe8f94da21f6814566ae9d18f",
+      "size": 1252980,
+      "mime": "audio/x-caf",
+      "loop": false,
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd189.caf"
+    },
+    "190": {
+      "id": 190,
+      "name": "",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd190.caf",
+      "sha256": "159161f6ae72334f84ee36818d8752648cc2ab503e36bbc4e5bb2fdfde3900ae",
+      "size": 334192,
+      "mime": "audio/x-caf",
+      "loop": false,
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd190.caf"
+    },
+    "191": {
+      "id": 191,
+      "name": "",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd191.caf",
+      "sha256": "b436ccf1f9e6bd649d732cf90cdfd077976f3676785c07ad756092948429db21",
+      "size": 268696,
+      "mime": "audio/x-caf",
+      "loop": false,
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd191.caf"
+    },
+    "192": {
+      "id": 192,
+      "name": "",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd192.caf",
+      "sha256": "2892bbdfa26c827e612b7215930addb38d1a7e87e864d1b68c28a66ed30394fc",
+      "size": 974296,
+      "mime": "audio/x-caf",
+      "loop": false,
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd192.caf"
+    },
+    "194": {
+      "id": 194,
+      "name": "",
+      "repository": "sinsuirakv0/KBC-rakv0-assets",
+      "revision": "8e9dca31e3845e3c7dcdc515e6c85d5480538fc0",
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd194.caf",
+      "sha256": "3b0b7138c6d339cccfe1beed32b42ef5ea5a2c13177a0073e63700f1cd89a9e5",
+      "size": 709696,
+      "mime": "audio/x-caf",
+      "loop": false,
+      "url": "https://raw.githubusercontent.com/sinsuirakv0/KBC-rakv0-assets/8e9dca31e3845e3c7dcdc515e6c85d5480538fc0/jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd194.caf"
     }
   },
   "nativeSource": {
@@ -1299,6 +1392,27 @@
         "priority": 0,
         "sha256": "19535f118c38bd6c7b2ed1796b61da3e8ed3251ad8fa0f2bea10aef1bc7946c7",
         "size": 1191457,
+        "sourceKind": "local"
+      },
+      "65": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd065.caf",
+        "priority": 0,
+        "sha256": "f7ebebd15fdaf9547184b99b2b3d6d01a047e2d1327c78c6483a19cb3aa9876f",
+        "size": 108834,
+        "sourceKind": "local"
+      },
+      "137": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd137.caf",
+        "priority": 0,
+        "sha256": "f076e3fef5617d5502f696e8d412959888bd4aaf0a62ffc63a73a94b5200865a",
+        "size": 248772,
+        "sourceKind": "local"
+      },
+      "139": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd139.caf",
+        "priority": 0,
+        "sha256": "4e291ae14bc67bd72c31a94c676e2a5d257ecee2c81501803516ebb063bfd108",
+        "size": 167104,
         "sourceKind": "local"
       },
       "174": {
@@ -1399,11 +1513,53 @@
         "size": 594332,
         "sourceKind": "local"
       },
+      "188": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd188.caf",
+        "priority": 0,
+        "sha256": "5a34006b2d0760393045b610d1b3e34a1ae74c62f7fcf7628b31741ced58d81e",
+        "size": 110252,
+        "sourceKind": "local"
+      },
+      "189": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd189.caf",
+        "priority": 0,
+        "sha256": "b42f968e12598c56d543ad1785836194360ec51fe8f94da21f6814566ae9d18f",
+        "size": 1252980,
+        "sourceKind": "local"
+      },
+      "190": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd190.caf",
+        "priority": 0,
+        "sha256": "159161f6ae72334f84ee36818d8752648cc2ab503e36bbc4e5bb2fdfde3900ae",
+        "size": 334192,
+        "sourceKind": "local"
+      },
+      "191": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd191.caf",
+        "priority": 0,
+        "sha256": "b436ccf1f9e6bd649d732cf90cdfd077976f3676785c07ad756092948429db21",
+        "size": 268696,
+        "sourceKind": "local"
+      },
+      "192": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd192.caf",
+        "priority": 0,
+        "sha256": "2892bbdfa26c827e612b7215930addb38d1a7e87e864d1b68c28a66ed30394fc",
+        "size": 974296,
+        "sourceKind": "local"
+      },
       "193": {
         "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd193.ogg",
         "priority": 0,
         "sha256": "7b23b2d97a85f33ae606f90d0eeca31551d4604c769bf0da0adcba14091a39b1",
         "size": 885159,
+        "sourceKind": "local"
+      },
+      "194": {
+        "path": "jp/Local/jp-1507021-2c1ac20b9c424404/assets/snd194.caf",
+        "priority": 0,
+        "sha256": "3b0b7138c6d339cccfe1beed32b42ef5ea5a2c13177a0073e63700f1cd89a9e5",
+        "size": 709696,
         "sourceKind": "local"
       },
       "195": {

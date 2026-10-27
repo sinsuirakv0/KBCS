@@ -82,6 +82,9 @@ uint32_t kbcs_core_stage_tick(const KbcsStageRow *rows, KbcsStageState *states,
 uint32_t kbcs_core_stage_commit(const KbcsStageRow *rows, KbcsStageState *states,
     int32_t count, KbcsStageContext *context, int32_t candidate,
     int32_t global_roll, int32_t row_roll);
+/* 006d9e44: 保留ダメージ後の出現条件から城HP保持旗を立てる。表示更新内では保持する。 */
+uint32_t kbcs_core_stage_castle_guard(const KbcsStageRow*,const KbcsStageState*,
+    int32_t count,const KbcsStageContext*,int32_t pending_damage,int32_t *preserve);
 typedef struct { int32_t base, clears, study_level, treasure, combo, okame; } KbcsLegendExperienceInput;
 typedef struct { int64_t stages[5]; } KbcsExperienceOutput;
 uint32_t kbcs_core_legend_experience(const KbcsLegendExperienceInput *input, KbcsExperienceOutput *output);
@@ -107,6 +110,9 @@ typedef struct { int32_t grant_column, mark_history, radar_blocked; } KbcsWeight
 uint32_t kbcs_core_reward_weight_finish(const KbcsWeightedFinishInput *input, KbcsWeightedFinishOutput *output);
 typedef struct { int32_t redirect, factor, limit; } KbcsItemDefinition;
 typedef struct { int32_t target, total, change; } KbcsItemGrant;
+typedef struct {int32_t kind,seen,plus,limit,third,fourth;} KbcsCharacterRewardInput;
+typedef struct {int32_t result,seen,plus,third,fourth;} KbcsCharacterRewardOutput;
+uint32_t kbcs_core_character_reward(const KbcsCharacterRewardInput*,KbcsCharacterRewardOutput*);
 uint32_t kbcs_core_item_add(const KbcsItemDefinition *definitions, int32_t *counts,
     int32_t count, int32_t index, int32_t amount, KbcsItemGrant *output);
 typedef struct { float count, multiplier; int32_t miss, weights[16]; } KbcsMaterialInput;
@@ -131,15 +137,22 @@ typedef struct { int32_t cells[13]; } KbcsRenderPart;
 typedef struct { int32_t x,y,width,height; } KbcsRenderCut;
 typedef struct { int32_t frame,value,easing,power; } KbcsRenderKey;
 typedef struct { int32_t part,property,loop,first,count; } KbcsRenderTrack;
+/* 0044beb4/0044bf2c。無限repeatの-1と、平文側の終端値を分ける。 */
+uint32_t kbcs_core_motion_lengths(const KbcsRenderTrack*,int32_t,const KbcsRenderKey*,int32_t,int32_t lengths[2]);
 typedef struct { int32_t units[3],frame,loop,anchor,facing,config[6],root_override; double root[5]; } KbcsPoseInput;
 typedef struct { int32_t part,cut,blend; double opacity; int32_t points[8]; } KbcsPosePacket;
 uint32_t kbcs_core_pose(const KbcsPoseInput*,const KbcsRenderPart*,int32_t,const KbcsRenderCut*,int32_t,const KbcsRenderTrack*,int32_t,const KbcsRenderKey*,int32_t,KbcsPosePacket*,int32_t*);
+/* 0044b854の整数基準点。contactは初期姿勢、pose_contactは指定Fの姿勢。 */
+uint32_t kbcs_core_model_contact(const KbcsPoseInput*,const KbcsRenderPart*,int32_t,int32_t*);
+uint32_t kbcs_core_pose_contact(const KbcsPoseInput*,const KbcsRenderPart*,int32_t,const KbcsRenderTrack*,int32_t,const KbcsRenderKey*,int32_t,int32_t*);
 // 背景・城の描画座標。UIや描画デバイスの状態を参照しない。
 typedef struct { double width,center,zoom; int32_t cut_height,castle[3],focus,viewport_width,battle_rows; } KbcsSceneInput;
 typedef struct { double width,center,zoom,minimum,top,bottom,enemy[4],player_x,viewport_width,y_origin,y_offset; } KbcsSceneLayout;
 uint32_t kbcs_core_scene_layout(const KbcsSceneInput*,KbcsSceneLayout*);
 
 
+/* 006ddfb8: ボス衝撃波の基点。X/Yは10倍座標、scale/offsetは城画像の原本値。 */
+uint32_t kbcs_core_boss_effect_anchor(int32_t x,int32_t y,int32_t scale,int32_t offset_x,int32_t offset_y,int32_t out[2]);
 typedef struct { int32_t texture,layer,count,blend; double opacity,points[16]; int32_t cut[4],colors[6]; } KbcsDrawCommand;
 typedef struct { KbcsSceneInput scene; int32_t cut[4],top[4],colors[12],overlay[7],self_sizes[6],show_enemy,show_player; } KbcsPaintInput;
 uint32_t kbcs_core_scene_paint(const KbcsPaintInput*,KbcsSceneLayout*,KbcsDrawCommand*,int32_t,int32_t*);
@@ -171,7 +184,7 @@ typedef struct {
 typedef struct {
  int32_t frame,intro,rows,page,page_frame,page_direction,paused,money,worker,cannon;
  int32_t holding,hold_frames,pointer_down,pointer_x,pointer_y,guard,pending_control,items_on,request_slot,request_cannon;
- int32_t ui_frame,speed_mode,wallet_flash,description_item,description_wait,start_x,start_y,gesture,page_step,request_action,bgm_level,se_level,vibration_on,info_mode,info_slot,saved_rows,hud_frame;
+ int32_t ui_frame,speed_mode,wallet_flash,description_item,description_wait,start_x,start_y,gesture,page_step,request_action,bgm_level,se_level,vibration_on,info_mode,info_slot,saved_rows,hud_frame,battle_mode;
 } KbcsBattleScreenState;
 typedef struct { int32_t ticks,phase,x,y,control; } KbcsBattleScreenInput;
 typedef struct {

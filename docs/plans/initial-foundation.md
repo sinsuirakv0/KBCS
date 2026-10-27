@@ -275,3 +275,34 @@ releaseを.local/dist/0.1.12へ配置し、既存実DBのCLI verifyはimporter8/
 ユーザー指定の軽い検証として代表6素材120姿勢、専用魂と通常魂、敵再生とUI操作を確認。workspace18＋compile_fail1、clippy全target、release/CLI verifyが通過。importer10でも全ステージの原本照合が一致した。姿勢評価のC++移植と戦闘の全状態は残る。設計と最新範囲はdocs/plans/motion-workspace.md。
 
 0.1.17：その他モーションを味方/敵共通ビューアに追加。素材対応/データAPIと波動・烈波・爆波の既存演出時計を接続。詳細・検証結果はdocs/plans/effect-motion-workspace.md。
+
+
+## 2026-10-25：通常生産と敵出現のC++入口
+
+原本15.7.2 ARM64とWebの試作を比較し、出撃成功後の資金/回数/待機、初期座標とレイヤー、再生産計算/時計、敵生成→間隔RNG→commit→seenを追加。原本37条件と既存連続出現3×3tickをC++に照合した。個体の能力/初期行動の全構築と画面接続は未完了。[関数・入力根拠・範囲](../../native/kbcs-core/docs/production.md)。実行中アプリは操作せず、既存API/DB/描画/ワイヤ/ABI3を維持。workspace30試験とcompile_fail1、その後の関連2試験と全target clippyを通過した。
+
+## 2026-10-25：個体・特性の状態カーネル
+
+009f1e64全体と捕捉/対象/抽選/妨害/時計、被弾前保存、予約・保護・HP・生存・KB/ワープ等のC++状態関数を追加。全原本を含む生成3658条件、局所の保護864/HP1068/KB804等をARM64へ照合した。版・関数・入力取得責務・制御helper・残範囲は[actors](../../native/kbcs-core/docs/actors.md)。代表fixtureはRustの1試験へまとめ、workspace31＋compile_fail1、clippy全targetを通過した。全行動/命中/伝播・実プロフィール取得・画面接続は未完了。起動中アプリを操作せず、既存API/DB/描画/ワイヤ/ABI3を維持する。
+
+## 2026-10-26：敵KB終了・死亡と行動後の待機
+
+敵KB3の終了と蘇生/盾再生成/撃破数/報酬、通常死亡4の枠解放/生産印/砲待機、行動後の接触と潜行、陣営別の攻撃待機1をC++へ追加。実命令へ720/640/432/864条件の計2656を照合した。先行の歩行3216/味方KB1152/敵ふっとばし3456条件も記録済み。workspace31＋compile_fail1、その後のbridge23＋compile_fail1と全target clippyを通過。入力取得・全体dispatch・更新順と未接続範囲は[actors](../../native/kbcs-core/docs/actors.md)。全特性・全戦闘・画面接続の完成とは扱わず、次は攻撃2の段発生/対象選出/命中と効果伝播へ進む。
+
+## 2026-10-26：攻撃段・対象選出と発生入口
+
+攻撃2の時計/段発生・単体/範囲の対象選出、陣営別の直接命中引数/12抽選、波動の200枠確保/初期化と命中履歴解除をC++とRustへ追加。原本実命令へ1888/864/720条件の計3472を照合。命中内部はcallbackで制御した範囲であり、命中条件/ダメージ全体や烈波/爆波・波動の進行/命中まで完成とは扱わない。契約・残範囲は[actors](../../native/kbcs-core/docs/actors.md)。起動中アプリと既存API/DB/描画/転送は操作・変更していない。
+
+2026-10-26追補：同じ発生関数の烈波→爆波をactor_emit_areaへ追加。幅の絶対値をそのままRNGへ渡す実命令を確認し、0と1の消費差、INT_MIN/座標wrap、陣営による方向、フラグ/parameter保存を保持。2016条件×連続2回=4032更新を原本へ照合し、全個体・波動/命中履歴・烈波/爆波の生成記録・RNGが一致した。生成記録と空の履歴を所有者へ登録する契約と、残る命中/寿命/反射は[actors](../../native/kbcs-core/docs/actors.md)。
+
+
+2026-10-26追補：C++所有のAreasへ烈波/反射待ち/爆波の進行、周期/5区画履歴、命中引数、反射、消滅と退場待ちを追加。96条件の17424phase更新/1258命中呼出と、所有者走査512条件を現版ARM64へ照合した。代表値は既存Rust1試験へ統合し、bridge23＋compile_fail1が通過。[関数・版・入力・制御helper・未接続範囲](../../native/kbcs-core/docs/secondary.md)。全命中内部/全体ランタイム/画面接続は未完了。
+
+2026-10-26: 命中006e4aec/006e79bc本体と波動進行/命中を追加。C++所有戦闘→実DB/編成→出撃画面を接続し、通常・二次攻撃のヘッドレス連続更新を確認。[最新の接続範囲・残り](../../native/kbcs-core/docs/battle-runtime.md)。全特性/全mainの完全一致を達成扱いにはしない。
+
+
+2026-10-27: ボス衝撃波、00a9490cのボス境界、主要VFX/SE、画像索引からの固定commit遅延取得を追加。確認用は.local/dist/0.1.34-battle-effects。最新の原本比較/継続試験/未照合範囲はresume.md冒頭とnative/kbcs-core/docs/battle-runtime.mdへ記録。
+
+2026-10-27: 追加生産・条件付き本能玉/価格・PRのPt/Fever/勝敗・対象限定コンボをC++所有戦闘へ接続。ABI4へ統一。根拠/照合/未完了はnative/kbcs-core/docs/battle-special.mdとresume.md。
+
+2026-10-28: 終了controller・報酬通知の原本部品/時計、持ち物とキャラ所持の原子的保存、1Fの衝撃波＋城破壊境界を接続/照合。詳細はnative/kbcs-core/docs/battle-result.md、再開状態はdocs/plans/resume.md。画面確認はユーザー担当。

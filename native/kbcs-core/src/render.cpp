@@ -5,6 +5,13 @@
 #include <limits>
 #include <vector>
 
+extern "C" uint32_t kbcs_core_boss_effect_anchor(int32_t x,int32_t y,int32_t scale,int32_t offset_x,int32_t offset_y,int32_t out[2]){
+ if(!out)return 1;
+ out[0]=(x-scale*1180/100)/10+offset_x*scale/100+64;
+ out[1]=y/10-scale*255/100+offset_y*scale/100+224;
+ return 0;
+}
+
 namespace {
 using I = int64_t;
 I divide(I a,I b) { if (!b || (a==INT64_MIN && b==-1)) throw 1; return a/b; }
@@ -41,10 +48,11 @@ bool valid_parent(const std::vector<Part> &parts,int index,I parent) {
 I track_value(const KbcsRenderKey *keys,int count,I offset,I frame,bool &active) {
   active=count && frame>=I(keys[0].frame)+offset;
   if (!active) return 0;
+  if (keys[0].frame==keys[count-1].frame) return keys[0].value;
+  if (frame>=I(keys[count-1].frame)+offset) return keys[count-1].value;
   for (int i=0;i<count;++i) {
     const auto &a=keys[i]; const I first=I(a.frame)+offset;
-    if (frame==first) return a.value;
-    if (i+1==count || frame<=first || frame>=I(keys[i+1].frame)+offset) continue;
+    if (i+1==count || frame<first || frame>=I(keys[i+1].frame)+offset) continue;
     const auto &b=keys[i+1];
     if (a.easing==1) return a.value;
     if (a.easing==0) return I(a.value)+divide(product(I(b.value)-a.value,frame-first),I(b.frame)-a.frame);
@@ -67,17 +75,17 @@ I track_value(const KbcsRenderKey *keys,int count,I offset,I frame,bool &active)
     }
     return divide(sum,4096);
   }
-  return keys[count-1].value;
+  return 0;
 }
 }
 
-extern "C" uint32_t kbcs_core_pose(const KbcsPoseInput *in,const KbcsRenderPart *bases,int32_t count,
+static uint32_t pose(const KbcsPoseInput *in,const KbcsRenderPart *bases,int32_t count,
     const KbcsRenderCut *cuts,int32_t cut_count,const KbcsRenderTrack *tracks,int32_t track_count,
-    const KbcsRenderKey *keys,int32_t key_count,KbcsPosePacket *output,int32_t *written) {
+    const KbcsRenderKey *keys,int32_t key_count,KbcsPosePacket *output,int32_t *written,int32_t *contact) {
   if (!in || !bases || !cuts || !output || !written || count<1 || count>4096 || cut_count<1 || cut_count>8192 ||
       track_count<0 || track_count>32768 || key_count<0 || key_count>262144 || (track_count && !tracks) ||
       (key_count && !keys) || in->units[0]<=0 || in->units[1]<=0 || in->units[2]<=0 ||
-      (in->facing!=1 && in->facing!=-1) || in->loop<0 || in->loop>1 || in->anchor<0 || in->anchor>1) return 1;
+      (in->facing!=1 && in->facing!=-1) || in->loop<0 || in->loop>1 || in->anchor<0 || in->anchor>2) return 1;
   try {
     const I su=in->units[0],ou=in->units[2];
     I maximum=1;
@@ -86,7 +94,7 @@ extern "C" uint32_t kbcs_core_pose(const KbcsPoseInput *in,const KbcsRenderPart 
       if(t.part<0 || t.part>=count || t.property<0 || t.property>14 || t.first<0 || t.count<0 || t.first>I(key_count)-t.count) return 1;
       if(!t.count) continue;
       const auto *k=keys+t.first; const I first=k[0].frame,last=k[t.count-1].frame;
-      for(int j=1;j<t.count;++j) if(k[j].frame<k[j-1].frame) return 1;
+      // 0044c884は原本順に区間を探索する。実素材にも逆順キーがあり、整列・拒否しない。
       const I offset=first<0 || t.loop!=1 ? -first : 0;
       const I end=t.loop==-1 ? last+offset-std::min<I>(offset,0) : t.loop>1 ? first+(last-first)*t.loop : last;
       maximum=std::max(maximum,end);
@@ -140,7 +148,8 @@ extern "C" uint32_t kbcs_core_pose(const KbcsPoseInput *in,const KbcsRenderPart 
         p.sx=divide(product(p.base[8],p.factor_x),su);p.sy=divide(product(p.base[9],p.factor_y),su);p.alpha=divide(product(p.base[11],p.factor_alpha),ou);
         if(p.v[0]<0) {
           p.sx*=in->facing;p.flip_x=p.local_x;p.flip_y=p.local_y;
-          p.matrix={1,0,float(p.v[4]),0,1,float(p.v[5])};
+          // 0044af4c: 根は位置の加算値だけを使い、モデルの基礎位置を含めない。
+          p.matrix={1,0,float(p.v[4]-p.base[4]),0,1,float(p.v[5]-p.base[5])};
         } else {
           const auto &parent=parts[size_t(p.v[0])];
           p.sx=divide(divide(product(product(p.base[8],p.factor_x),parent.sx),su),su);
@@ -171,6 +180,12 @@ extern "C" uint32_t kbcs_core_pose(const KbcsPoseInput *in,const KbcsRenderPart 
       }
       if(!progressed)return 1;
     }
+    if(contact) {
+      const int index=std::max(0,in->config[0]);if(index>=count)return 1;const auto &p=parts[size_t(index)];
+      // 0044b854の0x4c/0x54は原点の基礎値/加算値。位置ではない。
+      const auto at=point(p,divide(product(I(in->config[2])-p.v[6],p.sx),su),divide(product(I(in->config[3])-p.v[7],p.sy),su));
+      std::copy(at.begin(),at.end(),contact);return 0;
+    }
     std::array<int32_t,2> anchor{};
     if(in->anchor) {
       const int index=std::max(0,in->config[0]);if(index>=count)return 1;const auto &p=parts[size_t(index)];
@@ -190,12 +205,28 @@ extern "C" uint32_t kbcs_core_pose(const KbcsPoseInput *in,const KbcsRenderPart 
   } catch(int code) { return uint32_t(code); } catch(...) { return 3; }
 }
 
+extern "C" uint32_t kbcs_core_pose(const KbcsPoseInput *in,const KbcsRenderPart *parts,int32_t count,
+ const KbcsRenderCut *cuts,int32_t cut_count,const KbcsRenderTrack *tracks,int32_t track_count,
+ const KbcsRenderKey *keys,int32_t key_count,KbcsPosePacket *output,int32_t *written) {
+ return pose(in,parts,count,cuts,cut_count,tracks,track_count,keys,key_count,output,written,nullptr);
+}
+extern "C" uint32_t kbcs_core_model_contact(const KbcsPoseInput *in,const KbcsRenderPart *parts,int32_t count,int32_t *out) {
+ if(!out)return 1;const KbcsRenderCut cut{};KbcsPosePacket packet{};int32_t written=0;
+ return pose(in,parts,count,&cut,1,nullptr,0,nullptr,0,&packet,&written,out);
+}
+
+extern "C" uint32_t kbcs_core_pose_contact(const KbcsPoseInput *in,const KbcsRenderPart *parts,int32_t count,
+ const KbcsRenderTrack *tracks,int32_t track_count,const KbcsRenderKey *keys,int32_t key_count,int32_t *out) {
+ if(!out)return 1;const KbcsRenderCut cut{};KbcsPosePacket packet{};int32_t written=0;
+ return pose(in,parts,count,&cut,1,tracks,track_count,keys,key_count,&packet,&written,out);
+}
+
 extern "C" uint32_t kbcs_core_scene_layout(const KbcsSceneInput *in,KbcsSceneLayout *out) {
-  if(!in||!out||!std::isfinite(in->width)||!std::isfinite(in->center)||!std::isfinite(in->zoom)||in->width<=0||in->width>10000000||in->cut_height<=0||in->cut_height>100000||in->focus<0||in->focus>3||in->viewport_width<0||in->viewport_width>3840||in->battle_rows<0||in->battle_rows>2)return 1;
+  if(!in||!out||!std::isfinite(in->width)||!std::isfinite(in->center)||!std::isfinite(in->zoom)||in->width<=0||in->width>10000000||in->cut_height<=0||in->cut_height>100000||in->focus<0||in->focus>4||in->viewport_width<0||in->viewport_width>3840||in->battle_rows<0||in->battle_rows>2)return 1;
   const double viewport=in->viewport_width?std::max(960,in->viewport_width):960;
   const double width=std::max(1.,in->width*.4),minimum=std::min(1.,viewport/width),zoom=in->focus==3?minimum:std::clamp(in->zoom,minimum,in->battle_rows?1.:2.);
   const double desired=in->focus==1?320:in->focus==2?width-320:in->focus==3?width/2:in->center;
-  const double half=viewport*.5/zoom,center=width<=half*2?width/2:std::clamp(desired,half,width-half);
+  const double half=viewport*.5/zoom,center=in->focus==4?desired:width<=half*2?width/2:std::clamp(desired,half,width-half);
   const auto x=[&](double value){return viewport*.5+(value-center)*zoom;};
   // 005c8a6cは二段スロットの上端を超えた分もカメラへ戻す。
   const double anchor=in->battle_rows==2?505:520;

@@ -1,6 +1,8 @@
-﻿# KBCS — KBC Simulator
+﻿# KBCS — KBC Simulator 0.1.35
 
 にゃんこ大戦争のデータ閲覧・解析・編集・戦闘再現を目指すPC向けネイティブアプリ。JP15.7.2の味方・敵・全29系列のステージをSQLiteへ取り込み、ネットワークなしで検索・詳細閲覧できる。
+
+現在の調査入口は[0.1.35の実装状況・残課題](docs/plans/review-v0.1.35.md)。過去の版付き進捗は、その版時点の記録として扱う。通常戦闘は実装済みだが、全ステージ・全フレームの原本一致を保証した完成版ではない。
 
 ## 実装済み
 
@@ -16,7 +18,7 @@
 - 章別のお宝99項目、施設10項目の通常Lv/＋値、土台・装飾の種類/Lv。折りたたみ・絞り込み・対象分の一括設定・自動保存。対応する表示補正へ即反映。
 - 通常画面はWebと同じ数値表。原本・出典・注意書きは展開して確認。未知の列・空欄を保全。
 - 検証済みDBの切替、旧DBの保全、リージョン別の公開ポインタ。
-- C++20で体力・攻撃力・両方向の直接命中・メタルキラー・毒撃を計算し、特効・コンボ・土台/装飾を反映。現版ARM64で整数化を照合。出現待機の初期化・tick/commitと素材抽選も共用し、39000番台までのID/現在種別・参照先選択・出現行読込と、章/レジェンド/イベント/EXのXP入口を共用。各番台の専用進行と完全な戦闘の状態更新は未実装。
+- C++20で体力・攻撃力・両方向の直接命中・メタルキラー・毒撃を計算し、特効・コンボ・土台/装飾を反映。現版ARM64で整数化を照合。出現待機の初期化・tick/commitと素材抽選も共用し、39000番台までのID/現在種別・参照先選択・出現行読込と、章/レジェンド/イベント/EXのXP入口を共用。通常戦闘の出撃・敵出現・命中・状態更新・勝敗・報酬保存まで接続済み。番台固有の進行や全条件の再現には残課題がある。
 
 ## 0.1.21の追加
 
@@ -30,7 +32,7 @@ LLVM-MinGWを使う場合（パスは環境に合わせる）:
 
 ```powershell
 ./scripts/build.ps1 -LlvmBin 'D:/path/to/llvm-mingw/bin'
-./.local/dist/0.1.21/kbcs.exe
+./.local/dist/0.1.35/kbcs.exe
 ```
 
 スクリプトはreleaseビルド、WebView2Loader.dllと必要なMinGWランタイムDLLの同梱を行う。初回はCargo依存パッケージの取得にネットワークが必要。通常のMSVC環境でも `./scripts/build.ps1` で配布フォルダを生成する。MSVCでの実機検証は未実施。
@@ -40,10 +42,10 @@ GUIのホーム → データ管理の「データ取得・更新」で既存Git
 CLIでも同じ取り込み・照会を利用できる:
 
 ```powershell
-./.local/dist/0.1.21/kbcs.exe import --assets '../KBC-rakv0-assets' | Out-Host
-./.local/dist/0.1.21/kbcs.exe list --query 'ネコ' | Out-Host
-./.local/dist/0.1.21/kbcs.exe show --id 0 --form 2 | Out-Host
-./.local/dist/0.1.21/kbcs.exe verify | Out-Host
+./.local/dist/0.1.35/kbcs.exe import --assets '../KBC-rakv0-assets' | Out-Host
+./.local/dist/0.1.35/kbcs.exe list --query 'ネコ' | Out-Host
+./.local/dist/0.1.35/kbcs.exe show --id 0 --form 2 | Out-Host
+./.local/dist/0.1.35/kbcs.exe verify | Out-Host
 ```
 
 GUI用の実行ファイルはコンソールを作らない。PowerShellからCLI出力を表示する場合は上記のように `| Out-Host` を付ける。
@@ -53,7 +55,7 @@ DBの既定保存先は `%LOCALAPPDATA%/KBCS`。`--data-dir` または `KBCS_DAT
 サイド画面で注釈しながら調整するプレビュー:
 
 ```powershell
-./.local/dist/0.1.21/kbcs.exe preview --bind 127.0.0.1:4817 | Out-Host
+./.local/dist/0.1.35/kbcs.exe preview --bind 127.0.0.1:4817 | Out-Host
 ```
 
 [キャラ検索プレビュー](http://127.0.0.1:4817/pages/unit-search/) をCodexのブラウザパネルで開く。アプリと同じ埋込みHTML/CSS/JS・SQLiteを使用し、127.0.0.1だけで待ち受ける。通常のGUIはHTTPサーバーを起動せず、アプリ専用プロトコルを使用する。UIだけの変更もRust再ビルドで実行ファイルへ反映する。
@@ -77,6 +79,9 @@ DBの既定保存先は `%LOCALAPPDATA%/KBCS`。`--data-dir` または `KBCS_DAT
 
 データは [KBC assets](https://github.com/sinsuirakv0/KBC-rakv0-assets) の生成索引と原本を使用し、上流の取得・復号基盤は [battlecats-apk](https://github.com/sinsuirakv0/battlecats-apk)。解釈・配色の参考は [kbc-web](https://github.com/sinsuirakv0/kbc-web)。Webの未完成なDBを確定したゲーム仕様として扱わない。
 
-今後は専用の進行・解禁状態、モーション、C++戦闘コア、自作データ、APK出力、AI制御へ順に拡張する。今回の制限と次の変更箇所は[初期構築](docs/plans/initial-foundation.md)に記録する。
+今後は専用の進行・解禁状態と戦闘再現の残分岐、自作データ、APK出力、AI制御へ拡張する。今回の制限と次の変更箇所は[初期構築](docs/plans/initial-foundation.md)に記録する。
 
 保存済みネイティブ資料は [research/README.md](research/README.md)、[全関数キャッシュ報告](research/docs/complete-report.md)、[Private Releaseの取得手順](research/docs/github-storage.md)を参照。
+
+
+0.1.35の現状: C++所有戦闘へ個体生成・移動・命中・波動/烈波/爆波・城砲・精霊・スニャイパー・CPU・勝敗/報酬を接続。道場/ランキング道場・PRの計算と上部表示、ステージ名画像、結果帯、SE境界、1F城破壊を追加修正した。スキーマ8・変換器13・ABI4。[調査用の現状と残課題](docs/plans/review-v0.1.35.md)、[操作・性能設計](crates/kbcs-app/docs/performance.md)、[再開記録](docs/plans/resume.md)。

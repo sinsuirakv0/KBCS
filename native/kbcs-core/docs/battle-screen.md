@@ -40,7 +40,7 @@ HUDのPNG6枚はscripts/sync-battle-ui.pyで採用元のsize/SHA-256を検証し
 
 006d6d04の砲表示時計32f9b4/32f9b8は、速度倍率と別に3表示更新ごとに切り替わる。準備完了時の005d1f2cはimg002のcut11〜20＋9と、cut7＋10の二相。hud_frameを論理frame・ボタン用ui_frameから分離し、停止中は凍結する。GUIの独自点滅タイマーは持たない。
 
-009eadc8→008fbb48(mode1)→008fbbc8→008f9e20が戦闘専用の停止ウィンドウを作り、008fbcbc→008fb5f4が描く。一般設定008f657cとは別。009f560cのBattleTextureContext+490は日本語化したimg100。基準幅960の外枠は[248,142]〜[712,473]、ワイド時は中央へ平行移動。タイトル・ヘルプ・音量・1/2段・離脱・閉じるボタンの矩形/分割はC++配置から渡す。押下後5表示更新の待機と点滅を速度倍率で短縮しない。BGM/SEは原本の0/25/50/100%の4段階、PC非対応の振動はcut107。BGMは既存stage-audioへ接続、SEの状態のみ保存する。ヘルプはユーザー指定のhttps://kbc-rakv0.pages.dev/information/appli/battlecats/help/index.htmlへ限定する。
+009eadc8→008fbb48(mode1)→008fbbc8→008f9e20が戦闘専用の停止ウィンドウを作り、008fbcbc→008fb5f4が描く。一般設定008f657cとは別。009f560cのBattleTextureContext+490は日本語化したimg100。基準幅960の外枠は[248,142]〜[712,473]、ワイド時は中央へ平行移動。タイトル・ヘルプ・音量・1/2段・離脱・閉じるボタンの矩形/分割はC++配置から渡す。押下後5表示更新の待機と点滅を速度倍率で短縮しない。BGM/SEは原本の0/25/50/100%の4段階、PC非対応の振動はcut107。BGM/SEはstage-audioと所有BattleのSE通知へ接続し、音量を保存する。ヘルプはユーザー指定のhttps://kbc-rakv0.pages.dev/information/appli/battlecats/help/index.htmlへ限定する。
 
 008ffd00→006dd65c→006ddfb8のキャラ確認は元の段数を保存し、2段でキャラ名/説明/選択枠を表示、確認終了で復元する。img015 cut339〜348がボタンと選択枠。006a4e9cの全特性アイコン行は未移植。離脱は現在、生成前の準備画面へ戻す操作であり、本家のアイテム消費・返還を確定しない。
 
@@ -49,3 +49,23 @@ HUDのPNG6枚はscripts/sync-battle-ui.pyで採用元のsize/SHA-256を検証し
 画面は高さ640を保ち、横幅を利用可能領域から算出（960〜3840）。HUD中央・右端の原本アンカーを維持する。005c8548の下地は変換後の画像下端から680まで描き、640でクリップする。単に背景画像を上へ移動して下端を黒く残さない。Android端末のノッチ/安全領域はPCでは0とし、Pixel8の写真から余白を推定しない。DB試写の既定幅960・battle_rows=0は従来どおり。POD拡張に伴いABIは3。
 
 research/verify/battle_controls.pyは同版SOでスワイプ8条件、1/2段のカメラ、960/1280幅の停止ウィンドウ、金額15時計、砲2相、財布MAX、音量テーブルを局所照合する。fixtureはbattle-controls-vectors.json、既存のnative_screen_witnessesへ統合。角度・外部getter・テクスチャ出力は制御スタブであり、Android全入力系やGPU画素の一致ではない。財布MAXの全6表示時計で黄色が不変であることも最小テストに含める。ユーザー希望により画面操作・スクリーンショット確認は行わない。
+
+
+0.1.32のホスト専用control10はintro終了・native pausedなし・ポインター入力なしでのみ許可。指定したticks（最大30）を1論理Fずつ進め、速度アイテム設定と表示を保持する。通常更新のsteps/整数/乱数経路は変更しない。ホストの停止はAPIを進めない方式で、ネイティブオプションのpausedと区別する。3倍設定でも1Fでframe+1/砲残り-1、続く10Fでframe+10を既存代表テストへ追加。
+
+
+## 操作SEの接続（2026-10-28）
+
+`battle_screen_advance`は音源を再生せず、既存hookへ`KBCS_BATTLE_SCREEN_SOUND + id`を渡す。所有Battleのhookがframe/idを保存するため、UIにボタンごとの音源選択を重複させない。イベント0..5・POD・ABI4は保持する。押下10は領域への新規進入だけ。アイテム説明の押下と無効な振動ボタンは無音。財布は成功19/最大・資金不足15、砲の充填中入力も所有側の発射入口で15へ解決する。ポーズ・切替の解放は11。オプションの音量は008ff260/008ff388どおり解放時に変更し、その他の待機後操作と区別する。音量0でもC++通知・戦闘乱数は省かない。
+
+原本の呼出関係・終了後ゲート・検証範囲は[音源解析](../../../research/docs/audio-1572.md)を参照。`tests/battle-audio.cpp`はhold/成功失敗/充填完了/音量0境界/1・2段/アイテムの入力を、描画なしで所有APIから検査する。
+
+## 道場・PRの上部表示（2026-10-28）
+
+JP15.7.2 ARM64/SHA6122e248…の006ddfb8を追跡。`actor_top.inc`の`kbcs_core_battle_top_draw`へタイトル、Score/Pt、残時間、Feverを移し、Session→bridge→共用描画命令へ接続した。座標は論理画面の値で、PCの安全領域は0。タイトルは006e11acのx62/y10、原本PNGの先頭imgcutを使い、スコア枠より先に描く。独立したCanvas文字列への代替はしない。
+
+スコア枠はimg001_jaのcut106/107による横伸縮、cut104（Score）/159（Pt）/105（単位）と数字14番台。道場の加点は敵死亡のscore_displayをphase1/frame0として受け、表示hook5で006e11fc..006e1604の4分割補間と100→136→150→110の拡縮を進める。論理速度やHTTPのまとめ方で表示回数を変えない。
+
+残時間はscore_type1ではmode4以外、type3ではmode0かつ有限時間で描く。原本どおり30F/秒、1/100秒は余りF×100/30、残り900F以下は赤。数字83番台とcut93を使用する。PRのFeverはFeverEffect.png/imgcutの6〜9番、表示時計の3F点滅とwait/期間・gaugeから求める294幅の覆いをそのまま命令化する。UIでスコア式・時計・Fever進行を再計算しない。
+
+`research/verify/battle_top.py`とtests/battle-top-probe.cppで原本の数値補間128条件、実数字整形/横伸縮を含む描画152条件を照合。幅960/1280、mode0/4、900F境界、拡縮、Fever待機/点滅を含む。probeは解決済みの所有表示状態を入れるfixtureで、個体更新/全main/Android GPU画素の一致を主張しない。

@@ -32,13 +32,17 @@ pub fn run(root: PathBuf, region: String, source: String) -> Result<()> {
     let mut context = WebContext::new(Some(root.join("webview")));
     let webview = WebViewBuilder::new_with_web_context(&mut context)
         .with_asynchronous_custom_protocol("kbcs".into(), move |_, request, responder| {
-            let service = service.clone();
-            std::thread::spawn(move || {
+            let path = request.uri().path().to_owned();
+            crate::service::dispatch(&service, &path, move |service, accepted| {
                 let path = request
                     .uri()
                     .path_and_query()
                     .map_or("/", |value| value.as_str());
-                let reply = service.handle(request.method().as_str(), path, request.body());
+                let reply = if accepted {
+                    service.handle(request.method().as_str(), path, request.body())
+                } else {
+                    crate::service::Reply::overloaded()
+                };
                 let response = wry::http::Response::builder()
                     .status(reply.status)
                     .header("Content-Type", reply.mime)

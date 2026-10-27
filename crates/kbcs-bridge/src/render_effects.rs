@@ -141,12 +141,15 @@ fn base(value: &Value) -> i32 {
         _ => 0,
     }
 }
-pub struct Runtime(NonNull<c_void>);
+pub struct Runtime {
+    handle: NonNull<c_void>,
+    output: Vec<Particle>,
+}
 // 所有権を移動できるが、同時操作は許さない。Service側ではMutexで保護する。
 unsafe impl Send for Runtime {}
 impl Drop for Runtime {
     fn drop(&mut self) {
-        unsafe { kbcs_core_effect_destroy(self.0.as_ptr()) }
+        unsafe { kbcs_core_effect_destroy(self.handle.as_ptr()) }
     }
 }
 impl Runtime {
@@ -234,25 +237,29 @@ impl Runtime {
         if code != 0 {
             return Err(code);
         }
-        NonNull::new(handle).map(Self).ok_or(3)
+        NonNull::new(handle)
+            .map(|handle| Self {
+                handle,
+                output: vec![Particle::default(); 16384],
+            })
+            .ok_or(3)
     }
-    pub fn frame(&mut self, frame: i32) -> Result<Vec<Particle>, u32> {
-        let mut output = vec![Particle::default(); 16384];
+    // 次のframe呼出まで借用する。大きな出力領域を毎F確保・ゼロ埋めしない。
+    pub fn frame(&mut self, frame: i32) -> Result<&[Particle], u32> {
         let mut written = 0;
         let code = unsafe {
             kbcs_core_effect_frame(
-                self.0.as_ptr(),
+                self.handle.as_ptr(),
                 frame,
-                output.as_mut_ptr(),
-                output.len() as i32,
+                self.output.as_mut_ptr(),
+                self.output.len() as i32,
                 &mut written,
             )
         };
         if code != 0 {
             return Err(code);
         }
-        output.truncate(written as usize);
-        Ok(output)
+        self.output.get(..written as usize).ok_or(2)
     }
 }
 pub fn weather(

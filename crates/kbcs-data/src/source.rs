@@ -118,6 +118,64 @@ enum Location {
     Remote(String),
 }
 
+// DBに索引だけ保存した画像も、取り込み時のcommit/SHAへ固定して取得する。
+pub fn asset(database: &crate::store::Database, root: &Path, logical: &str) -> Result<Vec<u8>> {
+    safe_path(logical)?;
+    if let Ok((_, _, _, bytes)) = database.source(logical) {
+        return Ok(bytes);
+    }
+    let descriptor = database
+        .connection
+        .query_row(
+            "SELECT original_path,sha256,size,source_kind FROM asset_reference WHERE path=?",
+            [logical],
+            |row| {
+                Ok(Descriptor {
+                    path: row.get(0)?,
+                    sha256: row.get(1)?,
+                    size: row.get::<_, i64>(2)? as u64,
+                    source_kind: row.get(3)?,
+                })
+            },
+        )
+        .with_context(|| format!("画像の索引なし: {logical}"))?;
+    let metadata = database.metadata()?;
+    let origin = metadata.get("origin").context("原本の取得元なし")?;
+    let revision = metadata.get("revision").context("原本commitなし")?;
+    ensure!(
+        revision.len() == 40 && revision.bytes().all(|b| b.is_ascii_hexdigit()),
+        "不正な原本commit"
+    );
+    let location = if let Some(repository) = origin.strip_prefix("https://github.com/") {
+        let parts: Vec<_> = repository.trim_end_matches('/').split('/').collect();
+        ensure!(
+            parts.len() == 2
+                && parts.iter().all(|p| !p.is_empty()
+                    && p.bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))),
+            "不正な原本URL"
+        );
+        Location::Remote(format!(
+            "https://raw.githubusercontent.com/{}/{revision}",
+            parts.join("/")
+        ))
+    } else {
+        Location::Local(Path::new(origin).canonicalize()?)
+    };
+    let source = Source {
+        location,
+        agent: ureq::Agent::config_builder()
+            .timeout_global(Some(Duration::from_secs(60)))
+            .build()
+            .into(),
+        revision: revision.clone(),
+        origin: origin.clone(),
+        cache: Some(root.join("assets")),
+        previous: None,
+    };
+    source.checked_named(&descriptor, logical)
+}
+
 pub struct Source {
     location: Location,
     agent: ureq::Agent,
@@ -513,6 +571,25 @@ mod tests {
                 ..descriptor
             };
             assert!(source.checked(&invalid).is_err());
+            let connection = rusqlite::Connection::open_in_memory()?;
+            connection.execute_batch("CREATE TABLE metadata(key TEXT,value TEXT); CREATE TABLE source_file(path TEXT,original_path TEXT,source_kind TEXT,sha256 TEXT,bytes BLOB); CREATE TABLE asset_reference(path TEXT,original_path TEXT,sha256 TEXT,size INTEGER,source_kind TEXT);")?;
+            connection.execute(
+                "INSERT INTO metadata VALUES ('origin','https://github.com/unreachable/fixture')",
+                [],
+            )?;
+            connection.execute(
+                "INSERT INTO metadata VALUES ('revision',?)",
+                ["0".repeat(40)],
+            )?;
+            connection.execute(
+                "INSERT INTO asset_reference VALUES ('Image/img043.png',?,?,?,'local')",
+                rusqlite::params![invalid.path, hash(bytes), bytes.len() as i64],
+            )?;
+            std::fs::create_dir_all(root.join("assets/objects"))?;
+            std::fs::write(root.join("assets/objects").join(hash(bytes)), bytes)?;
+            let database = crate::store::Database { connection };
+            assert_eq!(asset(&database, &root, "Image/img043.png")?, bytes);
+            assert!(asset(&database, &root, "../img043.png").is_err());
             Ok(())
         })();
         std::fs::remove_dir_all(root)?;

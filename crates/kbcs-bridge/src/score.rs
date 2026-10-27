@@ -31,6 +31,10 @@ pub fn event_available(save_id: i32, flag: i32) -> bool {
     // 通常イベントは保存番号なしでこの処理へ進まない。原本ヘッダー2列の上限も反映する。
     (0..200).contains(&save_id) && flag == 1
 }
+pub fn stage_available(mode: i32, save_id: i32, flag: i32) -> bool {
+    // 005dd5b8: 未来編は通常イベントと別の章別保存先を持つ。
+    flag == 1 && ((4..=6).contains(&mode) || event_available(save_id, flag))
+}
 pub fn calculate(input: &Input) -> Result<Output, u32> {
     let mut output = Output::default();
     // 履歴の保存・実付与は所有ランタイムが行う。ここは数値と要求だけを返す。
