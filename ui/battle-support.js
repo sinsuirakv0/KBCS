@@ -8,13 +8,13 @@ export async function readBattleJson(path,options){
 }
 export function battleFormation(database,document){
   const known=new Map(database.units.map(unit=>[unit.id,unit]));
-  return {...structuredClone(document),slots:document.slots.map(member=>{
+  return {...structuredClone(document),gameVersion:database.gameVersion,slots:document.slots.map(member=>{
     if(!member)return null;const unit=known.get(member.unitId);if(!unit)throw Error('キャラID '+member.unitId+' が現在のDBにありません');
     const effective=resolveFormationMember(unit,member);if(!unit.forms.some(form=>form.index===effective.form))throw Error('キャラの形態が未収録です');return structuredClone(effective);
   }),profile:normalizeSimulationProfile(document.profile)};
 }
 export function castleHealthInput(database,document){
-  if(database.gameVersion!==catalog.version)throw Error('城体力計算とDBの対応版が異なります');
+  if((database.calculationVersion??database.gameVersion)!==catalog.version)throw Error('城体力計算とDBの対応版が異なります');
   const profile=normalizeSimulationProfile(document.profile),facility=profile.facilities.castle;
   const treasureBonus=catalog.treasures.filter(item=>item.effectType===0&&!item.effectFlag).reduce((sum,item)=>sum+Math.trunc(item.maximumEffect*profile.treasures[item.id]/100),0);
   const team=new Map(document.slots.slice(0,5).filter(Boolean).map(member=>[member.unitId,member.form]));

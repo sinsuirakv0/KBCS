@@ -40,6 +40,23 @@ pub struct Document {
 }
 impl Document {
     pub fn validate(&self, region: &str) -> Result<()> {
+        self.validate_capacity(region, |id| {
+            crate::equipment::capacity(&self.game_version, id)
+        })
+    }
+    pub fn validate_with_database(
+        &self,
+        region: &str,
+        database: &crate::store::Database,
+    ) -> Result<()> {
+        let equipment = crate::equipment::capacities(database)?;
+        self.validate_capacity(region, |id| Ok(equipment.get(&id).copied().unwrap_or(0)))
+    }
+    fn validate_capacity(
+        &self,
+        region: &str,
+        capacity: impl Fn(u32) -> Result<usize>,
+    ) -> Result<()> {
         ensure!(
             self.format == "kbcs-formation" && self.schema_version == 1,
             "未対応の編成ファイル形式です"
@@ -64,9 +81,7 @@ impl Document {
                 "キャラ設定が不正、または同じキャラが重複しています"
             );
             ensure!(
-                member.talents.len() <= 64
-                    && member.orbs.len()
-                        <= crate::equipment::capacity(&self.game_version, member.unit_id)?,
+                member.talents.len() <= 64 && member.orbs.len() <= capacity(member.unit_id)?,
                 "キャラの設定数が範囲外です"
             );
         }
@@ -113,7 +128,7 @@ pub struct WriteInput {
     pub revision: Option<i64>,
     pub document: Document,
 }
-pub struct Store(Connection);
+pub struct Store(Connection, std::path::PathBuf);
 impl Store {
     pub fn list(&self, region: &str) -> Result<Value> {
         let mut query=self.0.prepare("SELECT id,revision,json_extract(document,'$.name'),json_extract(document,'$.slotName') FROM formation WHERE region=? ORDER BY id")?;
@@ -128,7 +143,7 @@ impl Store {
         let version: i32 = connection.query_row("PRAGMA user_version", [], |r| r.get(0))?;
         ensure!(version == 0 || version == 1, "未対応の編成DB形式です");
         connection.execute_batch("PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS formation(id INTEGER PRIMARY KEY,region TEXT NOT NULL,revision INTEGER NOT NULL,document TEXT NOT NULL CHECK(json_valid(document)),updated_at INTEGER NOT NULL); CREATE INDEX IF NOT EXISTS formation_region ON formation(region,id); PRAGMA user_version=1;")?;
-        Ok(Self(connection))
+        Ok(Self(connection, root.to_path_buf()))
     }
     pub fn read(&self, region: &str, current: Option<i64>, direction: i32) -> Result<Value> {
         ensure!((-1..=1).contains(&direction), "編成の切替方向が不正です");
@@ -200,7 +215,11 @@ impl Store {
         )
     }
     pub fn write(&self, region: &str, input: &WriteInput) -> Result<Value> {
-        input.document.validate(region)?;
+        if let Ok(database) = crate::store::Database::open(&self.1, region) {
+            input.document.validate_with_database(region, &database)?;
+        } else {
+            input.document.validate(region)?;
+        }
         let text = serde_json::to_string(&input.document)?;
         let id = if let Some(id) = input.id {
             let revision = input.revision.context("編成の保存版がありません")?;

@@ -73,3 +73,8 @@ API根拠: [wry](https://docs.rs/wry/0.57.0/wry/)、[tao](https://docs.rs/tao/0.
 2026-10-26: 通常出撃の個体/RNG/出現/命中/再生産をC++ Battle handleへ移し、Rust SessionがDB/モデル/排他/転送を担当する。JSは入力と描画のみ。既存stateless DB/HUD APIは維持。[所有・更新順・検証限界](../../native/kbcs-core/docs/battle-runtime.md)。
 
 追加生産・条件付き本能玉・PRのPt/Fever/時間終了・対象限定コンボは[特殊戦闘](../../native/kbcs-core/docs/battle-special.md)へ記録。固定サイズFFIと解決済み対象表をC++へ複製し、描画/JSON/DBに戦闘状態の更新を分散しない。
+
+
+## 2026-10-29: Windows・macOS共通GUI
+
+GUIのWindows限定を解除し、Apple Silicon/Intel Macもtao+wry→共通Service→bridge/C++へ接続する。macOSはWKWebViewとApplication Supportを使う。戦闘のOS別実装を作らず、3環境のGitHub Actionsで同じ計算ベクトルを実行する。配布・署名・更新の関係は[ビルド](../../crates/kbcs-app/docs/build.md)、[本体更新](../../crates/kbcs-app/docs/updates.md)へ記録する。上記の初期設計にあるWindows専用の記述は過去の状態。

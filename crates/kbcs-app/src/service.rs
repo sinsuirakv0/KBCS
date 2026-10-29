@@ -87,6 +87,8 @@ pub struct Service {
     pub persist_rewards: bool,
     pub workers: Arc<crate::workers::Workers>,
     runtime: Arc<Mutex<crate::runtime::Monitor>>,
+    updates: Arc<crate::updates::Manager>,
+    pub desktop: bool,
 }
 
 type CatalogCache = Cache<(PathBuf, Vec<u8>)>;
@@ -143,6 +145,8 @@ pub fn dispatch(service: &Service, path: &str, job: impl FnOnce(Service, bool) +
 impl Service {
     pub fn new(root: PathBuf, region: String, source: String) -> Self {
         Self {
+            updates: Arc::new(crate::updates::Manager::new(root.clone(), region.clone())),
+            desktop: false,
             root,
             region,
             source,
@@ -157,6 +161,10 @@ impl Service {
             workers: Arc::new(crate::workers::Workers::new()),
             runtime: Arc::new(Mutex::new(crate::runtime::Monitor::default())),
         }
+    }
+
+    pub fn start_updates(&self) {
+        self.updates.check(true);
     }
 
     pub fn handle(&self, method: &str, path: &str, body: &[u8]) -> Reply {
@@ -205,6 +213,35 @@ impl Service {
     fn route(&self, method: &str, path: &str, body: &[u8]) -> Result<Reply> {
         let url = url::Url::parse(&format!("http://kbcs.localhost{path}"))?;
         let path = url.path();
+        if path == "/api/updates" {
+            ensure!(method == "GET", "GETが必要です");
+            return Ok(Reply::json(self.updates.status(self.desktop)));
+        }
+        if path == "/api/updates/startup" {
+            ensure!(method == "POST", "POSTが必要です");
+            return Ok(Reply::json(json!({"claimed":self.updates.claim_startup()})));
+        }
+        if path == "/api/updates/check" {
+            ensure!(method == "POST", "POSTが必要です");
+            self.updates.check(false);
+            return Ok(Reply::json(json!({"accepted":true})));
+        }
+        if path == "/api/updates/download" {
+            ensure!(method == "POST" && body.len() <= 1024, "更新要求が不正です");
+            ensure!(!self.busy.load(Ordering::SeqCst), "取り込み中です");
+            let input: Value = serde_json::from_slice(body)?;
+            self.updates
+                .start(input["kind"].as_str().context("更新対象がありません")?)?;
+            return Ok(Reply::json(json!({"accepted":true})));
+        }
+        if path == "/api/updates/apply" {
+            ensure!(
+                method == "POST" && self.desktop,
+                "本体の再起動はKBCSアプリで実行してください"
+            );
+            self.updates.apply()?;
+            return Ok(Reply::json(json!({"restart":true})));
+        }
         if path == "/api/runtime" {
             let mut value = self
                 .runtime
@@ -327,6 +364,10 @@ impl Service {
             );
             session
                 .core
+                .cheats(request.cheats)
+                .map_err(|code| anyhow::anyhow!("チート設定: {code}"))?;
+            session
+                .core
                 .viewport(request.scene.viewport_width)
                 .map_err(|code| anyhow::anyhow!("画面幅: {code}"))?;
             session.ending_camera(&mut request.scene)?;
@@ -366,6 +407,12 @@ impl Service {
                         .visuals()
                         .map_err(|code| anyhow::anyhow!("効果読取: {code}"))?,
                 )?;
+            }
+            if request.debug {
+                let extra: Vec<_> = session.core.active_actors().map_err(|code| anyhow::anyhow!("追加個体読取: {code}"))?.into_iter().filter(|value| value.slot >= 51).map(|value| json!({"side":value.side,"slot":value.slot,"words":value.actor.words.as_slice()})).collect();
+                if !extra.is_empty() {
+                    runtime["extraWords"] = json!(extra);
+                }
             }
             request.scene.frame = battle.state.frame;
             request.scene.battle_rows = battle.state.rows;
@@ -693,6 +740,15 @@ impl Service {
             ensure!(method == "POST", "POSTが必要です");
             let value: Value = serde_json::from_slice(body)?;
             let location = value["source"].as_str().unwrap_or(&self.source).to_owned();
+            if location == kbcs_data::DEFAULT_SOURCE {
+                ensure!(!self.busy.load(Ordering::SeqCst), "取り込み中です");
+                self.updates.start("data")?;
+                return Ok(Reply::json(json!({"accepted":true})));
+            }
+            ensure!(
+                !self.updates.busy.load(Ordering::SeqCst),
+                "ダウンロード中です"
+            );
             ensure!(
                 self.busy
                     .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
@@ -802,7 +858,8 @@ impl Service {
             let _audio = slot
                 .lock()
                 .map_err(|_| anyhow::anyhow!("音源のロック失敗"))?;
-            let audio = kbcs_data::stage_media::audio(&self.root, id)?;
+            let database = Database::open(&self.root, &self.region)?;
+            let audio = kbcs_data::stage_media::audio(&database, &self.root, id)?;
             return Ok(Reply {
                 status: 200,
                 mime: audio.mime,
@@ -985,6 +1042,7 @@ pub fn serve(root: PathBuf, region: String, source: String, bind: &str) -> Resul
     );
     let server = tiny_http::Server::http(address).map_err(|error| anyhow::anyhow!("{error}"))?;
     let service = Service::new(root, region, source);
+    service.start_updates();
     println!("KBCS preview: http://{bind}/");
     for mut request in server.incoming_requests() {
         let service = service.clone();

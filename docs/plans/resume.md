@@ -1,4 +1,48 @@
-﻿# 再開メモ（2026-10-28 / 0.1.35公開準備）
+﻿# 再開メモ（2026-10-29 / Windows・Mac両CPU・CI配布）
+
+ユーザー依頼でmacOS Apple Silicon/IntelとWindows x64の共通GUIへ移行し、0.1.36へ更新。READMEの3種類の入手リンク・環境・導入手順と、docs/releases/0.1.36.mdも更新した。今回のGitHubへのソースpush・CI実行・リリース公開は「README.mdごと更新」「リリースも、ユーザーが簡単に取得できる形で」という明示依頼による。
+
+- desktop::runはWindows/macOS共通のtao/wry→Service→Rust/C++。Macの既定データは~/Library/Application Support/KBCS、WKWebViewは保存先別のdata-store identifier（macOS 14以上）。ヘルプは固定URLだけをopenで起動。runtimeはDarwinのCPU/メモリAPIも取得する。戦闘処理をOSごとに分岐させない。
+- releases::app_asset_nameが3種類のZIPを選び、最新判定も当該CPUのZIPがある版に限定する。ZIP展開はUnix実行権限を保持。Mac更新はMach-O CPU/署名/SHA検査→親終了待機→同じ親の一時.appへ検証コピー→旧版退避/rename交換/失敗復旧→openで同じdata-dir/regionを引き継ぐ。署名済み.app内部へ検証索引を置かない。
+- build.ymlはpush/PR/manualで3CPUのlocked releaseテスト・clippy・JS回帰・実WebView接続検査・ZIP作成を行う。タグkbcs-vVERSIONでは全ビルド成功後にpublish-release.pyが版/commit/SHAとGitHub側の配布SHAを確認し、ドラフトから公開開発版にする。公開済み版は上書きしない。Source codeはGitHubのタグarchiveを使う。
+- package.pyはWindowsのDLL一式、MacのKBCS.app/Info.plistと署名を作る。Macは既定ad-hoc署名で、Developer ID/公証は未設定。初回のOS確認手順はREADMEへ記載。
+- desktop-checkは非表示でES module/通信ID/PNG/POST本文/C++/WebGLを確認し、ゲームデータの取得・既存AppDataへの書込・画面操作をしない。WKWebView向けUUID生成はgetRandomValuesを共用し、ゲーム内RNGは変更しない。
+- ローカルWindowsのworkspace39＋compile_fail1、JS3本、clippy、配布物help、実WebView接続検査を通過。Windowsの確認ZIPは.local/dist/0.1.36-local。C++の既存警告11件は残る。3環境の最終ログと配布SHAはGitHub Actionsの実行、およびkbcs-v0.1.36の配布JSON/SHAを参照する。設計はcrates/kbcs-app/docs/build.mdとupdates.md。
+
+# 再開メモ（2026-10-29 / 統合リリース・データ/本体更新）
+
+確認用 `.local/dist/0.1.35-updates/kbcs.exe`、SHA256 `2420462f1279f5bf87c992e6549fc776af971b5d36ee787c509ce7fed16569e6`。DLL/verification.jsonを同梱。確認用previewは4854、データは隔離した`.local/integrated-data`。GUI確認はユーザー担当。既存AppData/既存previewの編成や持ち物は変更していない。GitHub書込なし。前回までの未コミット変更を保持する。
+
+- assets最新公開`integrated-jp-1507040-3-1` / 15.7.4 / commit40bc155ebbc2b096a4a2123028e08cdb075b5383の全10ZIP、830,048,026 bytesを取得・SHA検証し、54,338ファイル（909,580,871 bytes）へ展開した。キャラ882 / 2,618形態、ステージ1,298マップ / 6,476面。ID736は説明3行・能力2行であるため実在する能力行までを採用。Web補完の別称/海外版補完は原本ZIPに含まれず旧生成物から混ぜない。
+- releases.rsがGitHub read-only確認・全ZIPストリーム受信・SHA/展開量/パス検証・採用元索引・原本フォルダ公開を共用。Sourceはrelease.jsonのある直下Data/res/Image等をGitなしで読める。公式schema8/importer13、ユーザーDB分離を維持。原本の管理パスはdata-dirからも解決し、移動前originへ固定しない。download.lock/update.lockはOS排他へ変更し、ファイル残存だけで更新不能にならない。
+- ManagerはGUI/preview起動時に公開版を非同期確認。DB/原本なしは自動取得、導入済みは版/公開日時で確認してUIの選択へ。拒否はホームのデータ管理へ案内。CLI importの標準取得元も新リリースへ接続。ローカルGit原本は引き続き明示指定可能。本体はkbcs-v SemVerのみ（公開開発版を含みnative-vを除外）、Windows x64 ZIPを検証して展開し、再起動時に親終了待機→SHA再検証→置換/失敗復旧。現実行ファイルの本体更新試験は行わず、置換/復旧を隔離fixtureで検証。
+- 15.7.2固定で新DBを拒否していた本能玉・計算・戦闘入口も接続。枠数は原本equipmentslot.csvをカタログ/編成保存/戦闘で共用。calculationVersionはsettings-catalog全27採用元SHAが一致するときだけ返す。戦闘入力4件と全効果時計、UI27参照のSHAも照合。ネイティブロジック自体は15.7.2参照のままで、15.7.4の全関数同一を意味しない。旧編成は一括変更せず現在DBへ出撃用に解決し、編集保存時にgameVersionを更新。
+- 原本音声はassets→musicの順で採用し、APKのCAFを圧縮版へ置換しない。CAFは既存の無再量子化WAV変換を共用。画像/BGMは固定されたローカル原本へ接続する。
+- workspace38＋compile_fail1、追加ストリーム取得1、clippy全target -D warnings、JS回帰が通過。実DBの初回自動再導入/最新判定、カタログ6経路、原本画像2件、音源8件、同梱UI11ファイルのbytes一致を確認。最終exeで15.7.4データを使い所有C++戦闘30/60/90F＋画像API検証を通過。記録は.local/update-*.json/log。ソース/仕様はcrates/kbcs-data/docs/releases.mdとcrates/kbcs-app/docs/updates.md。
+
+# 再開メモ（2026-10-28 / 編成一時枠・戦闘チート・20倍指定）
+
+確認用ビルド `.local/dist/0.1.35-formation-cheats/kbcs.exe`、SHA256 `25cb598b3e04ee074eb6815b0bfc3450c09c26e1c1692ef2ea89b13e80f6c7bf`。DLL/verification.jsonを同梱。旧4851/4852を停止せず、4853でpreviewを起動。GUI確認はユーザー担当。GitHub書込なし。前回の出撃準備等の変更を含め、現在は未コミット。
+
+- ユーザー確認: 一時5枠は選択時に手動移動、精霊召喚ボタンを隠す、上限解除は味方50体も対象。編成一覧は中央の戻るリンクの下、検索/形態は左、個別設定は右。追加は選択枠を上書きせず最小空き番号へ。満員時は本家の同じ1行分の描画を切り出した一時枠へ。正式10枠と一時枠を分離し、後者は編成ID別sessionStorage。空きを作るだけでは自動で移さない。
+- 操作盤のチートボタンで資金/数量上限/即生産/精霊ボタンを設定。flagsはC++所有Battleへ渡し、JSで金額/再生産を上書きしない。通常APIのPOD/ABI4は維持する。精霊状態/既存の精霊は削除せず、非表示中は親を通常生産できる。速度はアイテムに従う、または通常1倍基準で1..20倍。3倍アイテムと掛け合わせず、論理Fを飛ばさない。FPS隣に停止/非表示を除く累積平均を表示。
+- actor_pool.incが通常51枠に加えて必要分をdequeで保持。TLS scopeを公開所有API内で借り、通常の単体API形状/敵生成50枠を保持。追加個体の生成・時計・攻撃/対象列・被弾・保護・死亡・波動/烈波/爆波履歴・Rustの描画/診断まで共用。nativeの関数/所有関係はbattle-runtime.mdへ記録。原本にはないチートを本家と同一とは呼ばない。
+- 個体仮想アドレスと陣営strideの生成アダプタを追加。初回の回帰で相対offset c810/c83c/c840を見落としていたことを修正した。actor_pool_source.pyでHEADの生成ソースから変更後が完全再現できる。原本researchファイルは変更していない。通常経路の元の整数/乱数順を維持。
+- workspace33＋compile_fail1、clippy all-targets -D warnings、JS/SE/編成SVG8条件、BOM/diff検査を通過。最終の合成C++試験4条件は80体・1番/80番の同じ被弾HP（通常7500/波動6800/烈波5500/爆波5300）、即時入力/資金/ステージ数量上限、50体共通上限へのOFF復帰、精霊切替が通過。1F所有回帰と操作SEもrelease archiveから再検査。
+- 最終exeで実DBの通常戦闘30観測（900Fまで）を旧sortie-uiと比較し、時間計測を除くstate/layout/runtimeと描画命令数が同一。GPU頂点/画素の比較ではない。750Fの観測で勝利。実DBでも80体、追加30個体の診断語、335描画命令を確認。CLIのmemory報酬Store/隔離データで、実所持品へ付与しない。
+- 4853からUI変更18ファイルのbytes一致、静的import、編成/出撃準備ページの200応答を確認。記録はresearch/.local/formation-cheats-{normal-replay,80-input,80-replay,replay-check,serving-check}.json、同梱verification.json。見た目と大量個体時のGPU性能は未検査。
+
+# 再開メモ（2026-10-28 / 出撃準備・BGMシーク・戦闘ペイン）
+
+確認用ビルドは `.local/dist/0.1.35-sortie-ui/kbcs.exe`（13,144,576 bytes、SHA256 `f12075bbe88619d706c4090c9680560e16988bcad1e69f25d4f622bceceba455`）。DLLとverification.jsonを同梱。旧4851を停止/差替えず、新版previewを4852へ起動。GUI確認はユーザー担当。GitHub書込なし。今回のUI修正は未コミット。
+
+- 戦闘開始時の左右ペイン強制閉鎖を廃止。下部情報パネルを中央editorの子へ移した。上部操作/状態/計測欄を広げ、比率はPixel 8相当20:9を初期値として保存。16:9/18:9/21:9/領域追従へ切替可能。固定比率の余りを中央下の折りたたみパネルへ配分。論理Fや乱数を変更しない。
+- 注釈6件も反映。検索ギミックは横一列/横スクロール、最終編成を保存、既存編成SVGを共有、城体力の値をラベル付近へ、アイテムはmapicon ON/OFF画像、速度OFF→2→3→OFF。いざ出陣!!は007802c0/007acf88のimg031_ja cut10/11を使い、内部差分[38,6]を保持。準備画面へのホスト配置と原本部品の内部配置を区別する。
+- BGMシークの先頭復帰はRange非対応応答への直src指定が原因。試聴と戦闘でBlob取得を共有し、ドラッグ中のtimeupdate上書きを停止。取消/画面切替で取得とURLを解放。編成切替中の旧deployment応答も世代で無効化。
+- 原本ARM64の出陣配置24条件、編成編集の移動前後SVG8条件、preparation/battle-audio回帰、JS構文・BOM・diff検査が通過。releaseビルド完了。実DBの隔離リプレイは750Fの観測で勝利、900Fまで継続、PNG取得も検査。memory報酬Storeを用い、実ユーザー所持品は変更していない。
+- 新previewから変更15ファイルの配信bytesがディスクと一致すること、静的import/HTML参照の200応答を確認。記録は research/.local/{sortie-ui-1572,sortie-ui-release-replay,sortie-ui-serving-check}.json と同梱verification.json。関数関係はui/docs/{stage-sortie,formation}.md、素材追加はscripts/docs/README.md。実画面/GPU画素/原本入力時計の全体一致を確認したという意味ではない。
+
+# 再開メモ（2026-10-28 / 0.1.35公開準備）
 
 ユーザーがバージョン更新とGitHubへのソース一式のPushを明示承認。0.1.35、タグ`kbcs-v0.1.35`で公開する。生成済みC++ inc、Rust、UI、検証コード/fixture、解析資料を含む。会話添付、AppData、ビルド/cache/巨大実験生成物は除外。アプリと同コミットのsource ZIPをReleaseへ添付する。
 

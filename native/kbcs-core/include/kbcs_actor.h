@@ -231,6 +231,9 @@ enum { KBCS_BATTLE_SCREEN_SOUND = 0x10000 };
 typedef uint32_t (*KbcsBattleScreenHook)(void*,int32_t event,KbcsBattleScreenState*);
 uint32_t kbcs_core_battle_screen_advance(const KbcsBattleScreenConfig*,const KbcsBattleScreenState*,
     const KbcsBattleScreenInput*,KbcsBattleScreenState*,KbcsBattleScreenLayout*,KbcsBattleScreenHook,void*);
+/* ホスト拡張。通常の入口は即時生産を無効にして同じ本体を呼ぶ。 */
+uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScreenConfig*,const KbcsBattleScreenState*,
+    const KbcsBattleScreenInput*,KbcsBattleScreenState*,KbcsBattleScreenLayout*,KbcsBattleScreenHook,void*,int32_t immediate);
 /* 00a9bbac/005bbc90。ダメージを予約し、個別の一撃とバリアを比較する。 */
 uint32_t kbcs_core_actor_damage(KbcsActor actors[2][51],const KbcsActorEnvironment*,
     KbcsActorDamageContext*,int32_t side,int32_t slot,int32_t damage);

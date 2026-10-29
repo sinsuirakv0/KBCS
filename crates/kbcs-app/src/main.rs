@@ -4,12 +4,13 @@ mod battle;
 mod battle_rewards;
 mod battle_wire;
 mod cache;
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "macos"))]
 mod desktop;
 mod motion_pose;
 mod runtime;
 mod scene;
 mod service;
+mod updates;
 mod workers;
 
 use anyhow::{Context, Result};
@@ -26,6 +27,14 @@ fn default_data_dir() -> PathBuf {
     std::env::var_os("KBCS_DATA_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|| {
+            #[cfg(target_os = "macos")]
+            {
+                std::env::var_os("HOME")
+                    .map(PathBuf::from)
+                    .expect("HOMEが設定されていません")
+                    .join("Library/Application Support/KBCS")
+            }
+            #[cfg(not(target_os = "macos"))]
             std::env::var_os("LOCALAPPDATA")
                 .map(PathBuf::from)
                 .unwrap_or_else(|| PathBuf::from(".local"))
@@ -55,7 +64,12 @@ fn main() -> Result<()> {
     let region = option("--region").unwrap_or_else(|| "jp".into());
     let source = option("--assets").unwrap_or_else(|| kbcs_data::DEFAULT_SOURCE.into());
     match arguments.first().map(String::as_str) {
-        Some("import") => println!(
+        #[cfg(any(windows, target_os = "macos"))]
+        Some("desktop-check") => desktop::check(root, region, source)?,
+        Some("apply-update") => updates::apply_from_plan(&PathBuf::from(
+            option("--plan").context("--planが必要です")?,
+        ))?,
+        Some("import" | "download-data") => println!(
             "{}",
             serde_json::to_string_pretty(&import::import(
                 &source,
@@ -220,10 +234,12 @@ fn main() -> Result<()> {
         }
         Some(value) if !value.starts_with("--") => anyhow::bail!("未知のコマンド: {value}"),
         _ => {
-            #[cfg(windows)]
+            #[cfg(any(windows, target_os = "macos"))]
             desktop::run(root, region, source)?;
-            #[cfg(not(windows))]
-            anyhow::bail!("GUIは現在Windows専用です。previewコマンドでブラウザから閲覧できます");
+            #[cfg(not(any(windows, target_os = "macos")))]
+            anyhow::bail!(
+                "GUIはWindows・macOSに対応しています。previewコマンドでブラウザから閲覧できます"
+            );
         }
     }
     Ok(())

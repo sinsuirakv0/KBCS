@@ -9,6 +9,9 @@
 #include <type_traits>
 #include <vector>
 #include <map>
+#include <deque>
+
+#include "actor_pool.inc"
 
 struct KbcsActorHits {
  std::map<int32_t,std::vector<int32_t>> metal,credits;
@@ -55,7 +58,7 @@ struct Context {
  void reserveMetal(int slot,int rate){if(!hits)throw std::out_of_range("hit owner");hits->metal[slot].push_back(rate);}
  void creditHit(int source,int target){
   if(!hits)throw std::out_of_range("hit owner");
-  auto &credits=hits->credits[actors[1][target].words[240]];const int serial=actors[0][source].words[240];
+  auto &credits=hits->credits[actorAt(actors,1,target).words[240]];const int serial=actorAt(actors,0,source).words[240];
   if(std::find(credits.begin(),credits.end(),serial)==credits.end())credits.push_back(serial);
  }
  KbcsActorCannon *cannon=nullptr;const KbcsCannonRules *cannonRules=nullptr;
@@ -69,13 +72,14 @@ struct Context {
  KbcsActorRetirementResult *retirementResult=nullptr;
  int32_t intentBlocked=0;
  KbcsActorAttackSink attackSink=nullptr;void *attackUser=nullptr;int32_t attackEmitted=0;
+ int limit() const {return actorCount(actors);}
  void selectAttack(int32_t side,int32_t slot,int32_t hit);
  int enemyCredit(int side,int slot){
   int maximum=0;if(!enemyDeath||!enemyDeathResult)throw std::out_of_range("enemy credit");
   if(!enemyDeath->cohort_present)return 0;
-  enemyDeathResult->erase_cohort=1;enemyDeathResult->cohort_serial=actors[side][slot].words[240];
-  for(int i=0;i<enemyDeath->cohort_count;++i)for(int j=1;j<51;++j){
-   auto &peer=actors[1-side][j].words;
+  enemyDeathResult->erase_cohort=1;enemyDeathResult->cohort_serial=actorAt(actors,side,slot).words[240];
+  for(int i=0;i<enemyDeath->cohort_count;++i)for(int j=1;j<actorEnd();++j){
+   auto &peer=actorAt(actors,1-side,j).words;
    if(peer[240]!=enemyDeath->cohort[i])continue;
    ++peer[241];if(peer[243]>0&&maximum<peer[243]){maximum=peer[243];enemyDeathResult->selected_bonus_slot=j;}
   }
@@ -90,7 +94,7 @@ struct Context {
  const int32_t *boundary=nullptr;int32_t *transitionSound=nullptr;
  void protectionVisual(int kind,int side,int slot,bool breaker){
   if(!protection||protection->visual_count>=2)throw std::out_of_range("protection visual");
-  auto &out=protection->visuals[protection->visual_count++];const auto &actor=actors[side][slot];
+  auto &out=protection->visuals[protection->visual_count++];const auto &actor=actorAt(actors,side,slot);
   out[0]=kind;out[1]=actor.words[3];out[2]=actor.words[4]-(kind?420:0);out[3]=breaker;
  }
  static int divide(int32_t value,int32_t by){
@@ -154,9 +158,9 @@ int32_t n_0044beb4(Context &c,int64_t address){return c.clockValue(address,false
 int32_t n_0044bf2c(Context &c,int64_t address){return c.clockValue(address,true);}
 void n_00a9490c(Context &c,int64_t,int32_t side,int32_t slot){
  if(!c.boundary)throw std::out_of_range("actor boundary");
- c.actors[side][slot].words[30]=*c.boundary;
+ actorAt(c.actors,side,slot).words[30]=*c.boundary;
  // 00a9490c: 通常の敵限界へボスの出現基準を加える。unit-modeには適用しない。
- if(side==1&&!(c.environment.unit_modes[side]&1)&&c.actors[side][slot].words[64])c.actors[side][slot].words[30]+=c.bossPosition();
+ if(side==1&&!(c.environment.unit_modes[side]&1)&&actorAt(c.actors,side,slot).words[64])actorAt(c.actors,side,slot).words[30]+=c.bossPosition();
 }
 void n_00459f04(Context &c,int64_t,int32_t sound){
  // 00459f04は005bc058が0の時だけ再生する。単体APIの状態も同じ判定へ渡す。
@@ -256,18 +260,18 @@ int32_t n_00aa68ec(Context &c,int32_t,int32_t,int32_t,int32_t){
 
 void Context::selectAttack(int32_t side,int32_t slot,int32_t hit){
  struct Target {int32_t slot,metric;};
- std::array<Target,51> candidates{};int count=0;
- for(int target=0;target<51;++target){
+ std::array<Target,51> regular{};std::vector<Target> extra;Target *candidates=regular.data();if(limit()>51){extra.resize(limit());candidates=extra.data();}int count=0;
+ for(int target=0;target<actorEnd();++target){
   if(!n_006dda04(*this,0,side,slot,target,hit))continue;
   if(!side&&n_00a97c8c(*this,0,slot)){
    const bool matches=n_00a962a8(*this,0,slot,target)&1;
    if(target&&!matches&&target!=n_005bbc10(*this))continue;
   }
-  const auto &words=actors[1-side][target].words;
+  const auto &words=actorAt(actors,1-side,target).words;
   candidates[count++]={target,side?words[3]+words[14]:words[3]-words[14]};
  }
  if(!count)return;
- KbcsActorAttackSelection selection{};selection.side=side;selection.slot=slot;selection.hit=hit;
+ KbcsActorAttackSelection selection{};std::vector<int> targets;selection.side=side;selection.slot=slot;selection.hit=hit;
  if(!n_00a97980(*this,side,slot)){
   // 原本の選択ソートと同率時の順序を保つ。範囲1でも抽選を省略しない。
   std::fill_n(procs,12,0);
@@ -279,10 +283,11 @@ void Context::selectAttack(int32_t side,int32_t slot,int32_t hit){
   int ties=1;while(ties<count&&candidates[ties].metric==candidates[0].metric)++ties;
   selection.count=1;selection.targets[0]=candidates[n_0044a8d8(*this,ties)].slot;
  }else{
-  selection.count=count;for(int i=0;i<count;++i)selection.targets[i]=candidates[i].slot;
+  selection.count=std::min(count,51);for(int i=0;i<selection.count;++i)selection.targets[i]=candidates[i].slot;
+  if(count>51){targets.reserve(count);for(int i=0;i<count;++i)targets.push_back(candidates[i].slot);}
  }
  if(!attackSink)throw std::out_of_range("attack sink");
- ++attackEmitted;const uint32_t code=attackSink(attackUser,actors,&seed,&selection);
+ ActorTargetScope selected(selection,targets);++attackEmitted;const uint32_t code=attackSink(attackUser,actors,&seed,&selection);
  if(code||!seed)throw AttackFailure{code?code:1};
 }
 
@@ -290,8 +295,10 @@ void emitDirect(Context &context,const KbcsActorAttackSelection &selection,KbcsA
  const int side=selection.side,slot=selection.slot,hit=selection.hit;
  n_006e9c88(context,0,side,slot,hit);std::copy_n(context.procs,12,result.flags);
  result.parameter=side?0:n_00a9adf0(context,0,slot);
- for(int i=0;i<selection.count;++i){
-  const int target=selection.targets[i];
+ const bool extended=&selection==extendedSelection&&extendedTargets&&!extendedTargets->empty();
+ const int count=extended?int(extendedTargets->size()):selection.count;
+ for(int i=0;i<count;++i){
+  const int target=extended?(*extendedTargets)[i]:selection.targets[i];
   KbcsActorDirectHit call{};call.side=side;call.slot=slot;call.target=target;call.hit=hit;call.rate=100;call.parameter=result.parameter;
   std::copy_n(result.flags,12,call.flags);
   // 味方の直接命中には敵専用の毒撃/再生産遅延を渡さない。後続効果には元の12値を保持する。
@@ -302,7 +309,7 @@ void emitDirect(Context &context,const KbcsActorAttackSelection &selection,KbcsA
   int marker;
   if(!side&&n_00a94630(context,0,slot)&&n_00a94234(context,1,target)==14)marker=2;
   else marker=n_00a97f6c(context,side,slot,hit)&1;
-  context.actors[1-side][target].words[96]=marker;
+  actorAt(context.actors,1-side,target).words[96]=marker;
  }
 }
 #include "actor_rom.inc"
@@ -333,17 +340,17 @@ int Context::stat(int index,bool castle) const {
 }
 
 int64_t Context::read(int64_t address,int width) const {
- if(address>=0x84080&&address<0x9d088&&(width==1||width==2)){
-  const int offset=int(address-0x84080),index=offset%0xc804,byte=index%4;if(byte+width>4)throw std::out_of_range("actor read bytes");
-  return (uint32_t(actors[offset/0xc804][index/0x3ec].words[index%0x3ec/4])>>(byte*8))&((1U<<(width*8))-1);
+ if(address>=actorBase&&address<actorBase+2*actorStride&&(width==1||width==2)){
+  const int side=int((address-actorBase)/actorStride),index=int((address-actorBase)%actorStride),byte=index%4;if(byte+width>4)throw std::out_of_range("actor read bytes");
+  return (uint32_t(actorAt(actors,side,index/0x3ec).words[index%0x3ec/4])>>(byte*8))&((1U<<(width*8))-1);
  }
  // 未解決のアドレスを0に補完しない。分岐の追加時は原本と対応付けて拡張する。
  if((width!=4&&width!=8)||address%4){failureAddress=address;throw std::out_of_range("actor read width");}
  if(cannon&&address>=0x9d788&&address+width<=0x9d8f0&&width==4)return cannon->segments[(address-0x9d788)/180][(address-0x9d788)%180/12][(address-0x9d788)%12/4];
- if(address>=0x84080&&address<0x9d088){
-  const int side=int((address-0x84080)/0xc804),offset=int((address-0x84080)%0xc804);
+ if(address>=actorBase&&address<actorBase+2*actorStride){
+  const int side=int((address-actorBase)/actorStride),offset=int((address-actorBase)%actorStride);
   if(offset%0x3ec+width>0x3ec){failureAddress=address;throw std::out_of_range("actor address");}
-  const auto &record=actors[side][offset/0x3ec].words;const int word=(offset%0x3ec)/4;
+  const auto &record=actorAt(actors,side,offset/0x3ec).words;const int word=(offset%0x3ec)/4;
   uint64_t value=uint32_t(record[word]);if(width==8)value|=uint64_t(uint32_t(record[word+1]))<<32;
   return width==4?int32_t(value):int64_t(value);
  }
@@ -382,17 +389,17 @@ int64_t Context::read(int64_t address,int width) const {
  failureAddress=address;throw std::out_of_range("unresolved actor address");
 }
 void Context::write(int64_t address,int width,uint64_t value){
- if(address>=0x84080&&address<0x9d088&&(width==1||width==2)){
-  const int offset=int(address-0x84080),index=offset%0xc804,byte=index%4;if(byte+width>4)throw std::out_of_range("actor write bytes");
-  auto &word=actors[offset/0xc804][index/0x3ec].words[index%0x3ec/4];const uint32_t mask=((1U<<(width*8))-1)<<(byte*8);
+ if(address>=actorBase&&address<actorBase+2*actorStride&&(width==1||width==2)){
+  const int side=int((address-actorBase)/actorStride),index=int((address-actorBase)%actorStride),byte=index%4;if(byte+width>4)throw std::out_of_range("actor write bytes");
+  auto &word=actorAt(actors,side,index/0x3ec).words[index%0x3ec/4];const uint32_t mask=((1U<<(width*8))-1)<<(byte*8);
   word=int32_t((uint32_t(word)&~mask)|((uint32_t(value)<<(byte*8))&mask));return;
  }
  if(cannon&&address>=0x9d788&&address+width<=0x9d8f0&&width==4){cannon->segments[(address-0x9d788)/180][(address-0x9d788)%180/12][(address-0x9d788)%12/4]=int32_t(value);return;}
  if((width!=4&&width!=8)||address%4){failureAddress=address;throw std::out_of_range("actor write width");}
- if(address>=0x84080&&address<0x9d088){
-  const int side=int((address-0x84080)/0xc804),offset=int((address-0x84080)%0xc804);
+ if(address>=actorBase&&address<actorBase+2*actorStride){
+  const int side=int((address-actorBase)/actorStride),offset=int((address-actorBase)%actorStride);
   if(offset%0x3ec+width>0x3ec){failureAddress=address;throw std::out_of_range("actor address");}
-  auto &record=actors[side][offset/0x3ec].words;const int word=(offset%0x3ec)/4;
+  auto &record=actorAt(actors,side,offset/0x3ec).words;const int word=(offset%0x3ec)/4;
   record[word]=int32_t(value);if(width==8)record[word+1]=int32_t(value>>32);return;
  }
  if(enemyDeathResult&&address==0x32ec&&width==4){enemyDeathResult->score=int32_t(value);return;}
@@ -415,10 +422,10 @@ extern "C" uint32_t kbcs_core_actor_initialize(const KbcsActorDefinition *defini
  if(int64_t(request->layer_max)-request->layer_min>INT32_MAX-1||int64_t(request->layer_max)-request->layer_min<INT32_MIN)return 2;
  failureAddress=0;
  int free_slot=-1;
- for(int index=1;index<51;++index)if(!actors[request->side][index].words[0]){free_slot=index;break;}
- const auto backup=free_slot>0?actors[request->side][free_slot]:KbcsActor{};
+ for(int index=1;index<actorEnd();++index)if(!actorAt(actors,request->side,index).words[0]){free_slot=index;break;}
+ const auto backup=free_slot>0?actorAt(actors,request->side,free_slot):KbcsActor{};
  const auto previous_seed=*seed;const int32_t counts[]={environment->spawned[0],environment->spawned[1]};
- const auto restore=[&]{if(free_slot>0)actors[request->side][free_slot]=backup;*seed=previous_seed;std::copy_n(counts,2,environment->spawned);};
+ const auto restore=[&]{if(free_slot>0)actorAt(actors,request->side,free_slot)=backup;*seed=previous_seed;std::copy_n(counts,2,environment->spawned);};
  try{Context context{*definition,*environment,actors,*request,*seed};*slot=int32_t(n_009f1e64(context,0,request->side,request->raw,request->level_index,request->layer_min,request->layer_max,request->form,request->row));return 0;}
  catch(const std::range_error &){restore();return 2;}catch(...){restore();return 3;}
 }
@@ -447,7 +454,7 @@ extern "C" uint32_t kbcs_core_actor_hit(KbcsActorHits *owner,KbcsActor actors[2]
  const KbcsActorSecondaryHit *call,uint32_t *seed,int32_t *applied,KbcsActorEffectEvents *out){
  if(!owner||owner->failed||!actors||!environment||!hit||!clock||!damage||!call||!seed||!*seed||!applied||!out)return 1;
  const auto &input=call->hit;
- if(input.side<0||input.side>1||input.slot<1||input.slot>50||input.target<0||input.target>50||input.hit<0||input.hit>2||input.kind<0||input.kind>2||call->attack_type<0||call->attack_type>3||damage->count<0||(!damage->rows&&damage->count)||(!damage->states&&damage->count))return 1;
+ if(input.side<0||input.side>1||input.slot<1||input.slot>=actorEnd()||input.target<0||input.target>=actorEnd()||input.hit<0||input.hit>2||input.kind<0||input.kind>2||call->attack_type<0||call->attack_type>3||damage->count<0||(!damage->rows&&damage->count)||(!damage->states&&damage->count))return 1;
  for(auto flag:input.flags)if(flag<0||flag>1)return 1;
  if(hit->form<0||hit->form>3||hit->effects.target_count<1||hit->effects.target_count>12)return 1;
  try{
@@ -463,7 +470,7 @@ extern "C" uint32_t kbcs_core_actor_hit(KbcsActorHits *owner,KbcsActor actors[2]
 extern "C" uint32_t kbcs_core_actor_emit_area(const KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     const KbcsActorAttackSelection *source,const KbcsActorEmission *emission,uint32_t *seed,KbcsActorAreaEmission *out){
  static_assert(sizeof(KbcsActorSurge)==48&&sizeof(KbcsActorExplosion)==36);
- if(!actors||!environment||!source||!emission||!seed||!*seed||!out||source->side<0||source->side>1||source->slot<1||source->slot>50||source->hit<0||source->hit>2)return 1;
+ if(!actors||!environment||!source||!emission||!seed||!*seed||!out||source->side<0||source->side>1||source->slot<1||source->slot>=actorEnd()||source->hit<0||source->hit>2)return 1;
  for(int flag:emission->flags)if(flag<0||flag>1)return 1;
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};
@@ -502,7 +509,7 @@ extern "C" uint32_t kbcs_core_actor_emit_area(const KbcsActor actors[2][51],cons
 extern "C" uint32_t kbcs_core_actor_emit_wave(const KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     const KbcsActorAttackSelection *source,const KbcsActorEmission *emission,KbcsActorWaves *waves,uint32_t *seed,int32_t *slot){
  static_assert(sizeof(KbcsActorWave)==48);
- if(!actors||!environment||!source||!emission||!waves||!seed||!*seed||!slot||source->side<0||source->side>1||source->slot<1||source->slot>50||source->hit<0||source->hit>2)return 1;
+ if(!actors||!environment||!source||!emission||!waves||!seed||!*seed||!slot||source->side<0||source->side>1||source->slot<1||source->slot>=actorEnd()||source->hit<0||source->hit>2)return 1;
  for(int flag:emission->flags)if(flag<0||flag>1)return 1;
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};
@@ -516,7 +523,7 @@ extern "C" uint32_t kbcs_core_actor_emit_wave(const KbcsActor actors[2][51],cons
     wave.x=n_00a9482c(context,side,actor);wave.level=n_00a97b78(context,side,actor);wave.hit=hit;
     for(int j=0;j<12;++j)wave.flags[j]=uint8_t(emission->flags[storedProcOrder[j]]);
     wave.parameter=side?0:emission->parameter;wave.mini=n_00a97a14(context,side,actor)==1;
-    for(auto &row:waves->hits)row[i]=0;
+    for(auto &row:waves->hits)row[i]=0;if(activePool)for(auto &row:activePool->extra)row.waves[i]=0;
     result=i;break;
    }
   }
@@ -526,8 +533,8 @@ extern "C" uint32_t kbcs_core_actor_emit_wave(const KbcsActor actors[2][51],cons
 
 extern "C" uint32_t kbcs_core_actor_emit_direct(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     const KbcsActorAttackSelection *selection,uint32_t *seed,KbcsActorHitSink sink,void *user,KbcsActorEmission *out){
- if(!actors||!environment||!selection||!seed||!*seed||!sink||!out||selection->side<0||selection->side>1||selection->slot<1||selection->slot>50||selection->hit<0||selection->hit>2||selection->count<0||selection->count>51)return 1;
- for(int i=0;i<selection->count;++i)if(selection->targets[i]<0||selection->targets[i]>50)return 1;
+ if(!actors||!environment||!selection||!seed||!*seed||!sink||!out||selection->side<0||selection->side>1||selection->slot<1||selection->slot>=actorEnd()||selection->hit<0||selection->hit>2||selection->count<0||selection->count>51)return 1;
+ for(int i=0;i<selection->count;++i)if(selection->targets[i]<0||selection->targets[i]>=actorEnd())return 1;
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};KbcsActorEmission result{};
   Context context{definition,copy,actors,request,*seed};emitDirect(context,*selection,sink,user,result);*out=result;return 0;
@@ -536,8 +543,8 @@ extern "C" uint32_t kbcs_core_actor_emit_direct(KbcsActor actors[2][51],const Kb
 
 extern "C" uint32_t kbcs_core_actor_attack(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorMotion *motion,uint32_t *seed,KbcsActorAttackSink sink,void *user,KbcsActorAttackResult *out){
- if(!actors||!environment||!motion||!seed||!*seed||!sink||!out||side<0||side>1||slot<1||slot>50)return 1;
- KbcsActorAttackResult result{};const auto &words=actors[side][slot].words;
+ if(!actors||!environment||!motion||!seed||!*seed||!sink||!out||side<0||side>1||slot<1||slot>=actorEnd())return 1;
+ KbcsActorAttackResult result{};const auto &words=actorAt(actors,side,slot).words;
  if(!words[0]||words[1]!=2||words[61]>0){*out=result;return 0;}
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};
@@ -549,15 +556,15 @@ extern "C" uint32_t kbcs_core_actor_attack(KbcsActor actors[2][51],const KbcsAct
 
 extern "C" uint32_t kbcs_core_actor_attack_wait(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorMotion *motion,int32_t burrow_blocked,int32_t *handled){
- if(!actors||!environment||!motion||!handled||side<0||side>1||slot<1||slot>50||burrow_blocked<0||burrow_blocked>1)return 1;
- const auto backup=actors[side][slot];
+ if(!actors||!environment||!motion||!handled||side<0||side>1||slot<1||slot>=actorEnd()||burrow_blocked<0||burrow_blocked>1)return 1;
+ const auto backup=actorAt(actors,side,slot);
  if(!backup.words[0]||backup.words[1]!=1||backup.words[61]>0){*handled=0;return 0;}
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};context.motion=motion;context.intentBlocked=burrow_blocked;
   if(side)n_006d8cc0(context,0,0,slot);else n_006d8558(context,0,0,slot);
   *handled=1;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_intent(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t *burrow_blocked){
@@ -570,124 +577,124 @@ extern "C" uint32_t kbcs_core_actor_intent(KbcsActor actors[2][51],const KbcsAct
 
 extern "C" uint32_t kbcs_core_actor_retire(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorRetirement *input,KbcsActorRetirementResult *out){
- if(!actors||!environment||!input||!out||side<0||side>1||slot<1||slot>50||input->blocked<0||input->blocked>1||input->production_slot<0||input->production_slot>20)return 1;
- const auto backup=actors[side][slot];KbcsActorRetirementResult result{};result.production_slot= -1;result.cannon_remaining=input->cannon_remaining;
+ if(!actors||!environment||!input||!out||side<0||side>1||slot<1||slot>=actorEnd()||input->blocked<0||input->blocked>1||input->production_slot<0||input->production_slot>20)return 1;
+ const auto backup=actorAt(actors,side,slot);KbcsActorRetirementResult result{};result.production_slot= -1;result.cannon_remaining=input->cannon_remaining;
  if(!backup.words[0]||backup.words[1]!=4){*out=result;return 0;}
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};context.retirement=input;context.retirementResult=&result;
   if(environment->unit_modes[side]&1)n_006ebb0c(context,0,0,side,slot);else n_006ed5e0(context,0,0,side,slot);
   result.handled=1;*out=result;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_enemy_knockback(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorEnemyDeath *input,KbcsActorEnemyDeathResult *out){
- if(!actors||!environment||!input||!out||side<0||side>1||slot<1||slot>50||input->cohort_count<0||(input->cohort_count&&!input->cohort))return 1;
+ if(!actors||!environment||!input||!out||side<0||side>1||slot<1||slot>=actorEnd()||input->cohort_count<0||(input->cohort_count&&!input->cohort))return 1;
  for(int value:{input->quiet,input->score_enabled,input->notifications,input->money_disabled,input->recording,input->cohort_present})if(value<0||value>1)return 1;
- const auto backup=actors[side][slot];KbcsActorEnemyDeathResult result{};result.selected_bonus_slot=result.bonus_visual_slot=result.cohort_serial=result.sound= -1;result.score=input->score;
+ const auto backup=actorAt(actors,side,slot);KbcsActorEnemyDeathResult result{};result.selected_bonus_slot=result.bonus_visual_slot=result.cohort_serial=result.sound= -1;result.score=input->score;
  if(!backup.words[0]||(environment->unit_modes[side]&1)||backup.words[1]!=3){*out=result;return 0;}
- int32_t kills[51];for(int i=0;i<51;++i)kills[i]=actors[1-side][i].words[241];
+ std::array<int32_t,51> regular{};std::vector<int32_t> extra;int32_t *kills=regular.data();if(actorEnd()>51){extra.resize(actorEnd());kills=extra.data();}for(int i=0;i<actorEnd();++i)kills[i]=actorAt(actors,1-side,i).words[241];
  try{
   KbcsActorDefinition definition{};definition.cells[6]=input->money_base;auto copy=*environment;KbcsSpawnRequest request{};request.side=side;request.raw=backup.words[0];uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};context.boundary=&input->boundary;context.enemyDeath=input;context.enemyDeathResult=&result;
   n_006ed43c(context,0,0,side,slot);result.handled=1;*out=result;return 0;
- }catch(...){actors[side][slot]=backup;for(int i=0;i<51;++i)actors[1-side][i].words[241]=kills[i];return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;for(int i=0;i<actorEnd();++i)actorAt(actors,1-side,i).words[241]=kills[i];return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_enemy_displacement(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,int32_t boundary,int32_t *handled){
- if(!actors||!environment||!handled||side<0||side>1||slot<1||slot>50)return 1;
- const auto backup=actors[side][slot];const auto action=backup.words[1];
+ if(!actors||!environment||!handled||side<0||side>1||slot<1||slot>=actorEnd())return 1;
+ const auto backup=actorAt(actors,side,slot);const auto action=backup.words[1];
  if(!backup.words[0]||(environment->unit_modes[side]&1)||(action!=5&&action!=6)){*handled=0;return 0;}
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};context.boundary=&boundary;
   n_006ed8d4(context,0,0,side,slot);*handled=1;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_unit_knockback(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorKnockback *input,KbcsActorKnockbackResult *out){
- if(!actors||!environment||!input||!out||side<0||side>1||slot<1||slot>50||input->cost<0)return 1;
- const auto backup=actors[side][slot];const auto action=backup.words[1];KbcsActorKnockbackResult result{0,0,-1};
+ if(!actors||!environment||!input||!out||side<0||side>1||slot<1||slot>=actorEnd()||input->cost<0)return 1;
+ const auto backup=actorAt(actors,side,slot);const auto action=backup.words[1];KbcsActorKnockbackResult result{0,0,-1};
  if(!backup.words[0]||!(environment->unit_modes[side]&1)||(action!=3&&action!=5&&action!=6&&action!=7)){*out=result;return 0;}
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};context.knockback=input;context.knockbackResult=&result;context.boundary=&input->boundary;
   n_006eb7e0(context,0,0,side,slot);result.handled=1;*out=result;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_walk(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t side,int32_t slot,int32_t *handled){
- if(!actors||!environment||!handled||side<0||side>1||slot<1||slot>50)return 1;
- const auto backup=actors[side][slot];const auto action=backup.words[1];const bool unit_mode=(environment->unit_modes[side]&1)!=0;
+ if(!actors||!environment||!handled||side<0||side>1||slot<1||slot>=actorEnd())return 1;
+ const auto backup=actorAt(actors,side,slot);const auto action=backup.words[1];const bool unit_mode=(environment->unit_modes[side]&1)!=0;
  if(!backup.words[0]||(action!=0&&(unit_mode||action<11||action>16))){*handled=0;return 0;}
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};
   if(unit_mode)n_006eb8c0(context,0,0,side,slot);else n_006ecfec(context,0,0,side,slot);
   *handled=1;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_begin(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t side,int32_t slot){
- if(!actors||!environment||side<0||side>1||slot<0||slot>50)return 1;
- const auto backup=actors[side][slot];
+ if(!actors||!environment||side<0||side>1||slot<0||slot>=actorEnd())return 1;
+ const auto backup=actorAt(actors,side,slot);
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};n_006eb6b0(context,0,side,slot);return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_react(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorReaction *input,uint32_t *seed,KbcsActorReactionResult *out){
- if(!actors||!environment||!input||!seed||!*seed||!out||side<0||side>1||slot<0||slot>50)return 1;
- const auto backup=actors[side][slot];const auto previous_seed=*seed;
+ if(!actors||!environment||!input||!seed||!*seed||!out||side<0||side>1||slot<0||slot>=actorEnd())return 1;
+ const auto backup=actorAt(actors,side,slot);const auto previous_seed=*seed;
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};
   KbcsActorReactionResult result{};Context context{definition,copy,actors,request,*seed};context.reaction=input;context.reactionResult=&result;
-  if(slot&&actors[side][slot].words[19])n_006dac8c(context,0,side,slot);
+  if(slot&&actorAt(actors,side,slot).words[19])n_006dac8c(context,0,side,slot);
   *out=result;return 0;
- }catch(...){actors[side][slot]=backup;*seed=previous_seed;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;*seed=previous_seed;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_health(KbcsActor actors[2][51],int32_t side,int32_t slot,
     const KbcsActorHealth *input,uint32_t *seed,KbcsActorHealthResult *out){
- if(!actors||!input||!seed||!*seed||!out||side<0||side>1||slot<0||slot>50||input->deployment_slot< -1||input->deployment_slot>20)return 1;
- if(side==0&&actors[side][slot].words[248]>0&&input->cooldown>0&&input->deployment_slot<0)return 1;
- const auto backup=actors[side][slot];const auto previous_seed=*seed;
+ if(!actors||!input||!seed||!*seed||!out||side<0||side>1||slot<0||slot>=actorEnd()||input->deployment_slot< -1||input->deployment_slot>20)return 1;
+ if(side==0&&actorAt(actors,side,slot).words[248]>0&&input->cooldown>0&&input->deployment_slot<0)return 1;
+ const auto backup=actorAt(actors,side,slot);const auto previous_seed=*seed;
  try{
   KbcsActorDefinition definition{};KbcsActorEnvironment environment{};KbcsSpawnRequest request{};
   KbcsActorHealthResult result{};result.delay_slot= -1;result.sound= -1;
   Context context{definition,environment,actors,request,*seed};context.health=input;context.healthResult=&result;
   n_006da994(context,0,side,slot);*out=result;return 0;
- }catch(...){actors[side][slot]=backup;*seed=previous_seed;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;*seed=previous_seed;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_protect(KbcsActor actors[2][51],int32_t side,int32_t slot,KbcsActorProtection *out){
- if(!actors||!out||side<0||side>1||slot<0||slot>50)return 1;
- const auto backup=actors[side][slot];
+ if(!actors||!out||side<0||side>1||slot<0||slot>=actorEnd())return 1;
+ const auto backup=actorAt(actors,side,slot);
  try{
   KbcsActorDefinition definition{};KbcsActorEnvironment environment{};KbcsSpawnRequest request{};uint32_t seed=1;
   KbcsActorProtection result{};Context context{definition,environment,actors,request,seed};context.protection=&result;
   n_006d97dc(context,side,slot);*out=result;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_damage(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     KbcsActorDamageContext *damage,int32_t side,int32_t slot,int32_t amount){
- if(!actors||!environment||!damage||side<0||side>1||slot<0||slot>50||amount<0||damage->count<0||damage->count>4096||(damage->count&&(!damage->rows||!damage->states)))return 1;
- const auto backup=actors[side][slot];const int32_t notice[]={damage->notice[0],damage->notice[1]};
+ if(!actors||!environment||!damage||side<0||side>1||slot<0||slot>=actorEnd()||amount<0||damage->count<0||damage->count>4096||(damage->count&&(!damage->rows||!damage->states)))return 1;
+ const auto backup=actorAt(actors,side,slot);const int32_t notice[]={damage->notice[0],damage->notice[1]};
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,copy,actors,request,seed};context.damage=damage;
   n_00a9bbac(context,side,slot,amount);return 0;
- }catch(...){actors[side][slot]=backup;std::copy_n(notice,2,damage->notice);return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;std::copy_n(notice,2,damage->notice);return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_motion(KbcsActor actors[2][51],int32_t side,int32_t slot,const KbcsActorMotion *motion){
- if(!actors||!motion||side<0||side>1||slot<1||slot>50)return 1;
+ if(!actors||!motion||side<0||side>1||slot<1||slot>=actorEnd())return 1;
  try{
   KbcsActorDefinition definition{};KbcsActorEnvironment environment{};KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,environment,actors,request,seed};context.motion=motion;
@@ -696,17 +703,17 @@ extern "C" uint32_t kbcs_core_actor_motion(KbcsActor actors[2][51],int32_t side,
 }
 extern "C" uint32_t kbcs_core_actor_transition(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,const KbcsActorMotion *motion,int32_t boundary,int32_t *sound){
- if(!actors||!environment||!motion||!sound||side<0||side>1||slot<1||slot>50)return 1;
- const auto backup=actors[side][slot];
+ if(!actors||!environment||!motion||!sound||side<0||side>1||slot<1||slot>=actorEnd())return 1;
+ const auto backup=actorAt(actors,side,slot);
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;int32_t result= -1;
   Context context{definition,copy,actors,request,seed};context.motion=motion;context.boundary=&boundary;context.transitionSound=&result;
   n_006ecae4(context,0,0,side,slot);*sound=result;return 0;
- }catch(...){actors[side][slot]=backup;return 3;}
+ }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_resume(KbcsActor actors[2][51],int32_t side,int32_t slot){
- if(!actors||side<0||side>1||slot<1||slot>50)return 1;
+ if(!actors||side<0||side>1||slot<1||slot>=actorEnd())return 1;
  try{
   KbcsActorDefinition definition{};KbcsActorEnvironment environment{};KbcsSpawnRequest request{};uint32_t seed=1;
   Context context{definition,environment,actors,request,seed};n_006ec9f4(context,0,side,slot);return 0;
@@ -715,7 +722,7 @@ extern "C" uint32_t kbcs_core_actor_resume(KbcsActor actors[2][51],int32_t side,
 
 extern "C" uint32_t kbcs_core_actor_clock(KbcsActor actors[2][51],const KbcsActorClock *clock){
  if(!actors||!clock)return 1;
- for(int side=0;side<2;++side)for(int slot=0;slot<51;++slot)if(clock->forms[side][slot]<0||clock->forms[side][slot]>3)return 1;
+ for(int side=0;side<2;++side)for(int slot=0;slot<actorEnd();++slot)if(actorForm(clock,side,slot)<0||actorForm(clock,side,slot)>3)return 1;
  for(int value:clock->kill_orb)if(value<0||value>1)return 1;
  if(clock->kill_threshold<0)return 1;
  try{
@@ -727,7 +734,7 @@ extern "C" uint32_t kbcs_core_actor_clock(KbcsActor actors[2][51],const KbcsActo
 
 extern "C" uint32_t kbcs_core_actor_contact(const KbcsActor actors[2][51],int32_t side,
     int32_t slot,int32_t target,int32_t hit,int32_t castle_slot,int32_t special_castle,int32_t *out){
- if(!actors||!out||side<0||side>1||slot<1||slot>50||target<0||target>50||hit<0||hit>2||castle_slot< -1||castle_slot>50)return 1;
+ if(!actors||!out||side<0||side>1||slot<1||slot>=actorEnd()||target<0||target>=actorEnd()||hit<0||hit>2||castle_slot< -1||castle_slot>50)return 1;
  try{
   KbcsActorDefinition definition{};KbcsActorEnvironment environment{};environment.castle_slot=castle_slot;environment.special_castle=special_castle;
   KbcsSpawnRequest request{};request.side=side;uint32_t seed=1;
@@ -737,7 +744,7 @@ extern "C" uint32_t kbcs_core_actor_contact(const KbcsActor actors[2][51],int32_
 }
 extern "C" uint32_t kbcs_core_actor_matches(const KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     int32_t side,int32_t slot,int32_t target,int32_t *out){
- if(!actors||!environment||!out||side<0||side>1||slot<1||slot>50||target<0||target>50)return 1;
+ if(!actors||!environment||!out||side<0||side>1||slot<1||slot>=actorEnd()||target<0||target>=actorEnd())return 1;
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};request.side=side;uint32_t seed=1;
   Context context{definition,copy,const_cast<KbcsActor (*)[51]>(actors),request,seed};
@@ -746,7 +753,7 @@ extern "C" uint32_t kbcs_core_actor_matches(const KbcsActor actors[2][51],const 
 }
 extern "C" uint32_t kbcs_core_actor_roll(const KbcsActor actors[2][51],int32_t side,
     int32_t slot,int32_t hit,uint32_t *seed,int32_t flags[12]){
- if(!actors||!flags||!seed||!*seed||side<0||side>1||slot<1||slot>50||hit<0||hit>2)return 1;
+ if(!actors||!flags||!seed||!*seed||side<0||side>1||slot<1||slot>=actorEnd()||hit<0||hit>2)return 1;
  try{
   KbcsActorDefinition definition{};KbcsActorEnvironment environment{};KbcsSpawnRequest request{};request.side=side;
   Context context{definition,environment,const_cast<KbcsActor (*)[51]>(actors),request,*seed};
@@ -755,16 +762,16 @@ extern "C" uint32_t kbcs_core_actor_roll(const KbcsActor actors[2][51],int32_t s
 }
 extern "C" uint32_t kbcs_core_actor_effects(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,
     const KbcsActorEffectContext *effects,int32_t side,int32_t slot,int32_t target,const int32_t flags[7],uint32_t *seed,KbcsActorEffectEvents *out){
- if(!actors||!environment||!effects||!flags||!seed||!*seed||!out||side<0||side>1||slot<1||slot>50||target<0||target>50||effects->fruit<0||effects->fruit>300||effects->target_count<1||effects->target_count>12||effects->notifications<0||effects->notifications>1||effects->scenario_level<1)return 1;
+ if(!actors||!environment||!effects||!flags||!seed||!*seed||!out||side<0||side>1||slot<1||slot>=actorEnd()||target<0||target>=actorEnd()||effects->fruit<0||effects->fruit>300||effects->target_count<1||effects->target_count>12||effects->notifications<0||effects->notifications>1||effects->scenario_level<1)return 1;
  for(int i=0;i<7;++i)if(flags[i]<0||flags[i]>1)return 1;
  for(int value:effects->base_reductions)if(value<0||value>10000)return 1;
  for(int value:effects->sage)if(value<0||value>100)return 1;
- const auto backup=actors[1-side][target];const auto previous_seed=*seed;
+ const auto backup=actorAt(actors,1-side,target);const auto previous_seed=*seed;
  try{
   KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};request.side=side;KbcsActorEffectEvents events{};
   Context context{definition,copy,actors,request,*seed};context.effects=effects;context.events=&events;
   n_006e62f8(context,0,side,slot,target,0,flags[0],flags[1],flags[2],flags[3],flags[4],flags[5],flags[6]);*out=events;return 0;
- }catch(...){actors[1-side][target]=backup;*seed=previous_seed;return 3;}
+ }catch(...){actorAt(actors,1-side,target)=backup;*seed=previous_seed;return 3;}
 }
 
 extern "C" uint32_t kbcs_core_actor_load(const int32_t *raw,int32_t count,int32_t unit,int32_t *loaded){

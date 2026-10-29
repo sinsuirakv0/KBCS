@@ -33,13 +33,13 @@ extern "C" uint32_t kbcs_core_battle_computer(const KbcsComputerInput *input,Kbc
  const auto relative=[&](int x){return (x-in.camera)/10;};
  const auto inRange=[&](int x){return relative(in.castle_x)-in.cannon_range*160+89<relative(x);};
  if(!in.cannon_wait&&!in.cannon_action){
-  for(int i=1;i<51;++i)if(opponents[i].words[0]&&opponents[i].words[1]!=4&&inRange(opponents[i].words[3])&&!s.cannon_state)s.cannon_state=1;
-  for(int i=1;i<51;++i)if(opponents[i].words[0]&&relative(in.castle_x)+27-200<relative(opponents[i].words[3])){s.action=1;s.cannon_state=0;}
+  for(int i=1;i<actorEnd();++i)if(opponents[i].words[0]&&opponents[i].words[1]!=4&&inRange(opponents[i].words[3])&&!s.cannon_state)s.cannon_state=1;
+  for(int i=1;i<actorEnd();++i)if(opponents[i].words[0]&&relative(in.castle_x)+27-200<relative(opponents[i].words[3])){s.action=1;s.cannon_state=0;}
  }
  if(s.cannon_state==1){s.cannon_wait=draw(150);s.cannon_state=2;}
  else if(s.cannon_state==2){if(--s.cannon_wait<=0)s.cannon_state=draw(2)+3;}
  else if(s.cannon_state==3){
-  if(!in.cannon_wait&&!in.cannon_action)for(int i=1;i<51;++i)if(opponents[i].words[0]&&opponents[i].words[1]!=4&&inRange(opponents[i].words[3]))s.action=1;
+  if(!in.cannon_wait&&!in.cannon_action)for(int i=1;i<actorEnd();++i)if(opponents[i].words[0]&&opponents[i].words[1]!=4&&inRange(opponents[i].words[3]))s.action=1;
   s.cannon_state=0;
  }else if(s.cannon_state==4)s.cannon_state=0;
  const int chosen=s.choices[s.selected];

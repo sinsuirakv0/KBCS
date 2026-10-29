@@ -94,8 +94,8 @@ int hit(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,int x,int
 extern "C" void kbcs_core_battle_screen_economy(const KbcsBattleScreenConfig *config,KbcsBattleScreenState *state){
  if(!state->battle_mode){if(config->fixed_money<0)state->money=std::min(wallet(*config,state->worker),state->money+income(*config,state->worker));if(state->cannon>0)--state->cannon;}
 }
-extern "C" uint32_t kbcs_core_battle_screen_advance(const KbcsBattleScreenConfig *config,const KbcsBattleScreenState *state,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view,KbcsBattleScreenHook hook,void *user) {
- if(!config||!state||!input||!out||!view)return 1;
+extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScreenConfig *config,const KbcsBattleScreenState *state,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view,KbcsBattleScreenHook hook,void *user,int32_t immediate) {
+ if(!config||!state||!input||!out||!view||immediate<0||immediate>1)return 1;
  const auto &c=*config;auto s=*state;const auto &in=*input;
  // ホストのコマ送りは速度アイテムを保持し、1更新を1論理Fとして進める。
  const bool stepping=in.control==10;
@@ -164,7 +164,10 @@ extern "C" uint32_t kbcs_core_battle_screen_advance(const KbcsBattleScreenConfig
     if(target==100||target==200||target==203||target==205){const auto code=sound(11);if(code)return code;s.pending_control=target;s.guard=1;}
     if(target==101){s.request_cannon=1;if(hook){const auto code=hook(user,2,&s);if(code)return code;}}
     if(target==102){const bool allowed=s.worker<7&&s.money>=upgrade(c,s.worker);if(allowed){s.money-=upgrade(c,s.worker);++s.worker;s.wallet_flash=13;}const auto code=sound(allowed?19:15);if(code)return code;}
-    if(target>=0&&target<10&&s.hold_frames<14){s.pending_control=target;s.guard=1;}
+    if(target>=0&&target<10&&s.hold_frames<14){
+     if(immediate&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
+     else{s.pending_control=target;s.guard=1;}
+    }
    }
    s.pointer_down=0;s.holding=-1;s.hold_frames=0;
   }else if(tick==0&&in.phase==3){s.pointer_down=0;s.holding=-1;s.hold_frames=0;}
@@ -174,6 +177,10 @@ extern "C" uint32_t kbcs_core_battle_screen_advance(const KbcsBattleScreenConfig
 
  }
  KbcsBattleScreenLayout result{};layout(c,s,result);*out=s;*view=result;return 0;
+}
+
+extern "C" uint32_t kbcs_core_battle_screen_advance(const KbcsBattleScreenConfig *config,const KbcsBattleScreenState *state,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view,KbcsBattleScreenHook hook,void *user){
+ return kbcs_core_battle_screen_advance_custom(config,state,input,out,view,hook,user,0);
 }
 
 extern "C" uint32_t kbcs_core_battle_screen_step(const KbcsBattleScreenConfig *config,const KbcsBattleScreenState *state,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view){

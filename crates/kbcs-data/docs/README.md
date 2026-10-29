@@ -81,3 +81,5 @@ combos::readのgroupは既存source_file/NyancomboData.csv列2から補う。tar
 ## 戦闘タイトル画像の参照（2026-10-28）
 
 `stage_media::battle_title`は009f560cの種別別ファイル名を解決し、Map/ImageのPNGとimgcutを返す。PNGはsource_fileのbytes保存対象でなくasset_referenceにだけ存在することがある。存在確認を両表へ広げ、共通asset取得の固定revision/SHA・AppDataキャッシュを使う。画像をDBへ再取込する必要はない。宇宙編のkind -7/-14/-15/-25はscを使う。画像はSessionの初期texturesへ登録し、暗転中の一括読込とbattle-replay --validate-assetsの対象になる。
+
+統合ZIPの配置・採用元・音源・更新排他は[releases.md](releases.md)を参照。

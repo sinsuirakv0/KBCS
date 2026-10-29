@@ -6,7 +6,7 @@
 
 /* PC用の枠。色・罫線・表の構造は元Webの変数と部品を使う。 */
 body:has(.workspace) { height:100dvh; min-height:0; overflow:hidden; background:var(--color-bg); }
-.site-shell.workspace { --radius:0px; --font-size-body:.75rem; --font-size-small:.625rem; --font-size-input:.75rem; --control-height:26px; --input-height:26px; display:grid; grid-template-rows:36px minmax(0,1fr) auto; width:calc(100vw / var(--site-scale,1)); height:calc(100dvh / var(--site-scale,1)); margin:0; padding:0; background:var(--color-bg); font-size:var(--font-size-body); }
+.site-shell.workspace { --radius:0px; --font-size-body:.75rem; --font-size-small:.625rem; --font-size-input:.75rem; --control-height:26px; --input-height:26px; display:grid; grid-template-rows:36px minmax(0,1fr); width:calc(100vw / var(--site-scale,1)); height:calc(100dvh / var(--site-scale,1)); margin:0; padding:0; background:var(--color-bg); font-size:var(--font-size-body); }
 .workspace .site-header { min-height:0; flex-wrap:nowrap; gap:10px; padding:0 8px; background:var(--color-surface); }
 .workspace .brand { font-size:13px; gap:5px; }
 .workspace .brand img { width:22px; height:22px; }
@@ -186,3 +186,11 @@ body:has(.workspace) { height:100dvh; min-height:0; overflow:hidden; background:
 .workspace-panel-content{flex:1;min-height:0}
 
 .formation-unit-icon{display:block;width:100%;height:auto;aspect-ratio:110/85;overflow:visible;flex-shrink:0}
+
+/* 情報パネルは中央エディターだけに属し、左右パネルの高さを変えない。 */
+.workspace-editor>.workspace-bottom{flex-shrink:0}
+
+/* 更新通知はアプリ共通。本文や戦闘の配置を押し動かさない。 */
+.update-dialog{width:min(480px,calc(100vw - 40px));padding:22px;color:var(--color-text);background:var(--color-surface,#0b1930);border:1px solid var(--color-border);border-radius:3px}
+.update-dialog::backdrop{background:#0009}.update-dialog h2{font-size:18px;margin:0 0 14px}.update-dialog p{white-space:pre-wrap;overflow-wrap:anywhere}.update-dialog progress{width:100%;margin:12px 0}.update-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:20px}
+.update-notice{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:10000;max-width:calc(100vw - 32px);padding:10px 14px;color:var(--color-text);background:var(--color-surface,#0b1930);border:1px solid var(--color-border);box-shadow:0 2px 12px #0008}.update-notice button{margin-left:12px}.home-update-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}

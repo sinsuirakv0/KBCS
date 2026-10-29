@@ -1,8 +1,13 @@
 ﻿// actor.cpp内で同版getter/Contextを共有する。原本の履歴木を対象1..50の配列へ正規化する。
 static_assert(sizeof(KbcsActorReflection)==36&&sizeof(KbcsActorSecondaryHit)==80&&sizeof(KbcsActorAreaRules)==56);
 struct KbcsActorAreas {
- struct Surge {KbcsActorSurge record;KbcsActorAreaHistory history{};};
- struct Explosion {KbcsActorExplosion record;KbcsActorExplosionHistory history{};};
+ struct Surge {KbcsActorSurge record;KbcsActorAreaHistory history{};std::map<int,std::pair<int32_t,uint8_t>> extra;
+ int32_t &cycle(int slot){return slot<51?history.cycles[slot]:extra[slot].first;}
+ uint8_t &present(int slot){return slot<51?history.present[slot]:extra[slot].second;}
+ };
+ struct Explosion {KbcsActorExplosion record;KbcsActorExplosionHistory history{};std::map<int,std::array<uint8_t,5>> extra;
+ uint8_t &hit(int slot,int part){return slot<51?history.hits[slot][part]:extra[slot][part];}
+ };
  std::vector<Surge> surges;
  std::vector<KbcsActorReflection> reflections;
  std::vector<Explosion> explosions;
@@ -12,7 +17,7 @@ struct KbcsActorAreas {
 namespace {
 constexpr int storedProcOrder[]={0,1,2,3,4,6,8,7,5,9,10,11};
 int32_t areaPosition(Context &context,int side,int slot){
- const auto &words=context.actors[side][slot].words;
+ const auto &words=actorAt(context.actors,side,slot).words;
  return side?words[3]-words[14]:words[3]+words[14];
 }
 bool secondaryHit(Context &context,KbcsActorSecondarySink sink,void *user,int type,int side,int slot,int target,
@@ -31,7 +36,7 @@ void surgeHit(KbcsActorAreas &areas,Context &context,KbcsActorAreas::Surge &stat
  const int rate=side?100:value.kind==1?int32_t(n_00a98e50(context,side,slot)):value.kind==2?int32_t(n_00a98ca4(context,side,slot)):100;
  if(!secondaryHit(context,sink,user,2,side,slot,target,value.hit,int(value.mini)<<1,side?0:value.parameter,rate,value.flags))return;
  const int other=1-side;
- if(!n_00a98dbc(context,other,target)||state.history.present[target]||value.kind==1)return;
+ if(!n_00a98dbc(context,other,target)||state.present(target)||value.kind==1)return;
  KbcsActorReflection reflection{};reflection.side=other;reflection.slot=target;
  reflection.x=n_00a9482c(context,other,target);
  if(value.kind==2){
@@ -57,13 +62,13 @@ void stepSurges(KbcsActorAreas &areas,Context &context,KbcsActorSecondarySink si
     const int cycle=Context::divide(elapsed,period);
     if(elapsed==cycle*period){areas.events.push_back({1,2});areas.events.push_back({0,0x70});}
     const int other=1-value.side;
-    for(int target=1;target<51;++target){
+    for(int target=1;target<actorEnd();++target){
      if(!n_00a93f08(context,other,target)||!n_00a94484(context,other,target,value.slot))continue;
-     if(state.history.present[target]&&state.history.cycles[target]==cycle)continue;
+     if(state.present(target)&&state.cycle(target)==cycle)continue;
      const int x=areaPosition(context,other,target)+(value.side==1?-offset:offset);
      if(value.x-width/2<=x&&x<value.x+width/2){
       surgeHit(areas,context,state,target,sink,user);
-      state.history.present[target]=1;state.history.cycles[target]=cycle;
+      state.present(target)=1;state.cycle(target)=cycle;
      }
     }
    }else if(duration+tail<=elapsed){areas.surges.erase(areas.surges.begin()+i);continue;}
@@ -85,7 +90,7 @@ void stepReflections(KbcsActorAreas &areas,Context &context,const KbcsActorAreaR
    surge.x=n_00a9482c(context,value.side,value.slot)+(value.side==1?delta:-delta);
    for(int j=0;j<12;++j)surge.flags[j]=context.procs[storedProcOrder[j]]!=0;
    surge.parameter=n_00a9adf0(context,value.side,value.slot);surge.mini=value.mini;surge.kind=1;
-   areas.surges.push_back({surge,{}});
+   areas.surges.push_back({surge,{},{}});
    // 生成したFは、演出寿命の判定を飛ばして次の待機へ進む。
    ++i;continue;
   }
@@ -104,14 +109,14 @@ void stepExplosions(KbcsActorAreas &areas,Context &context,const KbcsActorAreaRu
    if(elapsed==wait)areas.events.push_back({0,0xa7+phase});
    if(elapsed<wait||elapsed>=wait+active)continue;
    const int other=1-value.side;
-   for(int target=1;target<51;++target){
+   for(int target=1;target<actorEnd();++target){
     if(!n_00a93f08(context,other,target)||!n_00a94484(context,other,target,value.slot))continue;
     const int x=areaPosition(context,other,target);
     for(int half=0;half<(phase?2:1);++half){
      const int part=phase+(half?2:0),center=value.x-distance/2+half*distance,width=rules.explosion_widths[phase]/2;
-     if(state.history.hits[target][part]||x<center-width||x>=center+width)continue;
+     if(state.hit(target,part)||x<center-width||x>=center+width)continue;
      secondaryHit(context,sink,user,3,value.side,value.slot,target,value.hit,0,value.side?0:value.parameter,rules.explosion_damage[phase],value.flags);
-     state.history.hits[target][part]=1;
+     state.hit(target,part)=1;
     }
    }
   }
@@ -119,7 +124,7 @@ void stepExplosions(KbcsActorAreas &areas,Context &context,const KbcsActorAreaRu
   ++i;
  }
 }
-bool validAreaActor(int side,int slot){return side>=0&&side<2&&slot>0&&slot<51;}
+bool validAreaActor(int side,int slot){return side>=0&&side<2&&slot>0&&slot<actorEnd();}
 }
 extern "C" uint32_t kbcs_core_actor_areas_create(KbcsActorAreas **out){if(!out)return 1;try{*out=new KbcsActorAreas;return 0;}catch(...){return 3;}}
 extern "C" void kbcs_core_actor_areas_destroy(KbcsActorAreas *areas){delete areas;}
@@ -127,7 +132,7 @@ extern "C" uint32_t kbcs_core_actor_areas_append(KbcsActorAreas *areas,const Kbc
  if(!areas||!value||areas->busy||areas->failed||value->surge_present<0||value->surge_present>1||value->explosion_present<0||value->explosion_present>1)return 1;
  if(value->surge_present&&(!validAreaActor(value->surge.side,value->surge.slot)||value->surge.hit<0||value->surge.hit>2))return 1;
  if(value->explosion_present&&(!validAreaActor(value->explosion.side,value->explosion.slot)||value->explosion.hit<0||value->explosion.hit>2))return 1;
- try{if(value->surge_present)areas->surges.push_back({value->surge,{}});if(value->explosion_present)areas->explosions.push_back({value->explosion,{}});return 0;}
+ try{if(value->surge_present)areas->surges.push_back({value->surge,{},{}});if(value->explosion_present)areas->explosions.push_back({value->explosion,{},{}});return 0;}
  catch(...){areas->failed=true;return 3;}
 }
 extern "C" uint32_t kbcs_core_actor_areas_counts(const KbcsActorAreas *areas,KbcsActorAreaCounts *out){

@@ -8,7 +8,7 @@ bool valid(const KbcsSpawnRequest &r) {
  return (r.side==0||r.side==1)&&(r.raw==-1||r.raw>=2)&&r.level_index>=0&&
      r.form>=0&&r.form<=3&&r.row>=0;
 }
-bool slotResult(int32_t slot) { return slot>=-2&&slot!=0&&slot<=50; }
+bool slotResult(int32_t slot) { return slot>=-2&&slot!=0&&slot<kbcs_core_actor_slot_count(); }
 KbcsSpawnRequest enemyRequest(const KbcsStageRow &row,int32_t index) {
  return {1,row.cells[0],0,row.cells[6],row.cells[7],0,index};
 }
@@ -30,7 +30,7 @@ extern "C" uint32_t kbcs_core_spawn_prepare(const KbcsSpawnRequest *request,
  KbcsSpawnPlacement result{-2,r.raw==-1?-1:r.raw-2,0,0,0};
  if(r.raw!=-1){
   result.slot=-1;
-  for(int32_t slot=1;slot<=50;++slot)if(occupied[slot]==0){
+  for(int32_t slot=1;slot<kbcs_core_actor_slot_count();++slot)if(occupied[slot]==0){
    int32_t roll=0;
    kbcs_core_random_bounded(seed,int32_t(std::max<int64_t>(0,range))+1,&roll);
    result={slot,r.raw-2,r.side==0?g.stage_width-2800:slot==g.castle_slot?3200:2800,

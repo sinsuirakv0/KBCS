@@ -1,4 +1,7 @@
-﻿import {createBattleResults} from './battle-results.js';
+﻿import {createSessionId} from './src/shared/browser/session-id.js';
+import {battleAspects,battleViewportWidth,battlePlaybackRate} from './battle-view.js';
+import {audioBlobUrl} from './src/shared/browser/audio-preview.js';
+import {createBattleResults} from './battle-results.js';
 import {createBattleSounds} from './battle-audio.js';
 import {readBattleJson,battleItems} from './battle-support.js';
 import {catalog} from './simulation-profile.js';
@@ -14,12 +17,11 @@ function configuration(database,snapshot){
  const team=new Map(formation.slots.slice(0,5).filter(Boolean).map(v=>[v.unitId,v.form]));
  const combo=type=>database.combos.filter(v=>v.type===type&&v.members.every(m=>team.has(m.id)&&team.get(m.id)>=m.form)).reduce((sum,v)=>sum+database.comboEffects[type].values[v.grade],0);
  const rule=(map.rules||[]).find(v=>v.id===0),mask=battleItems.reduce((bits,v,index)=>bits|(items[v.key]?1<<index:0),0);
- return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:snapshot.speed===2?2:3,fixed_money:rule?rule.parameters[0]*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?rule.parameters[0]*100:combo(5)*100};
+ return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:3,fixed_money:rule?rule.parameters[0]*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?rule.parameters[0]*100:combo(5)*100};
 }
 export async function prepareBattleScreen(database,snapshot,assets,signal,report){
  const [atlas,options]=await Promise.all([readBattleJson('/images/native-battle/manifest.json',{signal}),readBattleJson('/api/battle-options',{signal})]);
- if(atlas.version!==snapshot.version)throw Error('戦闘UI素材とDBの版が異なります');
- if(atlas.buildId!==snapshot.buildId){
+ if(atlas.buildId!==snapshot.buildId||atlas.version!==snapshot.version){
   const sources=Object.values(atlas.atlases).flatMap(value=>Object.entries(value.sources)).concat([[atlas.soundSource.path,atlas.soundSource]]),paths=[...new Set(sources.map(([path])=>path))];
   const hashes=await readBattleJson('/api/asset-hashes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(paths),signal});
   if(sources.some(([path,source])=>hashes[path]!==source.sha256))throw Error('戦闘UI素材とDBの原本が異なります');
@@ -36,9 +38,7 @@ export async function prepareBattleScreen(database,snapshot,assets,signal,report
  signal.addEventListener('abort',dispose,{once:true});
  async function loadAudio(track){
   if(audioUrls.has(track.id))return;
-  const response=await fetch('/api/stage-audio/'+track.id,{signal:audioController.signal});
-  if(!response.ok){const error=await response.json();throw Error(error.error||'BGM '+track.id+' を読み込めません');}
-  const blob=await response.blob();audioController.signal.throwIfAborted();audioUrls.set(track.id,URL.createObjectURL(blob));
+  audioUrls.set(track.id,await audioBlobUrl('/api/stage-audio/'+track.id,audioController.signal));
  }
  const tracks=snapshot.stage.musicTracks||[];
  try{if(tracks[0]){await loadAudio(tracks[0]);report('開始BGM',1,1);}}
@@ -49,15 +49,23 @@ export async function prepareBattleScreen(database,snapshot,assets,signal,report
 }
 export async function startBattleScreen(root,canvas,scene,snapshot,resources,onReturn){
  let screenWidth=960,camera=scene.layout,cameraVersion=0,drawnVersion=-1,drawnRows=0;
- const backgroundCanvas=root.querySelector('[data-battle-background]'),controls=document.getElementById('battle-controls'),session=crypto.randomUUID();
+ const backgroundCanvas=root.querySelector('[data-battle-background]'),controls=document.getElementById('battle-controls'),session=createSessionId();
+ const aspect=controls.querySelector('[data-battle-aspect]');aspect.innerHTML=battleAspects.map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join('');
+ try{aspect.value=localStorage.getItem('kbcs:battle-aspect')||'20:9';}catch{}if(!aspect.value)aspect.value='20:9';
  let painter;try{painter=createStagePainter(backgroundCanvas,()=>++cameraVersion,resources.sceneImages);}catch(error){resources.dispose();throw error;}
- let playbackPaused=false,stepQueue=0,paints=0;
+ let playbackPaused=false,stepQueue=0,paints=0,activeMs=0,activePaints=0,cheats=0,settingsVersion=0,appliedSettings=-1;
+ const speed=controls.querySelector('[data-battle-speed]'),cheatPanel=controls.querySelector('#battle-cheats');
+ speed.innerHTML='<option value="0">アイテムに従う</option>'+Array.from({length:20},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'倍</option>').join('');
+ cheatPanel.hidden=true;for(const input of cheatPanel.querySelectorAll('input'))input.checked=false;
+ controls.querySelector('[data-debug=cheats]').setAttribute('aria-expanded','false');
+ function changeSettings(){cheats=[...cheatPanel.querySelectorAll('input:checked')].reduce((flags,input)=>flags|Number(input.dataset.cheat),0);++settingsVersion;accumulator=0;lastTime=0;}
+ controls.addEventListener('change',changeSettings);
  const timing={coreMs:0,apiMs:0,computeMs:0,drawMs:0},frames=createBattleFrameClient();
  const context=canvas.getContext('2d'),message=root.querySelector('[data-battle-message]'),menu=root.querySelector('[data-battle-menu]');
- const messageHome=message.parentElement;controls.querySelector('.battle-stats').prepend(message);
+ const messageHome=message.parentElement;controls.querySelector('.battle-status-line').prepend(message);
  message.textContent='';
  const labels=resources.forms.map(v=>v?.name||'空き枠');
- let state={frame:0,intro:12,rows:2,page:0,page_frame:0,page_direction:1,paused:0,money:resources.money,worker:resources.worker,cannon:0,holding:-1,hold_frames:0,pointer_down:0,pointer_x:0,pointer_y:0,guard:0,pending_control:-1,items_on:resources.config.items,request_slot:-1,request_cannon:0,ui_frame:0,speed_mode:(resources.config.items&1)?1:0,wallet_flash:0,description_item:-1,description_wait:0,start_x:0,start_y:0,gesture:0,page_step:1,request_action:0,bgm_level:3,se_level:3,vibration_on:0,info_mode:0,info_slot:0,saved_rows:2,hud_frame:0};
+ let state={frame:0,intro:12,rows:2,page:0,page_frame:0,page_direction:1,paused:0,money:resources.money,worker:resources.worker,cannon:0,holding:-1,hold_frames:0,pointer_down:0,pointer_x:0,pointer_y:0,guard:0,pending_control:-1,items_on:resources.config.items,request_slot:-1,request_cannon:0,ui_frame:0,speed_mode:(resources.config.items&1)?(snapshot.speed===3?2:1):0,wallet_flash:0,description_item:-1,description_wait:0,start_x:0,start_y:0,gesture:0,page_step:1,request_action:0,bgm_level:3,se_level:3,vibration_on:0,info_mode:0,info_slot:0,saved_rows:2,hud_frame:0};
  let runtime={wait:Array(10).fill(0),maximum:Array(10).fill(0)},sessionCreated=false;
  Object.assign(state,{rows:resources.options.rows,saved_rows:resources.options.rows,bgm_level:resources.options.bgmLevel,se_level:resources.options.seLevel});
  let savedOptions=JSON.stringify(resources.options),saveOptions=Promise.resolve();
@@ -66,9 +74,9 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(body===savedOptions)return;savedOptions=body;
   saveOptions=saveOptions.then(()=>readBattleJson('/api/battle-options',{method:'PUT',headers:{'Content-Type':'application/json'},body,keepalive:true})).catch(error=>{savedOptions='';if(!stopped)message.textContent='設定保存: '+error.message;});
  }
- const actorsInfo=document.createElement('span');actorsInfo.className='battle-actor-info';controls.querySelector('.battle-stats').append(actorsInfo);
- const resultInfo=document.createElement('output');resultInfo.setAttribute('aria-live','polite');controls.querySelector('.battle-actions').append(resultInfo);
- const limitInfo=document.createElement('span');controls.querySelector('.battle-stats').append(limitInfo);
+ const actorsInfo=document.createElement('span');actorsInfo.className='battle-actor-info';controls.querySelector('.battle-state').append(actorsInfo);
+ const resultInfo=document.createElement('output');resultInfo.setAttribute('aria-live','polite');controls.querySelector('.battle-state').append(resultInfo);
+ const limitInfo=document.createElement('span');controls.querySelector('.battle-constraints').append(limitInfo);
  let view,stopped=false,raf=0,busy=false,lastTime=0,accumulator=0,pointer={phase:0,x:0,y:0},control=0,error=false,failure=null;
  const requestController=new AbortController();
  let audio=null,audioId=-1;
@@ -87,7 +95,8 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(!tints.has(key)){const surface=document.createElement('canvas');surface.width=cut[2];surface.height=cut[3];const paint=surface.getContext('2d');paint.drawImage(image,...cut,0,0,cut[2],cut[3]);paint.globalCompositeOperation='multiply';paint.fillStyle='rgb('+color.join(',')+')';paint.fillRect(0,0,surface.width,surface.height);paint.globalCompositeOperation='destination-in';paint.drawImage(image,...cut,0,0,cut[2],cut[3]);tints.set(key,surface);}return tints.get(key);
  }
  function resize(){
-  const box=canvas.parentElement.getBoundingClientRect(),width=Math.max(960,Math.min(3840,Math.round(box.width/Math.max(1,box.height)*640)));
+  const box=canvas.parentElement.getBoundingClientRect(),width=battleViewportWidth(aspect.value,box.width,box.height);
+  document.dispatchEvent(new CustomEvent('kbcs:battle-view',{detail:{ratio:aspect.value==='auto'?null:width/640}}));
   if(width===screenWidth&&canvas.width===width&&backgroundCanvas.width===width)return;
   screenWidth=width;resources.config.viewport_width=width;canvas.width=width;canvas.height=640;canvas.style.width='min(100cqw,'+(width/640*100)+'cqh)';backgroundCanvas.width=width;backgroundCanvas.height=640;backgroundCanvas.style.width=canvas.style.width;++cameraVersion;
  }
@@ -100,11 +109,11 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  }
  async function update(ticks,stepping=false){
   const input=stepping?{ticks,phase:0,x:0,y:0,control:10}:{ticks,...pointer,control};if(ticks)pointer.phase=0;control=0;
-  const version=cameraVersion;
+  const version=cameraVersion,sentSettings=settingsVersion;
   const sceneInput=stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session});
-  const {value:next,timing:measured}=await frames.load({session,input,scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
+  const {value:next,timing:measured}=await frames.load({session,input,cheats,scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
   Object.assign(timing,measured);timing.coreMs=next.coreMs;
-  if(stopped)return;state=next.state;view=next.layout;runtime=next.runtime;
+  if(stopped)return;appliedSettings=sentSettings;state=next.state;view=next.layout;runtime=next.runtime;
   persistOptions();
   results.update(runtime);
   sounds.update(runtime.sounds||[],state.se_level,state.speed_mode+1,playbackPaused&&!stepping,!!runtime.result.mode);
@@ -148,7 +157,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  }
  function paint(){
   if(!view)return;
-  ++paints;context.clearRect(0,0,screenWidth,640);
+  ++paints;if(!playbackPaused&&!state.paused&&!document.hidden&&state.intro>=24)++activePaints;context.clearRect(0,0,screenWidth,640);
   if(runtime.result?.mode&&runtime.ending.phase){results.paint(context,screenWidth,sprite,number,resources.atlas,resources.images);return;}
   const moneyBase=view.money_base,moneyRight=screenWidth-34,capX=number(view.wallet_max/100,moneyBase,moneyRight,10),slashX=capX-29;
   sprite('img001_ja',moneyBase+10,slashX,10);number(state.money/100,moneyBase,slashX-1,10);sprite('img001_ja',moneyBase+11,moneyRight,10);
@@ -158,7 +167,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   for(const index of order){const [x,y,w,h]=view.slots[index],form=resources.forms[index];
    if(!form){sprite('uni',0,x,y,w,h);if(view.modes[index]===2){context.fillStyle='rgba(0,0,0,.392)';context.fillRect(x,y,w,h);}continue;}
    const summon=runtime.hud.summons[index],image=resources.images.get(form.icon);if(summon[0]&&summon[1])context.drawImage(tinted(image,[9,21,110,85],[157,215,255],form.icon),x,y,w,h);else context.drawImage(image,9,21,110,85,x,y,w,h);
-   const cost=runtime.costs[index],disabled=state.battle_mode||runtime.deployment.blocked[index]||(summon[0]?!summon[1]:cost>state.money||runtime.wait[index]>0),base=disabled?46:35;
+   const cost=runtime.costs[index],disabled=state.battle_mode||runtime.deployment.blocked[index]||(summon[0]?!summon[1]:(!(cheats&1)&&cost>state.money)||runtime.wait[index]>0),base=disabled?46:35;
    if(disabled||view.modes[index]===2){context.fillStyle='rgba(0,0,0,.392)';context.fillRect(x,y,w,h);}
    if(summon[0]&&summon[1]){const cut=resources.atlas.atlases.img002_ja.rects[53],[sx,sy]=view.labels[index];context.drawImage(tinted(resources.images.get(resources.atlas.atlases.img002_ja.image),cut,[summon[4],summon[4],summon[4]],'summon-'+summon[4]),sx+Math.trunc((110-cut[2])/2),sy+Math.trunc((85-cut[3])/2));}
    const gauge=runtime.hud.gauges[index];
@@ -209,12 +218,15 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.addEventListener(type,input);
  function wheel(event){if(runtime.result?.mode||state.paused||state.rows!==1||state.intro<24||!event.deltaY)return;const point=coordinates(event);if(point.y<543||point.x<159+(screenWidth-960)/2||point.x>801+(screenWidth-960)/2)return;event.preventDefault();control=event.deltaY>0?9:8;}
  canvas.addEventListener('wheel',wheel,{passive:false});
+ function changeAspect(){try{localStorage.setItem('kbcs:battle-aspect',aspect.value);}catch{}resize();}
+ aspect.addEventListener('change',changeAspect);
  const observer=new ResizeObserver(resize);
- const monitor=createBattleMonitor(controls,()=>({...timing,...frames.stats(),frame:state.frame,paints,lag:accumulator*(state.speed_mode?state.speed_mode+1:1)+stepQueue,images:stageMediaStats(resources.sceneImages)}));
+ const monitor=createBattleMonitor(controls,()=>({...timing,...frames.stats(),frame:state.frame,paints,activeMs,activePaints,cheats,speed:Number(speed.value),lag:accumulator*(state.speed_mode?state.speed_mode+1:1)+stepQueue,images:stageMediaStats(resources.sceneImages)}));
  function command(event){
   const button=event.target.closest('[data-debug],[data-battle-control]');if(!button)return;
   const action=button.dataset.debug;
-  if(action==='toggle'){playbackPaused=!(playbackPaused||state.paused);accumulator=0;lastTime=0;if(playbackPaused&&!state.paused){state.pointer_down=0;state.holding=-1;state.hold_frames=0;pointer.phase=0;}if(state.paused&&!playbackPaused)control=1;button.textContent=playbackPaused?'再開':'一時停止';sounds.update([],state.se_level,1,playbackPaused,!!runtime.result.mode);if(audio){if(playbackPaused)audio.pause();else if(audioStarted&&!audio.ended&&!runtime.result.mode)audio.play().catch(()=>{});}}
+  if(action==='cheats'){cheatPanel.hidden=!cheatPanel.hidden;button.setAttribute('aria-expanded',String(!cheatPanel.hidden));}
+  else if(action==='toggle'){playbackPaused=!(playbackPaused||state.paused);accumulator=0;lastTime=0;if(playbackPaused&&!state.paused){state.pointer_down=0;state.holding=-1;state.hold_frames=0;pointer.phase=0;}if(state.paused&&!playbackPaused)control=1;button.textContent=playbackPaused?'再開':'一時停止';sounds.update([],state.se_level,1,playbackPaused,!!runtime.result.mode);if(audio){if(playbackPaused)audio.pause();else if(audioStarted&&!audio.ended&&!runtime.result.mode)audio.play().catch(()=>{});}}
   else if(action==='step'||action==='ten'){playbackPaused=true;stepQueue+=action==='step'?1:10;accumulator=0;if(state.paused)control=1;}
   else if(action==='menu')control=2;
   else if(action==='rows')control=3;
@@ -232,15 +244,18 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  document.addEventListener('visibilitychange',visibility);
  async function animate(now){
   if(stopped)return;
-  if(lastTime&&!document.hidden&&(!playbackPaused||state.paused))accumulator+=(now-lastTime)*30/1000;lastTime=now;
-  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||drawnVersion!==cameraVersion)){
+  if(lastTime&&!document.hidden){
+   const elapsed=now-lastTime;if(!playbackPaused&&!state.paused&&state.intro>=24)activeMs+=elapsed;
+   if(!playbackPaused||state.paused)accumulator+=elapsed*30/1000*(state.intro>=24&&!state.paused&&!state.battle_mode?battlePlaybackRate(Number(speed.value),state.speed_mode):1);
+  }lastTime=now;
+  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion)){
    busy=true;const stepping=!control&&stepQueue>0,ticks=control?0:stepping?Math.min(30,stepQueue):Math.min(playbackPaused?1:30,Math.floor(accumulator));if(stepping)stepQueue-=ticks;else accumulator-=ticks;
    try{await update(ticks,stepping);paint();}catch(e){if(!stopped){error=true;failure={frame:state.frame,message:e.message};message.textContent='戦闘停止: '+e.message;message.title=message.textContent;message.setAttribute('role','alert');if(audio)audio.pause();for(const button of controls.querySelectorAll('button'))button.disabled=!['report','return'].includes(button.dataset.debug);}}finally{busy=false;}
   }
   if(!error&&!stopped)raf=requestAnimationFrame(animate);
  }
  window.addEventListener('pagehide',stop);
- function stop(){if(stopped)return;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);}
+ function stop(){if(stopped)return;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);}
  try{resize();observer.observe(canvas.parentElement);
   const sceneInput={...stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session}),viewportWidth:screenWidth};
   const started=await readBattleJson('/api/battle-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot,config:resources.config,state,scene:sceneInput}),signal:requestController.signal});sessionCreated=true;

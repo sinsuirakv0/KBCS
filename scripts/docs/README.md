@@ -23,3 +23,14 @@ sync-battle-ui.py <assets>は検証済みJP15.7.2からHUDのimgcutと採用元S
 
 
 sync-stage-music.py --revision <40桁SHA> はGitHub assetsの固定commitからcurrent/manifest/assets index/Sound_settingを検証し、APK同梱BGM18件を既存補完索引へ加える。size/SHA、元パス、曲ごとのrevision、MIMEとloopを保持。大きい索引の生成用キャッシュはresearch/.local/music-indexで、配布物へ含めない。公式DBを書き換えるスクリプトではない。
+
+## 2026-10-28: 出撃準備ボタン
+
+sync-battle-ui.pyのアトラスへimg031_jaを追加し、以前に追加された結果/通知画像も再生成時に保持する。007802c0のcontext+0x138と007acf88のdrawからcut10/11を採用した。コピーしたPNG・imgcutの出典/size/SHAはnative-battle/manifest.jsonへ保存する。原本は変更しない。配置と局所ARM比較はui/docs/stage-sortie.mdとresearch/verify/sortie_ui.pyを参照する。
+
+
+## 2026-10-29: 自動ビルド・配布
+
+setup-windows-ci.ps1が検証済みLLVM-MinGW 20260922をSHA確認後に導入する。package.pyはビルド済みtargetをWindows x64/Mac arm64/Mac x64用ZIPへまとめ、CPU種別・単独起動・SHAを検査する。UIとresearchの生成は実行しない。workflow・署名・本体更新との命名契約は[ビルド設計](../../crates/kbcs-app/docs/build.md)を参照。
+
+publish-release.pyは全CPUの版/commit/ZIP-SHAとアップロード先のSHAを照合後、タグのドラフトを公開開発版へ変更する。公開済みリリースは更新しない。

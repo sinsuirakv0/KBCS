@@ -42,7 +42,7 @@ export function initializeWorkspace(){
   });
   body.append(left.panel,separators[0],editor,separators[1],right.panel);shell.append(body);
   const bottom=create('details','workspace-bottom','<summary><span>情報</span><span id="workspace-status" role="status"></span><span id="workspace-version"></span></summary><div class="workspace-information"></div>');
-  const information=bottom.querySelector('.workspace-information');shell.append(bottom);
+  const information=bottom.querySelector('.workspace-information');editor.append(bottom);
   const controls=create('div','workspace-controls');
   for(const side of ['left','right','bottom']){
     const button=create('button','workspace-toggle',icon(side));button.type='button';button.dataset.workspaceToggle=side;
@@ -77,23 +77,33 @@ export function initializeWorkspace(){
     move('#stage-filters',left.content);
     for(const id of ['stage-page-size','stage-show-enemies'])moveLabel(id,settingsGroup);
   }else if(page==='formation'){
-    left.panel.querySelector('h2').textContent='キャラ一覧';
+    left.panel.querySelector('h2').textContent='絞り込み';
     right.panel.querySelector('h2').textContent='キャラ・城砲設定';
-    move('.formation-library',left.content);move('#formation-member',right.content);move('#formation-profile',right.content);
+    move('#formation-search',left.content);moveLabel('formation-display-form',left.content);
+    move('#formation-member',right.content);move('#formation-profile',right.content);
     right.content.classList.add('formation-options');
   }else if(page==='stage-sortie'){
     move('#sortie-stage-navigation',left.content);move('#sortie-details',right.content);move('#battle-controls',viewbar);
     right.panel.querySelector('h2').textContent='ステージ詳細';
-    let previous;
+    let previousBottom,aspectRatio=1422/640;
+    function fitBattleView(){
+      const active=body.classList.contains('workspace-battle'),shelf=active&&bottom.open&&aspectRatio;
+      body.classList.toggle('workspace-battle-shelf',!!shelf);
+      if(shelf){const height=Math.max(1,Math.floor(Math.min(editor.clientWidth/aspectRatio,editor.clientHeight-viewbar.offsetHeight-48)));main.style.height=height+'px';}
+      else main.style.removeProperty('height');
+    }
+    const battleObserver=new ResizeObserver(fitBattleView);battleObserver.observe(editor);battleObserver.observe(viewbar);
+    bottom.addEventListener('toggle',fitBattleView);
+    document.addEventListener('kbcs:battle-view',event=>{aspectRatio=event.detail.ratio;fitBattleView();});
     document.addEventListener('kbcs:battle-mode',event=>{
       const active=event.detail;body.classList.toggle('workspace-battle',active);
-      if(active){previous={left:state.left,right:state.right};state.left=false;state.right=false;}
-      else if(previous){Object.assign(state,previous);previous=null;}
+      if(active){previousBottom=bottom.open;bottom.open=true;}
+      else if(previousBottom!==undefined){bottom.open=previousBottom;previousBottom=undefined;}
       left.panel.querySelector('h2').textContent=active?'シミュレーター':'このページ';
       right.panel.querySelector('h2').textContent=active?'シミュレーター':'ステージ詳細';
       for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
       viewbar.querySelector('.workspace-tab').textContent=active?'戦闘':'出撃準備';element('battle-controls').hidden=!active;for(const button of element('battle-controls').querySelectorAll('button'))button.disabled=active;viewbar.classList.toggle('battle-viewbar',active);
-      apply();
+      fitBattleView();apply();
     });
   }else if(page==='stage-detail'){
     move('#stage-navigation',left.content);

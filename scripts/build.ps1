@@ -1,7 +1,7 @@
 ﻿param(
     [string]$LlvmBin = $env:KBCS_LLVM_BIN,
     [switch]$DebugBuild,
-    [string]$OutputDirectory = '.local/dist/0.1.35'
+    [string]$OutputDirectory = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,6 +23,12 @@ try {
     if (-not $DebugBuild) { $buildArguments += '--release' }
     & cargo @buildArguments
     if ($LASTEXITCODE -ne 0) { throw 'Cargoビルドに失敗しました。' }
+    if (-not $OutputDirectory) {
+        $packages = (& cargo metadata --format-version 1 --locked --no-deps | ConvertFrom-Json).packages
+        if ($LASTEXITCODE -ne 0) { throw '本体の版を取得できません。' }
+        $appVersion = ($packages | Where-Object name -EQ 'kbcs-app' | Select-Object -First 1).version
+        $OutputDirectory = ".local/dist/$appVersion"
+    }
     $destination = Join-Path $workspace $OutputDirectory
     New-Item -ItemType Directory -Force -Path $destination | Out-Null
     $targetDirectory = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { Join-Path $workspace 'target' }

@@ -146,7 +146,17 @@ pub fn asset(database: &crate::store::Database, root: &Path, logical: &str) -> R
         revision.len() == 40 && revision.bytes().all(|b| b.is_ascii_hexdigit()),
         "不正な原本commit"
     );
-    let location = if let Some(repository) = origin.strip_prefix("https://github.com/") {
+    let managed = metadata
+        .get("release_tag")
+        .map(|tag| -> Result<PathBuf> {
+            safe_path(tag)?;
+            ensure!(!tag.contains('/'), "不正なリリース識別子");
+            Ok(root.join("assets/releases").join(tag))
+        })
+        .transpose()?;
+    let location = if let Some(directory) = managed.filter(|directory| directory.is_dir()) {
+        Location::Local(directory.canonicalize()?)
+    } else if let Some(repository) = origin.strip_prefix("https://github.com/") {
         let parts: Vec<_> = repository.trim_end_matches('/').split('/').collect();
         ensure!(
             parts.len() == 2
@@ -230,6 +240,17 @@ impl Source {
             let root = Path::new(location)
                 .canonicalize()
                 .context("assetsフォルダを開けません")?;
+            if root.join("release.json").is_file() {
+                let installed = crate::releases::installed(&root)?;
+                return Ok(Self {
+                    revision: installed.release.manifest.revision,
+                    origin: root.to_string_lossy().into_owned(),
+                    location: Location::Local(root),
+                    agent,
+                    cache: None,
+                    previous: None,
+                });
+            }
             let git = |args: &[&str]| -> Result<String> {
                 let output = Command::new("git")
                     .arg("-C")
@@ -378,7 +399,7 @@ impl Source {
         }
         let bytes = self.read_original(&descriptor.path)?;
         verify(&bytes, descriptor)?;
-        if let Some(path) = path {
+        if remote && let Some(path) = path {
             self.save_cache(&path, &bytes)?;
         }
         Ok(bytes)
@@ -440,6 +461,11 @@ impl Source {
             ["jp", "en", "kr", "tw"].contains(&region),
             "未知のリージョン"
         );
+        if let Location::Local(root) = &self.location
+            && root.join("release.json").is_file()
+        {
+            return self.integrated_dataset(root, region);
+        }
         let current_bytes = self.read(&format!("metadata/{region}/current.json"))?;
         let current: Current = parse_json(&current_bytes)?;
         let header = &current.header;
@@ -509,6 +535,84 @@ impl Source {
             files: assets.files,
             characters: characters.units,
             proofs,
+            release: None,
+        })
+    }
+
+    fn integrated_dataset(&self, root: &Path, region: &str) -> Result<Dataset> {
+        let installed = crate::releases::installed(root)?;
+        let manifest = &installed.release.manifest;
+        ensure!(
+            manifest.header.source_region == region && manifest.schema_version == 1,
+            "統合データの地域・形式が不一致です"
+        );
+        for (logical, descriptor) in &installed.files {
+            safe_path(logical)?;
+            ensure!(logical == &descriptor.path, "統合データのパスが不一致です");
+        }
+        let mut characters = Vec::new();
+        for path in installed.files.keys() {
+            let Some(id) = path
+                .strip_prefix("res/Unit_Explanation")
+                .and_then(|name| name.strip_suffix("_ja.csv"))
+                .and_then(|id| id.parse::<u32>().ok())
+                .filter(|id| *id > 0)
+            else {
+                continue;
+            };
+            let numeric = format!("Data/unit{id:03}.csv");
+            if !installed.files.contains_key(&numeric) {
+                continue;
+            }
+            let rows = crate::model::csv_rows(&self.checked(&installed.files[path])?)?;
+            // 説明だけ先行して追加・重複する原本があるため、実在する能力行数までに限る。
+            let form_count =
+                crate::model::numeric_rows(&self.checked(&installed.files[&numeric])?)?
+                    .len()
+                    .min(4);
+            let forms = rows
+                .into_iter()
+                .take(form_count)
+                .take_while(|row| row.first().is_some_and(|s| !s.trim().is_empty()))
+                .map(|row| CharacterForm {
+                    name: crate::model::plain_text(&row[0]),
+                    description: row
+                        .iter()
+                        .skip(1)
+                        .take(3)
+                        .map(|s| crate::model::plain_text(s))
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                })
+                .collect::<Vec<_>>();
+            if !forms.is_empty() {
+                characters.push(Character {
+                    kind: Some("normal".into()),
+                    id: (id - 1).to_string(),
+                    forms,
+                    aliases: Vec::new(),
+                });
+            }
+        }
+        characters.sort_by_key(|unit| unit.id.parse::<u32>().unwrap_or(u32::MAX));
+        ensure!(!characters.is_empty(), "統合データのキャラ説明が空です");
+        let proof = serde_json::to_vec(manifest)?;
+        Ok(Dataset {
+            current: Current {
+                header: manifest.header.clone(),
+                generated_path: format!("integrated/{}", manifest.tag),
+                manifest_sha256: hash(&proof),
+                status: "verified".into(),
+            },
+            manifest: Manifest {
+                header: manifest.header.clone(),
+                artifacts: BTreeMap::new(),
+                inputs: BTreeMap::new(),
+            },
+            files: installed.files,
+            characters,
+            proofs: vec![("integrated/manifest.json".into(), proof)],
+            release: Some((manifest.tag.clone(), installed.release.release.published_at)),
         })
     }
 }
@@ -519,6 +623,7 @@ pub struct Dataset {
     pub files: BTreeMap<String, Descriptor>,
     pub characters: Vec<Character>,
     pub proofs: Vec<(String, Vec<u8>)>,
+    pub release: Option<(String, String)>,
 }
 
 #[cfg(test)]
@@ -590,6 +695,16 @@ mod tests {
             let database = crate::store::Database { connection };
             assert_eq!(asset(&database, &root, "Image/img043.png")?, bytes);
             assert!(asset(&database, &root, "../img043.png").is_err());
+            database
+                .connection
+                .execute("INSERT INTO metadata VALUES ('release_tag','fixture')", [])?;
+            let managed = root.join("assets/releases/fixture/jp/server/original.csv");
+            std::fs::create_dir_all(managed.parent().unwrap())?;
+            std::fs::write(&managed, bytes)?;
+            // 保存時のoriginが別PCを指しても、移動後のdata-dirから原本を解決する。
+            assert_eq!(asset(&database, &root, "Image/img043.png")?, bytes);
+            std::fs::write(managed, b"corrupt")?;
+            assert!(asset(&database, &root, "Image/img043.png").is_err());
             Ok(())
         })();
         std::fs::remove_dir_all(root)?;

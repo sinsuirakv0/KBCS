@@ -4,6 +4,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/* 単体入口は51、所有戦闘の借用中だけ動的な個体枠数を返す。 */
+int32_t kbcs_core_actor_slot_count(void);
 
 /* 009f1e64のparam_2..8。rawはDBのID+2、level_indexは内部の0始まり。 */
 typedef struct { int32_t side,raw,level_index,layer_min,layer_max,form,row; } KbcsSpawnRequest;

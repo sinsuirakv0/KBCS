@@ -8,6 +8,8 @@ export function createBattleMonitor(root,read){
   const now=performance.now(),value=read(),seconds=(now-at)/1000;
   latest={...value,fps:(value.paints-lastPaints)/seconds,progress:(value.frame-lastFrame)/30/seconds,resources:resource};
   show('fps',number(latest.fps)+' FPS');show('progress','進行 '+number(latest.progress,2)+'×');
+  latest.averageFps=value.activeMs>0?value.activePaints*1000/value.activeMs:0;
+  show('average-fps','平均 '+number(latest.averageFps)+' FPS','戦闘開始からの描画回数 / 実時間。非表示と一時停止の時間を除きます');
   show('core','更新計算 '+number(value.coreMs)+'ms');show('scene','戦闘API '+number(value.apiMs)+'ms / p95 '+number(value.apiP95Ms)+'ms','直近'+value.apiSamples+'要求 / 最大 '+number(value.apiMaxMs)+'ms\nサーバー '+number(value.serverMs)+'ms（背景 '+number(value.computeMs)+' / 変換 '+number(value.encodeMs)+'）\n受渡・待機 '+number(value.transferMs)+'ms / 復元 '+number(value.decodeMs)+'ms / '+number(value.payloadBytes/1024,0)+'KB');
   show('draw','描画提出 '+number(value.drawMs)+'ms','CPUからWebGLへ送る時間。GPU実行時間は含めません');
   show('lag','待ち '+Math.ceil(value.lag)+'F');

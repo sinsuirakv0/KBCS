@@ -6,29 +6,26 @@ import {escapeHtml as esc,formatNumber,formatTime} from './src/shared/game/datab
 import {resolveStageRoute,applicableLimits} from './src/features/stages/model.js';
 import {loadStageScene,stageMediaHtml,initializeStageMedia} from './src/features/stages/native-media.js';
 import {prepareBattleScreen,startBattleScreen} from './battle-screen.js';
-import {formationIconHtml} from './formation-view.js';
+import {createFormationView,fitFormationName} from './formation-view.js';
+import {readSortiePreferences,sortieItemsHtml,toggleSortieItem,sortieLaunchHtml} from './sortie-view.js';
 import {formationDisplayName} from './formation-model.js';
 import {stageRulesHtml,stageFormationHtml} from './src/features/stages/view.js';
-import {battleItems,readBattleJson,battleFormation,castleHealth,prepareBattleAssets,effectiveStageLimit,stageDeployment,deploymentReason} from './battle-support.js';
+import {readBattleJson,battleFormation,castleHealth,prepareBattleAssets,effectiveStageLimit,stageDeployment} from './battle-support.js';
 
 const node=id=>document.getElementById('sortie-'+id),route=new URLSearchParams(location.search);
-let artwork,deployment,deployVersion=0,battle;
+let artwork,battleArtwork,paintFormation,formationIndex=1,deployment,deployVersion=0,battle;
 let database,enemies,units,map,stages=[],stage,entry,health,choiceVersion=0,controller,loadedAssets,prepared;
-let saved={};try{saved=JSON.parse(sessionStorage.getItem('kbcs:sortie')||'{}');}catch{}
-let crown=Math.max(1,Number(route.get('crown'))||1),items={...saved.items},speed=saved.speed===2?2:3;
-const known=new Map();
+let saved={items:{},speed:2};try{saved=readSortiePreferences(localStorage,sessionStorage);}catch{}
+let crown=Math.max(1,Number(route.get('crown'))||1),items={...saved.items},speed=saved.speed;
 const stageMedia=initializeStageMedia(node('media'),id=>stages.find(value=>value.id===id));
 function status(message,error=false){node('message').textContent=message;node('message').classList.toggle('sortie-status-error',error);}
-function store(){try{sessionStorage.setItem('kbcs:sortie',JSON.stringify({formation:entry?.id,items,speed}));}catch{}}
+function store(){saved={formation:entry?.id??saved.formation,items,speed};try{for(const storage of [localStorage,sessionStorage])storage.setItem('kbcs:sortie',JSON.stringify(saved));}catch{}}
 function ready(){node('launch').disabled=!!controller||!entry||!health||!deployment||!stage||!!(stage.variants?.length&&!stage.patternSource)||!(stage.width>0)||stage.background==null;}
 function drawFormation(){
   if(!entry){node('formation-preview').innerHTML='<a href="/pages/formation/">編成を作成</a>';return;}
   const document=battleFormation(units,entry.document);
   node('formation-edit').href='/pages/formation/?'+new URLSearchParams({id:entry.id,map:map.key,stage:stage.index,crown});
-  node('formation-preview').innerHTML=document.slots.map((member,index)=>{
-    const form=member&&known.get(member.unitId)?.forms.find(form=>form.index===member.form);
-    return form?formationIconHtml(units,form,artwork,deploymentReason(deployment?.slots[index].reasons||0)):'<span class="sortie-slot-empty">'+(index+1)+'</span>';
-  }).join('');
+  node('formation-preview').innerHTML=paintFormation(document,{index:formationIndex,deployment,preview:true});fitFormationName(node('formation-preview'),artwork);
 }
 async function refreshDeployment(){
   if(!entry||!stage||!artwork)return;
@@ -40,18 +37,18 @@ async function refreshDeployment(){
     node('restricted').textContent=count?count+'枠が出撃不可':'';
   }catch(error){if(version===deployVersion)status(error.message,true);}finally{if(version===deployVersion)ready();}
 }
-async function refreshFormationList(preferred=entry?.id){
+async function refreshFormationList(preferred=entry?.id??saved.formation){
+  preferred=Number(preferred);
   const list=await readBattleJson('/api/formations?list=1');
   node('formation').innerHTML=list.entries.map((value,index)=>'<option value="'+value.id+'">'+esc(formationDisplayName(value,index+1))+'</option>').join('');
   const id=list.entries.some(value=>value.id===preferred)?preferred:list.entries[0]?.id;
   await chooseFormation(id);
 }
 async function chooseFormation(id){
-  const version=++choiceVersion;health=null;deployment=null;ready();status('編成を読み込み中');
+  const version=++choiceVersion;++deployVersion;health=null;deployment=null;ready();status('編成を読み込み中');
   try{
     const result=await readBattleJson('/api/formations'+(id?'?current='+encodeURIComponent(id):''));
-    if(version!==choiceVersion)return;entry=result.entry;
-    if(entry&&entry.document.gameVersion!==units.gameVersion)throw Error('編成とDBの版が異なります。編成を確認してください');
+    if(version!==choiceVersion)return;entry=result.entry;formationIndex=result.index;
     drawFormation();
     if(entry){node('formation').value=entry.id;const value=await castleHealth(units,battleFormation(units,entry.document));if(version!==choiceVersion)return;health=value;node('health-breakdown').innerHTML=[['施設',value.facility],['城開発',value.development],['お宝',value.beforeCombo-value.facility-value.development],['コンボ加算',value.maximum-value.beforeCombo]].map(([name,amount])=>'<dt>'+name+'</dt><dd>'+formatNumber(amount)+'</dd>').join('');node('castle-health').textContent=formatNumber(value.maximum);node('sniper-damage').textContent=formatNumber(value.sniper);store();status('');await refreshDeployment();}
     else status('使用する編成を作成してください');
@@ -101,19 +98,28 @@ node('formation').addEventListener('change',event=>chooseFormation(event.target.
 node('stages').addEventListener('click',event=>{const target=event.target.closest('[data-stage]');if(target){stage=stages.find(value=>value.index===Number(target.dataset.stage));renderStage();}});
 node('crowns').addEventListener('click',event=>{const target=event.target.closest('[data-crown]');if(target){crown=Number(target.dataset.crown);renderStage();}});
 node('pattern').addEventListener('change',async event=>{const index=stage.index;node('launch').disabled=true;try{const value=await loadStageVariant(map.key,index,event.target.value);stages=stages.map(stage=>stage.index===index?value:stage);if(stage.index===index){stage=value;renderStage();status('');}}catch(error){status(error.message,true);}finally{ready();}});
-node('items').addEventListener('change',event=>{const key=event.target.dataset.item;if(key){items[key]=event.target.checked;node('speed').disabled=!items.speedup;store();}});
-node('speed').addEventListener('change',event=>{speed=Number(event.target.value);store();});
+node('formation-preview').addEventListener('click',event=>{
+ const target=event.target.closest('[data-action],[data-slot]');if(!target)return;
+ const action=target.dataset.action;
+ if(action==='previous'||action==='next'){
+  const select=node('formation'),count=select.options.length;
+  if(count)chooseFormation(Number(select.options[(select.selectedIndex+(action==='next'?1:-1)+count)%count].value));
+ }else if(action==='menu'){node('formation').focus();try{node('formation').showPicker?.();}catch{}}
+ else if(action==='cannon'||target.dataset.slot!=null){const url=new URL(node('formation-edit').href);if(target.dataset.slot!=null)url.searchParams.set('slot',target.dataset.slot);location.href=url;}
+});
+node('formation-preview').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){const button=event.target.closest('[role=button]');if(button){event.preventDefault();button.dispatchEvent(new MouseEvent('click',{bubbles:true}));}}});
+node('items').addEventListener('click',event=>{const button=event.target.closest('[data-item]'),key=button?.dataset.item;if(key){const focused=document.activeElement===button;speed=toggleSortieItem(items,speed,key);node('items').innerHTML=sortieItemsHtml(battleArtwork,items,speed);if(focused)node('items').querySelector('[data-item="'+key+'"]').focus({preventScroll:true});store();}});
 async function load(){
   try{
-    [database,enemies,units,artwork]=await Promise.all([loadStageDatabase(),loadEnemyDatabase(),loadUnitDatabase(),readBattleJson('/images/native-formation/manifest.json')]);
+    [database,enemies,units,artwork,battleArtwork]=await Promise.all([loadStageDatabase(),loadEnemyDatabase(),loadUnitDatabase(),readBattleJson('/images/native-formation/manifest.json'),readBattleJson('/images/native-battle/manifest.json')]);
     if(database.buildId!==units.buildId)throw Error('DBが更新されました。画面を再読み込みしてください');
-    for(const unit of units.units)known.set(unit.id,unit);
     const routeResult=resolveStageRoute(database,route),detail=await readBattleJson('/api/stages?'+new URLSearchParams({map:routeResult.map.key}));
     if(detail.buildId!==database.buildId||detail.revision!==database.revision)throw Error('DBが更新されました。画面を再読み込みしてください');
     map=detail.maps.find(value=>value.key===routeResult.map.key);stages=detail.stages;stage=stages.find(value=>value.id===routeResult.selected)||stages[0];crown=Math.min(map.stars.length,crown);
 
-    node('items').innerHTML=battleItems.map(item=>{const image=database.rewards[item.id]?.icon;return '<label><input type="checkbox" data-item="'+item.key+'" '+(items[item.key]?'checked':'')+'>'+(image?'<img src="'+esc(database.imageBase+image)+'" alt="">':'')+'<span>'+item.name+'</span></label>';}).join('');
-    node('speed').value=speed;node('speed').disabled=!items.speedup;renderStage();node('status').hidden=true;node('content').hidden=false;
+    paintFormation=createFormationView(units,artwork);
+    node('items').innerHTML=sortieItemsHtml(battleArtwork,items,speed);node('launch').innerHTML=sortieLaunchHtml(battleArtwork);
+    renderStage();node('status').hidden=true;node('content').hidden=false;
     await refreshFormationList(saved.formation);
   }catch(error){node('status').textContent=error.message;}
 }

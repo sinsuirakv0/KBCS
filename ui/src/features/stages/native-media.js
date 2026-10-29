@@ -1,4 +1,5 @@
-﻿import {NativeWebGLRenderer} from '../motion/native-webgl-renderer.js';
+﻿import {createAudioPreview} from '../../shared/browser/audio-preview.js';
+import {NativeWebGLRenderer} from '../motion/native-webgl-renderer.js';
 import {escapeHtml as esc} from '../../shared/game/database-view.js';
 import {saveCanvasImage} from '../../shared/browser/capture.js';
 import {initializeSceneGestures} from './scene-controls.js';
@@ -70,17 +71,16 @@ export function createStagePainter(canvas,onRestore,supplied){
   canvas.addEventListener('webglcontextlost',lost);canvas.addEventListener('webglcontextrestored',restored);
   return {paint:async result=>{if(disposed||active.gl.isContextLost())return false;return raster(canvas,result,active,supplied);},dispose:()=>{disposed=true;renderers.delete(active);active.dispose();canvas.removeEventListener('webglcontextlost',lost);canvas.removeEventListener('webglcontextrestored',restored);}};
 }
-const audioTime=value=>Number.isFinite(value)?Math.floor(value/60)+':'+String(Math.floor(value%60)).padStart(2,'0'):'—';
 export function stageMediaHtml(database,stage,enemies){
   const actor=enemies.enemies[stage.enemyCastle],path=actor?.icon||castlePath(stage),available=stage.background!=null&&stage.width>0;
   return '<div class="stage-media" data-media-stage="'+stage.id+'"><div class="stage-media-background"><button type="button" data-background-open aria-label="'+esc(stage.name)+'の背景を拡大"'+(available?'':' disabled')+'><canvas width="384" height="256" role="img" aria-label="背景 '+stage.background+'"></canvas></button><small>背景 '+(stage.background??'—')+'</small></div><div class="stage-media-castle">'+(path?'<img src="/api/asset/'+esc(path)+'" alt="'+esc(actor?.name||'敵城')+'" loading="lazy">':'—')+'<small>'+(actor?'敵ID '+actor.id:stage.castle==null?'—':['ec','wc','sc','rc'][stage.castleSet??3]+String(stage.castle).padStart(3,'0'))+'</small></div><div class="stage-music">'+(stage.musicTracks||[]).map(track=>{
     const item=database.musicCatalog?.tracks?.[track.id],name='BGM '+track.id+(item?.name?' '+item.name:'');
-    return '<div class="stage-track"><button type="button" data-track-play aria-label="'+esc(name)+'を再生"'+(item?'':' disabled')+'>▶</button><span>'+esc(name)+'<small>'+(track.threshold==null?'開始時':'敵城'+track.threshold+'%以下')+(item?'':' / 音源未収録')+'</small></span>'+(item?'<input type="range" data-track-seek min="0" max="100" step="0.1" value="0" disabled aria-label="再生位置"><output data-track-time>0:00 / —</output><audio preload="none" hidden src="/api/stage-audio/'+track.id+'"></audio>':'')+'</div>';
+    return '<div class="stage-track"><button type="button" data-track-play aria-label="'+esc(name)+'を再生"'+(item?'':' disabled')+'>▶</button><span>'+esc(name)+'<small>'+(track.threshold==null?'開始時':'敵城'+track.threshold+'%以下')+(item?'':' / 音源未収録')+'</small></span>'+(item?'<input type="range" data-track-seek min="0" max="100" step="0.1" value="0" disabled aria-label="再生位置"><output data-track-time>0:00 / —</output><audio preload="none" hidden data-source="/api/stage-audio/'+track.id+'"></audio>':'')+'</div>';
   }).join('')+'</div></div>';
 }
 export function initializeStageMedia(root,resolveStage){
   let dialog,camera,activeStage,request=0,animation=0,lastTime=0,currentFrame=0,focus=0,clearGestures;
-  const previews=new WeakMap();
+  const previews=new WeakMap(),players=new Map();
   async function thumbnail(canvas){
     if(!previews.has(canvas)){
       const stage=resolveStage(canvas.closest('[data-media-stage]').dataset.mediaStage);
@@ -88,7 +88,7 @@ export function initializeStageMedia(root,resolveStage){
     }return previews.get(canvas);
   }
   const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){thumbnail(entry.target);observer.unobserve(entry.target);}},{rootMargin:'180px'});
-  function stopAudio(){for(const audio of root.querySelectorAll('audio'))audio.pause();}
+  function stopAudio(){for(const player of players.values())player.pause();}
   async function draw(){
     if(!dialog?.open||!activeStage)return;const version=++request;
     try{
@@ -122,20 +122,17 @@ export function initializeStageMedia(root,resolveStage){
   }
   root.addEventListener('click',async event=>{
     const background=event.target.closest('[data-background-open]');if(background){open(resolveStage(background.closest('[data-media-stage]').dataset.mediaStage));return;}
-    const button=event.target.closest('[data-track-play]');if(!button)return;const audio=button.closest('.stage-track').querySelector('audio');if(!audio)return;
-    if(!audio.paused)audio.pause();else{stopAudio();try{button.textContent='…';await audio.play();}catch{button.textContent='!';button.title='音源を取得・再生できませんでした。';}}
+    const button=event.target.closest('[data-track-play]');if(!button)return;
+    await players.get(button.closest('.stage-track').querySelector('audio'))?.toggle();
   });
-  root.addEventListener('input',event=>{if(event.target.matches('[data-track-seek]')){const audio=event.target.closest('.stage-track').querySelector('audio');if(Number.isFinite(audio.duration))audio.currentTime=Number(event.target.value)/100*audio.duration;}});
   return {
-    clear(){stopAudio();observer.disconnect();if(dialog?.open)dialog.close();},
+    clear(){for(const player of players.values())player.dispose();players.clear();observer.disconnect();if(dialog?.open)dialog.close();},
     refresh(){
       for(const canvas of root.querySelectorAll('[data-media-stage] canvas'))observer.observe(canvas);
       for(const audio of root.querySelectorAll('audio')){
-        const track=audio.closest('.stage-track'),button=track.querySelector('[data-track-play]'),seek=track.querySelector('[data-track-seek]');
-        audio.onplay=()=>button.textContent='Ⅱ';audio.onpause=audio.onended=()=>button.textContent='▶';
-        audio.onerror=()=>{button.textContent='!';button.title='音源を取得・再生できませんでした。';};
-        const progress=()=>{seek.value=audio.duration?audio.currentTime/audio.duration*100:0;track.querySelector('[data-track-time]').textContent=audioTime(audio.currentTime)+' / '+audioTime(audio.duration);};
-        audio.onloadedmetadata=()=>{seek.disabled=!Number.isFinite(audio.duration);progress();};audio.ontimeupdate=progress;
+        if(players.has(audio))continue;
+        const track=audio.closest('.stage-track');
+        players.set(audio,createAudioPreview(audio,track.querySelector('[data-track-play]'),track.querySelector('[data-track-seek]'),track.querySelector('[data-track-time]'),stopAudio));
       }
     },
     prepareCapture:target=>Promise.all([...target.querySelectorAll('[data-media-stage] canvas')].map(thumbnail)),

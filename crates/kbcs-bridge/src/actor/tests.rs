@@ -608,7 +608,14 @@ fn native_actor_states() {
                     Ok(())
                 },
             )
-            .unwrap();
+            .unwrap_or_else(|code| {
+                unsafe extern "C" {
+                    fn kbcs_core_actor_last_error() -> i64;
+                }
+                panic!("attack code={code}, address={:x}, case={case}", unsafe {
+                    kbcs_core_actor_last_error()
+                });
+            });
         let mut expected = Pool::default();
         sparse(&mut expected, &case["after"]);
         assert_eq!(pool.0, expected.0);

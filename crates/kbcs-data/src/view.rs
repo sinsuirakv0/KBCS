@@ -94,6 +94,7 @@ fn form_value(form: &Form) -> Value {
 
 pub fn catalog(database: &Database, region: &str) -> Result<Value> {
     let metadata = database.metadata()?;
+    let equipment = crate::equipment::capacities(database)?;
     let mut units = Vec::new();
     let mut growth = Vec::new();
     let mut abilities = BTreeMap::new();
@@ -161,7 +162,7 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
             })
             .map(|combo| combo.id)
             .collect();
-        units.push(json!({"id":summary.id,"aliases":[aliases],"rarity":summary.rarity,"orbSlots":crate::equipment::capacity(&metadata["version"],summary.id)?,"maxLevel":original.max_level,"plusLevel":original.plus_level,"growth":growth.len()-1,"forms":forms,"talents":talents,"combos":unit_combos,"evolution":evolution,"acquisition":acquisition,"isSpirit":original.is_spirit,"kind":if original.is_spirit{"spirit"}else{&kind}}));
+        units.push(json!({"id":summary.id,"aliases":[aliases],"rarity":summary.rarity,"orbSlots":equipment.get(&summary.id).copied().unwrap_or(0),"maxLevel":original.max_level,"plusLevel":original.plus_level,"growth":growth.len()-1,"forms":forms,"talents":talents,"combos":unit_combos,"evolution":evolution,"acquisition":acquisition,"isSpirit":original.is_spirit,"kind":if original.is_spirit{"spirit"}else{&kind}}));
     }
     let mut summoners: BTreeMap<u32, Vec<(u32, usize, String)>> = BTreeMap::new();
     for unit in &units {
@@ -221,7 +222,7 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
     .map(|(key, label)| json!({"key":key,"label":label}))
     .collect();
     Ok(
-        json!({"schemaVersion":9,"gameVersion":metadata.get("version"),"revision":metadata.get("revision"),"datasetId":metadata.get("dataset_id"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","propertyAtlas":atlas,"targets":targets,"abilities":abilities.into_values().collect::<Vec<_>>(),"growth":growth,"units":units,"combos":combos,"comboEffects":combo_effects,"native":{"talents":true}}),
+        json!({"schemaVersion":9,"gameVersion":metadata.get("version"),"calculationVersion":crate::compatibility::calculation_version(database)?,"revision":metadata.get("revision"),"datasetId":metadata.get("dataset_id"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","propertyAtlas":atlas,"targets":targets,"abilities":abilities.into_values().collect::<Vec<_>>(),"growth":growth,"units":units,"combos":combos,"comboEffects":combo_effects,"native":{"talents":true}}),
     )
 }
 

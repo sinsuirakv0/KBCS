@@ -25,6 +25,8 @@ pub struct Request {
     pub debug: bool,
     #[serde(default)]
     pub compressed: bool,
+    #[serde(default)]
+    pub cheats: u32,
 }
 pub struct Clip {
     pub model: render::Model,
@@ -220,11 +222,12 @@ impl Session {
             .as_object()
             .context("戦闘入力の出典なし")?
         {
-            if let Ok((_, _, sha, _)) = database.source(path) {
-                ensure!(
-                    source["sha256"] == sha,
-                    "戦闘入力の原本SHAが一致しません: {path}"
-                );
+            if let Some(matches) = kbcs_data::compatibility::source_matches(
+                &database,
+                path,
+                source["sha256"].as_str().context("入力SHAなし")?,
+            )? {
+                ensure!(matches, "戦闘入力の原本SHAが一致しません: {path}");
             }
         }
         for source in constants["clocks"]
@@ -233,21 +236,24 @@ impl Session {
             .values()
         {
             if let Some(path) = source["path"].as_str()
-                && let Ok((_, _, sha, _)) = database.source(path)
+                && let Some(matches) = kbcs_data::compatibility::source_matches(
+                    &database,
+                    path,
+                    source["source"]["sha256"].as_str().context("時計SHAなし")?,
+                )?
             {
-                ensure!(
-                    source["source"]["sha256"] == sha,
-                    "効果時計の原本SHAが一致しません: {path}"
-                );
+                ensure!(matches, "効果時計の原本SHAが一致しません: {path}");
             }
         }
         ensure!(
-            metadata.get("version").map(String::as_str) == Some("15.7.2")
+            kbcs_data::compatibility::calculation_version(&database)?.is_some()
+                && (snapshot["version"].is_null()
+                    || snapshot["version"].as_str() == metadata.get("version").map(String::as_str))
                 && snapshot["buildId"].as_str() == metadata.get("build_id").map(String::as_str),
             "戦闘入力とDBの版が一致しません"
         );
         let document: Document = serde_json::from_value(snapshot["formation"].clone())?;
-        document.validate(region)?;
+        document.validate_with_database(region, &database)?;
         let map_key = snapshot["map"]["key"].as_str().context("マップIDなし")?;
         let data = if let Some(path) = snapshot["stage"]["patternSource"].as_str() {
             kbcs_data::stages::variant(
@@ -1187,37 +1193,37 @@ impl Session {
     }
     pub fn draw(&mut self, input: &crate::scene::Input) -> Result<crate::scene::Frame<'_>> {
         let visuals = native(self.core.visuals())?.to_vec();
-        let (actors, profiles) = native(self.core.actors())?;
+        let (actors, _) = native(self.core.actors())?;
+        let references = native(self.core.active_actors())?;
         let mut frame = self
             .scene
             .draw(&self.database, input)
             .context("戦闘背景の描画")?;
         let mut order = Vec::new();
-        // 006ddfb8は敵→味方の枠順で集め、レイヤーの小さい順に選択する。
         for side in [1, 0] {
-            for (slot, actor) in actors[side].iter().enumerate().skip(1) {
-                if actor.words[0] != 0 {
-                    order.push((side, slot));
-                }
-            }
+            order.extend(
+                references
+                    .iter()
+                    .filter(|value| value.side == side && value.slot > 0),
+            );
         }
+        // 原本の選択ソートを維持し、同じレイヤーの順序を変えない。
         for i in 0..order.len() {
             let mut first = i;
             for j in i + 1..order.len() {
-                if actors[order[j].0][order[j].1].words[5]
-                    < actors[order[first].0][order[first].1].words[5]
-                {
+                if order[j].actor.words[5] < order[first].actor.words[5] {
                     first = j;
                 }
             }
             order.swap(i, first);
         }
         let mut commands = Vec::new();
-        for (side, slot) in order {
-            let words = &actors[side][slot].words;
+        for value in order {
+            let (side, slot) = (value.side, value.slot);
+            let words = &value.actor.words;
             let model = self
                 .models
-                .get(profiles[side][slot] as usize)
+                .get(value.profile as usize)
                 .context("個体モデルなし")?;
             let action = words[1];
             let clip = match action {
@@ -1431,18 +1437,19 @@ impl Session {
         Ok(())
     }
     pub fn stats(&self) -> Result<Value> {
-        let (actors, profiles) = native(self.core.actors())?;
+        let (actors, _) = native(self.core.actors())?;
+        let references = native(self.core.active_actors())?;
         let (production, seed) = native(self.core.production())?;
-        let count = |side: usize| actors[side][1..].iter().filter(|a| a.words[0] != 0).count();
-        let mut units = Vec::new();
-        for side in 0..2 {
-            for slot in 1..51 {
-                let a = &actors[side][slot].words;
-                if a[0] != 0 {
-                    units.push(json!({"side":side,"slot":slot,"profile":profiles[side][slot],"raw":a[0],"layer":a[5],"frame":a[2],"action":a[1],"hp":a[8],"maximum":a[7],"x":a[3],"y":a[4],"serial":a[240]}));
-                }
-            }
-        }
+        let count = |side: usize| {
+            references
+                .iter()
+                .filter(|value| value.side == side && value.slot > 0)
+                .count()
+        };
+        let units: Vec<_> = references.iter().filter(|value|value.slot > 0).map(|value| {
+            let a = &value.actor.words;
+            json!({"side":value.side,"slot":value.slot,"profile":value.profile,"raw":a[0],"layer":a[5],"frame":a[2],"action":a[1],"hp":a[8],"maximum":a[7],"x":a[3],"y":a[4],"serial":a[240]})
+        }).collect();
         Ok(
             json!({"ex":native(self.core.ex())?,"endCamera":native(self.core.end_camera())?,"music":native(self.core.music())?,"ending":native(self.core.ending())?,"receipt":self.receipt.saved,"receiptError":self.receipt.error,"rewardRolls":native(self.core.rewards())?,"units":count(0),"enemies":count(1),"castleHp":[actors[0][0].words[8],actors[1][0].words[8]],"wait":production.wait,"maximum":production.maximum,"costs":native(self.core.prices())?,"produced":production.produced,"extras":native(self.core.extras())?,"points":native(self.core.points())?,"lastCosts":production.last_cost,"seed":seed,"actors":units,"cannon":[actors[0][0].words[9],actors[0][0].words[10],actors[0][0].words[13]],"sniper":native(self.core.sniper_status())?,"computer":native(self.core.computer())?,"sounds":native(self.core.sounds())?,"result":native(self.core.outcome())?,"deployment":native(self.core.deployment())?,"rules":self.rules}),
         )

@@ -14,3 +14,5 @@ stages::equipment_catalogは原本equipmentlist全IDを既存rewards::decorate�
 
 
 0.1.27：equipment::capacityはresources/unit-equipment-slots.jsonの版・採用元SHA付き原本から最大枠を返す。view::catalogのorbSlotsとDocument::validateが共用し、UIの追加・外部ファイルの取込・保存のいずれでも最大枠を超えない。191キャラ、最大2枠。元CSVにないキャラは0枠。原本の解放条件列も資産へ残すが、KBCSではユーザー指定どおり全解放の最大枠を使う。schema1と既存ユーザー文書を一括書換しない。
+
+2026-10-29: 公式DBがある保存と戦闘入力はDocument::validate_with_database→equipment::capacitiesへ接続する。原本CSVの最大枠を使い、データ更新で全キャラ画面が版不一致になることを避ける。保存済み旧編成は一括変更しない。詳細はreleases.md。

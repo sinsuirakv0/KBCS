@@ -15,10 +15,10 @@ extern "C" uint32_t kbcs_core_actor_sniper_step(KbcsActorSniper *state,const Kbc
   KbcsActorDefinition definition{};auto env=*environment;KbcsSpawnRequest request{};uint32_t random=1;
   Context context{definition,env,const_cast<KbcsActor (*)[51]>(actors),request,random};
   int maximum=0;
-  for(int i=1;i<51;++i)if(actors[1][i].words[0]&&n_00a94484(context,1,i,-1)&&i!=env.castle_slot&&maximum<=actors[1][i].words[3]){maximum=actors[1][i].words[3];s.target=i;}
-  const auto &castle=actors[0][0].words;const float wave=nativeSin(input->phase);
+  for(int i=1;i<actorEnd();++i)if(actorAt(actors,1,i).words[0]&&n_00a94484(context,1,i,-1)&&i!=env.castle_slot&&maximum<=actorAt(actors,1,i).words[3]){maximum=actorAt(actors,1,i).words[3];s.target=i;}
+  const auto &castle=actorAt(actors,0,0).words;const float wave=nativeSin(input->phase);
   s.desired=0;
-  if(s.target){const auto &target=actors[1][s.target].words;
+  if(s.target){const auto &target=actorAt(actors,1,s.target).words;
    const int x=(castle[3]-input->camera)/10+203,y=int(std::fma(wave,10.f,float(castle[4]/10-369)));
    const float degrees=nativeAngle(float(y-target[4]/10-target[5]*4+58),float(x-(target[3]-input->camera)/10));
    if(360.f-degrees>0)s.desired=-(360.f-degrees);
@@ -35,7 +35,7 @@ extern "C" uint32_t kbcs_core_actor_sniper_step(KbcsActorSniper *state,const Kbc
    else{
     s.gun_recoil=0;
     if(s.frame==11){
-     if(s.angle==s.desired&&s.target&&actors[1][s.target].words[0]&&actors[1][s.target].words[1]<3){
+     if(s.angle==s.desired&&s.target&&actorAt(actors,1,s.target).words[0]&&actorAt(actors,1,s.target).words[1]<3){
       for(int i=0;i<50;++i)if(!s.bullets[i].active){
        s.bullets[i]={1,castle[3]+1770,int(std::fma(wave*10.f,10.f,float(castle[4]-3958))),s.target,int(s.desired),1500};
        s.wait=0;s.smoke_active=1;for(auto &part:s.smoke)std::fill_n(part,5,0);
@@ -58,16 +58,16 @@ extern "C" uint32_t kbcs_core_actor_sniper_step(KbcsActorSniper *state,const Kbc
  }catch(...){return 3;}
 }
 extern "C" uint32_t kbcs_core_actor_sniper_hit(KbcsActorSniper *state,KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t slot,uint32_t *seed,int32_t *hits){
- if(!state||!actors||!environment||slot<1||slot>50||!seed||!*seed||!hits)return 1;
+ if(!state||!actors||!environment||slot<1||slot>=actorEnd()||!seed||!*seed||!hits)return 1;
  try{
   KbcsActorDefinition definition{};auto env=*environment;KbcsSpawnRequest request{};Context context{definition,env,actors,request,*seed};*hits=0;
-  auto &target=actors[1][slot].words;
+  auto &target=actorAt(actors,1,slot).words;
   for(int i=0;i<50;++i){auto &bullet=state->bullets[i];if(!bullet.active||bullet.target!=slot||target[3]<bullet.x)continue;
    const bool eligible=n_00a94484(context,1,slot,-1);bullet.active=0;bool visual=!eligible;
    if(eligible){
     if(n_00a9cc4c(context,1,slot)<1){const int roll=n_0044a8d8(context,100);
      if(int(n_00a9b790(context,1,slot))<=roll){
-      n_00a9bbac(context,1,slot,n_00a96cd8(context,1,slot)?1:actors[0][0].words[7]/20);
+      n_00a9bbac(context,1,slot,n_00a96cd8(context,1,slot)?1:actorAt(actors,0,0).words[7]/20);
       target[23]=1;visual=true;++*hits;
      }else{n_00a9cc8c(context,1,slot,n_00a9b81c(context,1,slot));n_00a9cd6c(context,1,slot,1);}
     }
@@ -81,19 +81,22 @@ extern "C" uint32_t kbcs_core_actor_sniper_hit(KbcsActorSniper *state,KbcsActor 
 }
 
 extern "C" uint32_t kbcs_core_battle_camera(KbcsBattle *battle,const KbcsSceneLayout *layout){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||battle->failed||!layout||!std::isfinite(layout->center)||!std::isfinite(layout->zoom)||layout->zoom<=0)return 1;
  const double value=(layout->center-480./layout->zoom)*10.;if(value<INT32_MIN||value>INT32_MAX)return 1;
  battle->camera=int32_t(value);battle->camera_zoom=layout->zoom;return 0;
 }
 extern "C" uint32_t kbcs_core_battle_sniper_status(const KbcsBattle *battle,int32_t out[5]){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;out[0]=(battle->config.state.items_on>>5)&1;out[1]=battle->sniper.target;out[2]=battle->sniper.wait;
  out[3]=0;for(const auto &bullet:battle->sniper.bullets)out[3]+=bullet.active!=0;out[4]=battle->sniper.firing;return 0;
 }
 extern "C" uint32_t kbcs_core_battle_sniper_draw(const KbcsBattle *battle,const KbcsSceneLayout *scene,const KbcsBattleAtlases *paint,KbcsDrawCommand *out,int32_t capacity,int32_t *count){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!scene||!paint||!out||!count||capacity<164||!std::isfinite(scene->zoom)||scene->zoom<=0)return 1;
  *count=0;if(!(battle->config.state.items_on&(1<<5)))return 0;
  if(!paint->cuts[0]||!paint->cuts[1]||paint->counts[0]<10||paint->counts[1]<14)return 1;
- const auto &s=battle->sniper;const auto &castle=battle->actors[0][0].words;const float shift=float(scene->viewport_width-960.)*.5f;
+ const auto &s=battle->sniper;const auto &castle=actorAt(battle->actors,0,0).words;const float shift=float(scene->viewport_width-960.)*.5f;
  const auto sprite=[&](int atlas,int cut,float x,float y,float w,float h,bool flip=false,float angle=0,float px=0,float py=0){
   if(cut<0||cut>=paint->counts[atlas])throw std::out_of_range("sniper cut");
   const auto &rect=paint->cuts[atlas][cut];KbcsDrawCommand c{paint->textures[atlas],2,4,0,1,{},{rect.x,rect.y,rect.width,rect.height},{}};

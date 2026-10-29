@@ -1,10 +1,10 @@
 ﻿// 006d6d04のボス走査。出現Fの通常行動/攻撃が済んだ後に行動7へ移す。
 extern "C" uint32_t kbcs_core_actor_boss(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t frames,int32_t *sounds,int32_t *shakes){
  if(!actors||!environment||!sounds||!shakes||frames<0)return 1;*sounds=0;*shakes=0;if(environment->unit_modes[1]&1)return 0;
- for(int boss=0;boss<51;++boss){auto &w=actors[1][boss].words;if(!w[64])continue;
+ for(int boss=0;boss<actorEnd();++boss){auto &w=actorAt(actors,1,boss).words;if(!w[64])continue;
   if(!w[65]){++*sounds;if(w[64]==2)++*shakes;
    KbcsActorDefinition definition{};KbcsActorEnvironment environment{};KbcsSpawnRequest request{};uint32_t seed=1;Context c{definition,environment,actors,request,seed};
-   for(int slot=1;slot<51;++slot)if(n_00a94484(c,0,slot,-1)&&!actors[0][slot].words[116]){n_00a94274(c,0,slot,7);n_00a9478c(c,0,slot,0);}
+   for(int slot=1;slot<actorEnd();++slot)if(n_00a94484(c,0,slot,-1)&&!actorAt(actors,0,slot).words[116]){n_00a94274(c,0,slot,7);n_00a9478c(c,0,slot,0);}
   }
   w[65]=std::min(w[65]+1,frames);
  }return 0;
@@ -16,13 +16,13 @@ extern "C" uint32_t kbcs_core_actor_summon(const KbcsSummonInput *input,KbcsSumm
  try{
   const int slot=input->slot;KbcsSummonOutput result{0,-1,-1,15,-1};
   if(!state->active[slot]||state->wait[slot]>0||state->used[slot]){*out=result;return 0;}
-  for(int parent=1;parent<51;++parent){const auto &source=actors[0][parent].words;if(source[0]!=input->parent_raw||source[1]==4)continue;
+  for(int parent=1;parent<actorEnd();++parent){const auto &source=actorAt(actors,0,parent).words;if(source[0]!=input->parent_raw||source[1]==4)continue;
    const int child=construct(user,&input->child,seed);result.last_slot=child;
-   if(child== -1){result.failure_sound=15;*out=result;return 0;}if(child<1||child>50||!*seed)return 1;
+   if(child== -1){result.failure_sound=15;*out=result;return 0;}if(child<1||child>=actorEnd()||!*seed)return 1;
    state->used[slot]=1;if(!result.count)result.sound=162;
    KbcsActorDefinition definition{};auto env=*environment;Context context{definition,env,actors,input->child,*seed};
    n_00a991a0(context,0,child,slot);
-   const int extent=actors[0][child].words[13];int x=source[3]-input->position*4;
+   const int extent=actorAt(actors,0,child).words[13];int x=source[3]-input->position*4;
    if(x-extent<3200)x=extent+3200;x=std::min(x,environment->stage_width-3200);
    n_00a9486c(context,0,child,x);n_00a95338(context,0,child,1);n_00a95ebc(context,0,child,2);
    n_00a9b7d0(context,0,child,100);n_00a9b85c(context,0,child,10000);n_00a9b50c(context,0,child,1);n_00a94274(context,0,child,2);
@@ -48,6 +48,8 @@ struct KbcsBattle {
  std::array<KbcsBattleVisual,200> critical_visuals{};
  KbcsActor actors[2][51]{};
  int32_t profiles[2][51]{};
+ mutable ActorPool pool{actors,{}};
+ mutable std::vector<KbcsBattleActorRef> actor_refs;
  KbcsActorHits hits;
  KbcsActorAreas areas;
  KbcsActorWaves waves{};
@@ -67,10 +69,15 @@ struct KbcsBattle {
  bool bonus_slots[51]{};
  uint32_t seed;
  bool failed=false;
+ uint32_t cheats=0;
  int32_t diagnostic[4]{};
  explicit KbcsBattle(const KbcsBattleConfig &value):config(value),seed(value.seed){
   for(auto &side:profiles)std::fill_n(side,51,-1);
  }
+ int32_t &profileIndex(int side,int slot){return slot<51?profiles[side][slot]:pool.extra[slot-51].profiles[side];}
+ int32_t profileIndex(int side,int slot) const {return slot<51?profiles[side][slot]:pool.extra[slot-51].profiles[side];}
+ bool &bonusSlot(int slot){return slot<51?bonus_slots[slot]:pool.extra[slot-51].bonus;}
+ auto &impactAt(int side,int slot){return slot<51?impacts[side][slot]:pool.extra[slot-51].impacts[side];}
  void check(uint32_t code){if(code)throw AttackFailure{code};}
  void sound(int frame,int id){if(id>=0)sounds.push_back({frame,id});}
  void battleSound(int id){if(!result.mode)sound(current_frame,id);}
@@ -79,7 +86,7 @@ struct KbcsBattle {
  template<size_t N> static KbcsBattleVisual *freeEffect(std::array<KbcsBattleVisual,N> &pool){auto it=std::find_if(pool.begin(),pool.end(),[](const auto &v){return !v.phase;});return it==pool.end()?nullptr:&*it;}
  void effectClock(){
   const auto advance=[&](auto &pool){for(auto &v:pool)if(v.phase){if(v.phase==0x10e8&&!v.frame)battleSound(44);if(++v.frame>=effectLength(v.phase,true))v.phase=0;}};
-  for(auto &side:impacts)for(auto &v:side)if(v[0]>0)--v[0];
+  for(auto &side:impacts)for(auto &v:side)if(v[0]>0)--v[0];for(auto &record:pool.extra)for(auto &v:record.impacts)if(v[0]>0)--v[0];
   advance(critical_visuals);advance(killer_visuals);advance(barrier_visuals);advance(shield_visuals);
   // 可変長リストは末尾から更新・削除し、初回SEも原本の順序を保つ。
   for(int phase:{0x35b8,0x3628,0x16480,0x16560})for(size_t i=transient.size();i-->0;){auto &v=transient[i];if(v.phase!=phase)continue;if(!v.frame)battleSound(v.phase==0x35b8?90:v.phase==0x3628?110:v.phase==0x16560?188:-1);if(++v.frame>=effectLength(v.phase))transient.erase(transient.begin()+i);}
@@ -90,21 +97,27 @@ struct KbcsBattle {
   // 005c2990は加算直後に0..財布上限へ丸める。財布暗号化のOS乱数は戦闘RNGと別。
   screen.money=std::clamp(screen.money+amount,0,layout.wallet_max);
  }
- int occupied(int side) const {int count=0;for(int j=1;j<51;++j)count+=actors[side][j].words[0]!=0;return count;}
- bool unitLimit() const {return config.unit_max>0&&occupied(0)>=config.unit_max;}
+ int occupied(int side) const {int count=0;for(int j=1;j<actorEnd();++j)count+=actorAt(actors,side,j).words[0]!=0;return count;}
+ bool summonActive(int slot) const {return !(cheats&KBCS_BATTLE_HIDE_SUMMON)&&summons.active[slot];}
+ bool unitLimit() const {if(cheats&KBCS_BATTLE_NO_LIMIT)return false;const int count=occupied(0);return (config.unit_max>0&&count>=config.unit_max)||(!pool.extra.empty()&&count>=50);}
+ void refill(KbcsBattleScreenState &screen){
+  if(!(cheats&KBCS_BATTLE_MONEY)||result.mode)return;
+  KbcsBattleScreenInput input{};KbcsBattleScreenState copy{};KbcsBattleScreenLayout layout{};
+  check(kbcs_core_battle_screen_step(&config.screen,&screen,&input,&copy,&layout));screen.money=layout.wallet_max;production.money=screen.money;
+ }
  bool productionCondition(int slot) const {
   int32_t enabled=0;const auto code=kbcs_core_production_condition(production.produced[slot],config.rules.production_kind,config.rules.production_periods[config.rules.slot_rarity[slot]],&enabled);
   if(code)throw AttackFailure{code};return enabled!=0;
  }
  KbcsBattleDeployment deployment(const KbcsBattleScreenState &screen) const {
   KbcsBattleDeployment out{};out.total=production.total;std::copy_n(warning,2,out.warning);
-  for(int j=1;j<51;++j){if(actors[0][j].words[0]<2||profiles[0][j]<0)continue;const int slot=profile(0,j).deployment_slot;
+  for(int j=1;j<actorEnd();++j){if(actorAt(actors,0,j).words[0]<2||profileIndex(0,j)<0)continue;const int slot=profile(0,j).deployment_slot;
    if(slot>=0&&slot<10)++out.active[config.rules.slot_rarity[slot]];
   }
   const bool full=unitLimit();
   for(const auto &p:definitions)if(!p.spawn.side&&p.deployment_slot>=0&&p.deployment_slot<10){const int i=p.deployment_slot,rarity=config.rules.slot_rarity[i];
    if(config.screen.blocked[i]||full)out.blocked[i]=config.screen.blocked[i]|(full?128:0);
-   else if(!summons.active[i]){KbcsBattleLimit in{config.screen.fixed_money>=0,screen.money,cost(p),config.rules.rarity_limits[rarity],out.active[rarity],config.rules.total_limit,production.total};
+   else if(!summonActive(i)){KbcsBattleLimit in{config.screen.fixed_money>=0,(cheats&KBCS_BATTLE_MONEY)?std::max(screen.money,cost(p)):screen.money,cost(p),(cheats&KBCS_BATTLE_NO_LIMIT)?0:config.rules.rarity_limits[rarity],out.active[rarity],(cheats&KBCS_BATTLE_NO_LIMIT)?-1:config.rules.total_limit,production.total};
     const auto code=kbcs_core_battle_limit(&in,&out.blocked[i]);if(code)throw AttackFailure{code};}
   }
   return out;
@@ -116,7 +129,7 @@ struct KbcsBattle {
   if(config.rules.score_type==3)check(kbcs_core_battle_point_display(&config.rules.point,&points));
   if(result.mode)return;
   // 006d6d04の表示更新。全体数/総生産数の上限は警告30Fを(0,1)へ上書きする。
-  if(occupied(0)==50||unitLimit()||(config.rules.total_limit>=0&&production.total>=config.rules.total_limit)){warning[0]=0;warning[1]=1;}
+  if((!(cheats&KBCS_BATTLE_NO_LIMIT)&&occupied(0)>=50)||unitLimit()||(!(cheats&KBCS_BATTLE_NO_LIMIT)&&config.rules.total_limit>=0&&production.total>=config.rules.total_limit)){warning[0]=0;warning[1]=1;}
   else if((warning[1]&~1)!=2)warning[1]=0;
   else if(warning[0]<=0||!--warning[0])warning[1]=0;
  }
@@ -190,7 +203,7 @@ struct KbcsBattle {
   return p.recharge;
  }
  const KbcsBattleProfile &profile(int side,int slot) const {
-  const int index=profiles[side][slot];if(index<0||size_t(index)>=definitions.size())throw std::out_of_range("battle profile");return definitions[index];
+  const int index=profileIndex(side,slot);if(index<0||size_t(index)>=definitions.size())throw std::out_of_range("battle profile");return definitions[index];
  }
  int find(const KbcsSpawnRequest &request) const {
   for(size_t i=0;i<definitions.size();++i){const auto &p=definitions[i];if(p.spawn.side==request.side&&p.spawn.raw==request.raw&&p.spawn.form==request.form)return int(i);}
@@ -204,15 +217,21 @@ struct KbcsBattle {
    std::copy_n(battle.rows[request->row].cells,14,environment.spawn_row);
    environment.hp_percent=environment.spawn_row[9];environment.attack_percent=environment.spawn_row[11];
   }
+  if(request->side||!(battle.cheats&KBCS_BATTLE_NO_LIMIT)){
+   bool free=false;for(int i=1;i<51;++i)if(!battle.actors[request->side][i].words[0]){free=true;break;}if(!free)return -1;
+  }else if(battle.occupied(0)>=actorEnd()-1){
+   if(battle.pool.extra.size()>=size_t(actorStride/0x3ec-51))throw std::length_error("actor capacity");
+   battle.pool.extra.emplace_back();
+  }
   std::copy_n(battle.config.environment.spawned,2,environment.spawned);
   auto definition=p.definition;
   if(!request->side&&p.deployment_slot>=0&&p.deployment_slot<10)definition.orb_enabled=definition.orb_enabled&&battle.productionCondition(p.deployment_slot);
   int32_t slot= -1;battle.check(kbcs_core_actor_initialize(&definition,&environment,battle.actors,request,random,&slot));
   std::copy_n(environment.spawned,2,battle.config.environment.spawned);
   if(slot>0){
-   battle.profiles[request->side][slot]=index;
-   battle.config.clock.forms[request->side][slot]=request->form;
-   if(!request->side)battle.config.clock.kill_orb[slot]=p.definition.orb_present[18];
+   battle.profileIndex(request->side,slot)=index;
+   if(slot<51)battle.config.clock.forms[request->side][slot]=request->form;else battle.pool.extra[slot-51].forms[request->side]=request->form;
+   if(!request->side){if(slot<51)battle.config.clock.kill_orb[slot]=p.definition.orb_present[18];else battle.pool.extra[slot-51].kill_orb=p.definition.orb_present[18];}
   }
   return slot;
  }
@@ -254,7 +273,7 @@ struct KbcsBattle {
   return kbcs_core_actor_areas_append(&battle.areas,&area);
  }
  void deathSurge(int side,int slot,bool unit_route,const KbcsBattleProfile &p,KbcsBattleScreenState &screen){
-  auto &words=actors[side][slot].words;
+  auto &words=actorAt(actors,side,slot).words;
   const int duration=std::max(1,std::max(config.death_surge_time,config.death_surge_motion[side]));
   if(words[2]==config.death_surge_time){
    Context context{p.definition,config.environment,actors,p.spawn,seed};n_006e9c88(context,0,side,slot,0);
@@ -270,7 +289,7 @@ struct KbcsBattle {
   int32_t blocked=0;check(kbcs_core_actor_areas_retirement_blocked(&areas,&waves,side,slot,unit_route,&blocked));
   if(blocked)return;
   // 行動21と4は同じ解放末尾へ入るが、21に通常死亡の通知を発生させない。
-  KbcsActorRetirement retirement{0,0,0,std::max(0,p.deployment_slot),actors[0][0].words[11],screen.cannon};KbcsActorRetirementResult result{};
+  KbcsActorRetirement retirement{0,0,0,std::max(0,p.deployment_slot),actorAt(actors,0,0).words[11],screen.cannon};KbcsActorRetirementResult result{};
   const int action=words[1];words[1]=4;words[2]=std::max(words[2],1);
   check(kbcs_core_actor_retire(actors,&config.environment,side,slot,&retirement,&result));
   if(words[0])words[1]=action;
@@ -278,7 +297,7 @@ struct KbcsBattle {
   screen.cannon=result.cannon_remaining;
  }
  void action(int side,int slot,KbcsBattleScreenState &screen){
-  auto &words=actors[side][slot].words;check(kbcs_core_actor_begin(actors,&config.environment,side,slot));
+  auto &words=actorAt(actors,side,slot).words;check(kbcs_core_actor_begin(actors,&config.environment,side,slot));
   if(!words[0])return;
   if(!slot){if(!side||(config.environment.unit_modes[side]&1))check(kbcs_core_actor_cannon_action(&cannon,actors,&config.cannon,side));return;}
   const auto &p=profile(side,slot);const bool unit_route=!side||(config.environment.unit_modes[side]&1);
@@ -301,13 +320,13 @@ struct KbcsBattle {
     if(output.score_updated){result.score=output.score;score_display.phase=int32_t(output.score_display);score_display.frame=int32_t(output.score_display>>32);}
     if(output.record_requested){const KbcsPointInput point{1,2,{output.record_values[0],output.record_values[1]},result.timer,config.rules.time_limit};check(kbcs_core_battle_point_add(&config.rules.point,&points,&point));}
     if(output.erase_cohort)hits.credits.erase(output.cohort_serial);
-    if(output.selected_bonus_slot>=0&&output.selected_bonus_slot<51)bonus_slots[output.selected_bonus_slot]=true;
+    if(output.selected_bonus_slot>=0&&output.selected_bonus_slot<actorEnd())bonusSlot(output.selected_bonus_slot)=true;
    }else check(kbcs_core_actor_enemy_displacement(actors,&config.environment,side,slot,p.boundary,&handled));
    return;
   }
   if(state==4){
    int32_t blocked=0;check(kbcs_core_actor_areas_retirement_blocked(&areas,&waves,side,slot,unit_route,&blocked));
-   KbcsActorRetirement input{blocked,p.death_body_frames,p.death_soul_frames,std::max(0,p.deployment_slot),actors[0][0].words[11],screen.cannon};KbcsActorRetirementResult result{};
+   KbcsActorRetirement input{blocked,p.death_body_frames,p.death_soul_frames,std::max(0,p.deployment_slot),actorAt(actors,0,0).words[11],screen.cannon};KbcsActorRetirementResult result{};
    check(kbcs_core_actor_retire(actors,&config.environment,side,slot,&input,&result));screen.cannon=result.cannon_remaining;
    if(result.reset_production&&result.production_slot>=0&&result.production_slot<10)summons.active[result.production_slot]=0;
    return;
@@ -327,18 +346,18 @@ struct KbcsBattle {
   complete();
   if(config.rules.score_type==3&&result.mode)points.ending=1; // 005d996c/005e02b0→00645630。
   config.waves.game_mode=result.mode;
-  diagnostic[1]=2;stage.active_enemies=occupied(1);stage.kill_delta=kills;kills=0;stage.castle_hp=actors[1][0].words[8];stage.castle_max_hp=actors[1][0].words[7];
-  if(stage.damage_condition)stage.castle_damage=actors[1][config.environment.castle_slot].words[112];
+  diagnostic[1]=2;stage.active_enemies=occupied(1);stage.kill_delta=kills;kills=0;stage.castle_hp=actorAt(actors,1,0).words[8];stage.castle_max_hp=actorAt(actors,1,0).words[7];
+  if(stage.damage_condition)stage.castle_damage=actorAt(actors,1,config.environment.castle_slot).words[112];
   if(!result.mode){KbcsEnemyProductionOutput birth{};check(kbcs_core_production_enemy(rows.data(),states.data(),int32_t(rows.size()),&stage,&seed,seen.data(),int32_t(seen.size()),construct,this,&birth));}
   diagnostic[1]=3;check(kbcs_core_actor_clock(actors,&config.clock));
   for(int side=0;side<2;++side){
    if(side){const KbcsSniperInput input{(screen.items_on>>5)&1,camera,640,sniper_phase};int32_t fired= -1;check(kbcs_core_actor_sniper_step(&sniper,&input,actors,&config.environment,&fired));}
-   for(int slot=0;slot<51;++slot){diagnostic[1]=4;diagnostic[2]=side;diagnostic[3]=slot;action(side,slot,screen);}
+   for(int slot=0;slot<actorEnd();++slot){diagnostic[1]=4;diagnostic[2]=side;diagnostic[3]=slot;action(side,slot,screen);}
   }
-  for(int slot=1;slot<51;++slot)if(bonus_slots[slot]){actors[0][slot].words[243]=0;bonus_slots[slot]=false;}
+  for(int slot=1;slot<actorEnd();++slot)if(bonusSlot(slot)){actorAt(actors,0,slot).words[243]=0;bonusSlot(slot)=false;}
   diagnostic[1]=5;int32_t burrow=0;check(kbcs_core_actor_intent(actors,&config.environment,&burrow));
-  for(int side=0;side<2;++side)for(int slot=1;slot<51;++slot){
-   if(!actors[side][slot].words[0])continue;const auto &p=profile(side,slot);int32_t handled=0;
+  for(int side=0;side<2;++side)for(int slot=1;slot<actorEnd();++slot){
+   if(!actorAt(actors,side,slot).words[0])continue;const auto &p=profile(side,slot);int32_t handled=0;
    diagnostic[1]=6;diagnostic[2]=side;diagnostic[3]=slot;check(kbcs_core_actor_attack_wait(actors,&config.environment,side,slot,&p.motion,burrow,&handled));
    diagnostic[1]=7;KbcsActorAttackResult result{};check(kbcs_core_actor_attack(actors,&config.environment,side,slot,&p.motion,&seed,attack,this,&result));
   }
@@ -349,27 +368,27 @@ struct KbcsBattle {
    diagnostic[1]=17;diagnostic[2]=side;diagnostic[3]=0;KbcsActorEffectEvents events{};KbcsActorDamageContext damage{config.guard_enabled,{notice[0],notice[1]},rows.data(),states.data(),int32_t(rows.size())};
    check(kbcs_core_actor_cannon_step(&cannon,actors,&config.environment,&config.hit,&config.clock,&damage,&config.cannon,side,&seed,&events));std::copy_n(damage.notice,2,notice);
   }
-  diagnostic[1]=13;bool shield_hits[2][51]{};
-  for(int side=0;side<2;++side)for(int slot=0;slot<51;++slot){
-   auto &words=actors[side][slot].words;if(!words[0])continue;
+  diagnostic[1]=13;bool shield_hits[2][51]{};std::vector<std::array<bool,2>> extra_hits(pool.extra.size());const auto shieldHit=[&](int side,int slot)->bool&{return slot<51?shield_hits[side][slot]:extra_hits[slot-51][side];};
+  for(int side=0;side<2;++side)for(int slot=0;slot<actorEnd();++slot){
+   auto &words=actorAt(actors,side,slot).words;if(!words[0])continue;
    if(side){
     const auto metal=hits.metal.find(slot);if(metal!=hits.metal.end()){
      int basis=words[8];for(int rate:metal->second){const int damage=std::max(1,(rate*basis)/100);KbcsActorDamageContext context{config.guard_enabled,{notice[0],notice[1]},rows.data(),states.data(),int32_t(rows.size())};check(kbcs_core_actor_damage(actors,&config.environment,&context,side,slot,damage));std::copy_n(context.notice,2,notice);basis=std::max(0,basis-damage);}
     }
    }
-   KbcsActorProtection protection{};check(kbcs_core_actor_protect(actors,side,slot,&protection));shield_hits[side][slot]=protection.shield_hit;
-   if(config.hit.effects.notifications&&result.mode!=4){auto &w=actors[side][slot].words;result.score=int32_t(uint32_t(result.score)+uint32_t(w[232]));w[232]=0;}
+   KbcsActorProtection protection{};check(kbcs_core_actor_protect(actors,side,slot,&protection));shieldHit(side,slot)=protection.shield_hit;
+   if(config.hit.effects.notifications&&result.mode!=4){auto &w=actorAt(actors,side,slot).words;result.score=int32_t(uint32_t(result.score)+uint32_t(w[232]));w[232]=0;}
    for(int i=0;i<protection.visual_count;++i){const auto &v=protection.visuals[i];auto *free=freeEffect(v[0]?shield_visuals:barrier_visuals);if(free)*free=effect(v[0]?(v[3]?0x2558:0x2520):(v[3]?0x2398:0x2360),v[1]/10,v[2]/10);}
 
   }
   // 保護処理後・特殊城HPの複写前。006d9e44は今回の保留ダメージで条件を判定する。
-  auto guard=stage;guard.castle_hp=actors[1][0].words[8];guard.castle_max_hp=actors[1][0].words[7];
-  if(guard.damage_condition)guard.castle_damage=actors[1][config.environment.castle_slot].words[112];
-  check(kbcs_core_stage_castle_guard(rows.data(),states.data(),int32_t(rows.size()),&guard,actors[1][0].words[19],&preserve_castle));
-  if(config.environment.special_castle>0){const int slot=config.environment.castle_slot;if(slot<1||slot>50)throw std::out_of_range("castle slot");for(int word:{7,8,19})actors[1][0].words[word]=actors[1][slot].words[word];}
+  auto guard=stage;guard.castle_hp=actorAt(actors,1,0).words[8];guard.castle_max_hp=actorAt(actors,1,0).words[7];
+  if(guard.damage_condition)guard.castle_damage=actorAt(actors,1,config.environment.castle_slot).words[112];
+  check(kbcs_core_stage_castle_guard(rows.data(),states.data(),int32_t(rows.size()),&guard,actorAt(actors,1,0).words[19],&preserve_castle));
+  if(config.environment.special_castle>0){const int slot=config.environment.castle_slot;if(slot<1||slot>=actorEnd())throw std::out_of_range("castle slot");for(int word:{7,8,19})actorAt(actors,1,0).words[word]=actorAt(actors,1,slot).words[word];}
   int impact_sound=0;
-  for(int side=0;side<2;++side)for(int slot=0;slot<51;++slot){
-   auto &words=actors[side][slot].words;if(!words[0]||(!words[19]&&!shield_hits[side][slot]))continue;
+  for(int side=0;side<2;++side)for(int slot=0;slot<actorEnd();++slot){
+   auto &words=actorAt(actors,side,slot).words;if(!words[0]||(!words[19]&&!shieldHit(side,slot)))continue;
    if(side&&!slot&&config.environment.special_castle>0)continue;
    impact_sound=std::max(impact_sound,!slot||(side&&slot==config.environment.castle_slot)?2:1);
    const KbcsActorDefinition definition{};const KbcsSpawnRequest request{};Context context{definition,config.environment,actors,request,seed};
@@ -381,7 +400,7 @@ struct KbcsBattle {
    // 00a9cbb8/00a9ce0c/00a9d2e4のフラグはword166/173/219。
    for(const auto &[active,phase]:{std::pair{bool(words[166]),0x35b8},std::pair{bool(words[173]),0x3628},std::pair{bool(words[219]),0x16480}})if(active){const auto point=hitPoint();transient.push_back(effect(phase,point[0]/10+68,point[1]/10+77));}
    if(critical){const auto point=hitPoint();auto &v=critical_entry?*critical_entry:critical_visuals[0];v.x=point[0]/10+68;v.y=point[1]/10+77;}
-   const auto impact=hitPoint();auto &visual=impacts[side][slot];visual[0]=12;visual[1]=impact[0];visual[2]=impact[1];visual[3]=slot?words[96]:int(words[96]==1);
+   const auto impact=hitPoint();auto &visual=impactAt(side,slot);visual[0]=12;visual[1]=impact[0];visual[2]=impact[1];visual[3]=slot?words[96]:int(words[96]==1);
    int deployment= -1,cooldown=0;if(!side&&slot){const auto &p=profile(side,slot);deployment=p.deployment_slot;cooldown=recharge(p);}
    diagnostic[1]=14;diagnostic[2]=side;diagnostic[3]=slot;KbcsActorHealth health{deployment,cooldown,preserve_castle};KbcsActorHealthResult result{};check(kbcs_core_actor_health(actors,side,slot,&health,&seed,&result));
    if(result.delay_slot>=0&&result.delay_slot<10){production.wait[result.delay_slot]+=result.delay_frames;transient.push_back(effect(0x16560,result.delay_x/10+68,result.delay_y/10+77));}
@@ -392,7 +411,7 @@ struct KbcsBattle {
    // 006db1c0..006db340: 敵城HPが閾値を跨いだFで停止し、45論理F後に後半曲へ。
    if(side&&slot==std::max(0,config.environment.castle_slot))check(kbcs_core_battle_music_cross(&reward_rules,previous,words[8],words[7],&music));
   }
-  if(!result.mode&&(!actors[1][0].words[8]||!actors[0][0].words[8]))endSound(!actors[1][0].words[8]);
+  if(!result.mode&&(!actorAt(actors,1,0).words[8]||!actorAt(actors,0,0).words[8]))endSound(!actorAt(actors,1,0).words[8]);
   check(kbcs_core_battle_result_step(&config.rules,&result,1,screen.frame,config.environment.castle_slot,actors,&seed));screen.battle_mode=result.mode;
   complete();
   if(result.reason==2)extras.clear();
@@ -405,7 +424,7 @@ struct KbcsBattle {
   }
   const int previous_cannon=screen.cannon;kbcs_core_battle_screen_economy(&config.screen,&screen);
   if(previous_cannon>0&&!screen.cannon)sound(screen.frame,28);
-  hits.metal.clear();production.money=screen.money;actors[0][0].words[12]=screen.cannon;
+  hits.metal.clear();production.money=screen.money;actorAt(actors,0,0).words[12]=screen.cannon;
   effectClock();
   for(auto &impact:sniper.impacts)for(int i:{0,3})if(impact[i]>0)--impact[i];
   for(int i=0;i<10;++i)if(summons.active[i]&&summons.wait[i]>0)--summons.wait[i];
@@ -416,17 +435,19 @@ struct KbcsBattle {
   if(found==definitions.end())throw std::out_of_range("deployment slot");
   const auto limits=deployment(screen);const bool root_allowed=!config.screen.blocked[slot]&&!unitLimit();
   if(!root_allowed){warning[0]=30;warning[1]=2;sound(screen.frame,15);return;}
-  if(summons.active[slot]){
+  if(summonActive(slot)){
    const int raw=found->definition.cells[110]+2;
    const auto child=std::find_if(definitions.begin(),definitions.end(),[&](const auto &p){return p.spawn.side==0&&p.spawn.raw==raw&&p.spawn.form==0;});
    if(child==definitions.end())throw std::out_of_range("summon profile");
    KbcsSummonInput input{child->spawn,slot,found->spawn.raw,config.summon_position};KbcsSummonOutput result{};
    check(kbcs_core_actor_summon(&input,&summons,actors,&config.environment,&seed,construct,this,&result));sound(screen.frame,result.sound);sound(screen.frame,result.failure_sound);sound(screen.frame,result.completion_sound);return;
   }
-  production.money=screen.money;KbcsProductionInput input{};input.spawn=found->spawn;input.slot=slot;input.present=1;input.allowed=1;input.blocked=limits.blocked[slot]!=0;input.cost=cost(*found);input.recharge=recharge(*found);input.reduction= -1;input.recharge_enabled=1;input.notify_failure=notify;input.summon_mode=found->summon_mode;
+  production.money=(cheats&KBCS_BATTLE_MONEY)?std::max(screen.money,cost(*found)):screen.money;
+  if(cheats&KBCS_BATTLE_INSTANT)production.wait[slot]=0;
+  KbcsProductionInput input{};input.spawn=found->spawn;input.slot=slot;input.present=1;input.allowed=1;input.blocked=limits.blocked[slot]!=0;input.cost=cost(*found);input.recharge=recharge(*found);input.reduction= -1;input.recharge_enabled=1;input.notify_failure=notify;input.summon_mode=found->summon_mode;
   KbcsProductionOutput result{};check(kbcs_core_production_deploy(&input,&production,&seed,construct,this,&result));screen.money=production.money;sound(screen.frame,result.sound);
   if(result.slot>0){
-   if(productionCondition(slot)&&!config.rules.recharge_fixed){int rate=actors[0][result.slot].words[250];if(rate<1)rate=found->spawn.form>=2?found->definition.orbs[19][0]:0;
+   if(productionCondition(slot)&&!config.rules.recharge_fixed){int rate=actorAt(actors,0,result.slot).words[250];if(rate<1)rate=found->spawn.form>=2?found->definition.orbs[19][0]:0;
     int32_t wait=0;check(kbcs_core_production_wait(recharge(*found),rate,&wait));production.wait[slot]=production.maximum[slot]=wait;
    }
    const auto &rule=config.rules.extra_rule;const int count=(uint32_t(rule[0])&(1U<<config.rules.slot_rarity[slot]))?std::max(0,rule[1]):0;
@@ -434,11 +455,13 @@ struct KbcsBattle {
    if(config.rules.score_type==3){const int value=(config.rules.cost_chapter+2)*(found->definition.cells[6]/100)/2;const KbcsPointInput point{0,1,{value,0},this->result.timer,config.rules.time_limit};check(kbcs_core_battle_point_add(&config.rules.point,&points,&point));this->result.score=points.score;}
   }
   if(result.slot>0&&found->definition.cells[110]>=0){summons.active[slot]=1;summons.wait[slot]=15;summons.used[slot]=0;}
+  if(cheats&KBCS_BATTLE_INSTANT)production.wait[slot]=production.maximum[slot]=0;
+  refill(screen);
  }
  void fire(KbcsBattleScreenState &screen,bool notify=true){
   if(result.mode)return;
-  const auto wall=std::find_if(definitions.begin(),definitions.end(),[&](const auto &p){return !p.spawn.side&&p.spawn.raw==actors[0][0].words[26]+2&&p.spawn.form==0;});
-  KbcsCannonFire result{};check(kbcs_core_actor_cannon_fire(actors,&config.environment,wall==definitions.end()?nullptr:&wall->spawn,&seed,construct,this,&result));screen.cannon=actors[0][0].words[12];if(result.fired||notify)sound(screen.frame,result.sound);if(result.fired){computer.action=0;sound(screen.frame,19);}
+  const auto wall=std::find_if(definitions.begin(),definitions.end(),[&](const auto &p){return !p.spawn.side&&p.spawn.raw==actorAt(actors,0,0).words[26]+2&&p.spawn.form==0;});
+  KbcsCannonFire result{};check(kbcs_core_actor_cannon_fire(actors,&config.environment,wall==definitions.end()?nullptr:&wall->spawn,&seed,construct,this,&result));screen.cannon=actorAt(actors,0,0).words[12];if(result.fired||notify)sound(screen.frame,result.sound);if(result.fired){computer.action=0;sound(screen.frame,19);}
  }
  void automatic(KbcsBattleScreenState &screen){
   if(result.mode)return;
@@ -449,10 +472,10 @@ struct KbcsBattle {
   check(kbcs_core_battle_screen_step(&config.screen,&screen,&idle,&copy,&layout));
   input.worker=screen.worker;input.money=screen.money;input.wallet=layout.wallet_max;input.upgrade_cost=layout.upgrade_cost;input.worker_level=config.screen.worker_level;
   input.page=screen.page;input.page_frame=screen.page_frame;input.page_direction=screen.page_direction;input.page_step=screen.page_step;
-  const auto limits=deployment(screen);const int units=occupied(0);input.full=units==50;input.cannon_wait=screen.cannon;input.cannon_action=actors[0][0].words[9];input.cannon_range=actors[0][0].words[6];input.castle_x=actors[0][0].words[3];input.camera=camera;
+  const auto limits=deployment(screen);const int units=occupied(0);input.full=!(cheats&KBCS_BATTLE_NO_LIMIT)&&units>=50;input.cannon_wait=screen.cannon;input.cannon_action=actorAt(actors,0,0).words[9];input.cannon_range=actorAt(actors,0,0).words[6];input.castle_x=actorAt(actors,0,0).words[3];input.camera=camera;
   std::fill_n(input.raw,10,-1);
   for(const auto &p:definitions)if(!p.spawn.side&&p.deployment_slot>=0&&p.deployment_slot<10){
-   const int i=p.deployment_slot;input.raw[i]=p.spawn.raw;input.cost[i]=cost(p);input.eligible[i]=!limits.blocked[i];input.wait[i]=production.wait[i];input.summoned[i]=summons.active[i];
+   const int i=p.deployment_slot;input.raw[i]=p.spawn.raw;input.cost[i]=cost(p);input.eligible[i]=!limits.blocked[i];input.wait[i]=production.wait[i];input.summoned[i]=summonActive(i);
   }
   KbcsComputerOutput result{};check(kbcs_core_battle_computer(&input,&computer,actors[1],&seed,&result));
   if(result.page_start){screen.page_frame=1;screen.page_direction=1;screen.holding=-1;screen.hold_frames=0;screen.gesture=1;}
@@ -471,6 +494,8 @@ struct KbcsBattle {
    else if(event==5){if(!screen->paused)battle.musicDisplay();if(battle.config.rules.score_type==3)battle.check(kbcs_core_battle_point_render(&battle.config.rules.point,&battle.points));if(battle.config.rules.score_type==1)battle.check(kbcs_core_battle_score_display(battle.result.score,&battle.score_display));}
    else if(event>=KBCS_BATTLE_SCREEN_SOUND)battle.sound(screen->frame,event-KBCS_BATTLE_SCREEN_SOUND);
 
+   if(event==0||event==1||event==3||event==5)battle.refill(*screen);
+   if((battle.cheats&KBCS_BATTLE_INSTANT)&&event==0){std::fill_n(battle.production.wait,10,0);std::fill_n(battle.production.maximum,10,0);}
    return 0;
   }
   catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
@@ -487,12 +512,12 @@ extern "C" uint32_t kbcs_core_battle_create(const KbcsBattleConfig *config,const
  try{
   KbcsBattleScreenInput input{};KbcsBattleScreenState screen{};KbcsBattleScreenLayout layout{};
   const auto valid=kbcs_core_battle_screen_step(&config->screen,&config->state,&input,&screen,&layout);if(valid)return valid;
-  battle=new KbcsBattle(*config);battle->config.state.cannon=layout.cannon_initial;if(count)battle->definitions.assign(profiles,profiles+count);if(row_count)battle->rows.assign(rows,rows+row_count);battle->states.resize(row_count);
+  battle=new KbcsBattle(*config);ActorPoolScope pool_scope(battle->pool);battle->config.state.cannon=layout.cannon_initial;if(count)battle->definitions.assign(profiles,profiles+count);if(row_count)battle->rows.assign(rows,rows+row_count);battle->states.resize(row_count);
   int seen_count=0;for(const auto &p:battle->definitions){if(p.orb_count<0||p.orb_count>8)throw AttackFailure{1};if(p.spawn.side)seen_count=std::max(seen_count,p.spawn.raw-1);}battle->seen.resize(seen_count);
-  battle->actors[0][0]=config->castle;
-  for(int side=0;side<2;++side){auto &w=battle->actors[side][0].words;w[0]=1;w[3]=side?3200:config->environment.stage_width-3200;w[4]=4400;w[7]=w[8]=config->castle_hp[side];}
+  actorAt(battle->actors,0,0)=config->castle;
+  for(int side=0;side<2;++side){auto &w=actorAt(battle->actors,side,0).words;w[0]=1;w[3]=side?3200:config->environment.stage_width-3200;w[4]=4400;w[7]=w[8]=config->castle_hp[side];}
   for(const auto &p:battle->definitions)if(p.spawn.side==1&&p.spawn.raw==config->environment.special_castle)battle->stage.damage_condition=p.definition.cells[49]!=0;
-  battle->actors[0][0].words[11]=layout.cannon_max;battle->actors[0][0].words[12]=layout.cannon_initial;
+  actorAt(battle->actors,0,0).words[11]=layout.cannon_max;actorAt(battle->actors,0,0).words[12]=layout.cannon_initial;
   battle->stage.max_enemies=config->enemy_max;battle->stage.global_min=config->global_min;battle->stage.global_max=config->global_max;
   KbcsStageStartOutput start{};KbcsEnemyProductionOutput birth{};const int castle_raw=config->environment.special_castle>0?config->environment.special_castle:0;
   battle->check(kbcs_core_production_start(battle->rows.data(),battle->states.data(),row_count,config->global_min,config->global_max,castle_raw,&battle->seed,KbcsBattle::construct,battle,&start,&birth));
@@ -500,29 +525,44 @@ extern "C" uint32_t kbcs_core_battle_create(const KbcsBattleConfig *config,const
  }catch(const AttackFailure &error){delete battle;return error.code;}catch(...){delete battle;return 3;}
 }
 extern "C" void kbcs_core_battle_destroy(KbcsBattle *battle){delete battle;}
+extern "C" uint32_t kbcs_core_battle_cheats(KbcsBattle *battle,uint32_t flags){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
+ if(!battle||battle->failed||(flags&~15U))return 1;battle->cheats=flags;
+ if(flags&KBCS_BATTLE_INSTANT){std::fill_n(battle->production.wait,10,0);std::fill_n(battle->production.maximum,10,0);}
+ return 0;
+}
 extern "C" uint32_t kbcs_core_battle_advance(KbcsBattle *battle,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||battle->failed||!input||!out||!view)return 1;
  battle->sounds.clear();battle->current_frame=battle->config.state.frame;BattleSoundScope sound_scope(battle->sounds,battle->current_frame);BattleRulesScope rules_scope(battle->config.rules,battle->result.mode);auto screen=battle->config.screen;
  auto resolved_input=*input;
  try{if(battle->result.mode){battle->endingInput(*input);resolved_input.phase=0;resolved_input.control=input->control==10?10:0;battle->config.state.paused=0;input=&resolved_input;}}catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
  // 精霊の再召喚は通常の資金/再生産待ちを条件にしない。原本の別入口で再検査する。
- for(int i=0;i<10;++i)if(battle->summons.active[i])screen.costs[i]=0;
- const auto code=kbcs_core_battle_screen_advance(&screen,&battle->config.state,input,out,view,KbcsBattle::hook,battle);
+ for(int i=0;i<10;++i)if(battle->summonActive(i))screen.costs[i]=0;
+ try{battle->refill(battle->config.state);}catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
+ const auto code=kbcs_core_battle_screen_advance_custom(&screen,&battle->config.state,input,out,view,KbcsBattle::hook,battle,(battle->cheats&KBCS_BATTLE_INSTANT)!=0);
  if(code){battle->failed=true;return code;}battle->config.state=*out;return 0;
 }
 extern "C" uint32_t kbcs_core_battle_actors(const KbcsBattle *battle,const KbcsActor **actors,const int32_t **profiles){
- if(!battle||!actors||!profiles)return 1;*actors=&battle->actors[0][0];*profiles=&battle->profiles[0][0];return 0;
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
+ if(!battle||!actors||!profiles)return 1;*actors=&actorAt(battle->actors,0,0);*profiles=&battle->profiles[0][0];return 0;
 }
 extern "C" uint32_t kbcs_core_battle_production(const KbcsBattle *battle,KbcsProductionState *out,uint32_t *seed){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out||!seed)return 1;*out=battle->production;*seed=battle->seed;return 0;
 }
-extern "C" uint32_t kbcs_core_battle_extras(const KbcsBattle *battle,const KbcsProductionExtra **out,int32_t *count){if(!battle||!out||!count)return 1;*out=battle->extras.data();*count=int32_t(battle->extras.size());return 0;}
-extern "C" uint32_t kbcs_core_battle_points(const KbcsBattle *battle,KbcsBattlePoints *out){if(!battle||!out)return 1;*out=battle->points;return 0;}
+extern "C" uint32_t kbcs_core_battle_extras(const KbcsBattle *battle,const KbcsProductionExtra **out,int32_t *count){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out||!count)return 1;*out=battle->extras.data();*count=int32_t(battle->extras.size());return 0;}
+extern "C" uint32_t kbcs_core_battle_points(const KbcsBattle *battle,KbcsBattlePoints *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->points;return 0;}
 extern "C" uint32_t kbcs_core_battle_computer_state(const KbcsBattle *battle,KbcsComputerState *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;*out=battle->computer;return 0;
 }
-extern "C" uint32_t kbcs_core_battle_result(const KbcsBattle *battle,KbcsBattleResult *out){if(!battle||!out)return 1;*out=battle->result;return 0;}
+extern "C" uint32_t kbcs_core_battle_result(const KbcsBattle *battle,KbcsBattleResult *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->result;return 0;}
 extern "C" uint32_t kbcs_core_battle_reward_rules(KbcsBattle *battle,const KbcsBattleRewardRules *input){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!input||battle->config.state.frame||battle->result.mode||input->enabled<0||input->enabled>1||input->material_enabled<0||input->material_enabled>1)return 1;
  const auto &r=*input;
  if(r.ex_count<0||r.ex_count>32)return 1;uint32_t ex_seed=1;KbcsExTransitionOutput ex_out{};const auto ex_code=kbcs_core_stage_ex(&r.ex,r.ex_choices,r.ex_count,&ex_seed,&ex_out);if(ex_code)return ex_code;
@@ -535,12 +575,18 @@ extern "C" uint32_t kbcs_core_battle_reward_rules(KbcsBattle *battle,const KbcsB
  if(r.material_enabled){KbcsMaterialOutput out{};const auto code=kbcs_core_material_plan(&r.material,&out);if(code)return code;}
  battle->reward_rules=r;return 0;
 }
-extern "C" uint32_t kbcs_core_battle_rewards(const KbcsBattle *battle,KbcsBattleRewards *out){if(!battle||!out)return 1;*out=battle->rewards;return 0;}
-extern "C" uint32_t kbcs_core_battle_notifications(KbcsBattle *battle,int32_t count){if(!battle||count<0||count>128||battle->ending.phase>3||battle->ending.popup.count)return 1;battle->ending.popup.count=count;return 0;}
-extern "C" uint32_t kbcs_core_battle_music(const KbcsBattle *battle,KbcsBattleMusic *out){if(!battle||!out)return 1;*out=battle->music;return 0;}
-extern "C" uint32_t kbcs_core_battle_ex(const KbcsBattle *battle,KbcsExTransitionOutput *out){if(!battle||!out)return 1;*out=battle->ex;return 0;}
-extern "C" uint32_t kbcs_core_battle_end_camera(const KbcsBattle *battle,KbcsBattleEndCamera *out){if(!battle||!out)return 1;*out=battle->end_camera;return 0;}
+extern "C" uint32_t kbcs_core_battle_rewards(const KbcsBattle *battle,KbcsBattleRewards *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->rewards;return 0;}
+extern "C" uint32_t kbcs_core_battle_notifications(KbcsBattle *battle,int32_t count){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||count<0||count>128||battle->ending.phase>3||battle->ending.popup.count)return 1;battle->ending.popup.count=count;return 0;}
+extern "C" uint32_t kbcs_core_battle_music(const KbcsBattle *battle,KbcsBattleMusic *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->music;return 0;}
+extern "C" uint32_t kbcs_core_battle_ex(const KbcsBattle *battle,KbcsExTransitionOutput *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->ex;return 0;}
+extern "C" uint32_t kbcs_core_battle_end_camera(const KbcsBattle *battle,KbcsBattleEndCamera *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->end_camera;return 0;}
 extern "C" uint32_t kbcs_core_battle_ending(const KbcsBattle *battle,KbcsBattleEnding *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;auto e=battle->ending;const auto &r=battle->result;const int width=battle->config.screen.viewport_width;
  static constexpr int slide[]={960,960,512,256,128,64,32,16,8,4,2,1,0};
  static constexpr int fall[]={-132,-94,-57,-20,17,54,92,129,167,204,242,235,227,224,220,219,217,216,215,216,217,218,220,223,227,234,242,241,240,239,237,238,240,241,242,242,242,242,242,242,242,242,242,242};
@@ -560,29 +606,34 @@ extern "C" uint32_t kbcs_core_battle_ending(const KbcsBattle *battle,KbcsBattleE
  *out=e;return 0;
 }
 extern "C" uint32_t kbcs_core_battle_deployment(const KbcsBattle *battle,KbcsBattleDeployment *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;try{*out=battle->deployment(battle->config.state);return 0;}catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
 }
 extern "C" uint32_t kbcs_core_battle_prices(const KbcsBattle *battle,int32_t out[10]){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;
  try{int32_t values[10]{};for(const auto &p:battle->definitions)if(!p.spawn.side&&p.deployment_slot>=0&&p.deployment_slot<10)values[p.deployment_slot]=battle->cost(p);std::copy_n(values,10,out);return 0;}
  catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
 }
 
 extern "C" uint32_t kbcs_core_battle_viewport(KbcsBattle *battle,int32_t width){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||battle->failed||width<960||width>3840)return 1;battle->config.screen.viewport_width=width;return 0;
 }
 
 extern "C" uint32_t kbcs_core_battle_error(const KbcsBattle *battle,int32_t out[4]){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;std::copy_n(battle->diagnostic,4,out);return 0;
 }
 
 extern "C" uint32_t kbcs_core_battle_hud(const KbcsBattle *battle,const KbcsSceneLayout *scene,const int32_t point[2],KbcsBattleHud *out){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!scene||!point||!out||!std::isfinite(scene->zoom)||scene->zoom<=0)return 1;
  KbcsBattleScreenInput input{};KbcsBattleScreenState state{};KbcsBattleScreenLayout slots{};
  const auto code=kbcs_core_battle_screen_step(&battle->config.screen,&battle->config.state,&input,&state,&slots);if(code)return code;
  KbcsBattleHud value{};value.title[0]=62;value.title[1]=10;value.scale=scene->zoom;
- for(int i=0;i<10;++i){auto &s=value.summons[i];s[0]=battle->summons.active[i];s[2]=battle->summons.wait[i];s[3]=battle->summons.used[i];
-  s[4]=int(float(std::cos(double(s[2]*10)*3.141592653589793/180.))*31.f+224.f);if(!s[0]||s[3]||s[2]>0)continue;for(const auto &p:battle->definitions)if(p.deployment_slot==i)for(int j=1;j<51;++j)if(battle->actors[0][j].words[0]==p.spawn.raw&&battle->actors[0][j].words[1]!=4)s[1]=1;
+ for(int i=0;i<10;++i){auto &s=value.summons[i];s[0]=battle->summonActive(i);s[2]=battle->summons.wait[i];s[3]=battle->summons.used[i];
+  s[4]=int(float(std::cos(double(s[2]*10)*3.141592653589793/180.))*31.f+224.f);if(!s[0]||s[3]||s[2]>0)continue;for(const auto &p:battle->definitions)if(p.deployment_slot==i)for(int j=1;j<actorEnd();++j)if(actorAt(battle->actors,0,j).words[0]==p.spawn.raw&&actorAt(battle->actors,0,j).words[1]!=4)s[1]=1;
  }
  // 005d18a4: 押下時のアイコン拡縮とは別の、元の枠座標へゲージを置く。
  for(const auto &p:battle->definitions)if(p.deployment_slot>=0&&p.deployment_slot<10){
@@ -593,8 +644,8 @@ extern "C" uint32_t kbcs_core_battle_hud(const KbcsBattle *battle,const KbcsScen
  }
  const auto &env=battle->config.environment;const auto &offset=battle->config.castle_offsets;
  for(int side=0;side<2;++side){
-  const int slot=side&&env.special_castle>0?env.castle_slot:0;if(slot<0||slot>50)return 1;
-  const auto &w=battle->actors[side][slot].words;double x=0,y=137;
+  const int slot=side&&env.special_castle>0?env.castle_slot:0;if(slot<0||slot>=actorEnd())return 1;
+  const auto &w=actorAt(battle->actors,side,slot).words;double x=0,y=137;
   if(!side){x=w[3]/10-24+offset[0];y+=offset[1];}
   else if(!slot){const int size=env.castle_scale;x=(w[3]-size*1180/100)/10+size*env.castle_offset/100+size*127/200+86+offset[2];y+=offset[3];}
   else{x=w[3]/10+point[0]+offset[4];y=w[4]/10+w[5]*4+point[1]+offset[5];}
@@ -606,12 +657,13 @@ extern "C" uint32_t kbcs_core_battle_hud(const KbcsBattle *battle,const KbcsScen
 }
 
 extern "C" uint32_t kbcs_core_battle_visuals(KbcsBattle *battle,const KbcsBattleVisual **out,int32_t *count){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out||!count)return 1;
  try{
   auto &list=battle->visuals;list.clear();
   // 005d3910/005d3f6c/005d57d0。描画時計を戦闘時計から作り、RNGを消費しない。
   for(int i=0;i<200;++i){const auto &wave=battle->waves.records[i];if(wave.state<1||wave.state>2)continue;
-   const int side=wave.state-1,layer=battle->actors[side][wave.slot].words[5];
+   const int side=wave.state-1,layer=actorAt(battle->actors,side,wave.slot).words[5];
    for(const auto &part:battle->segments.records[i])if(part.frame){
     const int offset=wave.side==2?160*5-540:0;
     list.push_back({wave.mini?1:0,side,wave.slot,0,battle->config.waves.motion_frames[wave.mini!=0]-1-part.frame,(part.x+offset)/10,460+layer*4,layer});
@@ -619,14 +671,14 @@ extern "C" uint32_t kbcs_core_battle_visuals(KbcsBattle *battle,const KbcsBattle
   }
   for(const auto &entry:battle->areas.surges){const auto &value=entry.record;const int start=15,period=value.level*20;int phase=0,frame=value.frame;
    if(frame>=start){frame-=start;phase=frame<period?1:2;if(phase==2)frame-=period;}
-   const int layer=battle->actors[value.side][value.slot].words[5];list.push_back({value.mini?3:2,value.side,value.slot,phase,frame,value.x/10,460+layer*4,layer});
+   const int layer=actorAt(battle->actors,value.side,value.slot).words[5];list.push_back({value.mini?3:2,value.side,value.slot,phase,frame,value.x/10,460+layer*4,layer});
   }
-  for(const auto &value:battle->areas.reflections){const int layer=battle->actors[value.side][value.slot].words[5];list.push_back({9,value.side,value.slot,0x29d8+value.side*0x38,value.frame,value.x/10,460+layer*4,layer,{}});}
+  for(const auto &value:battle->areas.reflections){const int layer=actorAt(battle->actors,value.side,value.slot).words[5];list.push_back({9,value.side,value.slot,0x29d8+value.side*0x38,value.frame,value.x/10,460+layer*4,layer,{}});}
   for(const auto &entry:battle->areas.explosions){const auto &value=entry.record;if(value.frame<0)continue;
-   const int phase=value.frame<battle->config.areas.explosion_frames[0]?0:1,layer=battle->actors[value.side][value.slot].words[5];
+   const int phase=value.frame<battle->config.areas.explosion_frames[0]?0:1,layer=actorAt(battle->actors,value.side,value.slot).words[5];
    list.push_back({4,value.side,value.slot,phase,value.frame-phase*battle->config.areas.explosion_frames[0],value.x/10,460+layer*4,layer});
   }
-  for(int side=0;side<2;++side){const auto &w=battle->actors[side][0].words;const int action=w[9],frame=w[10],x=w[3]/10+(side?-27:27),y=w[4]/10-160;
+  for(int side=0;side<2;++side){const auto &w=actorAt(battle->actors,side,0).words;const int action=w[9],frame=w[10],x=w[3]/10+(side?-27:27),y=w[4]/10-160;
    const auto model=[&](int phase,int at,int px,int py,int sx=1000,int sy=1000){list.push_back({5,side,0,phase,at,px,py,0,{sx,sy}});};
    if(action==4||action==7)model(1,frame,w[3]/10+85,130);
    else if(action==5||action==8)model(0,frame,w[18]/10,470);
@@ -644,7 +696,7 @@ extern "C" uint32_t kbcs_core_battle_visuals(KbcsBattle *battle,const KbcsBattle
   for(const auto *pool:{&battle->killer_visuals,&battle->barrier_visuals,&battle->shield_visuals})for(const auto &v:*pool)if(v.phase)list.push_back(v);
   for(int phase:{0x35b8,0x3628,0x16560})for(const auto &v:battle->transient)if(v.phase==phase)list.push_back(v);
   KbcsActorDefinition definition{};KbcsSpawnRequest request{};Context context{definition,battle->config.environment,battle->actors,request,battle->seed};context.clock=&battle->config.clock;
-  for(int side=0;side<2;++side)for(int slot=1;slot<51;++slot){const auto &w=battle->actors[side][slot].words;if(!w[0])continue;
+  for(int side=0;side<2;++side)for(int slot=1;slot<actorEnd();++slot){const auto &w=actorAt(battle->actors,side,slot).words;if(!w[0])continue;
    const int x=w[3]/10,y=w[4]/10+w[5]*4;
    const auto draw=[&](int phase,int at,int px,int py){list.push_back({7,side,slot,phase,at,px,py,w[5],{}});};
    if(w[1]!=14&&w[1]!=15&&w[1]!=18&&w[1]!=19&&w[1]!=20)for(int i=0;i<4;++i){const int px=x+i*(side?60:-60);switch(n_00a9cafc(context,side,slot,i)){
@@ -660,11 +712,23 @@ extern "C" uint32_t kbcs_core_battle_visuals(KbcsBattle *battle,const KbcsBattle
    if(n_00a9c81c(context,side,slot))draw(0x2328,w[134],x,y-42);
    const int shield=n_00a9cfb8(context,side,slot);if(shield>0)draw(0x2440+shield*0x38,w[193],x,y-42);
   }
-  if(!(battle->config.environment.unit_modes[1]&1)){const auto &e=battle->config.environment;int anchor[2];battle->check(kbcs_core_boss_effect_anchor(e.castle_x,battle->actors[1][0].words[4],e.castle_scale,e.castle_offset,battle->config.castle_y_offset,anchor));for(int slot=0;slot<51;++slot){const auto &w=battle->actors[1][slot].words;if(w[64]&&w[65]<=battle->config.boss_frames)list.push_back({8,0,-1,0x1040,w[65],anchor[0],anchor[1],0,{}});}}
+  if(!(battle->config.environment.unit_modes[1]&1)){const auto &e=battle->config.environment;int anchor[2];battle->check(kbcs_core_boss_effect_anchor(e.castle_x,actorAt(battle->actors,1,0).words[4],e.castle_scale,e.castle_offset,battle->config.castle_y_offset,anchor));for(int slot=0;slot<actorEnd();++slot){const auto &w=actorAt(battle->actors,1,slot).words;if(w[64]&&w[65]<=battle->config.boss_frames)list.push_back({8,0,-1,0x1040,w[65],anchor[0],anchor[1],0,{}});}}
   *out=list.data();*count=int32_t(list.size());return 0;
  }catch(...){return 3;}
 }
 
-extern "C" uint32_t kbcs_core_battle_sounds(const KbcsBattle *battle,const KbcsBattleSound **out,int32_t *count){if(!battle||!out||!count)return 1;*out=battle->sounds.data();*count=int32_t(battle->sounds.size());return 0;}
+extern "C" uint32_t kbcs_core_battle_sounds(const KbcsBattle *battle,const KbcsBattleSound **out,int32_t *count){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out||!count)return 1;*out=battle->sounds.data();*count=int32_t(battle->sounds.size());return 0;}
 
 #include "actor_top.inc"
+
+extern "C" uint32_t kbcs_core_battle_slots(const KbcsBattle *battle,int32_t *count){
+ if(!battle||!count)return 1;*count=battle->pool.size();return 0;
+}
+extern "C" uint32_t kbcs_core_battle_actor_refs(const KbcsBattle *battle,const KbcsBattleActorRef **out,int32_t *count){
+ if(!battle||!out||!count)return 1;ActorPoolScope pool_scope(battle->pool);
+ try{auto &refs=battle->actor_refs;refs.clear();
+  for(int side=0;side<2;++side)for(int slot=0;slot<actorEnd();++slot){const auto &actor=actorAt(battle->actors,side,slot);if(!slot||actor.words[0])refs.push_back({&actor,side,slot,battle->profileIndex(side,slot)});}
+  *out=refs.data();*count=int32_t(refs.size());return 0;
+ }catch(...){return 3;}
+}

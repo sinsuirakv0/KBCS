@@ -50,14 +50,16 @@ extern "C" uint32_t kbcs_core_actor_cannon_draw(const KbcsActor *castle,int32_t 
 }
 
 extern "C" uint32_t kbcs_core_battle_cannon_draw(const KbcsBattle *battle,const KbcsSceneLayout *scene,const KbcsBattleAtlases *paint,KbcsDrawCommand *out,int32_t capacity,int32_t *count){
- if(!battle)return 1;return kbcs_core_actor_cannon_draw(&battle->actors[0][0],battle->camera,scene,paint,out,capacity,count);
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
+ if(!battle)return 1;return kbcs_core_actor_cannon_draw(&actorAt(battle->actors,0,0),battle->camera,scene,paint,out,capacity,count);
 }
 
 // 005cca80: 被弾の12F記録。メタル/特殊被弾は通常色の後に加算色を重ねる。
 extern "C" uint32_t kbcs_core_battle_hit_draw(const KbcsBattle *battle,const KbcsSceneLayout *scene,const KbcsBattleAtlases *paint,KbcsDrawCommand *out,int32_t capacity,int32_t *count){
- if(!battle||!scene||!paint||!out||!count||!paint->cuts[0]||paint->counts[0]<14||capacity<224)return 1;*count=0;
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
+ if(!battle||!scene||!paint||!out||!count||!paint->cuts[0]||paint->counts[0]<14||capacity<224+(actorEnd()-51)*4)return 1;*count=0;
  const int shift=int(scene->viewport_width-960)/2;
- for(const auto &side:battle->impacts)for(const auto &v:side)if(v[0]>1){
+ for(int side=0;side<2;++side)for(int slot=0;slot<std::max(56,actorEnd());++slot){const auto &v=slot<51?battle->impacts[side][slot]:slot<actorEnd()?battle->pool.extra[slot-51].impacts[side]:battle->impacts[side][slot];if(v[0]<=1)continue;
   const auto &r=paint->cuts[0][13-v[0]/2];const int x=(v[1]-battle->camera)/10+shift,y=v[2]/10;
   const auto sprite=[&](int blend,int red,int green,int blue){KbcsDrawCommand c{paint->textures[0],2,4,blend,1,{},{r.x,r.y,r.width,r.height},{red,green,blue,1,0,0}};
    const int points[8]={x,y,x,y+117,x+137,y+117,x+137,y};
@@ -65,5 +67,6 @@ extern "C" uint32_t kbcs_core_battle_hit_draw(const KbcsBattle *battle,const Kbc
   if(v[3]==2){sprite(0,200,170,255);sprite(1,145,135,165);}
   else if(v[3]==1){sprite(0,204,204,204);sprite(1,255,255,255);}
   else sprite(0,255,255,255);
- }return 0;
+ }
+ return 0;
 }

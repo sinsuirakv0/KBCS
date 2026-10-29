@@ -1,5 +1,18 @@
 ﻿use crate::{actor, battle_screen, production, render, stage};
 use std::ptr::NonNull;
+#[repr(C)]
+struct RawActorRef {
+    actor: *const actor::Actor,
+    side: i32,
+    slot: i32,
+    profile: i32,
+}
+pub struct ActorRef<'a> {
+    pub actor: &'a actor::Actor,
+    pub side: usize,
+    pub slot: usize,
+    pub profile: i32,
+}
 
 #[repr(C)]
 pub struct RewardRules {
@@ -463,7 +476,7 @@ impl Battle {
             counts: [cuts.len() as i32, 0],
             textures: [texture, -1],
         };
-        let mut out = vec![render::Command::default(); 224];
+        let mut out = vec![render::Command::default(); 224 + (self.slots()? - 51) * 4];
         let mut count = 0;
         let code = unsafe {
             kbcs_core_battle_hit_draw(
@@ -584,6 +597,44 @@ impl Battle {
     pub fn viewport(&mut self, width: i32) -> Result<(), u32> {
         let code = unsafe { kbcs_core_battle_viewport(self.0.as_ptr(), width) };
         if code == 0 { Ok(()) } else { Err(code) }
+    }
+    pub fn cheats(&mut self, flags: u32) -> Result<(), u32> {
+        let code = unsafe { kbcs_core_battle_cheats(self.0.as_ptr(), flags) };
+        if code == 0 { Ok(()) } else { Err(code) }
+    }
+    pub fn slots(&self) -> Result<usize, u32> {
+        let mut count = 0;
+        let code = unsafe { kbcs_core_battle_slots(self.0.as_ptr(), &mut count) };
+        if code != 0 {
+            return Err(code);
+        }
+        usize::try_from(count).map_err(|_| 3)
+    }
+    pub fn active_actors(&self) -> Result<Vec<ActorRef<'_>>, u32> {
+        let mut values = std::ptr::null();
+        let mut count = 0;
+        let code = unsafe { kbcs_core_battle_actor_refs(self.0.as_ptr(), &mut values, &mut count) };
+        if code != 0 {
+            return Err(code);
+        }
+        if values.is_null() || count < 2 {
+            return Err(3);
+        }
+        // 個体本体を借用し、可変の参照一覧のポインタは外へ出さない。
+        unsafe { std::slice::from_raw_parts(values, count as usize) }
+            .iter()
+            .map(|value| {
+                if value.actor.is_null() || !(0..2).contains(&value.side) || value.slot < 0 {
+                    return Err(3);
+                }
+                Ok(ActorRef {
+                    actor: unsafe { &*value.actor },
+                    side: value.side as usize,
+                    slot: value.slot as usize,
+                    profile: value.profile,
+                })
+            })
+            .collect()
     }
     pub fn advance(&mut self, input: &battle_screen::Input) -> Result<battle_screen::Frame, u32> {
         let mut state = battle_screen::State::default();
@@ -742,6 +793,13 @@ unsafe extern "C" {
     ) -> u32;
     fn kbcs_core_battle_error(battle: *const RawBattle, out: *mut i32) -> u32;
     fn kbcs_core_battle_viewport(battle: *mut RawBattle, width: i32) -> u32;
+    fn kbcs_core_battle_cheats(battle: *mut RawBattle, flags: u32) -> u32;
+    fn kbcs_core_battle_slots(battle: *const RawBattle, count: *mut i32) -> u32;
+    fn kbcs_core_battle_actor_refs(
+        battle: *const RawBattle,
+        values: *mut *const RawActorRef,
+        count: *mut i32,
+    ) -> u32;
     fn kbcs_core_battle_create(
         config: *const Config,
         profiles: *const Profile,

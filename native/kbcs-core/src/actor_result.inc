@@ -16,12 +16,12 @@ extern "C" uint32_t kbcs_core_battle_result_step(const KbcsBattleRules *rules,Kb
  auto &s=*state;if(s.mode)return 0;
  const auto victory=[&](int reason,bool repair){
   s.mode=1;s.reason=reason;s.finished_frame=frame;
-  if(repair&&!actors[0][0].words[8])actors[0][0].words[8]=1;
+  if(repair&&!actorAt(actors,0,0).words[8])actorAt(actors,0,0).words[8]=1;
   // 005d996c: 通常の敵だけを死亡へ移す。特殊城の魂あり状態は変更しない。
-  for(int j=1;j<51;++j){auto &w=actors[1][j].words;
+  for(int j=1;j<actorEnd();++j){auto &w=actorAt(actors,1,j).words;
    if(w[0]&&w[1]!=4&&j!=castle_slot){w[1]=4;w[2]=0;w[8]=0;}
   }
-  if(castle_slot>0&&!actors[1][castle_slot].words[111])actors[1][castle_slot].words[1]=17;
+  if(castle_slot>0&&!actorAt(actors,1,castle_slot).words[111])actorAt(actors,1,castle_slot).words[1]=17;
   if(rules->score_type==2){KbcsStageScoreInput in{};in.elapsed=s.elapsed;in.count=1;KbcsStageScoreOutput out{};kbcs_core_stage_score(&in,&out);s.score=out.score;}
   else if(rules->native_kind== -6)s.score=(30000-s.elapsed)*(30000-s.elapsed);
  };
@@ -34,12 +34,12 @@ extern "C" uint32_t kbcs_core_battle_result_step(const KbcsBattleRules *rules,Kb
   if(!s.mode)s.elapsed=s.elapsed<29999?s.elapsed+1:30000;
   return 0;
  }
- if(actors[1][0].words[8]==0)victory(1,true);
- else if(!actors[0][0].words[8]){
+ if(actorAt(actors,1,0).words[8]==0)victory(1,true);
+ else if(!actorAt(actors,0,0).words[8]){
   s.mode=rules->score_type==1?4:rules->score_type==3?7:2;s.reason=2;s.finished_frame=frame;
   // 005e02b0: DAT_002b2bb0は(行動4,時計0)。対象ごとに5回抽選する。
   const auto draw=[&](int bound){int32_t value=0;kbcs_core_random_bounded(seed,bound,&value);return value;};
-  for(int j=1;j<51;++j){auto &w=actors[0][j].words;if(!w[0]||w[1]==4)continue;
+  for(int j=1;j<actorEnd();++j){auto &w=actorAt(actors,0,j).words;if(!w[0]||w[1]==4)continue;
    w[1]=4;w[2]=0;w[8]=0;w[10]=draw(12)*10+100;w[24]=draw(40)*-10+1000;w[25]=255;
    w[26]=w[10]/10+draw(10);w[27]=draw(40)+20;w[28]=draw(10)+5;w[29]=0;
   }

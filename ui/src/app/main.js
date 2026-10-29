@@ -1,4 +1,4 @@
-import { initializeThemeControls } from "../shared/theme/theme.js";
+﻿import { initializeThemeControls } from "../shared/theme/theme.js";
 
 initializeThemeControls();
 
@@ -7,3 +7,6 @@ initializeSiteSettings();
 
 import {initializeWorkspace} from "/workspace.js";
 initializeWorkspace();
+
+import {initializeUpdates} from '/updates.js';
+initializeUpdates();

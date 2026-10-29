@@ -1,6 +1,6 @@
 ﻿# kbcs-app
 
-mainがGUI・CLI・previewを選ぶ。desktop::runはtaoでWindowを作り、wry/WebView2で埋込みuiを表示する。service::Serviceは専用プロトコルとHTTPプレビューの共通処理を持つ。
+mainがGUI・CLI・previewを選ぶ。desktop::runはtaoでWindowを作り、wryで埋込みuiを表示する（WindowsはWebView2、macOSはWKWebView）。service::Serviceは専用プロトコルとHTTPプレビューの共通処理を持つ。
 
 - GET /api/catalog: SQLite → view::catalog。公開snapshotごとの表示キャッシュ。
 - GET /api/asset/<logical path>: 保存済みPNG。原本のフォルダやネットワークは不要。
@@ -65,3 +65,8 @@ GET /api/formations?current=ID&direction=-1|0|1 は前/現在/次、POSTは{id,r
 2026-10-27: battle::Sessionは実DBのmap.rulesの11をC++へ渡し、runtime.costs/produced/lastCosts/computerを返す。JSの初期価格や乱数へ戻さない。詳細は../../../native/kbcs-core/docs/computer.md。
 
 戦闘SessionはPointStageSettings/StagePointRulesMap、NyancomboDataのgroup列/Charagroup type3を読み、解決済みRules/ProfileをC++へ渡す。[特殊戦闘](../../../native/kbcs-core/docs/battle-special.md)参照。旧DBへ原本の不足を補う場合もsource::assetの固定revision/SHAを使う。公式snapshotを書き換えない。
+
+起動時のデータ確認・自動取得・本体の再起動更新は[updates.md](updates.md)を参照。
+
+
+Windows・Apple Silicon Mac・Intel Macのビルドと配布は[ビルド設計](build.md)を参照。

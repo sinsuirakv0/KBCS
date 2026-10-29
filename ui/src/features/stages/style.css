@@ -1,4 +1,4 @@
-@import "../../shared/ui/game-database.css";
+﻿@import "../../shared/ui/game-database.css";
 .stage-filter-row,.stage-mode { display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
 .stage-mode { margin:0; padding:0; border:0; }
 .stage-mode label { position:relative; cursor:pointer; }
@@ -16,7 +16,7 @@
 .stage-search-table .stage-names { white-space:normal; min-width:155px; max-width:250px; }
 .stage-search-table .stage-names a { display:block; }
 .stage-enemy-icons { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; min-width:100px; max-width:200px; margin:auto; }
-.stage-search-table .stage-tags { white-space:normal; min-width:90px; max-width:160px; }
+.stage-search-table .stage-tags { white-space:nowrap; min-width:90px; }
 .stage-search-table .stage-tags span { display:inline-block; margin:1px 3px; }
 .hide-stage-enemies .stage-enemies-column { display:none; }
 .stage-search-wrap { margin-top:5px; }

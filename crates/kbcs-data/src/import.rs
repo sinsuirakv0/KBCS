@@ -128,13 +128,6 @@ pub struct ImportReport {
     pub database: PathBuf,
 }
 
-struct Lock(PathBuf);
-impl Drop for Lock {
-    fn drop(&mut self) {
-        let _ = fs::remove_file(&self.0);
-    }
-}
-
 pub fn import(
     location: &str,
     root: &Path,
@@ -143,10 +136,18 @@ pub fn import(
 ) -> Result<ImportReport> {
     fs::create_dir_all(root.join("official"))?;
     let lock_path = root.join("update.lock");
-    let mut lock_file = OpenOptions::new().write(true).create_new(true).open(&lock_path).context("更新ロックが存在します。別の更新が終了するまで待ってください。異常終了時はプロセス不在を確認してupdate.lockを除去してください")?;
-    let _lock = Lock(lock_path);
+    let mut lock_file = crate::releases::lock(&lock_path)?;
+    lock_file.set_len(0)?;
     writeln!(lock_file, "{}", std::process::id())?;
     progress("データソース・採用元の検証".into());
+    let integrated;
+    let location = if location == crate::DEFAULT_SOURCE {
+        let release = crate::releases::latest_data(region)?;
+        integrated = crate::releases::install_data(&release, root, &progress)?;
+        integrated.to_str().context("原本保存先の文字コード不正")?
+    } else {
+        location
+    };
     let source = Source::open_cached(location, root, region)?;
     let dataset = source.dataset(region)?;
     let header = &dataset.current.header;
@@ -282,6 +283,13 @@ fn build(
         "INSERT INTO metadata VALUES ('version_code',?)",
         [header.version_code.to_string()],
     )?;
+    if let Some((tag, published)) = &dataset.release {
+        connection.execute("INSERT INTO metadata VALUES ('release_tag',?)", [tag])?;
+        connection.execute(
+            "INSERT INTO metadata VALUES ('release_published',?)",
+            [published],
+        )?;
+    }
     for (path, bytes) in &dataset.proofs {
         retain(connection, path, path, "generated", bytes)?;
     }
@@ -473,7 +481,11 @@ fn build(
                 raw_cells: cells.clone(),
                 growth: rates.clone(),
                 source_path: path.clone(),
-                name_source: format!("{}/site/characters.json", dataset.current.generated_path),
+                name_source: if dataset.current.generated_path.starts_with("integrated/") {
+                    explanation.clone()
+                } else {
+                    format!("{}/site/characters.json", dataset.current.generated_path)
+                },
                 motion_path,
             };
             store::insert_form(connection, &form, &unit.aliases.join(" "))?;

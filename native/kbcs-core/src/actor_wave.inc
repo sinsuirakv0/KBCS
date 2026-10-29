@@ -1,22 +1,23 @@
 ﻿// 005d287c/005d2c18。遮断の走査を全波動の命中より先に行い、候補を後から確定する。
 namespace {
+uint8_t &waveHit(KbcsActorWaves &waves,int target,int index){return target<51?waves.hits[target][index]:activePool->extra[target-51].waves[index];}
 void stopWave(KbcsActorWave &wave,KbcsActorWaveSegment (&segments)[6]){
  wave.side=0;wave.frame=0;wave.level=0;for(auto &part:segments)part.frame=0;
 }
-void waveStopped(Context &context,int side,int slot){context.actors[side][slot].words[94]=0;context.actors[side][slot].words[95]=1;}
+void waveStopped(Context &context,int side,int slot){actorAt(context.actors,side,slot).words[94]=0;actorAt(context.actors,side,slot).words[95]=1;}
 int waveElapsed(const KbcsActorWave &wave,const KbcsActorWaveSegment &part,const KbcsActorWaveRules &rules){
  return rules.motion_frames[wave.mini!=0]-part.frame-2;
 }
 bool waveContact(Context &context,const KbcsActorWave &wave,const KbcsActorWaveSegment &part,int target,int width){
  const int other=wave.state==1?1:0;
- const auto &actor=context.actors[other][target].words;
+ const auto &actor=actorAt(context.actors,other,target).words;
  const int position=other?actor[3]-actor[14]:actor[3]+actor[14]-width;
  return part.x-width<=position&&position<part.x+width;
 }
 bool waveTarget(Context &context,const KbcsActorWave &wave,int target,bool hit_phase){
  if(wave.state!=1&&wave.state!=2)return false;
  const int other=wave.state==1?1:0;
- if(!context.actors[other][target].words[0])return false;
+ if(!actorAt(context.actors,other,target).words[0])return false;
  if(other&&hit_phase&&target==context.environment.castle_slot)return false;
  return n_00a94484(context,other,target,wave.slot);
 }
@@ -47,10 +48,10 @@ void hitWaves(Context &context,KbcsActorWaves &waves,KbcsActorWaveSegments &segm
    if(part.frame<=0)continue;--part.frame;
    const int elapsed=waveElapsed(wave,part,rules),start=wave.mini?rules.small_start:3,end=wave.mini?rules.small_end:7;
    if(elapsed<start||elapsed>end)continue;
-   for(int target=1;target<51;++target){
-    if(waves.hits[target][i]||!waveTarget(context,wave,target,false)||!waveContact(context,wave,part,target,width))continue;
+   for(int target=1;target<actorEnd();++target){
+    if(waveHit(waves,target,i)||!waveTarget(context,wave,target,false)||!waveContact(context,wave,part,target,width))continue;
     const int other=wave.state==1?1:0;
-    if(context.actors[other][target].words[87]!=1)continue;
+    if(actorAt(context.actors,other,target).words[87]!=1)continue;
     stopWave(wave,parts);waveStopped(context,other,target);
    }
   }
@@ -60,12 +61,12 @@ void hitWaves(Context &context,KbcsActorWaves &waves,KbcsActorWaveSegments &segm
   const auto &wave=waves.records[i];
   for(const auto &part:segments.records[i]){
    if(part.frame<=0||waveElapsed(wave,part,rules)!=(wave.mini?rules.small_end:7))continue;
-   for(int target=1;target<51;++target){
-    if(waves.hits[target][i]||!waveTarget(context,wave,target,true)||!waveContact(context,wave,part,target,width))continue;
+   for(int target=1;target<actorEnd();++target){
+    if(waveHit(waves,target,i)||!waveTarget(context,wave,target,true)||!waveContact(context,wave,part,target,width))continue;
     const int other=wave.state==1?1:0;
     if(n_00a9b0b8(context,other,target)){
      const int previous=stoppers[i];
-     if(previous<0||context.actors[other][target].words[3]<context.actors[other][candidates[previous].target].words[3])stoppers[i]=int(candidates.size());
+     if(previous<0||actorAt(context.actors,other,target).words[3]<context.actors[other][candidates[previous].target].words[3])stoppers[i]=int(candidates.size());
     }
     candidates.push_back({i,target});
    }
@@ -74,10 +75,10 @@ void hitWaves(Context &context,KbcsActorWaves &waves,KbcsActorWaveSegments &segm
  for(size_t j=0;j<candidates.size();++j){
   const auto [index,target]=candidates[j];auto &wave=waves.records[index];const int other=wave.state==1?1:0;
   if(stoppers[index]>=0&&stoppers[index]!=int(j)){
-   const int x=context.actors[other][target].words[3];
+   const int x=actorAt(context.actors,other,target).words[3];
    if(wave.state==2?wave.x<x:x<wave.x)continue;
   }
-  waves.hits[target][index]=1;
+  waveHit(waves,target,index)=1;
   if(wave.state!=1&&wave.state!=2)continue;
   const int side=wave.state-1;
   const bool applied=secondaryHit(context,sink,user,1,side,wave.slot,target,wave.hit,wave.mini,side?0:wave.parameter,100,wave.flags);

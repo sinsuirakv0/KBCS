@@ -571,7 +571,7 @@ fn catalog_selection(
         crate::stage_media::annotate(stage, series);
     }
     Ok(
-        json!({"schemaVersion":2,"gameVersion":metadata.get("version"),"revision":metadata.get("revision"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","scope":{"bands":maps.iter().filter_map(|m|m["nativeId"].as_i64()).map(|id|id/1000*1000).collect::<BTreeSet<_>>(),"nativeVersion":"15.7.2"},"series":maps.iter().filter_map(|m|m["series"].as_str()).collect::<BTreeSet<_>>().into_iter().map(|s|json!({"id":s,"label":series_label(s)})).collect::<Vec<_>>(),"maps":maps,"stages":stages,"rewards":rewards,"musicCatalog":crate::stage_media::music()}),
+        json!({"schemaVersion":2,"gameVersion":metadata.get("version"),"calculationVersion":crate::compatibility::calculation_version(database)?,"revision":metadata.get("revision"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","scope":{"bands":maps.iter().filter_map(|m|m["nativeId"].as_i64()).map(|id|id/1000*1000).collect::<BTreeSet<_>>(),"nativeVersion":"15.7.2"},"series":maps.iter().filter_map(|m|m["series"].as_str()).collect::<BTreeSet<_>>().into_iter().map(|s|json!({"id":s,"label":series_label(s)})).collect::<Vec<_>>(),"maps":maps,"stages":stages,"rewards":rewards,"musicCatalog":crate::stage_media::music_catalog(database)?}),
     )
 }
 

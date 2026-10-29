@@ -10,7 +10,7 @@ args=parser.parse_args();assets=Assets(args.assets)
 output={'version':'15.7.2','buildId':assets.current['buildId'],'nativeSha256':SHA,'atlases':{}}
 destination=root/'ui/images/native-battle'
 destination.mkdir(parents=True,exist_ok=True)
-for stem in ['img001_ja','img002_ja','mapicon','uni','img100_ja','img015']:
+for stem in ['img001_ja','img002_ja','mapicon','uni','img100_ja','img015','img004_ja','img004_DOJO_ja','img101','img101_nekoDojo','img005_1','img006_ja','img031_ja']:
     key='ImageData/'+stem+'.imgcut';lines=assets.text(key).splitlines()
     rects=[[int(cell) for cell in line.split(',')[:4]] for line in lines[4:4+int(lines[3])]]
     image=('Unit/' if stem=='uni' else 'Image/')+stem+'.png';entry=assets.files[image]

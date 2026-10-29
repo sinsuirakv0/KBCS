@@ -6,6 +6,7 @@ import re
 import struct
 from actor_hit_source import hit_source
 from actor_cannon_source import cannon_hit
+from actor_pool_source import adapt_actor_pool
 
 ROOT = Path(__file__).resolve().parents[2]
 reference = json.loads((ROOT / 'research/.local/reference.json').read_text(encoding='utf-8-sig'))
@@ -508,6 +509,7 @@ for address,value in [(0x2b2820,1),(0x2b2938,2)]:
 header = '// 生成元: research/cli/export_actor.py。JP15.7.2 ARM64、原本の分岐を保持する。\n'
 output = header + '\n'.join(prototypes) + '\n\n' + '\n\n'.join(translated.values())
 target = ROOT / 'native/kbcs-core/src/actor_generated.inc'
+output = adapt_actor_pool(output)
 target.write_bytes(b'\xef\xbb\xbf' + '\n'.join(line.rstrip() for line in output.split('\n')).encode('utf-8'))
 (ROOT / 'native/kbcs-core/src/actor_rom.inc').write_text('static constexpr std::pair<int64_t,int32_t> actorRom[] = {\n' +
     ',\n'.join(' {0x%x,%d}'%(a,v) for a,v in sorted(rom.items()))+'\n};\n',encoding='utf-8')

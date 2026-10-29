@@ -317,6 +317,46 @@ pub fn music() -> Value {
     )
     .expect("同梱音源索引")
 }
+pub fn music_catalog(database: &Database) -> Result<Value> {
+    let mut catalog = music();
+    let metadata = database.metadata()?;
+    let mut statement = database.connection.prepare(
+        "SELECT path,size,sha256 FROM asset_reference WHERE path LIKE 'music/snd%' OR path LIKE 'assets/snd%' ORDER BY path DESC",
+    )?;
+    for row in statement.query_map([], |row| {
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, i64>(1)?,
+            row.get::<_, String>(2)?,
+        ))
+    })? {
+        let (path, size, sha) = row?;
+        let Some((stem, extension)) = basename(&path).split_once('.') else {
+            continue;
+        };
+        let Some(id) = stem.strip_prefix("snd").and_then(|v| v.parse::<u32>().ok()) else {
+            continue;
+        };
+        let mime = match extension {
+            "ogg" => "audio/ogg",
+            "caf" => "audio/x-caf",
+            "mp3" => "audio/mpeg",
+            _ => continue,
+        };
+        // 同じIDがあればAPKの原本を優先し、CAFを圧縮版へ置き換えない。
+        let track = &mut catalog["tracks"][id.to_string()];
+        if !track.is_object() {
+            *track = json!({});
+        }
+        track["path"] = json!(path);
+        track["mime"] = json!(mime);
+        track["size"] = json!(size);
+        track["sha256"] = json!(sha);
+        track["revision"] = json!(metadata.get("revision"));
+        track["url"] = json!(format!("/api/stage-audio/{id}"));
+    }
+    Ok(catalog)
+}
 pub struct Audio {
     pub mime: &'static str,
     pub bytes: Vec<u8>,
@@ -391,7 +431,23 @@ fn decoded_audio(mime: &'static str, bytes: Vec<u8>) -> Result<Audio> {
         bytes: wave,
     })
 }
-pub fn audio(root: &std::path::Path, id: i64) -> Result<Audio> {
+pub fn audio(database: &Database, root: &std::path::Path, id: i64) -> Result<Audio> {
+    for folder in ["assets", "music"] {
+        for (extension, mime) in [
+            ("ogg", "audio/ogg"),
+            ("caf", "audio/x-caf"),
+            ("mp3", "audio/mpeg"),
+        ] {
+            let path = format!("{folder}/snd{id:03}.{extension}");
+            if database.connection.query_row(
+                "SELECT EXISTS(SELECT 1 FROM asset_reference WHERE path=?)",
+                [&path],
+                |row| row.get::<_, bool>(0),
+            )? {
+                return decoded_audio(mime, crate::source::asset(database, root, &path)?);
+            }
+        }
+    }
     let catalog = music();
     let track = &catalog["tracks"][id.to_string()];
     let url = track["url"].as_str().context("音源未収録です")?;

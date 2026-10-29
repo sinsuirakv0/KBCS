@@ -22,4 +22,19 @@
 #formation-context{border-block:1px solid var(--color-border);padding:8px 0;margin-top:10px;font-size:12px}
 .formation-lower:empty{display:none}
 
+/* 一覧は中央、検索条件は左、選択キャラの設定は右へ置く。 */
+.workspace .formation-lower{display:block}
+.workspace .formation-library{min-width:0}
+.workspace #formation-results{max-height:none;overflow:visible;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.workspace-left #formation-search{width:100%}
+.workspace-left label:has(#formation-display-form){display:flex;align-items:center;gap:8px;margin-top:10px}
+.workspace-left #formation-display-form{min-width:0;flex:1}
+.formation-tray{margin-top:8px;border:1px solid #473512;background:#d4b15f}
+.formation-tray[hidden]{display:none}
+.formation-tray>.formation-native{width:100%;display:block}
+.formation-tray-label{font-size:12px;padding:4px 8px;background:var(--color-surface);border-bottom:1px solid var(--color-border)}
+.formation-tray-label button{float:right;font-size:11px;padding:1px 6px}
+
 .workspace-left .formation-library>label{white-space:nowrap}.workspace-left .formation-library>label>select{min-width:0;flex:1;width:0;max-width:160px}
+
+.formation-tray{width:calc(100% * 698 / 1188);margin-left:calc(100% * 288 / 1188)}

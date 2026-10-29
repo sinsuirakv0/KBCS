@@ -506,3 +506,94 @@ fn raw_columns_and_paths_do_not_silently_change() -> Result<()> {
     }
     Ok(())
 }
+
+#[test]
+fn integrated_layout_uses_raw_names_without_git() -> Result<()> {
+    use kbcs_data::{
+        releases,
+        source::{Descriptor, Source},
+    };
+    let temporary =
+        Fixture(std::env::temp_dir().join(format!("kbcs-integrated-{}", std::process::id())));
+    let legacy = temporary.0.join("legacy");
+    fs::create_dir_all(&legacy)?;
+    git(&legacy, &["init", "-q"]);
+    source(&legacy, "jp")?;
+    commit(&legacy);
+    let original = Source::open(legacy.to_str().unwrap())?;
+    let dataset = original.dataset("jp")?;
+    let integrated = temporary.0.join("integrated");
+    let mut files = std::collections::BTreeMap::new();
+    for (logical, descriptor) in dataset.files {
+        let bytes = original.checked(&descriptor)?;
+        write(&integrated, &logical, &bytes)?;
+        files.insert(
+            logical.clone(),
+            Descriptor {
+                path: logical,
+                ..descriptor
+            },
+        );
+    }
+    let explanation = "res/Unit_Explanation1_ja.csv";
+    let bytes =
+        "ネコ,原本の説明\nネコビルダー,第2\nネコモヒカン,第3\n先行した説明,能力行なし".as_bytes();
+    write(&integrated, explanation, bytes)?;
+    files.insert(
+        explanation.into(),
+        Descriptor {
+            path: explanation.into(),
+            sha256: hash(bytes),
+            size: bytes.len() as u64,
+            source_kind: "integrated".into(),
+        },
+    );
+    let slot_path = "Data/equipmentslot.csv";
+    let slot_bytes = b"// header\n0,2,0,1";
+    write(&integrated, slot_path, slot_bytes)?;
+    files.insert(
+        slot_path.into(),
+        Descriptor {
+            path: slot_path.into(),
+            sha256: hash(slot_bytes),
+            size: slot_bytes.len() as u64,
+            source_kind: "integrated".into(),
+        },
+    );
+    let release = releases::Release {
+        tag_name: "integrated-jp-fixture".into(),
+        published_at: "2026-10-29T00:00:00Z".into(),
+        html_url: String::new(),
+        draft: false,
+        assets: Vec::new(),
+    };
+    let manifest = releases::Manifest {
+        schema_version: 1,
+        header: dataset.current.header,
+        revision: original.revision,
+        repository: releases::DATA_REPOSITORY.into(),
+        tag: release.tag_name.clone(),
+        archives: Default::default(),
+    };
+    write(
+        &integrated,
+        "release.json",
+        &serde_json::to_vec(&releases::Installed {
+            release: releases::DataRelease { release, manifest },
+            files,
+        })?,
+    )?;
+    let root = temporary.0.join("data");
+    import::import(integrated.to_str().unwrap(), &root, "jp", |_| {})?;
+    let database = Database::open(&root, "jp")?;
+    let form = database.form("jp", 0, 2)?;
+    assert_eq!(form.name, "ネコモヒカン");
+    assert_eq!(form.name_source, explanation);
+    assert_eq!(kbcs_data::equipment::capacities(&database)?[&0], 2);
+    assert_eq!(database.metadata()?["release_tag"], "integrated-jp-fixture");
+    let before = fs::read(root.join("current.json"))?;
+    write(&integrated, explanation, b"corrupt")?;
+    assert!(import::import(integrated.to_str().unwrap(), &root, "jp", |_| {}).is_err());
+    assert_eq!(before, fs::read(root.join("current.json"))?);
+    Ok(())
+}

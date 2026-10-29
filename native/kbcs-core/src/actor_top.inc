@@ -29,6 +29,7 @@ struct TopDraw {
 };
 }
 extern "C" uint32_t kbcs_core_battle_top_draw(const KbcsBattle *battle,const KbcsRenderCut *cuts,int32_t count,const KbcsRenderCut *fever,int32_t fever_count,const KbcsRenderCut *title,KbcsDrawCommand *out,int32_t capacity,int32_t *written){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!cuts||count<0||!out||capacity<0||!written||fever_count<0||(!fever&&fever_count))return 1;
  try{
   TopDraw d{cuts,count,out,capacity};const auto &r=battle->result;const auto &rules=battle->config.rules;const int center=battle->config.screen.viewport_width/2;
@@ -56,6 +57,7 @@ extern "C" uint32_t kbcs_core_battle_top_draw(const KbcsBattle *battle,const Kbc
  }catch(...){return 3;}
 }
 extern "C" uint32_t kbcs_core_battle_overlay(const KbcsBattle *battle,KbcsDrawCommand *out,int32_t capacity,int32_t *written){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out||capacity<2||!written)return 1;KbcsBattleEnding e{};const auto code=kbcs_core_battle_ending(battle,&e);if(code)return code;int count=0;
  const auto rect=[&](int x,int y,int w,int h,int red,int green,int blue){auto &c=out[count++];c={};c.texture=-2;c.layer=11;c.count=4;c.blend=2;c.opacity=1;const double p[]={double(x),double(y),double(x),double(y+h),double(x+w),double(y+h),double(x+w),double(y)};std::copy_n(p,8,c.points);c.colors[0]=red;c.colors[1]=green;c.colors[2]=blue;};
  if(e.shade)rect(0,0,battle->config.screen.viewport_width,640,255-e.shade,255-e.shade,255-e.shade);

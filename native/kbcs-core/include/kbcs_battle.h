@@ -73,6 +73,13 @@ typedef struct {
 typedef struct {int32_t deploy,upgrade,fire,page_start,page_step;} KbcsComputerOutput;
 uint32_t kbcs_core_battle_computer(const KbcsComputerInput*,KbcsComputerState*,const KbcsActor opponents[51],uint32_t*,KbcsComputerOutput*);
 typedef struct KbcsBattle KbcsBattle;
+/* KBCS専用。原本ルールは保持し、明示した戦闘のみに上書きを適用する。 */
+enum {KBCS_BATTLE_MONEY=1,KBCS_BATTLE_NO_LIMIT=2,KBCS_BATTLE_INSTANT=4,KBCS_BATTLE_HIDE_SUMMON=8};
+uint32_t kbcs_core_battle_cheats(KbcsBattle*,uint32_t flags);
+/* 借用個体。次のadvance/参照一覧取得/破棄まで、所有者を排他で保持する。 */
+typedef struct {const KbcsActor *actor;int32_t side,slot,profile;} KbcsBattleActorRef;
+uint32_t kbcs_core_battle_actor_refs(const KbcsBattle*,const KbcsBattleActorRef**,int32_t*);
+uint32_t kbcs_core_battle_slots(const KbcsBattle*,int32_t*);
 /* 006ddfb8の上部表示と、終了帯の原本描画。texture0=img001、1=FeverEffect、2=任意のステージ名。 */
 uint32_t kbcs_core_battle_top_draw(const KbcsBattle*,const KbcsRenderCut*,int32_t,const KbcsRenderCut*,int32_t,const KbcsRenderCut*,KbcsDrawCommand*,int32_t,int32_t*);
 uint32_t kbcs_core_battle_overlay(const KbcsBattle*,KbcsDrawCommand*,int32_t,int32_t*);

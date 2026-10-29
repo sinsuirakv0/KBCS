@@ -648,15 +648,15 @@ uint32_t n_0058bef8(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3
   lVar6 = n_0081f580(ctx);
   lVar7 = n_0081f580(ctx);
   iVar1 = ctx.s32(0x22fa38 +
-                  lVar6 + (int64_t)ctx.s32(lVar7 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-                                        0x84080) * 0x1c4 + 0xa388);
+                  lVar6 + (int64_t)ctx.s32(lVar7 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+                                        (actorBase+0*actorStride+0x0)) * 0x1c4 + 0xa388);
   iVar3 = n_0058b674(ctx,8);
   lVar6 = n_0081f580(ctx);
   iVar4 = n_00a5b084(ctx,0,5);
   lVar6 = n_0081f580(ctx);
-  if (ctx.s32(lVar6 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8417c) == 2) {
+  if (ctx.s32(lVar6 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xfc)) == 2) {
     lVar6 = n_0081f580(ctx);
-    ctx.u32(lVar6 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8417c) = 0;
+    ctx.u32(lVar6 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xfc)) = 0;
     iVar8 = 200;
   }
   else {
@@ -732,7 +732,7 @@ uint32_t n_005bbc90(Context &ctx,...) {
       }
       iVar1 = iVar1 + 1;
       n_0081f580(ctx);
-    } while (iVar1 != 0x33);
+    } while (iVar1 != ctx.limit());
   }
   return 0;
 }
@@ -746,7 +746,7 @@ int32_t n_005bf7d8(Context &ctx,int32_t param_1,...) {
   if (param_1 == 0) {
     iVar1 = 0x10e;
   }
-  return ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + 0x8408c) + iVar1;
+  return ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0xc)) + iVar1;
 }
 
 void n_005ce03c(Context &ctx,int64_t param_1,int64_t param_2,...) {
@@ -761,12 +761,12 @@ void n_005ce03c(Context &ctx,int64_t param_1,int64_t param_2,...) {
   uint64_t uVar8;
   int64_t lVar9;
   lVar7 = 0;
-  lVar1 = param_1 + 0x841f0;
+  lVar1 = param_1 + (actorBase+0*actorStride+0x170);
   bVar4 = true;
   do {
     bVar3 = bVar4;
     uVar8 = 0;
-    lVar9 = lVar7 * 0xc804;
+    lVar9 = lVar7 * actorStride;
     do {
       n_00a9bef4(ctx,lVar7,uVar8 & 0xffffffff,0);
       iVar5 = n_00a9cc4c(ctx,lVar7,uVar8 & 0xffffffff);
@@ -915,7 +915,7 @@ void n_005ce03c(Context &ctx,int64_t param_1,int64_t param_2,...) {
       }
       uVar8 = uVar8 + 1;
       lVar9 = lVar9 + 0x3ec;
-    } while (uVar8 != 0x33);
+    } while (uVar8 != uint64_t(ctx.limit()));
     lVar7 = 1;
     bVar4 = false;
   } while (bVar3);
@@ -962,7 +962,7 @@ void n_005d6740(Context &ctx,int64_t param_1,int32_t param_2,...) {
       iVar2 = ctx.s32(piVar11);
       if ((0 < iVar2) && (ctx.s32(piVar11) = iVar2 + -1, unaff_w24 < iVar2 && iVar2 + -1 <= unaff_w23)) {
         uVar12 = 1;
-        piVar14 = (int64_t)(param_1 + (int64_t)param_2 * -0xc804 + 0x90ca8);
+        piVar14 = (int64_t)(param_1 + (int64_t)param_2 * -actorStride + (actorBase+1*actorStride+0x424));
         do {
           iVar2 = n_00a93f08(ctx,iVar1,uVar12 & 0xffffffff);
           if (iVar2 == 2) {
@@ -984,7 +984,7 @@ LAB_005d69b8:
           }
           uVar12 = uVar12 + 1;
           piVar14 = (int64_t)((int64_t)piVar14 + 0x3ec);
-        } while (uVar12 != 0x33);
+        } while (uVar12 != uint64_t(ctx.limit()));
       }
       lVar13 = lVar13 + 1;
     } while (lVar13 != 0xf);
@@ -1017,7 +1017,7 @@ LAB_005d69b8:
           }
         }
         iVar2 = iVar2 + 1;
-      } while (iVar2 != 0x33);
+      } while (iVar2 != ctx.limit());
     }
     else {
       iVar2 = n_00a92f5c(ctx,param_2);
@@ -1052,7 +1052,7 @@ LAB_005d69b8:
             }
           }
           iVar2 = iVar2 + 1;
-        } while (iVar2 != 0x33);
+        } while (iVar2 != ctx.limit());
       }
       else {
         iVar2 = n_00a92f5c(ctx,param_2);
@@ -1081,7 +1081,7 @@ LAB_005d69b8:
               }
             }
             iVar2 = iVar2 + 1;
-          } while (iVar2 != 0x33);
+          } while (iVar2 != ctx.limit());
         }
       }
     }
@@ -1128,7 +1128,7 @@ void n_005d6c3c(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3,int
   else {
     uVar7 = 2;
   }
-  ctx.u32(param_1 + uVar17 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84200) = uVar7;
+  ctx.u32(param_1 + uVar17 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x180)) = uVar7;
   uVar5 = n_00a94484(ctx,uVar17 & 0xffffffff,param_3,0);
   if ((bVar2 || (uVar5 & 1) != 0) &&
      (iVar4 = n_00a94f0c(ctx,uVar17 & 0xffffffff,param_3), iVar4 < param_4)) {
@@ -1261,7 +1261,7 @@ LAB_005d7440:
                     );
         goto LAB_005d7514;
       }
-      lVar16 = param_1 + (int64_t)(int32_t)uVar17 * 0xc804 + (int64_t)param_3 * 0x3ec;
+      lVar16 = param_1 + (int64_t)(int32_t)uVar17 * actorStride + (int64_t)param_3 * 0x3ec;
       uVar5 = 0x41f0;
     }
     else {
@@ -1286,10 +1286,10 @@ LAB_005d7440:
         ctx.u32(lVar16 + 0x9d824) = 0;
         ctx.u32(lVar16 + 0x9d830) = 0;
       }
-      lVar16 = param_1 + (int64_t)(int32_t)uVar17 * 0xc804 + (int64_t)param_3 * 0x3ec;
+      lVar16 = param_1 + (int64_t)(int32_t)uVar17 * actorStride + (int64_t)param_3 * 0x3ec;
       uVar5 = 0x41f8;
     }
-    ctx.u64(lVar16 + (uint64_t)(uVar5 | 0x80000)) = 0x100000000ULL;
+    ctx.u64(lVar16 + (actorBase+uVar5-0x4080)) = 0x100000000ULL;
   }
 LAB_005d7514:
   return;
@@ -1302,14 +1302,14 @@ void n_006d823c(Context &ctx,int64_t param_1,...) {
           do {
             uVar76 = n_00a94bf0(ctx,1,uVar32);
             if (((uVar76 & 1) != 0) && (iVar30 = n_00a95100(ctx,1,uVar32), iVar30 == 0)) break;
-            bVar26 = uVar32 < 0x32;
+            bVar26 = uVar32 < uint32_t(ctx.limit()-1);
             uVar32 = uVar32 + 1;
-          } while (uVar32 != 0x33);
-          lVar65 = -0x32;
-          lVar66 = 0x8446c;
+          } while (uVar32 != uint64_t(ctx.limit()));
+          lVar65 = 1-ctx.limit();
+          lVar66 = (actorBase+0*actorStride+0x3ec);
           do {
             if ((ctx.s32((int64_t)param_1 + lVar66) != 0) &&
-               (iVar30 = n_00a94234(ctx,0,(int32_t)lVar65 + 0x33), iVar30 == 7)) {
+               (iVar30 = n_00a94234(ctx,0,(int32_t)lVar65 + ctx.limit()), iVar30 == 7)) {
               bVar26 = true;
               break;
             }
@@ -1373,7 +1373,7 @@ void n_006d823c(Context &ctx,int64_t param_1,...) {
                       break;
                     }
                     iVar31 = iVar31 + 1;
-                  } while (iVar31 != 0x33);
+                  } while (iVar31 != ctx.limit());
                 }
                 else {
                   iVar31 = n_00a94234(ctx,uVar33,iVar30);
@@ -1386,7 +1386,7 @@ void n_006d823c(Context &ctx,int64_t param_1,...) {
                 }
               }
               iVar30 = iVar30 + 1;
-            } while (iVar30 != 0x33);
+            } while (iVar30 != ctx.limit());
             uVar33 = 1;
             bVar27 = false;
           } while (bVar59);
@@ -1397,7 +1397,7 @@ void n_006d823c(Context &ctx,int64_t param_1,...) {
 
 void n_006d8558(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,...) {
 
-  int32_t iVar30;int32_t iVar31;bool bVar27;uint64_t uVar46;uint32_t uVar43;uint64_t uVar76=(uint32_t)param_3;int64_t piVar62;piVar62=(int64_t)(param_1+0x84080+(int64_t)param_3*0x3ec);
+  int32_t iVar30;int32_t iVar31;bool bVar27;uint64_t uVar46;uint32_t uVar43;uint64_t uVar76=(uint32_t)param_3;int64_t piVar62;piVar62=(int64_t)(param_1+(actorBase+0*actorStride+0x0)+(int64_t)param_3*0x3ec);
               if ((ctx.s32(piVar62+(1)*4) == 1) && (ctx.s32(piVar62+(0x3d)*4) < 1)) {
                 n_009f4688(ctx,param_1,param_2,0,uVar76 & 0xffffffff);
                 uVar43 = n_00a97c8c(ctx,0,uVar76 & 0xffffffff);
@@ -1414,7 +1414,7 @@ void n_006d8558(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,...
                       bVar27 = true;
                     }
                     iVar30 = iVar30 + 1;
-                  } while (iVar30 != 0x33);
+                  } while (iVar30 != ctx.limit());
                   if (!bVar27) {
                     iVar30 = n_00a943dc(ctx,0,uVar76 & 0xffffffff);
                     uVar46 = 0;
@@ -1440,14 +1440,14 @@ LAB_006d8990:
                         bVar27 = true;
                       }
                       iVar30 = iVar30 + 1;
-                    } while (iVar30 != 0x33);
+                    } while (iVar30 != ctx.limit());
                     if (bVar27) return;
                     iVar30 = 0;
                     do {
                       iVar31 = n_006dda04(ctx,param_1,0,uVar76 & 0xffffffff,iVar30,0);
                       if (iVar31 != 0) return;
                       iVar30 = iVar30 + 1;
-                    } while (iVar30 != 0x33);
+                    } while (iVar30 != ctx.limit());
                     uVar46 = 0;
                   }
                   else {
@@ -1555,7 +1555,7 @@ LAB_006d91e4:
                       goto LAB_006d9270;
                     }
                     iVar30 = iVar30 + 1;
-                  } while (iVar30 != 0x33);
+                  } while (iVar30 != ctx.limit());
                   if ((bVar27) || (iVar30 = n_00a943dc(ctx,1,uVar76 & 0xffffffff), iVar30 < 1))
                   return;
                   uVar46 = 0;
@@ -1765,7 +1765,7 @@ LAB_006d9cc4:
 void n_006da994(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3,...) {
 
   int32_t iVar30;int32_t iVar31;int32_t iVar36;int32_t iVar38;int32_t iVar41;uint64_t uVar46;uint64_t uVar76;
-  bool bVar26=param_2==0;int64_t lVar65=(int64_t)param_2*0xc804;int64_t pbVar75=(int64_t)param_3*0x3ec+lVar65+0x84080;
+  bool bVar26=param_2==0;int64_t lVar65=(int64_t)param_2*actorStride;int64_t pbVar75=(int64_t)param_3*0x3ec+lVar65+(actorBase+0*actorStride+0x0);
             iVar30 = n_00a958b0(ctx,param_2,(uint64_t)param_3 & 0xffffffff);
             uVar76 = n_00a9b39c(ctx,param_2,(uint64_t)param_3 & 0xffffffff);
             if ((uVar76 & 1) == 0) {
@@ -1780,17 +1780,17 @@ void n_006da994(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3,...
                 iVar31 = n_00a9d458(ctx,0,(uint64_t)param_3 & 0xffffffff);
                 ctx.healthResult->delay_slot = uVar76;ctx.healthResult->delay_frames = iVar31;
                 if (param_3 == 0) {
-                  iVar31 = ctx.s32((int64_t)param_1 + lVar65 + 0x8408c);
+                  iVar31 = ctx.s32((int64_t)param_1 + lVar65 + (actorBase+0*actorStride+0xc));
                   iVar38 = n_0044a8d8(ctx,0x2e);
-                  iVar36 = ctx.s32((int64_t)param_1 + lVar65 + 0x84090);
+                  iVar36 = ctx.s32((int64_t)param_1 + lVar65 + (actorBase+0*actorStride+0x10));
                   iVar41 = n_0044a8d8(ctx,0x19);
                   iVar31 = iVar31 + iVar38 * 10 + -0x3a9;
                   iVar36 = iVar36 + iVar41 * -10 + -0x497;
                 }
                 else {
-                  iVar31 = ctx.s32((int64_t)param_1 + (int64_t)param_3 * 0x3ec + 0x8408c);
+                  iVar31 = ctx.s32((int64_t)param_1 + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xc));
                   iVar38 = n_0044a8d8(ctx,0x2e);
-                  iVar36 = ctx.s32((int64_t)param_1 + (int64_t)param_3 * 0x3ec + 0x84090);
+                  iVar36 = ctx.s32((int64_t)param_1 + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x10));
                   iVar41 = n_0044a8d8(ctx,0x1f);
                   iVar31 = iVar31 + iVar38 * -10 + -0x1b5;
                   iVar36 = iVar36 + iVar41 * 10 + -0x52d;
@@ -1803,11 +1803,11 @@ void n_006da994(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3,...
               n_00a958f0(ctx,1,0,1);
             }
             if ((((0 < ctx.s32((int64_t)param_1 +
-                               (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x841a4)) &&
+                               (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0x124))) &&
                  (uVar46 = n_0044a8d8(ctx,100), (int32_t)uVar46 <= ctx.s32(pbVar75 + 0x124))) &&
                 (ctx.s32(pbVar75 + 0x20) < 1)) && (ctx.s32(pbVar75 + 0x134) == 0)) {
               ctx.s32(pbVar75 + 0x20) = 1;
-              ctx.u32((int64_t)param_1 + (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x841b4) = 1;
+              ctx.u32((int64_t)param_1 + (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0x134)) = 1;
               n_006dde48(ctx,uVar46,param_2,(uint64_t)param_3 & 0xffffffff,3);
               uVar46 = n_00457e1c(ctx);
               n_00459efc(ctx,uVar46,0x32,0);
@@ -1820,7 +1820,7 @@ void n_006da994(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3,...
 void n_006dac8c(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3,...) {
 
   int32_t iVar30=ctx.reaction->previous_hp;int32_t iVar31;int32_t iVar36;int32_t iVar38;int32_t iVar41;int32_t iVar74;int32_t iVar79;int64_t piVar64;uint64_t uVar46;uint64_t uVar76;int64_t lVar66;
-  bool bVar26=param_2==0;int64_t pbVar75=(int64_t)param_3*0x3ec+(int64_t)param_2*0xc804+0x84080;
+  bool bVar26=param_2==0;int64_t pbVar75=(int64_t)param_3*0x3ec+(int64_t)param_2*actorStride+(actorBase+0*actorStride+0x0);
               if (((bVar26) || (uVar76 = n_005bbbc8(ctx), (uVar76 & 1) == 0)) ||
                  (uVar76 = n_005bbc10(ctx), param_3 != (int64_t)(uVar76 & 0xffffffff))) {
                 iVar36 = n_00a95824(ctx,param_2,(uint64_t)param_3 & 0xffffffff);
@@ -1854,9 +1854,9 @@ LAB_006dae60:
                    (iVar31 = n_00a94234(ctx,param_2,(uint64_t)param_3 & 0xffffffff), iVar31 != 0x15)) {
                   if (((iVar41 == iVar74) ||
                       (iVar41 == ctx.s32((int64_t)param_1 +
-                                         (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x840a4)))
+                                         (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0x24))))
                      && (ctx.s32((int64_t)param_1 +
-                                 (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x841b4) != 1)) {
+                                 (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0x134)) != 1)) {
                     iVar31 = n_00a9c990(ctx,param_2,(uint64_t)param_3 & 0xffffffff);
                     if ((0 < iVar31) &&
                        (iVar31 = n_00a958b0(ctx,param_2,(uint64_t)param_3 & 0xffffffff), 0 < iVar31)) {
@@ -1887,12 +1887,12 @@ LAB_006dae60:
                       n_00a9ddc8(ctx,param_2,(uint64_t)param_3 & 0xffffffff,1);
                       if (ctx.reaction->death_visual_available) {ctx.reactionResult->death_visual=1;
                           iVar31 = ctx.s32((int64_t)param_1 +
-                                           (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x8408c)
+                                           (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0xc))
                           ;
                           iVar36 = n_0044a8d8(ctx,0x2e);
                           ctx.reactionResult->death_x = iVar31 + iVar36 * -10 + 0xfa;
                           iVar31 = ctx.s32((int64_t)param_1 +
-                                           (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x84090)
+                                           (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0x10))
                           ;
                           iVar36 = n_0044a8d8(ctx,0x1f);
                           ctx.reactionResult->death_y = iVar31 + iVar36 * 10 + -0x96;
@@ -1901,11 +1901,11 @@ LAB_006dae60:
                       }
                     }
                     piVar64 = (int64_t)((int64_t)param_1 +
-                                     (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x8417c);
+                                     (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0xfc));
                     if (ctx.s32(piVar64) == 1) {
                       ctx.s32(piVar64) = 2;
                     }
-                    lVar66 = (int64_t)param_3 * 0x3ec + (int64_t)param_2 * 0xc804 + 0x84080;
+                    lVar66 = (int64_t)param_3 * 0x3ec + (int64_t)param_2 * actorStride + (actorBase+0*actorStride+0x0);
                     if (ctx.s32((int64_t)param_1 + lVar66 + 0x134) == 1) {
                       ctx.u32((int64_t)param_1 + lVar66 + 0x134) = 2;
                     }
@@ -1942,12 +1942,12 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
      (uVar7 = n_00a97f6c(ctx,param_2,param_3,0), (uVar7 & 1) != 0)) {
     lVar8 = param_1 + (int64_t)param_3 * 0x3ec;
     if (param_2 == 0) {
-      iVar2 = ctx.s32(lVar8 + 0x8408c);
+      iVar2 = ctx.s32(lVar8 + (actorBase+0*actorStride+0xc));
       iVar5 = n_00a980b8(ctx,0,param_3,0);
       iVar2 = iVar2 - iVar5;
     }
     else {
-      iVar5 = ctx.s32(lVar8 + 0x90890);
+      iVar5 = ctx.s32(lVar8 + (actorBase+1*actorStride+0xc));
       iVar2 = n_00a980b8(ctx,param_2,param_3,0);
       iVar2 = iVar2 + iVar5;
     }
@@ -1955,7 +1955,7 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
     if ((uVar7 & 1) == 0) {
       return 0;
     }
-    iVar5 = ctx.s32(param_1 + (uint64_t)(param_2 == 0) * 0xc804 + (int64_t)param_4 * 0x3ec + 0x8408c);
+    iVar5 = ctx.s32(param_1 + (uint64_t)(param_2 == 0) * actorStride + (int64_t)param_4 * 0x3ec + (actorBase+0*actorStride+0xc));
     if (param_2 == 0) {
       if (iVar5 < iVar2) {
         return 0;
@@ -1971,12 +1971,12 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
   if ((iVar2 != 2) || (uVar7 = n_00a97f6c(ctx,param_2,param_3,param_5), (uVar7 & 1) == 0)) {
     lVar8 = param_1 + (int64_t)param_3 * 0x3ec;
     if (param_2 == 0) {
-      iVar2 = ctx.s32(lVar8 + 0x8408c);
-      iVar5 = iVar2 - ctx.s32(lVar8 + 0x840b4);
+      iVar2 = ctx.s32(lVar8 + (actorBase+0*actorStride+0xc));
+      iVar5 = iVar2 - ctx.s32(lVar8 + (actorBase+0*actorStride+0x34));
     }
     else {
-      iVar5 = ctx.s32(lVar8 + 0x90890);
-      iVar2 = ctx.s32(lVar8 + 0x908b8) + iVar5;
+      iVar5 = ctx.s32(lVar8 + (actorBase+1*actorStride+0xc));
+      iVar2 = ctx.s32(lVar8 + (actorBase+1*actorStride+0x34)) + iVar5;
     }
     iVar3 = n_00a93f08(ctx,bVar1,param_4);
     if (iVar3 == 0) {
@@ -1986,10 +1986,10 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
     if ((uVar7 & 1) == 0) {
       return 0;
     }
-    lVar8 = param_1 + 0x84080 + (int64_t)param_4 * 0x3ec;
+    lVar8 = param_1 + (actorBase+0*actorStride+0x0) + (int64_t)param_4 * 0x3ec;
     if (param_2 == 0) {
-      iVar3 = ctx.s32(lVar8 + 0xc810) - ctx.s32(lVar8 + 0xc83c);
-      iVar4 = ctx.s32(lVar8 + 0xc810) - ctx.s32(lVar8 + 0xc840);
+      iVar3 = ctx.s32(lVar8 + (actorStride+0xc)) - ctx.s32(lVar8 + (actorStride+0x38));
+      iVar4 = ctx.s32(lVar8 + (actorStride+0xc)) - ctx.s32(lVar8 + (actorStride+0x3c));
     }
     else {
       iVar3 = ctx.s32(lVar8 + 0x3c) + ctx.s32(lVar8 + 0xc);
@@ -2010,17 +2010,17 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
   if (param_2 == 0) {
     iVar5 = n_00a98224(ctx,0,param_3,param_5);
     lVar8 = param_1 + (int64_t)param_3 * 0x3ec;
-    iVar2 = ctx.s32(lVar8 + 0x8408c);
+    iVar2 = ctx.s32(lVar8 + (actorBase+0*actorStride+0xc));
     iVar3 = n_00a980b8(ctx,0,param_3,param_5);
     if (iVar5 < 1) {
       iVar4 = n_00a98224(ctx,0,param_3,param_5);
-      iVar5 = ctx.s32(lVar8 + 0x8408c);
+      iVar5 = ctx.s32(lVar8 + (actorBase+0*actorStride+0xc));
       iVar2 = iVar2 - (iVar3 + iVar4);
       iVar3 = n_00a980b8(ctx,0,param_3,param_5);
       iVar5 = iVar5 - iVar3;
     }
     else {
-      iVar5 = ctx.s32(lVar8 + 0x8408c);
+      iVar5 = ctx.s32(lVar8 + (actorBase+0*actorStride+0xc));
       iVar2 = iVar2 - iVar3;
       iVar3 = n_00a980b8(ctx,0,param_3,param_5);
       iVar4 = n_00a98224(ctx,0,param_3,param_5);
@@ -2030,18 +2030,18 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
   else {
     iVar3 = n_00a98224(ctx,param_2,param_3,param_5);
     lVar8 = param_1 + (int64_t)param_3 * 0x3ec;
-    iVar5 = ctx.s32(lVar8 + 0x90890);
+    iVar5 = ctx.s32(lVar8 + (actorBase+1*actorStride+0xc));
     iVar2 = n_00a980b8(ctx,param_2,param_3,param_5);
     iVar2 = iVar2 + iVar5;
     if (iVar3 < 1) {
       iVar5 = n_00a98224(ctx,param_2,param_3,param_5);
-      iVar3 = ctx.s32(lVar8 + 0x90890);
+      iVar3 = ctx.s32(lVar8 + (actorBase+1*actorStride+0xc));
       iVar2 = iVar2 + iVar5;
       iVar5 = n_00a980b8(ctx,param_2,param_3,param_5);
       iVar5 = iVar5 + iVar3;
     }
     else {
-      iVar5 = ctx.s32(lVar8 + 0x90890);
+      iVar5 = ctx.s32(lVar8 + (actorBase+1*actorStride+0xc));
       iVar3 = n_00a980b8(ctx,param_2,param_3,param_5);
       iVar4 = n_00a98224(ctx,param_2,param_3,param_5);
       iVar5 = iVar3 + iVar4 + iVar5;
@@ -2051,7 +2051,7 @@ uint64_t n_006dda04(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_
   if ((uVar7 & 1) == 0) {
     return 0;
   }
-  iVar3 = ctx.s32(param_1 + (uint64_t)(param_2 == 0) * 0xc804 + (int64_t)param_4 * 0x3ec + 0x8408c);
+  iVar3 = ctx.s32(param_1 + (uint64_t)(param_2 == 0) * actorStride + (int64_t)param_4 * 0x3ec + (actorBase+0*actorStride+0xc));
   if (param_4 == 0) {
     if (param_2 != 0) goto joined_r0x006dde40;
   }
@@ -2247,8 +2247,8 @@ LAB_006e5128:
         if ((uVar19 & 1) == 0) goto LAB_006e515c;
         local_198 = 0;
         lVar25 = param_1 + (int64_t)param_4 * 0x3ec;
-        ctx.u32(lVar25 + 0x909f4) = 0;
-        ctx.u32(lVar25 + 0x909f8) = 1;
+        ctx.u32(lVar25 + (actorBase+1*actorStride+0x170)) = 0;
+        ctx.u32(lVar25 + (actorBase+1*actorStride+0x174)) = 1;
       }
       else {
         if (param_2 == 2) {
@@ -2271,7 +2271,7 @@ LAB_006e515c:
       n_00a9bbac(ctx,1,param_4,local_198);
       uVar19 = n_00a97d6c(ctx,0,param_3);
       if ((uVar19 & 1) != 0) {
-        ctx.u32(param_1 + (int64_t)param_4 * 0x3ec + 0x90980) = 1;
+        ctx.u32(param_1 + (int64_t)param_4 * 0x3ec + (actorBase+1*actorStride+0xfc)) = 1;
       }
       uVar19 = n_00a9a1ec(ctx,0,param_3);
       if (((uVar19 & 1) != 0) && (uVar19 = n_00a96ff8(ctx,1,param_4), (uVar19 & 1) != 0)) {
@@ -3164,7 +3164,7 @@ LAB_006e8600:
 LAB_006e87a4:
       if ((uVar14 & 1) != 0) {
         uVar13 = 0;
-        ctx.u64(param_1 + (int64_t)param_4 * 0x3ec + 0x841f0) = 0x100000000ULL;
+        ctx.u64(param_1 + (int64_t)param_4 * 0x3ec + (actorBase+0*actorStride+0x170)) = 0x100000000ULL;
       }
     }
     else {
@@ -3549,7 +3549,7 @@ void n_006eb6b0(Context &ctx,int64_t param_1,int32_t param_3,int32_t param_4,...
 
   }
   if (!uVar38) return;
-  puVar37 = (int64_t)(param_1 + 0x84080 + (int64_t)param_3 * 0xc804 + uVar38 * 0x3ec);
+  puVar37 = (int64_t)(param_1 + (actorBase+0*actorStride+0x0) + (int64_t)param_3 * actorStride + uVar38 * 0x3ec);
   if (0 < (int32_t)ctx.u32(puVar37+(0x12)*4)) {
     ctx.u32(puVar37+(0x12)*4) = ctx.u32(puVar37+(0x12)*4) + -1;
   }
@@ -3562,7 +3562,7 @@ void n_006eb7e0(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int
 
   int32_t iVar14;int32_t iVar18;int32_t iVar17;uint32_t uVar15;int64_t puVar37;uint64_t uVar23;uint64_t uVar24;uint64_t uVar38=(uint32_t)param_4;int64_t puVar33;
   int32_t iVar2=param_3==0?60:-60;int32_t iVar3=param_3==0?20:-20;int64_t lVar36=param_1+(int64_t)param_3*0x1f0;
-  puVar37=(int64_t)(param_1+0x84080+(int64_t)param_3*0xc804+uVar38*0x3ec);
+  puVar37=(int64_t)(param_1+(actorBase+0*actorStride+0x0)+(int64_t)param_3*actorStride+uVar38*0x3ec);
   if (n_00a94234(ctx,param_3,param_4)!=3) {
       iVar14 = n_00a94234(ctx,param_3,uVar38 & 0xffffffff);
       if (iVar14 == 5) {
@@ -3723,7 +3723,7 @@ void n_006eb8c0(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int
       iVar18 = n_006dda04(ctx,param_1,param_3,uVar38 & 0xffffffff,iVar14,0);
       if (iVar18 == 1) return;
       iVar14 = iVar14 + 1;
-    } while (iVar14 != 0x33);
+    } while (iVar14 != ctx.limit());
     iVar14 = n_00a9bfcc(ctx,param_3,uVar38 & 0xffffffff);
     if (0 < iVar14) return;
     iVar14 = n_00a943dc(ctx,param_3,uVar38 & 0xffffffff);
@@ -3744,7 +3744,7 @@ void n_006eb8c0(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int
 
 void n_006ebb0c(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int32_t param_4,...) {
 
-int32_t iVar14;int32_t iVar17;int32_t iVar18;uint64_t uVar23;uint64_t uVar38=(uint32_t)param_4;int64_t puVar37;puVar37=(int64_t)(param_1+0x84080+(int64_t)param_3*0xc804+(int64_t)param_4*0x3ec);
+int32_t iVar14;int32_t iVar17;int32_t iVar18;uint64_t uVar23;uint64_t uVar38=(uint32_t)param_4;int64_t puVar37;puVar37=(int64_t)(param_1+(actorBase+0*actorStride+0x0)+(int64_t)param_3*actorStride+(int64_t)param_4*0x3ec);
 
   iVar14 = n_00a94234(ctx,param_3,uVar38 & 0xffffffff);
   if (iVar14 == 4) {
@@ -3787,7 +3787,7 @@ int32_t iVar14;int32_t iVar17;int32_t iVar18;uint64_t uVar23;uint64_t uVar38=(ui
              (iVar14 = n_00a94234(ctx,param_3,uVar23 & 0xffffffff), iVar14 != 4)) goto LAB_006ec68c;
         }
         uVar23 = uVar23 + 1;
-      } while ((int32_t)uVar23 != 0x33);
+      } while ((int32_t)uVar23 != ctx.limit());
       iVar14 = n_005bc1dc(ctx,param_3,uVar38 & 0xffffffff);
       ctx.retirementResult->reset_production=1;ctx.retirementResult->production_slot=iVar14;
     }
@@ -3916,7 +3916,7 @@ void n_006ecfec(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int
           iVar15 = n_006dda04(ctx,param_1,param_3,uVar23 & 0xffffffff,iVar13,0);
           if (iVar15 == 1) return;
           iVar13 = iVar13 + 1;
-        } while (iVar13 != 0x33);
+        } while (iVar13 != ctx.limit());
         iVar13 = n_00a9bfcc(ctx,param_3,uVar23 & 0xffffffff);
         if (iVar13 < 1) {
           uVar14 = n_00a943dc(ctx,param_3,uVar23 & 0xffffffff);
@@ -4016,7 +4016,7 @@ LAB_006ed318:
 void n_006ed43c(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int32_t param_4,...) {
 
   int32_t iVar13;int32_t iVar15;int32_t local_184;uint32_t uVar14;uint64_t uVar23=(uint32_t)param_4;uint64_t uVar24;uint64_t uVar26;int64_t lVar25;int64_t piVar40;int64_t puVar32;
-  piVar40=(int64_t)(param_1+0x84080+(int64_t)param_3*0xc804+uVar23*0x3ec);
+  piVar40=(int64_t)(param_1+(actorBase+0*actorStride+0x0)+(int64_t)param_3*actorStride+uVar23*0x3ec);
       iVar13 = n_00a94234(ctx,param_3,uVar23 & 0xffffffff);
       if (iVar13 == 3) {
         n_009f4688(ctx,param_1,param_2,param_3,uVar23 & 0xffffffff);
@@ -4134,7 +4134,7 @@ void n_006ed43c(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int
 
 void n_006ed5e0(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int32_t param_4,...) {
 
-int32_t iVar13;int32_t iVar15;int32_t iVar16;uint64_t uVar24;int64_t piVar40;piVar40=(int64_t)(param_1+0x84080+(int64_t)param_3*0xc804+(int64_t)param_4*0x3ec);uint64_t uVar23=(uint32_t)param_4;
+int32_t iVar13;int32_t iVar15;int32_t iVar16;uint64_t uVar24;int64_t piVar40;piVar40=(int64_t)(param_1+(actorBase+0*actorStride+0x0)+(int64_t)param_3*actorStride+(int64_t)param_4*0x3ec);uint64_t uVar23=(uint32_t)param_4;
 
   iVar13 = n_00a94234(ctx,param_3,uVar23 & 0xffffffff);
   if (iVar13 == 4) {
@@ -4177,7 +4177,7 @@ int32_t iVar13;int32_t iVar15;int32_t iVar16;uint64_t uVar24;int64_t piVar40;piV
 void n_006ed8d4(Context &ctx,int64_t param_1,int64_t param_2,int32_t param_3,int32_t param_4,...) {
 
   int32_t iVar13;int32_t iVar15;int32_t iVar16;uint64_t uVar24;uint64_t uVar26;uint64_t uVar39;uint64_t uVar23=(uint32_t)param_4;int32_t local_128[1];int32_t fruits[7];int32_t fruit_count=0;int64_t piVar40;int64_t puVar32;
-  piVar40=(int64_t)(param_1+0x84080+(int64_t)param_3*0xc804+uVar23*0x3ec);
+  piVar40=(int64_t)(param_1+(actorBase+0*actorStride+0x0)+(int64_t)param_3*actorStride+uVar23*0x3ec);
           iVar13 = n_00a94234(ctx,param_3,uVar23 & 0xffffffff);
           if (iVar13 == 5) {
             n_009f4688(ctx,param_1,param_2,param_3,uVar23 & 0xffffffff);
@@ -4337,7 +4337,7 @@ uint64_t n_009f1e64(Context &ctx,int64_t param_1,int32_t param_2,int32_t param_3
         }
         n_00a9486c(ctx,iVar10,uVar16,iVar6);
         n_00a94e34(ctx,param_2,uVar16,0x1180);
-        lVar17 = param_1 + 0x84080 + (int64_t)param_2 * 0xc804 + uVar16 * 0x3ec;
+        lVar17 = param_1 + (actorBase+0*actorStride+0x0) + (int64_t)param_2 * actorStride + uVar16 * 0x3ec;
         ctx.s32(lVar17 + 0x14) = param_5;
         iVar6 = n_0044a8d8(ctx,(param_6 - param_5 & ((param_6 - param_5) >> 0x1f ^ 0xffffffffU)) + 1);
         ctx.s32(lVar17 + 0x14) = ctx.s32(lVar17 + 0x14) + iVar6;
@@ -4975,7 +4975,7 @@ LAB_009f407c:
         goto LAB_009f41b8;
       }
       uVar16 = (uint64_t)(iVar9 + 1U);
-    } while (iVar9 + 1U != 0x33);
+    } while (iVar9 + 1U != uint32_t(ctx.limit()));
     uVar16 = 0xffffffff;
   }
 LAB_009f41b8:
@@ -5128,7 +5128,7 @@ uint32_t n_00a92ec8(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x84098);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x18));
 }
 
 uint32_t n_00a92f34(Context &ctx,uint64_t param_1,...) {
@@ -5145,14 +5145,14 @@ uint32_t n_00a92f5c(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840a4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x24));
 }
 
 void n_00a92f90(Context &ctx,int32_t param_1,uint32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840a4) = param_2;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x24)) = param_2;
   return;
 }
 
@@ -5160,14 +5160,14 @@ uint32_t n_00a92fc8(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840a8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x28));
 }
 
 void n_00a92ffc(Context &ctx,int32_t param_1,uint32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840a8) = param_2;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x28)) = param_2;
   return;
 }
 
@@ -5175,21 +5175,21 @@ uint32_t n_00a9314c(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840b4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x34));
 }
 
 bool n_00a932ac(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + 0x84094) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x14)) != 0;
 }
 
 void n_00a932e8(Context &ctx,int32_t param_1,uint32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x84094) = param_2 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x14)) = param_2 & 1;
   return;
 }
 
@@ -5197,63 +5197,63 @@ uint32_t n_00a93320(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840c4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x44));
 }
 
 uint32_t n_00a9338c(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840c8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x48));
 }
 
 uint32_t n_00a933f8(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840d0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x50));
 }
 
 uint32_t n_00a934d0(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840d4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x54));
 }
 
 uint32_t n_00a935a8(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840d8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x58));
 }
 
 uint32_t n_00a93800(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840ec);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x6c));
 }
 
 uint32_t n_00a9386c(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840ec);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x6c));
 }
 
 bool n_00a938d8(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840f0) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x70)) != 0;
 }
 
 void n_00a93914(Context &ctx,int32_t param_1,uint32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840f0) = param_2 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x70)) = param_2 & 1;
   return;
 }
 
@@ -5261,7 +5261,7 @@ void n_00a93988(Context &ctx,int32_t param_1,uint32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840f4) = param_2 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x74)) = param_2 & 1;
   return;
 }
 
@@ -5269,21 +5269,21 @@ uint32_t n_00a939c0(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840f8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x78));
 }
 
 uint32_t n_00a93a2c(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840f8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x78));
 }
 
 uint32_t n_00a93a98(Context &ctx,int32_t param_1,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + 0x840fc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (actorBase+0*actorStride+0x7c));
 }
 
 uint32_t n_00a93b04(Context &ctx,uint64_t param_1,...) {
@@ -5353,13 +5353,13 @@ uint32_t n_00a93f08(Context &ctx,int32_t param_1,int32_t param_2,...) {
   int64_t lVar1;
   uint32_t uVar2;
   lVar1 = n_0081f580(ctx);
-  if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84080) == 0) {
+  if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x0)) == 0) {
     uVar2 = 0;
   }
   else {
     lVar1 = n_0081f580(ctx);
     uVar2 = 1;
-    if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84080) != 1) {
+    if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x0)) != 1) {
       uVar2 = 2;
     }
   }
@@ -5370,7 +5370,7 @@ int32_t n_00a93fc8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84080) + -2;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x0)) + -2;
 }
 
 void n_00a9400c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,int32_t param_4,...) {
@@ -5385,7 +5385,7 @@ void n_00a9400c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,int
     }
   }
   lVar1 = n_0081f580(ctx);
-  ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84080) = param_3;
+  ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x0)) = param_3;
   return;
 }
 
@@ -5393,7 +5393,7 @@ uint32_t n_00a94234(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4));
 }
 
 void n_00a94274(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...) {
@@ -5404,7 +5404,7 @@ void n_00a94274(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   uint64_t uVar4;
   if (param_3 == 0) {
     lVar2 = n_0081f580(ctx);
-    if (ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a8) == 0) {
+    if (ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x28)) == 0) {
       param_3 = 1;
     }
     else {
@@ -5413,7 +5413,7 @@ void n_00a94274(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
       if ((uVar4 & 1) == 0) {
         lVar2 = n_0081f580(ctx);
         param_3 = 0xe;
-        if (ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843b4) < 1) {
+        if (ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x334)) < 1) {
           param_3 = 0;
         }
       }
@@ -5424,10 +5424,10 @@ void n_00a94274(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   }
   else if (param_3 == 4) {
     lVar2 = n_0081f580(ctx);
-    if (ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84368) != 0) {
+    if (ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e8)) != 0) {
       iVar1 = n_0044a8d8(ctx,100);
       lVar2 = n_0081f580(ctx);
-      if (iVar1 < ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84368)) {
+      if (iVar1 < ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e8))) {
         uVar3 = n_00457e1c(ctx);
         n_00459efc(ctx,uVar3,0x8f,0);
         param_3 = 0x15;
@@ -5438,7 +5438,7 @@ void n_00a94274(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   }
 LAB_00a943ac:
   lVar2 = n_0081f580(ctx);
-  ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) = param_3;
+  ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) = param_3;
   return;
 }
 
@@ -5446,7 +5446,7 @@ uint32_t n_00a943dc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x28));
 }
 
 uint32_t n_00a9441c(Context &ctx,int32_t param_1,int32_t param_2,...) {
@@ -5458,7 +5458,7 @@ uint32_t n_00a9441c(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843b4);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x334));
   }
   else {
     uVar1 = 0;
@@ -5470,26 +5470,26 @@ bool n_00a94484(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  if (((((ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0) &&
+  if (((((ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0) &&
         (lVar1 = n_0081f580(ctx),
-        ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 1)) &&
+        ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 1)) &&
        (lVar1 = n_0081f580(ctx),
-       ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 2)) &&
+       ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 2)) &&
       ((lVar1 = n_0081f580(ctx),
-       ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0xb &&
+       ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0xb &&
        (lVar1 = n_0081f580(ctx),
-       ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0xd)))) &&
+       ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0xd)))) &&
      (lVar1 = n_0081f580(ctx),
-     ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0x10)) {
+     ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0x10)) {
     if ((param_3 == -1) ||
        (lVar1 = n_0081f580(ctx),
-       ctx.s32(lVar1 + (int64_t)param_1 * -0xc804 + (int64_t)param_3 * 0x3ec + 0x90b9c) == 0)) {
+       ctx.s32(lVar1 + (int64_t)param_1 * -actorStride + (int64_t)param_3 * 0x3ec + (actorBase+1*actorStride+0x318)) == 0)) {
       return false;
     }
     lVar1 = n_0081f580(ctx);
-    if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0xe) {
+    if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0xe) {
       lVar1 = n_0081f580(ctx);
-      return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) == 0xf;
+      return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) == 0xf;
     }
   }
   return true;
@@ -5499,20 +5499,20 @@ bool n_00a94630(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84398) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x318)) != 0;
 }
 
 bool n_00a9467c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  if (((ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0x13) &&
+  if (((ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0x13) &&
       (lVar1 = n_0081f580(ctx),
-      ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0x12)) &&
+      ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0x12)) &&
      (lVar1 = n_0081f580(ctx),
-     ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 0x14)) {
+     ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 0x14)) {
     lVar1 = n_0081f580(ctx);
-    return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84084) != 4;
+    return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4)) != 4;
   }
   return false;
 }
@@ -5521,14 +5521,14 @@ uint32_t n_00a9474c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84088);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x8));
 }
 
 void n_00a9478c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84088) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x8)) = param_3;
   return;
 }
 
@@ -5536,8 +5536,8 @@ void n_00a947d8(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84088) = ctx.s32(lVar1 + 0x84088) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x8)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x8)) + param_3;
   return;
 }
 
@@ -5545,14 +5545,14 @@ uint32_t n_00a9482c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8408c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc));
 }
 
 void n_00a9486c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8408c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc)) = param_3;
   return;
 }
 
@@ -5560,8 +5560,8 @@ void n_00a948b8(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x8408c) = ctx.s32(lVar1 + 0x8408c) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0xc)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0xc)) + param_3;
   return;
 }
 
@@ -5574,7 +5574,7 @@ bool n_00a94bf0(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84180) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x100)) != 0;
   }
   else {
     bVar1 = false;
@@ -5590,15 +5590,15 @@ bool n_00a94c60(Context &ctx,uint64_t param_1,int32_t param_2,int32_t param_3,..
   n_00a9490c(ctx,param_1,param_2,param_3);
   if (param_2 == 1) {
     lVar3 = n_0081f580(ctx);
-    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x908fc);
+    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+1*actorStride+0x78));
     lVar3 = n_0081f580(ctx);
-    bVar2 = iVar1 < ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x90890);
+    bVar2 = iVar1 < ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+1*actorStride+0xc));
   }
   else if (param_2 == 0) {
     lVar3 = n_0081f580(ctx);
-    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x840f8);
+    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x78));
     lVar3 = n_0081f580(ctx);
-    bVar2 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x8408c) < iVar1;
+    bVar2 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xc)) < iVar1;
   }
   else {
     bVar2 = false;
@@ -5614,9 +5614,9 @@ void n_00a94d0c(Context &ctx,uint64_t param_1,uint32_t param_2,int32_t param_3,.
   n_00a9490c(ctx,param_1,param_2,param_3);
   if (param_2 == 1) {
     lVar3 = n_0081f580(ctx);
-    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x908fc);
+    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+1*actorStride+0x78));
     lVar3 = n_0081f580(ctx);
-    if (iVar1 < ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x90890)) {
+    if (iVar1 < ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+1*actorStride+0xc))) {
       return;
     }
   }
@@ -5625,16 +5625,16 @@ void n_00a94d0c(Context &ctx,uint64_t param_1,uint32_t param_2,int32_t param_3,.
       return;
     }
     lVar3 = n_0081f580(ctx);
-    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x840f8);
+    iVar1 = ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x78));
     lVar3 = n_0081f580(ctx);
-    if (ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + 0x8408c) < iVar1) {
+    if (ctx.s32(lVar3 + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xc)) < iVar1) {
       return;
     }
   }
   lVar3 = n_0081f580(ctx);
-  uVar2 = ctx.u32(lVar3 + (uint64_t)param_2 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x840f8);
+  uVar2 = ctx.u32(lVar3 + (uint64_t)param_2 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x78));
   lVar3 = n_0081f580(ctx);
-  ctx.u32(lVar3 + (uint64_t)param_2 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x8408c) = uVar2;
+  ctx.u32(lVar3 + (uint64_t)param_2 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xc)) = uVar2;
   return;
 }
 
@@ -5642,7 +5642,7 @@ void n_00a94e34(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84090) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x10)) = param_3;
   return;
 }
 
@@ -5650,14 +5650,14 @@ uint32_t n_00a94e80(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840c8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x48));
 }
 
 void n_00a94ec0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840c8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x48)) = param_3;
   return;
 }
 
@@ -5665,14 +5665,14 @@ uint32_t n_00a94f0c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840d8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x58));
 }
 
 void n_00a94f4c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840d8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x58)) = param_3;
   return;
 }
 
@@ -5680,14 +5680,14 @@ bool n_00a94f98(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840dc) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x5c)) != 0;
 }
 
 void n_00a94fe0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840dc) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x5c)) = param_3 & 1;
   return;
 }
 
@@ -5699,7 +5699,7 @@ void n_00a95094(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84180) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x100)) = param_3;
   }
   return;
 }
@@ -5708,14 +5708,14 @@ uint32_t n_00a95100(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84184);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x104));
 }
 
 void n_00a95140(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84184) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x104)) = param_3;
   return;
 }
 
@@ -5723,7 +5723,7 @@ void n_00a95220(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84240) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c0)) = param_3;
   return;
 }
 
@@ -5731,14 +5731,14 @@ uint32_t n_00a9526c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84244);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c4));
 }
 
 void n_00a952ac(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84244) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c4)) = param_3;
   return;
 }
 
@@ -5746,14 +5746,14 @@ uint32_t n_00a952f8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8424c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1cc));
 }
 
 void n_00a95338(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8424c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1cc)) = param_3;
   return;
 }
 
@@ -5761,8 +5761,8 @@ void n_00a95384(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x8424c) = ctx.s32(lVar1 + 0x8424c) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x1cc)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x1cc)) + param_3;
   return;
 }
 
@@ -5770,14 +5770,14 @@ uint32_t n_00a953d8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84254);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1d4));
 }
 
 void n_00a95418(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84254) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1d4)) = param_3;
   return;
 }
 
@@ -5785,8 +5785,8 @@ void n_00a95464(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84254) = ctx.s32(lVar1 + 0x84254) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x1d4)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x1d4)) + param_3;
   return;
 }
 
@@ -5794,14 +5794,14 @@ uint32_t n_00a954b8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84278);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1f8));
 }
 
 void n_00a954f8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84278) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1f8)) = param_3;
   return;
 }
 
@@ -5809,14 +5809,14 @@ uint32_t n_00a95544(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8427c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1fc));
 }
 
 void n_00a95584(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8427c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1fc)) = param_3;
   return;
 }
 
@@ -5824,14 +5824,14 @@ bool n_00a955d0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84280) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x200)) != 0;
 }
 
 void n_00a95618(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84280) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x200)) = param_3 & 1;
   return;
 }
 
@@ -5839,14 +5839,14 @@ bool n_00a95664(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84284) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x204)) != 0;
 }
 
 void n_00a956ac(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84284) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x204)) = param_3 & 1;
   return;
 }
 
@@ -5854,7 +5854,7 @@ void n_00a95738(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84440) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3c0)) = param_3;
   return;
 }
 
@@ -5862,7 +5862,7 @@ void n_00a95784(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84444) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3c4)) = param_3;
   return;
 }
 
@@ -5870,14 +5870,14 @@ uint32_t n_00a95824(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8409c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c));
 }
 
 void n_00a95864(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8409c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c)) = param_3;
   return;
 }
 
@@ -5885,14 +5885,14 @@ uint32_t n_00a958b0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20));
 }
 
 void n_00a958f0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20)) = param_3;
   return;
 }
 
@@ -5900,8 +5900,8 @@ void n_00a9593c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x840a0) = ctx.s32(lVar1 + 0x840a0) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x20)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x20)) + param_3;
   return;
 }
 
@@ -5909,14 +5909,14 @@ uint32_t n_00a95990(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x24));
 }
 
 void n_00a959d0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x24)) = param_3;
   return;
 }
 
@@ -5924,7 +5924,7 @@ void n_00a95a1c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x28)) = param_3;
   return;
 }
 
@@ -5932,16 +5932,16 @@ uint32_t n_00a95a68(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-           (int64_t)ctx.s32(0x002f47bc + (int64_t)param_3 * 4) * 4 + 0x84080);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+           (int64_t)ctx.s32(0x002f47bc + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0));
 }
 
 void n_00a95ac4(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uint32_t param_4,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-    (int64_t)ctx.s32(0x002f47bc + (int64_t)param_3 * 4) * 4 + 0x84080) = param_4;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+    (int64_t)ctx.s32(0x002f47bc + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) = param_4;
   return;
 }
 
@@ -5950,18 +5950,18 @@ uint32_t n_00a95b24(Context &ctx,int32_t param_1,int32_t param_2,...) {
   int64_t lVar1;
   uint32_t uVar2;
   lVar1 = n_0081f580(ctx);
-  if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840d4) == 0) {
+  if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x54)) == 0) {
     uVar2 = 0;
   }
   else {
     lVar1 = n_0081f580(ctx);
-    if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84264) == 0) {
+    if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1e4)) == 0) {
       uVar2 = 1;
     }
     else {
       lVar1 = n_0081f580(ctx);
       uVar2 = 2;
-      if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84268) != 0) {
+      if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1e8)) != 0) {
         uVar2 = 3;
       }
     }
@@ -5973,22 +5973,22 @@ uint32_t n_00a95bd0(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-           (int64_t)ctx.s32(0x002f47c8 + (int64_t)param_3 * 4) * 4 + 0x84080);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+           (int64_t)ctx.s32(0x002f47c8 + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0));
 }
 
 uint32_t n_00a95c2c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840b0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x30));
 }
 
 void n_00a95c6c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840b0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x30)) = param_3;
   return;
 }
 
@@ -5996,7 +5996,7 @@ void n_00a95cf8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840b4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x34)) = param_3;
   return;
 }
 
@@ -6004,14 +6004,14 @@ uint32_t n_00a95d44(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840b8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x38));
 }
 
 void n_00a95d84(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840b8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x38)) = param_3;
   return;
 }
 
@@ -6019,7 +6019,7 @@ void n_00a95dd0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840bc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3c)) = param_3;
   return;
 }
 
@@ -6027,8 +6027,8 @@ void n_00a95e1c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uin
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-    (int64_t)ctx.s32(0x002f47c8 + (int64_t)param_3 * 4) * 4 + 0x84080) = param_4;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+    (int64_t)ctx.s32(0x002f47c8 + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) = param_4;
   return;
 }
 
@@ -6036,14 +6036,14 @@ uint32_t n_00a95e7c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84258);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1d8));
 }
 
 void n_00a95ebc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84258) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1d8)) = param_3;
   return;
 }
 
@@ -6051,16 +6051,16 @@ bool n_00a95f08(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-                  (int64_t)ctx.s32(0x002f47d4 + (int64_t)param_3 * 4) * 4 + 0x84080) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+                  (int64_t)ctx.s32(0x002f47d4 + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) != 0;
 }
 
 void n_00a95f6c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uint32_t param_4,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-            (int64_t)ctx.s32(0x002f47d4 + (int64_t)param_3 * 4) * 4 + 0x84080) = param_4 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+            (int64_t)ctx.s32(0x002f47d4 + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) = param_4 & 1;
   return;
 }
 
@@ -6068,7 +6068,7 @@ void n_00a9600c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84420) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3a0)) = param_3;
   return;
 }
 
@@ -6076,8 +6076,8 @@ void n_00a96058(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84420) = ctx.s32(lVar1 + 0x84420) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x3a0)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x3a0)) + param_3;
   return;
 }
 
@@ -6090,9 +6090,9 @@ uint64_t n_00a962a8(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3
   int32_t iVar5;
   uint64_t uVar6;
   lVar1 = n_0081f580(ctx);
-  if ((ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d8) < 1) ||
+  if ((ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x258)) < 1) ||
      (lVar1 = n_0081f580(ctx),
-     ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842dc) < 1)) {
+     ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x25c)) < 1)) {
     uVar6 = 1 - (int64_t)param_1;
     lVar1 = n_0081f580(ctx);
     uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
@@ -6103,12 +6103,12 @@ LAB_00a963b4:
       iVar5 = (int32_t)uVar6;
       if ((uVar3 & 1) != 0) {
         lVar1 = n_0081f580(ctx);
-        if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84124) != 0) {
+        if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa4)) != 0) {
           lVar1 = n_0081f580(ctx);
           uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
           if (((uVar3 & 1) == 0) &&
              (lVar1 = n_0081f580(ctx),
-             ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84124) != 0))
+             ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xa4)) != 0))
           goto LAB_00a965d4;
         }
       }
@@ -6116,12 +6116,12 @@ LAB_00a963b4:
       uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
       if ((uVar3 & 1) != 0) {
         lVar1 = n_0081f580(ctx);
-        if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84128) != 0) {
+        if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa8)) != 0) {
           lVar1 = n_0081f580(ctx);
           uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
           if (((uVar3 & 1) == 0) &&
              (lVar1 = n_0081f580(ctx),
-             ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84128) != 0))
+             ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xa8)) != 0))
           goto LAB_00a965d4;
         }
       }
@@ -6129,7 +6129,7 @@ LAB_00a963b4:
       uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
       if ((uVar3 & 1) != 0) {
         lVar1 = n_0081f580(ctx);
-        if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8412c) != 0) {
+        if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xac)) != 0) {
           lVar1 = n_0081f580(ctx);
           uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
           lVar4 = n_0081f580(ctx);
@@ -6137,7 +6137,7 @@ LAB_00a963b4:
           if ((uVar3 & 1) != 0) {
             lVar1 = 0x128;
           }
-          if (ctx.s32(lVar4 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + lVar1 + 0x84080) != 0)
+          if (ctx.s32(lVar4 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + lVar1 + (actorBase+0*actorStride+0x0)) != 0)
           goto LAB_00a965d4;
         }
       }
@@ -6145,19 +6145,19 @@ LAB_00a963b4:
       uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
       if ((uVar3 & 1) != 0) {
         lVar1 = n_0081f580(ctx);
-        if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84130) != 0)
+        if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb0)) != 0)
         goto LAB_00a96590;
 LAB_00a965f0:
         lVar1 = n_0081f580(ctx);
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84134) != 0) {
+          if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb4)) != 0) {
             lVar1 = n_0081f580(ctx);
             uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
             if (((uVar3 & 1) == 0) &&
                (lVar1 = n_0081f580(ctx),
-               ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84134) != 0))
+               ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xb4)) != 0))
             goto LAB_00a965d4;
           }
         }
@@ -6165,12 +6165,12 @@ LAB_00a965f0:
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84138) != 0) {
+          if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb8)) != 0) {
             lVar1 = n_0081f580(ctx);
             uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
             if (((uVar3 & 1) == 0) &&
                (lVar1 = n_0081f580(ctx),
-               ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84138) != 0))
+               ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xb8)) != 0))
             goto LAB_00a965d4;
           }
         }
@@ -6178,12 +6178,12 @@ LAB_00a965f0:
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8413c) != 0) {
+          if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xbc)) != 0) {
             lVar1 = n_0081f580(ctx);
             uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
             if (((uVar3 & 1) == 0) &&
                (lVar1 = n_0081f580(ctx),
-               ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x8413c) != 0))
+               ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xbc)) != 0))
             goto LAB_00a965d4;
           }
         }
@@ -6191,12 +6191,12 @@ LAB_00a965f0:
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84234) != 0) {
+          if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b4)) != 0) {
             lVar1 = n_0081f580(ctx);
             uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
             if (((uVar3 & 1) == 0) &&
                (lVar1 = n_0081f580(ctx),
-               ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84234) != 0))
+               ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x1b4)) != 0))
             goto LAB_00a965d4;
           }
         }
@@ -6204,12 +6204,12 @@ LAB_00a965f0:
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c0) != 0) {
+          if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x240)) != 0) {
             lVar1 = n_0081f580(ctx);
             uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
             if (((uVar3 & 1) == 0) &&
                (lVar1 = n_0081f580(ctx),
-               ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x842c0) != 0))
+               ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x240)) != 0))
             goto LAB_00a965d4;
           }
         }
@@ -6217,7 +6217,7 @@ LAB_00a965f0:
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if ((ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c8) != 0) &&
+          if ((ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x248)) != 0) &&
              (uVar3 = n_00a97148(ctx,uVar6 & 0xffffffff,param_3), (uVar3 & 1) != 0))
           goto LAB_00a965d4;
         }
@@ -6225,7 +6225,7 @@ LAB_00a965f0:
         uVar3 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
         if ((uVar3 & 1) != 0) {
           lVar1 = n_0081f580(ctx);
-          if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84388) != 0) {
+          if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x308)) != 0) {
             uVar2 = n_00a971b8(ctx,uVar6 & 0xffffffff,param_3);
             return uVar2;
           }
@@ -6237,19 +6237,19 @@ LAB_00a96590:
       uVar3 = n_005c2710(ctx,lVar1 + (int64_t)iVar5 * 0x1f0 + 0x2678);
       if ((uVar3 & 1) == 0) {
         lVar1 = n_0081f580(ctx);
-        if (ctx.s32(lVar1 + (int64_t)iVar5 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x84130) == 0)
+        if (ctx.s32(lVar1 + (int64_t)iVar5 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0xb0)) == 0)
         goto LAB_00a965f0;
       }
     }
     else {
       lVar1 = n_0081f580(ctx);
-      if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840c0) == 0)
+      if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x40)) == 0)
       goto LAB_00a963b4;
       lVar1 = n_0081f580(ctx);
       uVar3 = n_005c2710(ctx,lVar1 + uVar6 * 0x1f0 + 0x2678);
       if (((uVar3 & 1) != 0) ||
          (lVar1 = n_0081f580(ctx),
-         ctx.s32(lVar1 + uVar6 * 0xc804 + (int64_t)param_3 * 0x3ec + 0x840c4) == 0))
+         ctx.s32(lVar1 + uVar6 * actorStride + (int64_t)param_3 * 0x3ec + (actorBase+0*actorStride+0x44)) == 0))
       goto LAB_00a963b4;
     }
 LAB_00a965d4:
@@ -6266,7 +6266,7 @@ uint32_t n_00a96948(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x258));
 }
 
 bool n_00a969c8(Context &ctx,int32_t param_1,int32_t param_2,...) {
@@ -6281,7 +6281,7 @@ bool n_00a969c8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840c0) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x40)) != 0;
   }
   return bVar1;
 }
@@ -6295,7 +6295,7 @@ bool n_00a96a38(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840c4) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x44)) != 0;
   }
   else {
     bVar1 = false;
@@ -6315,7 +6315,7 @@ bool n_00a96aa8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84124) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa4)) != 0;
   }
   return bVar1;
 }
@@ -6329,7 +6329,7 @@ bool n_00a96b18(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84124) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa4)) != 0;
   }
   else {
     bVar1 = false;
@@ -6349,7 +6349,7 @@ bool n_00a96b88(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84128) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa8)) != 0;
   }
   return bVar1;
 }
@@ -6363,7 +6363,7 @@ bool n_00a96bf8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84128) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa8)) != 0;
   }
   else {
     bVar1 = false;
@@ -6383,7 +6383,7 @@ bool n_00a96c68(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8412c) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xac)) != 0;
   }
   return bVar1;
 }
@@ -6400,7 +6400,7 @@ bool n_00a96cd8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   if ((uVar2 & 1) != 0) {
     lVar1 = 0x128;
   }
-  return ctx.s32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + lVar1 + 0x84080) != 0;
+  return ctx.s32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + lVar1 + (actorBase+0*actorStride+0x0)) != 0;
 }
 
 bool n_00a96d58(Context &ctx,int32_t param_1,int32_t param_2,...) {
@@ -6412,7 +6412,7 @@ bool n_00a96d58(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84130) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb0)) != 0;
   }
   else {
     bVar1 = true;
@@ -6432,7 +6432,7 @@ bool n_00a96dc8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84134) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb4)) != 0;
   }
   return bVar1;
 }
@@ -6446,7 +6446,7 @@ bool n_00a96e38(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84134) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb4)) != 0;
   }
   else {
     bVar1 = false;
@@ -6466,7 +6466,7 @@ bool n_00a96ea8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84138) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb8)) != 0;
   }
   return bVar1;
 }
@@ -6480,7 +6480,7 @@ bool n_00a96f18(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84138) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb8)) != 0;
   }
   else {
     bVar1 = false;
@@ -6500,7 +6500,7 @@ bool n_00a96f88(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8413c) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xbc)) != 0;
   }
   return bVar1;
 }
@@ -6514,7 +6514,7 @@ bool n_00a96ff8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8413c) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xbc)) != 0;
   }
   else {
     bVar1 = false;
@@ -6531,7 +6531,7 @@ bool n_00a97068(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84234) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b4)) != 0;
   }
   else {
     bVar1 = false;
@@ -6548,7 +6548,7 @@ bool n_00a970d8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c0) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x240)) != 0;
   }
   else {
     bVar1 = false;
@@ -6565,7 +6565,7 @@ bool n_00a97148(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c8) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x248)) != 0;
   }
   else {
     bVar1 = false;
@@ -6582,7 +6582,7 @@ bool n_00a971b8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84388) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x308)) != 0;
   }
   else {
     bVar1 = false;
@@ -6602,7 +6602,7 @@ void n_00a97228(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   if ((uVar2 & 1) != 0) {
     lVar1 = 0x40;
   }
-  ctx.u32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + lVar1 + 0x84080) = param_3 & 1;
+  ctx.u32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + lVar1 + (actorBase+0*actorStride+0x0)) = param_3 & 1;
   return;
 }
 
@@ -6610,7 +6610,7 @@ void n_00a972a8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84124) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa4)) = param_3 & 1;
   return;
 }
 
@@ -6618,7 +6618,7 @@ void n_00a972f4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84128) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa8)) = param_3 & 1;
   return;
 }
 
@@ -6626,7 +6626,7 @@ void n_00a97340(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8412c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xac)) = param_3 & 1;
   return;
 }
 
@@ -6642,7 +6642,7 @@ void n_00a9738c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   if ((uVar2 & 1) != 0) {
     lVar1 = 0x128;
   }
-  ctx.u32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + lVar1 + 0x84080) = param_3 & 1;
+  ctx.u32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + lVar1 + (actorBase+0*actorStride+0x0)) = param_3 & 1;
   return;
 }
 
@@ -6650,7 +6650,7 @@ void n_00a9740c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84130) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb0)) = param_3 & 1;
   return;
 }
 
@@ -6658,7 +6658,7 @@ void n_00a97458(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84134) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb4)) = param_3 & 1;
   return;
 }
 
@@ -6666,7 +6666,7 @@ void n_00a974a4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84138) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xb8)) = param_3 & 1;
   return;
 }
 
@@ -6674,7 +6674,7 @@ void n_00a974f0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842b8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x238)) = param_3;
   return;
 }
 
@@ -6682,7 +6682,7 @@ void n_00a9753c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8413c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xbc)) = param_3 & 1;
   return;
 }
 
@@ -6690,7 +6690,7 @@ void n_00a97588(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84234) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b4)) = param_3 & 1;
   return;
 }
 
@@ -6698,7 +6698,7 @@ void n_00a975d4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c0) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x240)) = param_3 & 1;
   return;
 }
 
@@ -6706,7 +6706,7 @@ void n_00a97620(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c8) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x248)) = param_3 & 1;
   return;
 }
 
@@ -6714,7 +6714,7 @@ void n_00a9766c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84388) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x308)) = param_3 & 1;
   return;
 }
 
@@ -6727,7 +6727,7 @@ bool n_00a976b8(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84390) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x310)) != 0;
   }
   else {
     bVar1 = false;
@@ -6739,7 +6739,7 @@ void n_00a97728(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84390) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x310)) = param_3 & 1;
   return;
 }
 
@@ -6752,7 +6752,7 @@ bool n_00a97774(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843b8) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x338)) != 0;
   }
   else {
     bVar1 = false;
@@ -6764,7 +6764,7 @@ void n_00a977e4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843b8) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x338)) = param_3 & 1;
   return;
 }
 
@@ -6777,7 +6777,7 @@ bool n_00a97830(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843dc) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x35c)) != 0;
   }
   else {
     bVar1 = false;
@@ -6789,7 +6789,7 @@ void n_00a978a0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843dc) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x35c)) = param_3 & 1;
   return;
 }
 
@@ -6797,14 +6797,14 @@ bool n_00a978ec(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84450) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d0)) != 0;
 }
 
 void n_00a97934(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84450) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d0)) = param_3 & 1;
   return;
 }
 
@@ -6812,14 +6812,14 @@ bool n_00a97980(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840d0) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x50)) != 0;
 }
 
 void n_00a979c8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840d0) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x50)) = param_3 & 1;
   return;
 }
 
@@ -6827,14 +6827,14 @@ uint32_t n_00a97a14(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84358);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2d8));
 }
 
 void n_00a97a54(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84358) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2d8)) = param_3;
   return;
 }
 
@@ -6842,7 +6842,7 @@ void n_00a97aa0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8411c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x9c)) = param_3;
   return;
 }
 
@@ -6850,7 +6850,7 @@ void n_00a97aec(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84120) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa0)) = param_3;
   return;
 }
 
@@ -6858,35 +6858,35 @@ uint32_t n_00a97b38(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8411c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x9c));
 }
 
 uint32_t n_00a97b78(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84120);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xa0));
 }
 
 bool n_00a97bb8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84144) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc4)) != 0;
 }
 
 uint32_t n_00a97c00(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84144);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc4));
 }
 
 void n_00a97c40(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84144) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc4)) = param_3;
   return;
 }
 
@@ -6902,7 +6902,7 @@ bool n_00a97c8c(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84164) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe4)) != 0;
   }
   return bVar1;
 }
@@ -6915,7 +6915,7 @@ void n_00a97cfc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84164) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe4)) = param_3 & 1;
   }
   return;
 }
@@ -6932,7 +6932,7 @@ bool n_00a97d6c(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84168) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe8)) != 0;
   }
   return bVar1;
 }
@@ -6945,7 +6945,7 @@ void n_00a97ddc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84168) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe8)) = param_3 & 1;
   }
   return;
 }
@@ -6962,7 +6962,7 @@ uint32_t n_00a97e4c(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8441c);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x39c));
   }
   return uVar1;
 }
@@ -6975,7 +6975,7 @@ void n_00a97eb4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8441c) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x39c)) = param_3;
   }
   return;
 }
@@ -6984,7 +6984,7 @@ void n_00a97f20(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841a4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x124)) = param_3;
   return;
 }
 
@@ -6993,16 +6993,16 @@ bool n_00a97f6c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   int64_t lVar1;
   if (((int32_t)param_3 < 1) ||
      (lVar1 = n_0081f580(ctx),
-     ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-              (int64_t)ctx.s32(0x002f47e0 + (uint64_t)param_3 * 4) * 4 + 0x84080) == 0)) {
+     ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+              (int64_t)ctx.s32(0x002f47e0 + (uint64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) == 0)) {
     lVar1 = n_0081f580(ctx);
-    param_3 = -(uint32_t)(ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841d0) ==
+    param_3 = -(uint32_t)(ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x150)) ==
                      0);
   }
   else {
     lVar1 = n_0081f580(ctx);
-    if (ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-                 (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4 + 0x84080) == 0) {
+    if (ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+                 (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4 + (actorBase+0*actorStride+0x0)) == 0) {
       param_3 = 0xffffffff;
     }
   }
@@ -7014,8 +7014,8 @@ void n_00a98050(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uin
   int64_t lVar1;
   if (param_3 != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-              (int64_t)ctx.s32((int64_t)0x002b27e8 + (int64_t)param_3 * 4 + 4) * 4 + 0x84080) =
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+              (int64_t)ctx.s32((int64_t)0x002b27e8 + (int64_t)param_3 * 4 + 4) * 4 + (actorBase+0*actorStride+0x0)) =
          param_4 & 1;
   }
   return;
@@ -7027,16 +7027,16 @@ uint32_t n_00a980b8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_
   int64_t lVar2;
   if (((int32_t)param_3 < 1) ||
      (lVar2 = n_0081f580(ctx),
-     ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-              (int64_t)ctx.s32(0x002f47e0 + (uint64_t)param_3 * 4) * 4 + 0x84080) == 0)) {
+     ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+              (int64_t)ctx.s32(0x002f47e0 + (uint64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) == 0)) {
     lVar2 = n_0081f580(ctx);
-    param_3 = -(uint32_t)(ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841d0) ==
+    param_3 = -(uint32_t)(ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x150)) ==
                      0);
   }
   else {
     lVar2 = n_0081f580(ctx);
-    if (ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-                 (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4 + 0x84080) == 0) {
+    if (ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+                 (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4 + (actorBase+0*actorStride+0x0)) == 0) {
       param_3 = 0xffffffff;
     }
   }
@@ -7045,16 +7045,16 @@ uint32_t n_00a980b8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_
     uVar1 = param_3;
   }
   lVar2 = n_0081f580(ctx);
-  return ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-           (int64_t)(int32_t)ctx.s32(0x002f47ec+((int32_t)uVar1)*4) * 4 + 0x84080);
+  return ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+           (int64_t)(int32_t)ctx.s32(0x002f47ec+((int32_t)uVar1)*4) * 4 + (actorBase+0*actorStride+0x0));
 }
 
 void n_00a981c4(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uint32_t param_4,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4
-   + 0x84080) = param_4;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4
+   + (actorBase+0*actorStride+0x0)) = param_4;
   return;
 }
 
@@ -7064,16 +7064,16 @@ uint32_t n_00a98224(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_
   int64_t lVar2;
   if (((int32_t)param_3 < 1) ||
      (lVar2 = n_0081f580(ctx),
-     ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-              (int64_t)ctx.s32(0x002f47e0 + (uint64_t)param_3 * 4) * 4 + 0x84080) == 0)) {
+     ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+              (int64_t)ctx.s32(0x002f47e0 + (uint64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) == 0)) {
     lVar2 = n_0081f580(ctx);
-    param_3 = -(uint32_t)(ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841d0) ==
+    param_3 = -(uint32_t)(ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x150)) ==
                      0);
   }
   else {
     lVar2 = n_0081f580(ctx);
-    if (ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-                 (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4 + 0x84080) == 0) {
+    if (ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+                 (int64_t)(int32_t)ctx.s32(0x002f47ec+(param_3)*4) * 4 + (actorBase+0*actorStride+0x0)) == 0) {
       param_3 = 0xffffffff;
     }
   }
@@ -7082,16 +7082,16 @@ uint32_t n_00a98224(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_
     uVar1 = param_3;
   }
   lVar2 = n_0081f580(ctx);
-  return ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-           (int64_t)(int32_t)ctx.s32(0x002f47f8+((int32_t)uVar1)*4) * 4 + 0x84080);
+  return ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+           (int64_t)(int32_t)ctx.s32(0x002f47f8+((int32_t)uVar1)*4) * 4 + (actorBase+0*actorStride+0x0));
 }
 
 void n_00a98338(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uint32_t param_4,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + (int64_t)(int32_t)ctx.s32(0x002f47f8+(param_3)*4) * 4
-   + 0x84080) = param_4;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (int64_t)(int32_t)ctx.s32(0x002f47f8+(param_3)*4) * 4
+   + (actorBase+0*actorStride+0x0)) = param_4;
   return;
 }
 
@@ -7099,21 +7099,21 @@ bool n_00a98398(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8429c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x21c)) != 0;
 }
 
 uint32_t n_00a983e0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8429c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x21c));
 }
 
 void n_00a98420(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8429c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x21c)) = param_3;
   return;
 }
 
@@ -7121,14 +7121,14 @@ uint32_t n_00a9846c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842a0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x220));
 }
 
 void n_00a984ac(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842a0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x220)) = param_3;
   return;
 }
 
@@ -7136,14 +7136,14 @@ uint32_t n_00a984f8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842a4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x224));
 }
 
 void n_00a98538(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842a4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x224)) = param_3;
   return;
 }
 
@@ -7151,14 +7151,14 @@ uint32_t n_00a98584(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842a8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x228));
 }
 
 void n_00a985c4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842a8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x228)) = param_3;
   return;
 }
 
@@ -7166,35 +7166,35 @@ bool n_00a98610(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8430c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x28c)) != 0;
 }
 
 uint32_t n_00a98658(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8430c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x28c));
 }
 
 bool n_00a98698(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8432c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2ac)) != 0;
 }
 
 uint32_t n_00a986e0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8432c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2ac));
 }
 
 void n_00a98720(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8432c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2ac)) = param_3;
   return;
 }
 
@@ -7202,14 +7202,14 @@ uint32_t n_00a9876c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84330);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2b0));
 }
 
 void n_00a987ac(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84330) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2b0)) = param_3;
   return;
 }
 
@@ -7217,21 +7217,21 @@ uint32_t n_00a987f8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843cc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x34c));
 }
 
 uint32_t n_00a98838(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84338);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2b8));
 }
 
 void n_00a98878(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84338) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2b8)) = param_3;
   return;
 }
 
@@ -7239,14 +7239,14 @@ uint32_t n_00a988c4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8433c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2bc));
 }
 
 void n_00a98904(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8433c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2bc)) = param_3;
   return;
 }
 
@@ -7254,14 +7254,14 @@ uint32_t n_00a98950(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84340);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2c0));
 }
 
 void n_00a98990(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84340) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2c0)) = param_3;
   return;
 }
 
@@ -7269,14 +7269,14 @@ uint32_t n_00a989dc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84344);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2c4));
 }
 
 void n_00a98a1c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84344) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2c4)) = param_3;
   return;
 }
 
@@ -7284,7 +7284,7 @@ void n_00a98a68(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843cc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x34c)) = param_3;
   return;
 }
 
@@ -7292,7 +7292,7 @@ void n_00a98ab4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84368) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e8)) = param_3;
   return;
 }
 
@@ -7300,14 +7300,14 @@ uint32_t n_00a98b00(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8436c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2ec));
 }
 
 void n_00a98b40(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8436c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2ec)) = param_3;
   return;
 }
 
@@ -7315,14 +7315,14 @@ uint32_t n_00a98b8c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84370);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2f0));
 }
 
 void n_00a98bcc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84370) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2f0)) = param_3;
   return;
 }
 
@@ -7330,14 +7330,14 @@ uint32_t n_00a98c18(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84374);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2f4));
 }
 
 void n_00a98c58(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84374) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2f4)) = param_3;
   return;
 }
 
@@ -7345,14 +7345,14 @@ uint32_t n_00a98ca4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84410);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x390));
 }
 
 void n_00a98ce4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84410) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x390)) = param_3;
   return;
 }
 
@@ -7360,14 +7360,14 @@ uint32_t n_00a98d30(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84424);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3a4));
 }
 
 void n_00a98d70(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84424) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3a4)) = param_3;
   return;
 }
 
@@ -7375,14 +7375,14 @@ bool n_00a98dbc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843d0) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x350)) != 0;
 }
 
 void n_00a98e04(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843d0) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x350)) = param_3 & 1;
   return;
 }
 
@@ -7390,14 +7390,14 @@ uint32_t n_00a98e50(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84438);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3b8));
 }
 
 void n_00a98e90(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84438) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3b8)) = param_3;
   return;
 }
 
@@ -7405,14 +7405,14 @@ bool n_00a98edc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8443c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3bc)) != 0;
 }
 
 void n_00a98f24(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8443c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3bc)) = param_3 & 1;
   return;
 }
 
@@ -7420,14 +7420,14 @@ uint32_t n_00a98f70(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84400);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x380));
 }
 
 void n_00a98fb0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84400) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x380)) = param_3;
   return;
 }
 
@@ -7435,14 +7435,14 @@ uint32_t n_00a98ffc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84404);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x384));
 }
 
 void n_00a9903c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84404) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x384)) = param_3;
   return;
 }
 
@@ -7450,14 +7450,14 @@ uint32_t n_00a99088(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84408);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x388));
 }
 
 void n_00a990c8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84408) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x388)) = param_3;
   return;
 }
 
@@ -7465,14 +7465,14 @@ uint32_t n_00a99114(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843d4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x354));
 }
 
 void n_00a99154(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843d4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x354)) = param_3;
   return;
 }
 
@@ -7480,7 +7480,7 @@ void n_00a991a0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843d8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x358)) = param_3;
   return;
 }
 
@@ -7488,14 +7488,14 @@ uint32_t n_00a991ec(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ~ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843d8) >> 0x1f;
+  return ~ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x358)) >> 0x1f;
 }
 
 void n_00a99274(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84468) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3e8)) = param_3;
   return;
 }
 
@@ -7503,21 +7503,21 @@ bool n_00a992c0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84148) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc8)) != 0;
 }
 
 uint32_t n_00a99308(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84148);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc8));
 }
 
 void n_00a99348(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84148) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc8)) = param_3;
   return;
 }
 
@@ -7525,14 +7525,14 @@ uint32_t n_00a99394(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8414c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xcc));
 }
 
 void n_00a993d4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8414c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xcc)) = param_3;
   return;
 }
 
@@ -7540,21 +7540,21 @@ bool n_00a99420(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84150) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd0)) != 0;
 }
 
 uint32_t n_00a99468(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84150);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd0));
 }
 
 void n_00a994a8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84150) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd0)) = param_3;
   return;
 }
 
@@ -7562,14 +7562,14 @@ uint32_t n_00a994f4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84154);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd4));
 }
 
 void n_00a99534(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84154) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd4)) = param_3;
   return;
 }
 
@@ -7577,21 +7577,21 @@ bool n_00a99580(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84190) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x110)) != 0;
 }
 
 uint32_t n_00a995c8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84190);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x110));
 }
 
 void n_00a99608(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84190) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x110)) = param_3;
   return;
 }
 
@@ -7599,14 +7599,14 @@ uint32_t n_00a99654(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84194);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x114));
 }
 
 void n_00a99694(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84194) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x114)) = param_3;
   return;
 }
 
@@ -7614,14 +7614,14 @@ uint32_t n_00a996e0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84198);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x118));
 }
 
 void n_00a99720(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84198) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x118)) = param_3;
   return;
 }
 
@@ -7629,21 +7629,21 @@ bool n_00a9976c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842cc) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x24c)) != 0;
 }
 
 uint32_t n_00a997b4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842cc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x24c));
 }
 
 void n_00a997f4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842cc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x24c)) = param_3;
   return;
 }
 
@@ -7651,14 +7651,14 @@ uint32_t n_00a99840(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x250));
 }
 
 void n_00a99880(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x250)) = param_3;
   return;
 }
 
@@ -7666,14 +7666,14 @@ uint32_t n_00a998cc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8419c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x11c));
 }
 
 void n_00a9990c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8419c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x11c)) = param_3;
   return;
 }
 
@@ -7681,14 +7681,14 @@ uint32_t n_00a99958(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841a0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x120));
 }
 
 void n_00a99998(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841a0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x120)) = param_3;
   return;
 }
 
@@ -7701,25 +7701,25 @@ uint8_t n_00a999e4(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uint64_t uVar10;
   uint8_t bVar11;
   lVar9 = n_0081f580(ctx);
-  if (ctx.s32(lVar9 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8419c) == 0) {
+  if (ctx.s32(lVar9 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x11c)) == 0) {
     bVar11 = false;
   }
   else {
     lVar9 = n_0081f580(ctx);
-    iVar1 = ctx.s32(lVar9 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840a0);
+    iVar1 = ctx.s32(lVar9 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20));
     lVar9 = n_0081f580(ctx);
-    iVar7 = ctx.s32(lVar9 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8409c);
+    iVar7 = ctx.s32(lVar9 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c));
     lVar9 = n_0081f580(ctx);
-    bVar11 = iVar1 <= (ctx.s32(lVar9 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8419c) *
+    bVar11 = iVar1 <= (ctx.s32(lVar9 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x11c)) *
                       iVar7) / 100;
   }
   if (param_1 == 0) {
     lVar9 = n_0081f580(ctx);
-    iVar1 = ctx.s32(lVar9 + (int64_t)param_2 * 0x3ec + 0x84080);
-    iVar7 = ctx.clock->forms[0][param_2];
+    iVar1 = ctx.s32(lVar9 + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x0));
+    iVar7 = actorForm(ctx.clock,0,param_2);
     if (1 < iVar7) {
       lVar9 = n_0081f580(ctx);
-      iVar7 = ctx.s32(lVar9 + (int64_t)param_2 * 0x3ec + 0x84444);
+      iVar7 = ctx.s32(lVar9 + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3c4));
       lVar9 = n_0081f580(ctx);
       iVar8 = ctx.clock->kill_threshold;
       if (iVar7 < iVar8) {
@@ -7727,7 +7727,7 @@ uint8_t n_00a999e4(Context &ctx,int32_t param_1,int32_t param_2,...) {
       }
       else {
         lVar9 = n_0081f580(ctx);
-        uVar10 = ctx.clock->kill_orb[param_2];
+        uVar10 = actorKillOrb(ctx.clock,param_2);
 
         if ((uVar10 & 1) != 0) {
           bVar11 = bVar11 | 2;
@@ -7751,7 +7751,7 @@ bool n_00a99c24(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84140) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc0)) != 0;
   }
   return bVar1;
 }
@@ -7764,7 +7764,7 @@ void n_00a99c94(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84140) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xc0)) = param_3 & 1;
   }
   return;
 }
@@ -7781,7 +7781,7 @@ bool n_00a99d04(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84158) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd8)) != 0;
   }
   return bVar1;
 }
@@ -7794,7 +7794,7 @@ void n_00a99d74(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84158) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xd8)) = param_3 & 1;
   }
   return;
 }
@@ -7811,7 +7811,7 @@ bool n_00a99de4(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8415c) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xdc)) != 0;
   }
   return bVar1;
 }
@@ -7824,7 +7824,7 @@ void n_00a99e54(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8415c) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xdc)) = param_3 & 1;
   }
   return;
 }
@@ -7841,7 +7841,7 @@ bool n_00a99ec4(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84300) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x280)) != 0;
   }
   return bVar1;
 }
@@ -7854,7 +7854,7 @@ void n_00a99f34(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84300) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x280)) = param_3 & 1;
   }
   return;
 }
@@ -7871,7 +7871,7 @@ bool n_00a99fa4(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84304) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x284)) != 0;
   }
   return bVar1;
 }
@@ -7884,7 +7884,7 @@ void n_00a9a014(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84304) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x284)) = param_3 & 1;
   }
   return;
 }
@@ -7893,21 +7893,21 @@ bool n_00a9a084(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84160) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe0)) != 0;
 }
 
 uint32_t n_00a9a0cc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84160);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe0));
 }
 
 void n_00a9a10c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84160) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xe0)) = param_3;
   return;
 }
 
@@ -7915,14 +7915,14 @@ bool n_00a9a158(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8416c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xec)) != 0;
 }
 
 void n_00a9a1a0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8416c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xec)) = param_3 & 1;
   return;
 }
 
@@ -7938,7 +7938,7 @@ bool n_00a9a1ec(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84230) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b0)) != 0;
   }
   return bVar1;
 }
@@ -7951,7 +7951,7 @@ void n_00a9a25c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84230) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b0)) = param_3 & 1;
   }
   return;
 }
@@ -7968,7 +7968,7 @@ bool n_00a9a2cc(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84238) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b8)) != 0;
   }
   return bVar1;
 }
@@ -7981,7 +7981,7 @@ void n_00a9a33c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84238) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1b8)) = param_3 & 1;
   }
   return;
 }
@@ -7998,7 +7998,7 @@ bool n_00a9a3ac(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c4) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x244)) != 0;
   }
   return bVar1;
 }
@@ -8011,7 +8011,7 @@ void n_00a9a41c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842c4) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x244)) = param_3 & 1;
   }
   return;
 }
@@ -8028,7 +8028,7 @@ bool n_00a9a48c(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84394) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x314)) != 0;
   }
   return bVar1;
 }
@@ -8041,7 +8041,7 @@ void n_00a9a4fc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84394) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x314)) = param_3 & 1;
   }
   return;
 }
@@ -8061,11 +8061,11 @@ uint32_t n_00a9a56c(Context &ctx,int32_t param_1,int32_t param_2,...) {
     uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
     if ((((uVar3 & 1) == 0) ||
         (lVar2 = n_0081f580(ctx),
-        ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84394) == 0)) ||
+        ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x314)) == 0)) ||
        (lVar2 = n_0081f580(ctx),
-       ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84414) != 0)) {
+       ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x394)) != 0)) {
       lVar2 = n_0081f580(ctx);
-      uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84414);
+      uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x394));
     }
     else {
       uVar1 = 0xa0;
@@ -8082,9 +8082,9 @@ void n_00a9a64c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,ui
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84414) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x394)) = param_3;
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84418) = param_4;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x398)) = param_4;
   }
   return;
 }
@@ -8104,11 +8104,11 @@ uint32_t n_00a9a6dc(Context &ctx,int32_t param_1,int32_t param_2,...) {
     uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
     if ((((uVar3 & 1) == 0) ||
         (lVar2 = n_0081f580(ctx),
-        ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84394) == 0)) ||
+        ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x314)) == 0)) ||
        (lVar2 = n_0081f580(ctx),
-       ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84418) != 0)) {
+       ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x398)) != 0)) {
       lVar2 = n_0081f580(ctx);
-      uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84418);
+      uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x398));
     }
     else {
       uVar1 = 0x46;
@@ -8121,21 +8121,21 @@ bool n_00a9a7bc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84290) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x210)) != 0;
 }
 
 uint32_t n_00a9a804(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84290);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x210));
 }
 
 void n_00a9a844(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84290) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x210)) = param_3;
   return;
 }
 
@@ -8143,21 +8143,21 @@ bool n_00a9a890(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8435c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2dc)) != 0;
 }
 
 uint32_t n_00a9a8d8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8435c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2dc));
 }
 
 void n_00a9a918(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8435c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2dc)) = param_3;
   return;
 }
 
@@ -8165,7 +8165,7 @@ void n_00a9a964(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8430c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x28c)) = param_3;
   return;
 }
 
@@ -8173,14 +8173,14 @@ uint32_t n_00a9a9b0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84310);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x290));
 }
 
 void n_00a9a9f0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84310) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x290)) = param_3;
   return;
 }
 
@@ -8188,7 +8188,7 @@ void n_00a9aa3c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84398) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x318)) = param_3 & 1;
   return;
 }
 
@@ -8204,7 +8204,7 @@ bool n_00a9aa88(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843bc) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x33c)) != 0;
   }
   return bVar1;
 }
@@ -8217,7 +8217,7 @@ void n_00a9aaf8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843bc) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x33c)) = param_3 & 1;
   }
   return;
 }
@@ -8234,7 +8234,7 @@ uint32_t n_00a9ab68(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843c0);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x340));
   }
   return uVar1;
 }
@@ -8247,7 +8247,7 @@ void n_00a9abd0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843c0) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x340)) = param_3;
   }
   return;
 }
@@ -8264,7 +8264,7 @@ uint32_t n_00a9ac3c(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843c4);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x344));
   }
   return uVar1;
 }
@@ -8277,7 +8277,7 @@ void n_00a9aca4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843c4) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x344)) = param_3;
   }
   return;
 }
@@ -8294,7 +8294,7 @@ bool n_00a9ad10(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843e0) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x360)) != 0;
   }
   return bVar1;
 }
@@ -8307,7 +8307,7 @@ void n_00a9ad80(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843e0) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x360)) = param_3 & 1;
   }
   return;
 }
@@ -8324,7 +8324,7 @@ uint32_t n_00a9adf0(Context &ctx,int32_t param_1,int32_t param_2,...) {
   }
   else {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843e8);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x368));
   }
   return uVar1;
 }
@@ -8337,7 +8337,7 @@ void n_00a9ae58(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) != 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843e8) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x368)) = param_3;
   }
   return;
 }
@@ -8346,21 +8346,21 @@ bool n_00a9aec4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84458) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d8)) != 0;
 }
 
 uint32_t n_00a9af0c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84458);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d8));
 }
 
 void n_00a9af4c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84458) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d8)) = param_3;
   return;
 }
 
@@ -8368,14 +8368,14 @@ uint32_t n_00a9af98(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8445c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3dc));
 }
 
 void n_00a9afd8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8445c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3dc)) = param_3;
   return;
 }
 
@@ -8383,14 +8383,14 @@ bool n_00a9b024(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841d8) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x158)) != 0;
 }
 
 void n_00a9b06c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841d8) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x158)) = param_3 & 1;
   return;
 }
 
@@ -8398,14 +8398,14 @@ bool n_00a9b0b8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841dc) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x15c)) != 0;
 }
 
 void n_00a9b100(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841dc) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x15c)) = param_3 & 1;
   return;
 }
 
@@ -8413,14 +8413,14 @@ bool n_00a9b14c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841e0) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x160)) != 0;
 }
 
 void n_00a9b194(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841e0) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x160)) = param_3 & 1;
   return;
 }
 
@@ -8428,14 +8428,14 @@ bool n_00a9b1e0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841e4) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x164)) != 0;
 }
 
 void n_00a9b228(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841e4) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x164)) = param_3 & 1;
   return;
 }
 
@@ -8443,14 +8443,14 @@ bool n_00a9b274(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841e8) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x168)) != 0;
 }
 
 void n_00a9b2bc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841e8) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x168)) = param_3 & 1;
   return;
 }
 
@@ -8458,14 +8458,14 @@ bool n_00a9b308(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841ec) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x16c)) != 0;
 }
 
 void n_00a9b350(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841ec) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x16c)) = param_3 & 1;
   return;
 }
 
@@ -8473,14 +8473,14 @@ bool n_00a9b39c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8423c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1bc)) != 0;
 }
 
 void n_00a9b3e4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8423c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1bc)) = param_3 & 1;
   return;
 }
 
@@ -8488,14 +8488,14 @@ bool n_00a9b430(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d4) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x254)) != 0;
 }
 
 void n_00a9b478(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d4) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x254)) = param_3 & 1;
   return;
 }
 
@@ -8503,7 +8503,7 @@ void n_00a9b50c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84250) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1d0)) = param_3 & 1;
   return;
 }
 
@@ -8511,14 +8511,14 @@ uint32_t n_00a9b558(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84288);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x208));
 }
 
 void n_00a9b598(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84288) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x208)) = param_3;
   return;
 }
 
@@ -8526,14 +8526,14 @@ uint32_t n_00a9b5e4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84360);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e0));
 }
 
 void n_00a9b624(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84360) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e0)) = param_3;
   return;
 }
 
@@ -8541,14 +8541,14 @@ uint32_t n_00a9b670(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84364);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e4));
 }
 
 void n_00a9b6b0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84364) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2e4)) = param_3;
   return;
 }
 
@@ -8556,14 +8556,14 @@ bool n_00a9b6fc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842bc) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x23c)) != 0;
 }
 
 void n_00a9b744(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842bc) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x23c)) = param_3 & 1;
   return;
 }
 
@@ -8571,14 +8571,14 @@ uint32_t n_00a9b790(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84314);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x294));
 }
 
 void n_00a9b7d0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84314) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x294)) = param_3;
   return;
 }
 
@@ -8586,14 +8586,14 @@ uint32_t n_00a9b81c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84320);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2a0));
 }
 
 void n_00a9b85c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84320) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2a0)) = param_3;
   return;
 }
 
@@ -8601,14 +8601,14 @@ bool n_00a9b8a8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84348) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2c8)) != 0;
 }
 
 void n_00a9b8f0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84348) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2c8)) = param_3 & 1;
   return;
 }
 
@@ -8616,14 +8616,14 @@ bool n_00a9b93c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8434c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2cc)) != 0;
 }
 
 void n_00a9b984(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8434c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2cc)) = param_3 & 1;
   return;
 }
 
@@ -8631,14 +8631,14 @@ bool n_00a9b9d0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8440c) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x38c)) != 0;
 }
 
 void n_00a9ba18(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8440c) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x38c)) = param_3 & 1;
   return;
 }
 
@@ -8646,14 +8646,14 @@ bool n_00a9ba64(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84464) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3e4)) != 0;
 }
 
 void n_00a9baac(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84464) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3e4)) = param_3 & 1;
   return;
 }
 
@@ -8661,16 +8661,16 @@ uint32_t n_00a9baf8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840cc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4c));
 }
 
 void n_00a9bb38(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x840cc) = param_3;
+  ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x4c)) = param_3;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84308) = (uint32_t)(param_3 != 0)
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x288)) = (uint32_t)(param_3 != 0)
   ;
   return;
 }
@@ -8698,22 +8698,22 @@ void n_00a9bbac(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   }
 LAB_00a9bc28:
   lVar3 = n_0081f580(ctx);
-  lVar3 = lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar3 + 0x840cc) = ctx.s32(lVar3 + 0x840cc) + param_3;
+  lVar3 = lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar3 + (actorBase+0*actorStride+0x4c)) = ctx.s32(lVar3 + (actorBase+0*actorStride+0x4c)) + param_3;
   lVar3 = n_0081f580(ctx);
-  lVar3 = lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar3 + 0x84240) = ctx.s32(lVar3 + 0x84240) + param_3;
+  lVar3 = lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar3 + (actorBase+0*actorStride+0x1c0)) = ctx.s32(lVar3 + (actorBase+0*actorStride+0x1c0)) + param_3;
   lVar3 = n_0081f580(ctx);
-  if (((0 < ctx.s32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84288)) &&
+  if (((0 < ctx.s32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x208))) &&
       (lVar3 = n_0081f580(ctx),
-      ctx.s32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84288) < param_3)) &&
+      ctx.s32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x208)) < param_3)) &&
      (lVar3 = n_0081f580(ctx),
-     ctx.s32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8428c) == 0)) {
+     ctx.s32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20c)) == 0)) {
     lVar3 = n_0081f580(ctx);
-    ctx.u32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8428c) = 1;
+    ctx.u32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20c)) = 1;
   }
   lVar3 = n_0081f580(ctx);
-  ctx.u32(lVar3 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84308) = 1;
+  ctx.u32(lVar3 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x288)) = 1;
   return;
 }
 
@@ -8721,14 +8721,14 @@ uint32_t n_00a9bd44(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8428c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20c));
 }
 
 void n_00a9bd84(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8428c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x20c)) = param_3;
   return;
 }
 
@@ -8736,21 +8736,21 @@ bool n_00a9bdd0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84308) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x288)) != 0;
 }
 
 bool n_00a9be18(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84118) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x98)) != 0;
 }
 
 void n_00a9be60(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84118) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x98)) = param_3 & 1;
   return;
 }
 
@@ -8758,14 +8758,14 @@ bool n_00a9beac(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84170) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xf0)) != 0;
 }
 
 void n_00a9bef4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84170) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xf0)) = param_3 & 1;
   return;
 }
 
@@ -8773,14 +8773,14 @@ uint32_t n_00a9bf40(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843e4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x364));
 }
 
 void n_00a9bf80(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843e4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x364)) = param_3;
   return;
 }
 
@@ -8788,14 +8788,14 @@ uint32_t n_00a9bfcc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84174);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xf4));
 }
 
 void n_00a9c00c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84174) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xf4)) = param_3;
   return;
 }
 
@@ -8803,8 +8803,8 @@ void n_00a9c058(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84174) = ctx.s32(lVar1 + 0x84174) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0xf4)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0xf4)) + param_3;
   return;
 }
 
@@ -8812,7 +8812,7 @@ void n_00a9c0ec(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84188) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x108)) = param_3;
   return;
 }
 
@@ -8820,14 +8820,14 @@ uint32_t n_00a9c138(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843f0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x370));
 }
 
 void n_00a9c178(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843f0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x370)) = param_3;
   return;
 }
 
@@ -8835,14 +8835,14 @@ uint32_t n_00a9c1c4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84178);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xf8));
 }
 
 void n_00a9c204(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84178) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0xf8)) = param_3;
   return;
 }
 
@@ -8850,8 +8850,8 @@ void n_00a9c250(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84178) = ctx.s32(lVar1 + 0x84178) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0xf8)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0xf8)) + param_3;
   return;
 }
 
@@ -8859,7 +8859,7 @@ void n_00a9c2e4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8418c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x10c)) = param_3;
   return;
 }
 
@@ -8867,14 +8867,14 @@ uint32_t n_00a9c330(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843f4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x374));
 }
 
 void n_00a9c370(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843f4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x374)) = param_3;
   return;
 }
 
@@ -8882,14 +8882,14 @@ uint32_t n_00a9c3bc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841ac);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x12c));
 }
 
 void n_00a9c3fc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841ac) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x12c)) = param_3;
   return;
 }
 
@@ -8897,8 +8897,8 @@ void n_00a9c448(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x841ac) = ctx.s32(lVar1 + 0x841ac) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x12c)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x12c)) + param_3;
   return;
 }
 
@@ -8906,14 +8906,14 @@ uint32_t n_00a9c49c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841b0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x130));
 }
 
 void n_00a9c4dc(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841b0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x130)) = param_3;
   return;
 }
 
@@ -8921,14 +8921,14 @@ uint32_t n_00a9c528(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841bc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x13c));
 }
 
 void n_00a9c568(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x841bc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x13c)) = param_3;
   return;
 }
 
@@ -8936,14 +8936,14 @@ uint32_t n_00a9c5b4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843f8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x378));
 }
 
 void n_00a9c5f4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843f8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x378)) = param_3;
   return;
 }
 
@@ -8951,9 +8951,9 @@ void n_00a9c640(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84214) = 0;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x194)) = 0;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84218) = 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x198)) = 1;
   return;
 }
 
@@ -8961,7 +8961,7 @@ void n_00a9c6a4(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842d8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x258)) = param_3;
   return;
 }
 
@@ -8969,8 +8969,8 @@ void n_00a9c6f0(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x842d8) = ctx.s32(lVar1 + 0x842d8) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x258)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x258)) + param_3;
   return;
 }
 
@@ -8978,7 +8978,7 @@ void n_00a9c744(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842dc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x25c)) = param_3;
   return;
 }
 
@@ -8986,14 +8986,14 @@ uint32_t n_00a9c790(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843fc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x37c));
 }
 
 void n_00a9c7d0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843fc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x37c)) = param_3;
   return;
 }
 
@@ -9001,14 +9001,14 @@ bool n_00a9c81c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84294) != 0;
+  return ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x214)) != 0;
 }
 
 void n_00a9c864(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84294) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x214)) = param_3 & 1;
   return;
 }
 
@@ -9016,7 +9016,7 @@ void n_00a9c8f0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84298) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x218)) = param_3;
   return;
 }
 
@@ -9024,14 +9024,14 @@ uint32_t n_00a9c990(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842ac);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x22c));
 }
 
 void n_00a9c9d0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842ac) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x22c)) = param_3;
   return;
 }
 
@@ -9039,8 +9039,8 @@ void n_00a9ca1c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x842ac) = ctx.s32(lVar1 + 0x842ac) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x22c)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x22c)) + param_3;
   return;
 }
 
@@ -9048,14 +9048,14 @@ uint32_t n_00a9ca70(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842b0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x230));
 }
 
 void n_00a9cab0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842b0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x230)) = param_3;
   return;
 }
 
@@ -9063,16 +9063,16 @@ uint32_t n_00a9cafc(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-           (int64_t)ctx.s32(0x002f4804 + (int64_t)param_3 * 4) * 4 + 0x84080);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+           (int64_t)ctx.s32(0x002f4804 + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0));
 }
 
 void n_00a9cb58(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,uint32_t param_4,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec +
-    (int64_t)ctx.s32(0x002f4804 + (int64_t)param_3 * 4) * 4 + 0x84080) = param_4;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec +
+    (int64_t)ctx.s32(0x002f4804 + (int64_t)param_3 * 4) * 4 + (actorBase+0*actorStride+0x0)) = param_4;
   return;
 }
 
@@ -9080,7 +9080,7 @@ void n_00a9cc00(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84318) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x298)) = param_3 & 1;
   return;
 }
 
@@ -9088,14 +9088,14 @@ uint32_t n_00a9cc4c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8431c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x29c));
 }
 
 void n_00a9cc8c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8431c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x29c)) = param_3;
   return;
 }
 
@@ -9103,8 +9103,8 @@ void n_00a9ccd8(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x8431c) = ctx.s32(lVar1 + 0x8431c) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x29c)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x29c)) + param_3;
   return;
 }
 
@@ -9112,14 +9112,14 @@ uint32_t n_00a9cd2c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84324);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2a4));
 }
 
 void n_00a9cd6c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84324) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2a4)) = param_3;
   return;
 }
 
@@ -9127,8 +9127,8 @@ void n_00a9cdb8(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84324) = ctx.s32(lVar1 + 0x84324) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x2a4)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x2a4)) + param_3;
   return;
 }
 
@@ -9136,7 +9136,7 @@ void n_00a9ce54(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84334) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2b4)) = param_3 & 1;
   return;
 }
 
@@ -9144,14 +9144,14 @@ uint32_t n_00a9cea0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84378);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2f8));
 }
 
 void n_00a9cee0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84378) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2f8)) = param_3;
   return;
 }
 
@@ -9159,14 +9159,14 @@ uint32_t n_00a9cf2c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8437c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2fc));
 }
 
 void n_00a9cf6c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8437c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2fc)) = param_3;
   return;
 }
 
@@ -9174,14 +9174,14 @@ uint32_t n_00a9cfb8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84380);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x300));
 }
 
 void n_00a9cff8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84380) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x300)) = param_3;
   return;
 }
 
@@ -9189,7 +9189,7 @@ void n_00a9d084(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84384) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x304)) = param_3;
   return;
 }
 
@@ -9197,15 +9197,15 @@ uint32_t n_00a9d124(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8438c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x30c));
 }
 
 void n_00a9d1b0(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x8438c) = ctx.s32(lVar1 + 0x8438c) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x30c)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x30c)) + param_3;
   return;
 }
 
@@ -9213,14 +9213,14 @@ uint32_t n_00a9d204(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843c8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x348));
 }
 
 void n_00a9d244(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843c8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x348)) = param_3;
   return;
 }
 
@@ -9228,8 +9228,8 @@ void n_00a9d290(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x843c8) = ctx.s32(lVar1 + 0x843c8) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x348)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x348)) + param_3;
   return;
 }
 
@@ -9237,7 +9237,7 @@ void n_00a9d32c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843ec) = param_3 & 1;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x36c)) = param_3 & 1;
   return;
 }
 
@@ -9245,14 +9245,14 @@ uint32_t n_00a9d378(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84428);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3a8));
 }
 
 void n_00a9d3b8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84428) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3a8)) = param_3;
   return;
 }
 
@@ -9260,8 +9260,8 @@ void n_00a9d404(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84428) = ctx.s32(lVar1 + 0x84428) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x3a8)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x3a8)) + param_3;
   return;
 }
 
@@ -9269,14 +9269,14 @@ uint32_t n_00a9d458(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84460);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3e0));
 }
 
 void n_00a9d498(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84460) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3e0)) = param_3;
   return;
 }
 
@@ -9284,8 +9284,8 @@ void n_00a9d4e4(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-  ctx.s32(lVar1 + 0x84460) = ctx.s32(lVar1 + 0x84460) + param_3;
+  lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+  ctx.s32(lVar1 + (actorBase+0*actorStride+0x3e0)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x3e0)) + param_3;
   return;
 }
 
@@ -9298,7 +9298,7 @@ uint32_t n_00a9d538(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84204);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x184));
   }
   else {
     uVar1 = 0;
@@ -9314,7 +9314,7 @@ void n_00a9d5a0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84204) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x184)) = param_3;
   }
   return;
 }
@@ -9328,7 +9328,7 @@ void n_00a9d60c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    iVar3 = ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84204);
+    iVar3 = ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x184));
   }
   else {
     iVar3 = 0;
@@ -9337,7 +9337,7 @@ void n_00a9d60c(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84204) = iVar3 + param_3;
+    ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x184)) = iVar3 + param_3;
   }
   return;
 }
@@ -9351,7 +9351,7 @@ uint32_t n_00a9d6c0(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8421c);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x19c));
   }
   else {
     uVar1 = 0;
@@ -9367,7 +9367,7 @@ void n_00a9d728(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8421c) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x19c)) = param_3;
   }
   return;
 }
@@ -9381,7 +9381,7 @@ void n_00a9d794(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    iVar3 = ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8421c);
+    iVar3 = ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x19c));
   }
   else {
     iVar3 = 0;
@@ -9390,7 +9390,7 @@ void n_00a9d794(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.s32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8421c) = iVar3 + param_3;
+    ctx.s32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x19c)) = iVar3 + param_3;
   }
   return;
 }
@@ -9403,7 +9403,7 @@ void n_00a9d848(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x843b4) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x334)) = param_3;
   }
   return;
 }
@@ -9416,8 +9416,8 @@ void n_00a9d8b4(Context &ctx,int32_t param_1,int32_t param_2,int32_t param_3,...
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    lVar1 = lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec;
-    ctx.s32(lVar1 + 0x843b4) = ctx.s32(lVar1 + 0x843b4) + param_3;
+    lVar1 = lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec;
+    ctx.s32(lVar1 + (actorBase+0*actorStride+0x334)) = ctx.s32(lVar1 + (actorBase+0*actorStride+0x334)) + param_3;
   }
   return;
 }
@@ -9431,7 +9431,7 @@ uint32_t n_00a9d928(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84220);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1a0));
   }
   else {
     uVar1 = 0;
@@ -9447,7 +9447,7 @@ void n_00a9d990(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84220) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1a0)) = param_3;
   }
   return;
 }
@@ -9461,7 +9461,7 @@ uint32_t n_00a9d9fc(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84224);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1a4));
   }
   else {
     uVar1 = 0;
@@ -9477,7 +9477,7 @@ void n_00a9da64(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84224) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1a4)) = param_3;
   }
   return;
 }
@@ -9491,7 +9491,7 @@ uint32_t n_00a9dad0(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84228);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1a8));
   }
   else {
     uVar1 = 0;
@@ -9507,7 +9507,7 @@ void n_00a9db38(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84228) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1a8)) = param_3;
   }
   return;
 }
@@ -9521,7 +9521,7 @@ uint32_t n_00a9dba4(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84208);
+    uVar1 = ctx.u32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x188));
   }
   else {
     uVar1 = 0;
@@ -9537,7 +9537,7 @@ void n_00a9dc0c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84208) = param_3;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x188)) = param_3;
   }
   return;
 }
@@ -9551,7 +9551,7 @@ bool n_00a9dc78(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8422c) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1ac)) != 0;
   }
   else {
     bVar1 = false;
@@ -9567,7 +9567,7 @@ void n_00a9dce8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8422c) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1ac)) = param_3 & 1;
   }
   return;
 }
@@ -9581,7 +9581,7 @@ bool n_00a9dd58(Context &ctx,int32_t param_1,int32_t param_2,...) {
   uVar3 = n_005c2710(ctx,lVar2 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar3 & 1) == 0) {
     lVar2 = n_0081f580(ctx);
-    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84248) != 0;
+    bVar1 = ctx.s32(lVar2 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c8)) != 0;
   }
   else {
     bVar1 = false;
@@ -9597,7 +9597,7 @@ void n_00a9ddc8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
   uVar2 = n_005c2710(ctx,lVar1 + (int64_t)param_1 * 0x1f0 + 0x2678);
   if ((uVar2 & 1) == 0) {
     lVar1 = n_0081f580(ctx);
-    ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84248) = param_3 & 1;
+    ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x1c8)) = param_3 & 1;
   }
   return;
 }
@@ -9606,14 +9606,14 @@ uint32_t n_00a9de38(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842e4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x264));
 }
 
 void n_00a9de78(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842e4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x264)) = param_3;
   return;
 }
 
@@ -9621,14 +9621,14 @@ uint32_t n_00a9dec4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842e8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x268));
 }
 
 void n_00a9df04(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842e8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x268)) = param_3;
   return;
 }
 
@@ -9636,14 +9636,14 @@ uint32_t n_00a9df50(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842ec);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x26c));
 }
 
 void n_00a9df90(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842ec) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x26c)) = param_3;
   return;
 }
 
@@ -9651,14 +9651,14 @@ uint32_t n_00a9dfdc(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842f0);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x270));
 }
 
 void n_00a9e01c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842f0) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x270)) = param_3;
   return;
 }
 
@@ -9666,14 +9666,14 @@ uint32_t n_00a9e068(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842f4);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x274));
 }
 
 void n_00a9e0a8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842f4) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x274)) = param_3;
   return;
 }
 
@@ -9681,14 +9681,14 @@ uint32_t n_00a9e0f4(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842f8);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x278));
 }
 
 void n_00a9e134(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842f8) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x278)) = param_3;
   return;
 }
 
@@ -9696,14 +9696,14 @@ uint32_t n_00a9e180(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842fc);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x27c));
 }
 
 void n_00a9e1c0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x842fc) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x27c)) = param_3;
   return;
 }
 
@@ -9711,14 +9711,14 @@ uint32_t n_00a9e20c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84350);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2d0));
 }
 
 void n_00a9e24c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84350) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2d0)) = param_3;
   return;
 }
 
@@ -9726,14 +9726,14 @@ uint32_t n_00a9e298(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84354);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2d4));
 }
 
 void n_00a9e2d8(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84354) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x2d4)) = param_3;
   return;
 }
 
@@ -9741,14 +9741,14 @@ uint32_t n_00a9e324(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84454);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d4));
 }
 
 void n_00a9e364(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84454) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3d4)) = param_3;
   return;
 }
 
@@ -9756,14 +9756,14 @@ uint32_t n_00a9e3b0(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8442c);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3ac));
 }
 
 void n_00a9e3f0(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8442c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3ac)) = param_3;
   return;
 }
 
@@ -9771,14 +9771,14 @@ uint32_t n_00a9e43c(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84430);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3b0));
 }
 
 void n_00a9e47c(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84430) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3b0)) = param_3;
   return;
 }
 
@@ -9786,14 +9786,14 @@ uint32_t n_00a9e4c8(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84434);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3b4));
 }
 
 void n_00a9e508(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84434) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3b4)) = param_3;
   return;
 }
 
@@ -9801,14 +9801,14 @@ uint32_t n_00a9e554(Context &ctx,int32_t param_1,int32_t param_2,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  return ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84448);
+  return ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3c8));
 }
 
 void n_00a9e594(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,...) {
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x84448) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3c8)) = param_3;
   return;
 }
 
@@ -9816,7 +9816,7 @@ void n_00a9e620(Context &ctx,int32_t param_1,int32_t param_2,uint32_t param_3,..
 
   int64_t lVar1;
   lVar1 = n_0081f580(ctx);
-  ctx.u32(lVar1 + (int64_t)param_1 * 0xc804 + (int64_t)param_2 * 0x3ec + 0x8444c) = param_3;
+  ctx.u32(lVar1 + (int64_t)param_1 * actorStride + (int64_t)param_2 * 0x3ec + (actorBase+0*actorStride+0x3cc)) = param_3;
   return;
 }
 

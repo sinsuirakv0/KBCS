@@ -35,7 +35,7 @@ async function renderCalculations(visible){
   const condition={clears:Number(element('stage-xp-clears').value),combo:Number(element('stage-xp-combo').value),okame:Number(element('stage-xp-okame').checked),studyLevel:settings.studyLevel,treasure:settings.studyTreasureBonus};
   element('stage-xp-profile').textContent='勉強力Lv'+condition.studyLevel+' / お宝＋'+condition.treasure+'%';
   try{
-    if(database.gameVersion!==catalog.version)throw Error('DBとXP計算の対応版が一致しません。');
+    if((database.calculationVersion??database.gameVersion)!==catalog.version)throw Error('DBとXP計算の対応版が一致しません。');
     const available=visible.filter(stage=>stage.xp!=null);
     for(let offset=0;offset<available.length;offset+=64){
       const chunk=available.slice(offset,offset+64);

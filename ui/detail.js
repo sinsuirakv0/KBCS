@@ -124,7 +124,7 @@ try{
   database=await loadUnitDatabase();unit=database.units.find(unit=>unit.id===Number(params.get('id')||0));if(!unit)throw Error('キャラが見つかりません');
   const selected=unit.forms.find(form=>form.code===params.get('form'))||unit.forms.at(-1);
   growthForm=selected;
-  nativeStatistics=createNativeStatistics(unit,database.growth[unit.growth],database.gameVersion);
+  nativeStatistics=createNativeStatistics(unit,database.growth[unit.growth],database.calculationVersion??database.gameVersion);
   element('unit-title').textContent=selected.name;document.title=selected.name+' | KBCS';
   element('unit-detail-version').textContent='JP データv'+database.gameVersion;
   element('detail-level').max=unit.maxLevel+unit.plusLevel||1;element('detail-level').value=settings.level;
