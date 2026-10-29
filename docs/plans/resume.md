@@ -1,4 +1,10 @@
-﻿# 再開メモ（2026-10-29 / Apple Silicon初回ZIP取得のtimeout）
+﻿# 再開メモ（2026-10-29 / Intel Mac CIの通信試験）
+
+- ユーザー指定run40862502160/job123408981211はIntelのcargo testで101。ネイティブ23件・アプリ6件とデータの他7件は成功。旧本文期限のRecvBodyは発火済みで、テストのpartial非空assertだけが失敗した。同runのWindows/Apple Siliconは成功。
+- 中間受信量への不必要な仮定を外し、本文期限のエラー型・低速取得の完全性・通信再試行・上限/part削除・破損検出を維持する。取得実装やworkflowには変更しない。資料はcrates/kbcs-data/docs/releases.md。CI修正の依頼としてmainへpushし、自動実行のIntel jobを確認する。
+- ローカルのkbcs-data releaseテスト11件と同crate/all-targetsのrelease clippy（-D warnings）が通過。
+
+# 再開メモ（2026-10-29 / Apple Silicon初回ZIP取得のtimeout）
 
 - 初回アセット取得で `timeout: receive body` との報告。releases.rsのtimeout_recv_body=120秒が、無通信時間ではなく本文全体の期限だった。固定依存ureq 3.4.2のconfig.rs/timings.rsを確認し、ローカルHTTPで継続受信中でも同じRecvBodyエラーになる条件を短縮再現した。ARM64固有とは確認していない。
 - JSON/manifestは全体30秒、ZIPは試行ごとに全体1800秒、接続20秒/応答ヘッダー60秒。本文だけの120秒期限を削除。通信エラーとHTTP408/429/5xxは最大3試行、1秒→2秒待機。途中EOFも対象、ディスク失敗・超過サイズ・SHA不一致は再試行しない。原本/本体の両ZIPが同じdownload関数を使う。

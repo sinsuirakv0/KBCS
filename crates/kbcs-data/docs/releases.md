@@ -50,3 +50,7 @@ agentは接続20秒・応答ヘッダー60秒を設定し、本文だけの短�
 受信失敗のpartは破棄し、そのZIPの先頭から再取得する。HTTP Rangeによる中断位置再開は未実装。検証済みキャッシュの再利用と、成功時だけrenameする契約を維持する。install_data全体が失敗した場合のpending削除・既存DB維持も変更しない。最終失敗後は既存のホーム「データ管理」から再試行でき、lockファイルの手動削除は不要。
 
 ローカルHTTP試験で旧本文期限を短縮して再現し、遅延受信の成功、途中切断からの再取得、3回失敗での打切り/part削除を確認した。SHA不一致は再試行せず、既存のサイズ/SHA検証と完成キャッシュ再利用の試験も通過。kbcs-dataのreleaseテスト11件とworkspace/all-targetsのrelease clippy（-D warnings）が通過。Mac実機の通信試験は含まない。
+
+## 2026-10-29: Intel Mac CIの通信試験
+
+Actions run 40862502160のmacos-x64は、コンパイル後のdownload_allows_slow_body_and_retries_interrupted_transferで失敗した。旧本文期限によるRecvBodyエラーは正しく発生していたが、期限前にpartialへ必ず1byte以上返ると仮定した追加assertが失敗。中間受信量はOSのバッファリングや実行タイミングに依存し、空であることはタイムアウトの誤りを意味しない。その量のassertを削除し、RecvBodyそのものの判定を残す。後段の低速取得の全bytes/SHA一致、切断後の1回再取得、3試行での打切り/part削除、破損時は再試行しない検査を維持する。アプリの取得処理・期限・リトライ条件とworkflowは変更しない。

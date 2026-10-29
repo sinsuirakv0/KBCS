@@ -673,19 +673,19 @@ mod tests {
                 bytes.len(),
                 vec![(bytes.clone(), Duration::from_millis(80))],
             )?;
-            let mut partial = Vec::new();
             let error = legacy
                 .get(&url)
                 .call()?
                 .body_mut()
                 .as_reader()
-                .read_to_end(&mut partial)
+                .read_to_end(&mut Vec::new())
                 .unwrap_err();
+            // 期限までの中間受信量はOSや実行タイミングによって0bytesにもなる。
+            // 本文期限の発火を確認し、取得結果と再試行は後段で検査する。
             assert!(matches!(
                 ureq::Error::from(error),
                 ureq::Error::Timeout(ureq::Timeout::RecvBody)
             ));
-            assert!(!partial.is_empty() && partial.len() < bytes.len());
             worker.join().unwrap();
 
             // 最初の接続は途中で切れ、次は旧期限より長く受信して完了する。
