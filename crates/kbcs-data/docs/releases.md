@@ -40,3 +40,13 @@ motions::resourcesはmanifestと同じbody/soul/animationのパスを、ファ�
 統合ZIP由来のテキスト原本は、最大8並列で準備し、SHAを確認した内容を取り込み中だけ共有する。CSV/JSON/モーション定義に限定した128MiB上限のメモリキャッシュで、名前の読取・正規化・モーションの各工程による再オープン/再ハッシュを避ける。容量に入るものだけを先読みし、画像は対象外。Git作業ツリーの毎回検証、通常のasset要求時のSHA照合、次回取り込みでの再検証は維持する。DBへの書込み・解釈の順序は変えない。
 
 隔離済み15.7.4原本の全件変換で112.549秒、完成DB再利用で0.549秒。DBは480,440,320→226,963,456bytes。unit/form/enemy/stage/asset_reference/talent/talent_levelの件数は旧DBと一致。通常キャラの未使用形態を隠したcatalogは882キャラ/2177形態（精霊を含む）。同一入力の30/60/90Fで旧版とstate/runtime/layout/sceneが一致し、RNGも一致。0tickの通常/即生産では味方数0/1/2、frameとui_frameは0のまま。APIの本文付き/パスのみのmanifestは同じbody/soul等を返し、例ID94の応答は9184→1328bytes。これらは単一環境の参考値で、ZIP取得/展開時間や実画面の検証を含まない。記録は.local/fix-verification.jsonと.local/fix-api-verification.json。
+
+## 2026-10-29: 大容量ZIPの受信期限と通信再試行
+
+Apple Silicon版の初回取得で報告された `timeout: receive body` を調査。固定依存ureq 3.4.2のconfig.rs/timings.rsでは、timeout_recv_bodyは各readの無通信時間ではなく、応答ヘッダー受信から本文全体を読み終えるまでの期限。従来は全体1800秒とは別に本文120秒を設定していたため、継続受信していても2分で中断した。現行Number ZIPは約224.8MiBであり、回線速度によりこの期限へ到達する。Windows/Macの共通Rust処理で、ARM64固有の原因とは確認していない。
+
+agentは接続20秒・応答ヘッダー60秒を設定し、本文だけの短い期限を外す。JSON/manifestは全体30秒、downloadはZIPごと・試行ごとに全体1800秒。無期限待機にはしない。download_with_agentを共用し、タイムアウト・接続切断/途中EOF・一時的な接続失敗・HTTP 408/429/5xxだけを最大3試行（待機1秒→2秒）で再取得する。通信のreadエラーだけをureq::Errorへ戻し、ローカル書込み/容量/SHA検証失敗を通信障害として繰り返さない。対象名と試行回数を進捗・最終エラーへ含める。本体ZIPも同じ関数を利用する。
+
+受信失敗のpartは破棄し、そのZIPの先頭から再取得する。HTTP Rangeによる中断位置再開は未実装。検証済みキャッシュの再利用と、成功時だけrenameする契約を維持する。install_data全体が失敗した場合のpending削除・既存DB維持も変更しない。最終失敗後は既存のホーム「データ管理」から再試行でき、lockファイルの手動削除は不要。
+
+ローカルHTTP試験で旧本文期限を短縮して再現し、遅延受信の成功、途中切断からの再取得、3回失敗での打切り/part削除を確認した。SHA不一致は再試行せず、既存のサイズ/SHA検証と完成キャッシュ再利用の試験も通過。kbcs-dataのreleaseテスト11件とworkspace/all-targetsのrelease clippy（-D warnings）が通過。Mac実機の通信試験は含まない。

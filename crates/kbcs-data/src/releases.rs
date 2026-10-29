@@ -65,21 +65,19 @@ pub struct Installed {
     pub files: BTreeMap<String, Descriptor>,
 }
 
-pub fn agent() -> ureq::Agent {
+fn agent(timeout: Duration) -> ureq::Agent {
     ureq::Agent::config_builder()
-        .timeout_global(Some(Duration::from_secs(1800)))
+        .timeout_global(Some(timeout))
         .timeout_connect(Some(Duration::from_secs(20)))
-        .timeout_recv_body(Some(Duration::from_secs(120)))
+        .timeout_recv_response(Some(Duration::from_secs(60)))
+        // recv_bodyは無通信時間ではなく本文全体の期限。大容量ZIPはglobalだけで制限する。
+        .timeout_recv_body(None)
         .build()
         .into()
 }
 
 fn json<T: serde::de::DeserializeOwned>(url: &str) -> Result<T> {
-    let agent: ureq::Agent = ureq::Agent::config_builder()
-        .timeout_global(Some(Duration::from_secs(30)))
-        .build()
-        .into();
-    let bytes = agent
+    let bytes = agent(Duration::from_secs(30))
         .get(url)
         .header("User-Agent", "KBCS")
         .header("Accept", "application/vnd.github+json")
@@ -127,7 +125,7 @@ pub fn latest_data(region: &str) -> Result<DataRelease> {
         &release.tag_name,
         &asset.name,
     )?;
-    let bytes = agent()
+    let bytes = agent(Duration::from_secs(30))
         .get(&asset.browser_download_url)
         .call()?
         .body_mut()
@@ -291,6 +289,41 @@ fn file_hash(path: &Path) -> Result<(u64, String)> {
 }
 
 pub fn download(asset: &Asset, directory: &Path, progress: &impl Fn(String)) -> Result<PathBuf> {
+    download_with_agent(
+        asset,
+        directory,
+        progress,
+        &agent(Duration::from_secs(1800)),
+    )
+}
+
+fn retryable(error: &ureq::Error) -> bool {
+    match error {
+        ureq::Error::Timeout(_)
+        | ureq::Error::HostNotFound
+        | ureq::Error::ConnectionFailed
+        | ureq::Error::StatusCode(408 | 429 | 500..=599) => true,
+        ureq::Error::Io(error) => matches!(
+            error.kind(),
+            std::io::ErrorKind::TimedOut
+                | std::io::ErrorKind::UnexpectedEof
+                | std::io::ErrorKind::ConnectionAborted
+                | std::io::ErrorKind::ConnectionReset
+                | std::io::ErrorKind::ConnectionRefused
+                | std::io::ErrorKind::NotConnected
+                | std::io::ErrorKind::Interrupted
+                | std::io::ErrorKind::BrokenPipe
+        ),
+        _ => false,
+    }
+}
+
+fn download_with_agent(
+    asset: &Asset,
+    directory: &Path,
+    progress: &impl Fn(String),
+    agent: &ureq::Agent,
+) -> Result<PathBuf> {
     let sha = digest(asset)?;
     fs::create_dir_all(directory)?;
     let path = directory.join(format!("{sha}.zip"));
@@ -299,51 +332,77 @@ pub fn download(asset: &Asset, directory: &Path, progress: &impl Fn(String)) -> 
         return Ok(path);
     }
     let temporary = path.with_extension("part");
-    let result = (|| -> Result<()> {
-        let mut response = agent()
-            .get(&asset.browser_download_url)
-            .header("User-Agent", "KBCS")
-            .call()?;
-        let mut reader = response.body_mut().as_reader();
-        let mut file = File::create(&temporary)?;
-        let mut hasher = Sha256::new();
-        let mut received = 0;
-        let mut reported = std::time::Instant::now();
-        let mut buffer = vec![0; 128 * 1024];
-        loop {
-            let length = reader.read(&mut buffer)?;
-            if length == 0 {
-                break;
+    for attempt in 1..=3 {
+        let result = (|| -> Result<()> {
+            let mut response = agent
+                .get(&asset.browser_download_url)
+                .header("User-Agent", "KBCS")
+                .call()?;
+            let mut reader = response.body_mut().as_reader();
+            let mut file = File::create(&temporary)?;
+            let mut hasher = Sha256::new();
+            let mut received = 0;
+            let mut reported = std::time::Instant::now();
+            let mut buffer = vec![0; 128 * 1024];
+            loop {
+                // 通信エラーだけを再試行し、ディスク書込みや検証失敗は繰り返さない。
+                let length = reader.read(&mut buffer).map_err(ureq::Error::from)?;
+                if length == 0 {
+                    if received < asset.size {
+                        return Err(ureq::Error::Io(std::io::Error::new(
+                            std::io::ErrorKind::UnexpectedEof,
+                            "ZIPの受信中に接続が終了しました",
+                        ))
+                        .into());
+                    }
+                    break;
+                }
+                received += length as u64;
+                ensure!(received <= asset.size, "配布サイズを超過しました");
+                file.write_all(&buffer[..length])?;
+                hasher.update(&buffer[..length]);
+                if reported.elapsed() >= Duration::from_millis(250) {
+                    progress(format!(
+                        "ダウンロード: {} / {:.1} / {:.1} MB",
+                        asset.name,
+                        received as f64 / 1048576.,
+                        asset.size as f64 / 1048576.
+                    ));
+                    reported = std::time::Instant::now();
+                }
             }
-            received += length as u64;
-            ensure!(received <= asset.size, "配布サイズを超過しました");
-            file.write_all(&buffer[..length])?;
-            hasher.update(&buffer[..length]);
-            if reported.elapsed() >= Duration::from_millis(250) {
+            ensure!(
+                received == asset.size && format!("{:x}", hasher.finalize()) == sha,
+                "ダウンロードのサイズ・SHA-256不一致: {}",
+                asset.name
+            );
+            file.sync_all()?;
+            drop(file);
+            fs::rename(&temporary, &path)?;
+            Ok(())
+        })();
+        match result {
+            Ok(()) => return Ok(path),
+            Err(error) => {
+                let _ = fs::remove_file(&temporary);
+                if attempt == 3 || !error.downcast_ref::<ureq::Error>().is_some_and(retryable) {
+                    return Err(error).with_context(|| {
+                        format!(
+                            "ダウンロードに失敗しました: {}（{attempt}/3回）",
+                            asset.name
+                        )
+                    });
+                }
                 progress(format!(
-                    "ダウンロード: {} / {:.1} / {:.1} MB",
-                    asset.name,
-                    received as f64 / 1048576.,
-                    asset.size as f64 / 1048576.
+                    "通信を再試行します（{}/3回）: {} / {error}",
+                    attempt + 1,
+                    asset.name
                 ));
-                reported = std::time::Instant::now();
+                std::thread::sleep(Duration::from_secs(attempt));
             }
         }
-        ensure!(
-            received == asset.size && format!("{:x}", hasher.finalize()) == sha,
-            "ダウンロードのサイズ・SHA-256不一致: {}",
-            asset.name
-        );
-        file.sync_all()?;
-        drop(file);
-        fs::rename(&temporary, &path)?;
-        Ok(())
-    })();
-    if result.is_err() {
-        let _ = fs::remove_file(temporary);
     }
-    result?;
-    Ok(path)
+    unreachable!()
 }
 
 // Windowsでも別名へ正規化されないパスだけを許可し、symlinkは展開しない。
@@ -565,21 +624,117 @@ mod tests {
     use super::*;
 
     fn serve_body(bytes: Vec<u8>) -> Result<(String, std::thread::JoinHandle<()>)> {
+        let size = bytes.len();
+        serve_responses(size, vec![(bytes, Duration::ZERO)])
+    }
+
+    fn serve_responses(
+        size: usize,
+        responses: Vec<(Vec<u8>, Duration)>,
+    ) -> Result<(String, std::thread::JoinHandle<()>)> {
         let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
         let url = format!("http://{}/fixture.zip", listener.local_addr()?);
         let worker = std::thread::spawn(move || {
-            let (mut stream, _) = listener.accept().unwrap();
-            let mut request = [0; 4096];
-            let _ = stream.read(&mut request);
-            write!(
-                stream,
-                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-                bytes.len()
-            )
-            .unwrap();
-            stream.write_all(&bytes).unwrap();
+            for (bytes, delay) in responses {
+                let (mut stream, _) = listener.accept().unwrap();
+                stream
+                    .set_read_timeout(Some(Duration::from_secs(5)))
+                    .unwrap();
+                let mut request = [0; 4096];
+                let _ = stream.read(&mut request);
+                write!(
+                    stream,
+                    "HTTP/1.1 200 OK\r\nContent-Length: {size}\r\nConnection: close\r\n\r\n"
+                )
+                .unwrap();
+                for chunk in bytes.chunks(16 * 1024) {
+                    std::thread::sleep(delay);
+                    if stream.write_all(chunk).is_err() {
+                        break;
+                    }
+                }
+            }
         });
         Ok((url, worker))
+    }
+
+    #[test]
+    fn download_allows_slow_body_and_retries_interrupted_transfer() -> Result<()> {
+        let root = std::env::temp_dir().join(format!("kbcs-slow-download-{}", std::process::id()));
+        let result = (|| -> Result<()> {
+            let bytes = vec![42; 64 * 1024];
+            // 旧120秒の条件を短縮して再現。継続受信しても本文全体の期限で失敗する。
+            let legacy: ureq::Agent = ureq::Agent::config_builder()
+                .timeout_global(Some(Duration::from_secs(5)))
+                .timeout_recv_body(Some(Duration::from_millis(200)))
+                .build()
+                .into();
+            let (url, worker) = serve_responses(
+                bytes.len(),
+                vec![(bytes.clone(), Duration::from_millis(80))],
+            )?;
+            let mut partial = Vec::new();
+            let error = legacy
+                .get(&url)
+                .call()?
+                .body_mut()
+                .as_reader()
+                .read_to_end(&mut partial)
+                .unwrap_err();
+            assert!(matches!(
+                ureq::Error::from(error),
+                ureq::Error::Timeout(ureq::Timeout::RecvBody)
+            ));
+            assert!(!partial.is_empty() && partial.len() < bytes.len());
+            worker.join().unwrap();
+
+            // 最初の接続は途中で切れ、次は旧期限より長く受信して完了する。
+            let (url, worker) = serve_responses(
+                bytes.len(),
+                vec![
+                    (bytes[..1024].to_vec(), Duration::ZERO),
+                    (bytes.clone(), Duration::from_millis(100)),
+                ],
+            )?;
+            let asset = Asset {
+                name: "slow.zip".into(),
+                size: bytes.len() as u64,
+                browser_download_url: url,
+                digest: Some(format!("sha256:{}", hash(&bytes))),
+            };
+            let retries = std::cell::Cell::new(0);
+            let path = download_with_agent(
+                &asset,
+                &root,
+                &|message| {
+                    if message.starts_with("通信を再試行") {
+                        retries.set(retries.get() + 1);
+                    }
+                },
+                &agent(Duration::from_secs(5)),
+            )?;
+            worker.join().unwrap();
+            assert_eq!(fs::read(&path)?, bytes);
+            assert_eq!(retries.get(), 1);
+            fs::remove_file(&path)?;
+
+            let (url, worker) = serve_responses(bytes.len(), vec![(vec![42], Duration::ZERO); 3])?;
+            let asset = Asset {
+                browser_download_url: url,
+                ..asset
+            };
+            let error = download_with_agent(&asset, &root, &|_| {}, &agent(Duration::from_secs(5)))
+                .unwrap_err();
+            worker.join().unwrap();
+            assert!(error.to_string().contains("3/3回"));
+            assert!(!path.exists());
+            assert!(!path.with_extension("part").exists());
+            Ok(())
+        })();
+        if root.exists() {
+            fs::remove_dir_all(root)?;
+        }
+        result
     }
 
     #[test]
@@ -602,8 +757,17 @@ mod tests {
             let (url, worker) = serve_body(vec![7; bytes.len()])?;
             asset.browser_download_url = url;
             fs::write(&path, b"corrupt cache")?;
-            assert!(download(&asset, &root, &|_| {}).is_err());
+            let retries = std::cell::Cell::new(0);
+            assert!(
+                download(&asset, &root, &|message| {
+                    if message.starts_with("通信を再試行") {
+                        retries.set(retries.get() + 1);
+                    }
+                })
+                .is_err()
+            );
             worker.join().unwrap();
+            assert_eq!(retries.get(), 0);
             assert!(!path.with_extension("part").exists());
             Ok(())
         })();
