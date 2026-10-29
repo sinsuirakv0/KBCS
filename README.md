@@ -1,14 +1,14 @@
 ﻿# KBCS インストールガイド
 
-## インストールファイル（v0.1.36）
+## インストールファイル（v0.1.37）
 
 | 使用する端末 | ダウンロード |
 | --- | --- |
-| Windows 64ビット | [Windows版ZIP](https://github.com/sinsuirakv0/KBCS/releases/download/kbcs-v0.1.36/KBCS-0.1.36-windows-x64.zip) |
-| Mac・Mシリーズ | [Mac Apple Silicon版ZIP](https://github.com/sinsuirakv0/KBCS/releases/download/kbcs-v0.1.36/KBCS-0.1.36-macos-arm64.zip) |
-| Mac・Intel | [Mac Intel版ZIP](https://github.com/sinsuirakv0/KBCS/releases/download/kbcs-v0.1.36/KBCS-0.1.36-macos-x64.zip) |
+| Windows 64ビット | [Windows版ZIP](https://github.com/sinsuirakv0/KBCS/releases/download/kbcs-v0.1.37/KBCS-0.1.37-windows-x64.zip) |
+| Mac・Mシリーズ | [Mac Apple Silicon版ZIP](https://github.com/sinsuirakv0/KBCS/releases/download/kbcs-v0.1.37/KBCS-0.1.37-macos-arm64.zip) |
+| Mac・Intel | [Mac Intel版ZIP](https://github.com/sinsuirakv0/KBCS/releases/download/kbcs-v0.1.37/KBCS-0.1.37-macos-x64.zip) |
 
-[リリースページ](https://github.com/sinsuirakv0/KBCS/releases/tag/kbcs-v0.1.36)からも取得できます。WindowsとMacは、以下の手順でインストールしてください。
+[リリースページ](https://github.com/sinsuirakv0/KBCS/releases/tag/kbcs-v0.1.37)からも取得できます。WindowsとMacは、以下の手順でインストールしてください。
 
 ## 推奨動作環境
 
