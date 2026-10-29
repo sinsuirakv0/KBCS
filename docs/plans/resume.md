@@ -1,4 +1,11 @@
-﻿# 再開メモ（2026-10-29 / Intel Mac CIの通信試験）
+﻿# 再開メモ（2026-10-29 / mainの自動採番・Release公開）
+
+- ユーザーの「version指定なしなら自動で上げる」依頼により、mainのpushでprepare→三環境build→Release公開へ接続する。Cargoで既存タグより上げてあればその版、指定がなければpatch+1、手動Actionsのversion入力でも指定可能。PR/他ブランチ/forkはビルドのみ。
+- 自動コミットでCargo/Cargo.lock/README/説明を揃え、そのSHAを全buildとpublishへ渡す。既存タグは移動せず、新規タグは三環境の成功後。GITHUB_TOKENのpushは別workflowを起動しないため、同じrunで完結する。設計はscripts/docs/release.mdとcrates/kbcs-app/docs/build.md。
+- mainにはbotコミットが加わるので、次回作業前にローカル変更を保持しながらfast-forwardで同期する。公開途中で失敗した場合は同じrunの再実行を使い、公開済みの版を上書きしない。
+- ローカル4テスト（GitHub書込なし）、actionlint 1.7.12、隔離した実workspaceの3crateの版/lock一致が通過。mainの次のpushで自動採番から公開まで確認する。
+
+# 再開メモ（2026-10-29 / Intel Mac CIの通信試験）
 
 - ユーザー指定run40862502160/job123408981211はIntelのcargo testで101。ネイティブ23件・アプリ6件とデータの他7件は成功。旧本文期限のRecvBodyは発火済みで、テストのpartial非空assertだけが失敗した。同runのWindows/Apple Siliconは成功。
 - 中間受信量への不必要な仮定を外し、本文期限のエラー型・低速取得の完全性・通信再試行・上限/part削除・破損検出を維持する。取得実装やworkflowには変更しない。資料はcrates/kbcs-data/docs/releases.md。CI修正の依頼としてmainへpushし、自動実行のIntel jobを確認する。
