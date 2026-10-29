@@ -141,18 +141,28 @@ fn start(root: PathBuf, region: String, source: String, check: bool) -> Result<(
 // 画面操作をせず、実際のWebViewで同梱module・PNG・POST本文・C++入口を確認する。
 const DESKTOP_CHECK: &str = r#"
 window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const {createSessionId} = await import('/src/shared/browser/session-id.js');
-    const id = createSessionId();
-    if (!/^[0-9a-f-]{36}$/.test(id)) throw Error('session id');
-    const response = await fetch('/api/motion-timeline', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({soulFrames:2,specialFrames:3})});
-    if (!response.ok || !(await response.json()).frames.length) throw Error('native POST');
-    const image = await fetch('/images/kbc-logo.png');
-    if (!image.ok || new Uint8Array(await image.arrayBuffer())[0] !== 137) throw Error('image');
-    if (!document.createElement('canvas').getContext('webgl')) throw Error('WebGL');
-    window.ipc.postMessage('kbcs:desktop-check:'+JSON.stringify({ok:true}));
-  } catch (error) {
-    window.ipc.postMessage('kbcs:desktop-check:'+JSON.stringify({ok:false,error:String(error)}));
-  }
+  const checks = {};
+  const probe = async (name, operation) => {
+    try { await operation(); checks[name] = true; }
+    catch (error) { checks[name] = String(error); }
+  };
+  await Promise.all([
+    probe('module', async () => {
+      const {createSessionId} = await import(new URL('/src/shared/browser/session-id.js', location.href).href);
+      if (!/^[0-9a-f-]{36}$/.test(createSessionId())) throw Error('session id');
+    }),
+    probe('native', async () => {
+      const response = await fetch('/api/motion-timeline', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({soulFrames:2,specialFrames:3})});
+      if (!response.ok || !(await response.json()).frames.length) throw Error('native POST');
+    }),
+    probe('image', async () => {
+      const response = await fetch('/images/kbc-logo.png');
+      if (!response.ok || new Uint8Array(await response.arrayBuffer())[0] !== 137) throw Error('image');
+    }),
+    probe('webgl', () => {
+      if (!document.createElement('canvas').getContext('webgl')) throw Error('WebGL');
+    }),
+  ]);
+  window.ipc.postMessage('kbcs:desktop-check:'+JSON.stringify({ok:Object.values(checks).every(value => value === true),checks}));
 }, {once:true});
 "#;

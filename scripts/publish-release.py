@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def gh(*args, check=True):
-    return subprocess.run(["gh", *map(str, args)], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", check=check)
+    result = subprocess.run(["gh", *map(str, args)], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
+    if check and result.returncode:
+        raise RuntimeError(result.stderr.strip() or result.stdout.strip())
+    return result
 
 
 def main():

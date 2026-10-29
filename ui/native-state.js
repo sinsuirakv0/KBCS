@@ -1,4 +1,4 @@
-const isDetail=page=>page.endsWith('-detail');
+﻿const isDetail=page=>page.endsWith('-detail');
 const stateKey=(page,route)=>'kbcs:view:'+page+(isDetail(page)?':'+(route.get('id')||route.get('map')||'0'):'');
 
 export function writePageParams(page,params,search=location.search){
@@ -27,8 +27,8 @@ export function bindDetailNavigation(page,path,getParams){
   const save=event=>{
     const link=event.target.closest('a[href]');
     if(!link)return;
-    const target=new URL(link.href,location.origin);
-    if(target.origin===location.origin&&target.pathname===path)writePageParams(page,getParams(target,link),target.search);
+    const target=new URL(link.href,location.href);
+    if(target.protocol===location.protocol&&target.host===location.host&&target.pathname===path)writePageParams(page,getParams(target,link),target.search);
   };
   document.addEventListener('click',save);
   document.addEventListener('auxclick',save);

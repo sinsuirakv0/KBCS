@@ -1,4 +1,5 @@
-﻿import {createSessionId} from '../src/shared/browser/session-id.js';
+﻿import {bindDetailNavigation} from '../native-state.js';
+import {createSessionId} from '../src/shared/browser/session-id.js';
 // BGMのシーク・取得待ちの取消、編成設定の復元、速度と表示比率の回帰。
 import assert from 'node:assert/strict';
 import {createAudioPreview} from '../src/shared/browser/audio-preview.js';
@@ -40,3 +41,14 @@ for(let mode=0;mode<=2;++mode){assert.equal(battlePlaybackRate(0,mode),1);assert
 console.log('formation tray and absolute playback rate passed');
 
 assert.equal(createSessionId({getRandomValues:bytes=>bytes.fill(0)}),'00000000-0000-4000-8000-000000000000');
+
+// custom schemeのoriginはnullになり得る。履歴の保存に無効なbaseを渡さない。
+const oldLocation=globalThis.location,oldDocument=globalThis.document,oldSession=globalThis.sessionStorage;
+const saved=new Map(),handlers=[];
+globalThis.location=new URL('kbcs://localhost/pages/unit-search/');
+globalThis.document={addEventListener:(name,handler)=>handlers.push(handler)};
+globalThis.sessionStorage={setItem:(key,value)=>saved.set(key,value)};
+bindDetailNavigation('unit-detail','/pages/unit-detail/',()=>new URLSearchParams('id=42'));
+handlers[0]({target:{closest:()=>({href:'kbcs://localhost/pages/unit-detail/?id=42'})}});
+assert.equal(saved.get('kbcs:view:unit-detail:42'),'id=42');
+globalThis.location=oldLocation;globalThis.document=oldDocument;globalThis.sessionStorage=oldSession;

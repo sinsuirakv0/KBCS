@@ -47,3 +47,5 @@ Windowsの従来のscripts/build.ps1も維持する。CIと同じZIPを作るに
 `desktop-check`はCI用の非表示ウィンドウで、実際のWebView上からES module・暗号学的通信ID・PNG・JSON POST本文・C++のモーション時計・WebGL contextを検査する。自動更新の開始を省略し、40秒で応答がなければ失敗する。check-desktop.pyは隔離した一時data-dirを使い、画面操作や実ゲームデータのダウンロードは行わない。通常起動の経路は同じbuilder/serviceを使う。WKWebViewの専用スキームではrandomUUIDの提供を前提にせず、getRandomValuesによるUUID生成を共用する。ゲーム内のRNGとは別物。
 
 MacのMach port取得/解放はmach2の公開APIを使う。libcの非推奨mach_host_self/mach_task_selfへ依存せず、各サンプル後にportを解放する。
+
+WKWebViewの初期化スクリプトのdynamic importはdocumentのURLを明示して解決する。また、専用スキームのlocation.originがnullでも履歴保存できるよう、native-state.jsはlocation.hrefをbaseに、protocol/hostで同一アプリを判定する。
