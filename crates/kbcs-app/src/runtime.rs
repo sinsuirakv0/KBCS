@@ -63,7 +63,7 @@ impl Monitor {
         }
         #[cfg(target_os = "macos")]
         unsafe {
-            let host = libc::mach_host_self();
+            let host = mach2::mach_init::mach_host_self();
             let mut cpu: libc::host_cpu_load_info = std::mem::zeroed();
             let mut count = libc::HOST_CPU_LOAD_INFO_COUNT;
             if libc::host_statistics(
@@ -107,7 +107,7 @@ impl Monitor {
                         * page_size as u64
                 );
             }
-            libc::mach_port_deallocate(libc::mach_task_self(), host);
+            mach2::mach_port::mach_port_deallocate(mach2::traps::mach_task_self(), host);
             let mut total = 0u64;
             let mut length = std::mem::size_of_val(&total);
             if libc::sysctlbyname(
