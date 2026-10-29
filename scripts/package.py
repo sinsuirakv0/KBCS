@@ -9,6 +9,7 @@ import plistlib
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 import tomllib
 import zipfile
@@ -113,6 +114,7 @@ def main():
         result = subprocess.run([str(executable), "help"], cwd=folder, capture_output=True, timeout=30)
         if result.returncode or b"kbcs [" not in result.stdout:
             raise RuntimeError(f"配布物の起動に失敗: {result.returncode}: {result.stderr!r}")
+        print(run(sys.executable, ROOT / "scripts/check-desktop.py", "--binary", executable))
         with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zipped:
             for path in sorted(folder.rglob("*")):
                 if path.is_file():

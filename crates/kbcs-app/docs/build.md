@@ -49,3 +49,7 @@ Windowsの従来のscripts/build.ps1も維持する。CIと同じZIPを作るに
 MacのMach port取得/解放はmach2の公開APIを使う。libcの非推奨mach_host_self/mach_task_selfへ依存せず、各サンプル後にportを解放する。
 
 WKWebViewの初期化スクリプトのdynamic importはdocumentのURLを明示して解決する。また、専用スキームのlocation.originがnullでも履歴保存できるよう、native-state.jsはlocation.hrefをbaseに、protocol/hostで同一アプリを判定する。
+
+起動検査の標準出力/エラーは一時ファイルで受ける。WebView2の子プロセスにpipeが引き継がれても、親の終了を検知した後に出力読取で待ち続けないようにする。タイムアウト時も途中のエラーログを表示する。
+
+実WebViewの検査はpackage.pyでDLL/Info.plist/署名を揃えた後の配布物に対して実行する。ビルドツリーの実行ファイルや、開発用PATH内のWebView2Loaderを前提にしない。検査成功後にZIPを作る。

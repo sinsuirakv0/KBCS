@@ -10,9 +10,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--binary", type=Path, required=True)
 args = parser.parse_args()
 with tempfile.TemporaryDirectory(prefix="kbcs-desktop-check-", ignore_cleanup_errors=True) as temporary:
-    result = subprocess.run([str(args.binary.resolve()), "desktop-check", "--data-dir", temporary],
-        capture_output=True, timeout=60, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    logs = result.stderr.decode("utf-8", errors="replace")
+    stdout = Path(temporary) / "stdout.log"
+    stderr = Path(temporary) / "stderr.log"
+    # WebViewの子プロセスがpipeを保持しても、親アプリの終了判定を妨げない。
+    with stdout.open("wb") as output, stderr.open("wb") as errors:
+        try:
+            result = subprocess.run([str(args.binary.resolve()), "desktop-check", "--data-dir", temporary],
+                stdout=output, stderr=errors, timeout=60, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except subprocess.TimeoutExpired as error:
+            raise RuntimeError("WebView起動が時間内に完了しませんでした\n" + stderr.read_text(encoding="utf-8", errors="replace")) from error
+    logs = stderr.read_text(encoding="utf-8", errors="replace")
     records = [json.loads(line.split("KBCS desktop check: ", 1)[1]) for line in logs.splitlines() if "KBCS desktop check: " in line]
     if result.returncode or not records or not records[-1].get("ok"):
         raise RuntimeError(f"WebView接続失敗: {result.returncode}\n{logs}")

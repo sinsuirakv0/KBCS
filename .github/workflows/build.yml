@@ -30,15 +30,12 @@ jobs:
           - platform: windows-x64
             runner: windows-2022
             target: x86_64-pc-windows-gnullvm
-            executable: kbcs.exe
           - platform: macos-arm64
             runner: macos-15
             target: aarch64-apple-darwin
-            executable: kbcs
           - platform: macos-x64
             runner: macos-15-intel
             target: x86_64-apple-darwin
-            executable: kbcs
     defaults:
       run:
         shell: bash
@@ -75,8 +72,6 @@ jobs:
         run: node --test ui/tests/*.test.mjs
       - name: Build app
         run: cargo build --workspace --release --locked --target ${{ matrix.target }}
-      - name: Check desktop connections without game downloads
-        run: python scripts/check-desktop.py --binary target/${{ matrix.target }}/release/${{ matrix.executable }}
       - name: Package and check standalone executable
         run: python scripts/package.py --target ${{ matrix.target }} --output .local/dist
       - name: Upload installers
