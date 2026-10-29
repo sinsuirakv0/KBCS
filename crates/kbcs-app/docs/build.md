@@ -53,3 +53,5 @@ WKWebViewの初期化スクリプトのdynamic importはdocumentのURLを明示�
 起動検査の標準出力/エラーは一時ファイルで受ける。WebView2の子プロセスにpipeが引き継がれても、親の終了を検知した後に出力読取で待ち続けないようにする。タイムアウト時も途中のエラーログを表示する。
 
 実WebViewの検査はpackage.pyでDLL/Info.plist/署名を揃えた後の配布物に対して実行する。ビルドツリーの実行ファイルや、開発用PATH内のWebView2Loaderを前提にしない。検査成功後にZIPを作る。
+
+GitHubのdraftはreleases/tags/TAGで404になる。公開前のSHA検証ではgh release view --json apiUrlから解決したrelease IDのAPIを使う。0.1.36は三環境のタグビルドが成功した同一成果物を維持し、この取得経路だけを修正して公開処理へ引き継ぐ。タグは書き換えない。

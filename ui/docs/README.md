@@ -124,3 +124,10 @@ stages/native-media.jsはC++描画命令のGPU転送と操作・音声再生を�
 ## 0.1.27: 共通ナビゲーションとパネル
 
 workspace.jsが上部をホーム・履歴の戻る/次へ・再読み込みへ統一する。ブラウザ履歴を使うため、DB詳細や編成から準備画面へ戻れる。URLや全機能リンクを追加しない。すべてのページで左右パネルを切替可能にし、未保存の初回は左右を表示（狭い注釈用ペインは左を先に表示）。既存の表示/幅設定は維持する。内容のあるパネルだけを有効にする旧仕様は廃止。編成と出撃準備はページ固有の部品を移動し、その他の左はページ内の見出し/詳細、右は該当設定と共通の表示設定を置く。詳細はformation.mdとstage-sortie.md。
+
+
+## 2026-10-29: Windows・macOS共通WebView
+
+画面と戦闘ロジックは共通。battle-screen.jsの通信IDはshared/browser/session-id.jsのcreateSessionIdを使い、randomUUIDがない専用スキームではgetRandomValuesから生成する。ゲーム内RNG/論理Fとは独立。native-state.jsの詳細ページ保存はlocation.hrefでURLを解決し、protocol/hostで同じアプリを判定する。WKWebViewのoriginがnullでも検索・詳細の状態保存を続ける。
+
+preparation.test.mjsで通信IDのフォールバックと専用スキームでの履歴保存を検査する。CIのpackage.py→check-desktop.py→desktop-checkは実際の配布用WebViewでmodule/PNG/POST本文/C++/WebGLを検査する。画面を操作せず、ゲーム原本の自動取得を止めた隔離data-dirを使う。WindowsはWebView2、MacはWKWebView。公開と署名の条件はアプリ領域のbuild.mdを参照。

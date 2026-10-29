@@ -1,4 +1,13 @@
-﻿# 再開メモ（2026-10-29 / Windows・Mac両CPU・CI配布）
+﻿# 公開完了（2026-10-29 / KBCS 0.1.36）
+
+公開URL: https://github.com/sinsuirakv0/KBCS/releases/tag/kbcs-v0.1.36 。タグは`0d6a50ec3779a0ba424f80f2a492cbc7d577a1ba`。Windows x64・Mac arm64・Mac x64の3ZIPと各SHA/ビルドJSONを公開した。READMEとリリース説明にはOS別の直接リンク、Source code ZIP、導入手順を置いた。MacはmacOS 14以上・開発用署名で、Developer ID/公証は未設定。
+
+- main CI 40815206591は3環境すべて成功。タグCI 40816291677も3ビルドで計算/データ39件＋compile_fail1、JS3本、clippy、配布物の実WebView接続/単独起動/署名/CPUを通過。コードと戦闘をOS別に複製していない。
+- タグCIの公開stepでdraftのRESTタグ取得が404となったため、gh release viewのapiUrlからIDで取得する経路へ修正した。同じタグのCI成果物を再ビルド・タグ上書きせず、修正したpublish-release.pyで版/commit/全SHA・GitHubのサイズ/配布SHAを再検証して公開。修正はmainにも反映する。今後のタグは修正済み公開処理を使う。
+- 匿名HTTPで3ZIPとSource code ZIPが200となり、公開ZIPの全SHA・サイズ、Windowsの同梱5ファイル、MacのMach-O CPU・実行ビット・Info.plistを確認した。記録.local/release-0.1.36-verification.json。公開Windows ZIPの実行ファイルで隔離済みJP15.7.4原本を使い、画像検査とC++戦闘30/60/90Fの再生も通過（同JSON/battle.json）。ユーザーのAppData/既存GUIを操作していない。
+- 詳細はcrates/kbcs-app/docs/build.md/updates.md、ui/docs/README.md、GitHubの各jobログ。実画面の見た目・操作感はユーザー確認。以降のsource pushは自動ビルド、kbcs-vVERSIONタグでは全3ビルド成功後に公開開発版を作る。
+
+# 再開メモ（2026-10-29 / Windows・Mac両CPU・CI配布）
 
 ユーザー依頼でmacOS Apple Silicon/IntelとWindows x64の共通GUIへ移行し、0.1.36へ更新。READMEの3種類の入手リンク・環境・導入手順と、docs/releases/0.1.36.mdも更新した。今回のGitHubへのソースpush・CI実行・リリース公開は「README.mdごと更新」「リリースも、ユーザーが簡単に取得できる形で」という明示依頼による。
 

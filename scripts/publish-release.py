@@ -46,11 +46,15 @@ def main():
         gh("release", "create", tag, "--verify-tag", "--draft", "--prerelease", "--title", "KBCS " + version, "--notes-file", notes)
     gh("release", "upload", tag, *files, "--clobber")
     repository = os.environ["GITHUB_REPOSITORY"]
-    release = json.loads(gh("api", f"repos/{repository}/releases/tags/{tag}").stdout)
+    # ドラフトはタグのREST取得では404になるため、CLIで解決したrelease IDを使う。
+    api_url = json.loads(gh("release", "view", tag, "--json", "apiUrl").stdout)["apiUrl"]
+    if not api_url.startswith(f"https://api.github.com/repos/{repository}/releases/"):
+        raise ValueError("リリースの取得先が一致しません")
+    release = json.loads(gh("api", api_url).stdout)
     actual = {asset["name"]: (asset["size"], asset.get("digest")) for asset in release["assets"]}
     if any(actual.get(name) != value for name, value in hashes.items()):
         raise ValueError("GitHubの配布ZIPのサイズ・SHAが一致しません。ドラフトを維持します")
-    gh("release", "edit", tag, "--draft=false", "--prerelease")
+    gh("release", "edit", tag, "--draft=false", "--prerelease", "--notes-file", notes)
     print(gh("release", "view", tag, "--json", "url", "--jq", ".url").stdout.strip())
 
 
