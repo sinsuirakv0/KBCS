@@ -36,10 +36,10 @@ function actionSvg(label,action,content){
   const [x,y,w,h]={menu:[layout.badgeX,61,147,36],previous:[layout.leftX,134,62,97],next:[layout.rightX,134,62,97],cannon:[layout.width-65,80,66,51],clear:[-7,220,80,80]}[action];
   return content+'<rect role="button" tabindex="0" aria-label="'+escape(label)+'" data-action="'+action+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="transparent"/>';
 }
- return (doc,{index=1,selected=-1,floating=null,shifts=Array.from({length:10},()=>({x:0,y:0})),deployment=null,preview=false,tray=false}={})=>{
+ return (doc,{index=1,selected=-1,floating=null,shifts=Array.from({length:10},()=>({x:0,y:0})),deployment=null,preview=false,tray=false,ghost=false,hiddenSlot=-1}={})=>{
   const layout=formationLayout();
   let body='<rect width="1188" height="278" fill="#d4b15f"/>'+sprite('img008_ja',0,0,0,1188,55)+sprite('img008_ja',3,8,3,297,46)+'<path d="M0 55H1188V79H0Z" fill="#ffe290"/><path d="M0 79H1188" stroke="#706241"/>';
-  if(!tray){
+  if(!tray&&!ghost){
   // 原本の子スプライトは親中心+51、中心揃え。11件以上の保存番号はPC用文字表示。
   const badgeNumber=index<=10?sprite('img029_ja',43+index,layout.badgeX+124-Math.trunc(25/2),67,25,24):'<text x="'+(layout.badgeX+124)+'" y="89" text-anchor="middle" fill="white" stroke="black" stroke-width="2" paint-order="stroke" font-size="'+Math.min(24,44/String(index).length)+'" font-weight="bold">'+index+'</text>';
   body+=actionSvg('出陣スロットの操作','menu',sprite('img029_ja',5,layout.badgeX,61,147,36)+badgeNumber);
@@ -50,9 +50,10 @@ function actionSvg(label,action,content){
   body+=actionSvg('次の編成','next','<g transform="translate('+(2*layout.rightX+62)+' 0) scale(-1 1)">'+sprite('img006_ja',8,layout.rightX,134,62,97)+'</g>');
   body+=sprite('img029_ja',7,layout.pageX,110+manifest.parameters.values.slot_page_y_offset)+sprite('img029_ja',8,layout.pageX,205+manifest.parameters.values.slot_page_y_offset);
   body+='<rect x="290" y="160" width="696" height="4" fill="#9b8247"/><rect x="290" y="255" width="696" height="4" fill="#9b8247"/>';
-  }else body='<rect x="288" y="88" width="698" height="89" fill="#d4b15f"/>';
+  }else if(tray)body='<rect x="288" y="88" width="698" height="89" fill="#d4b15f"/>';
+  if(ghost)body='';
   // 00a82394は占有状態に関係なく、番号付きの10枠を先に描く。
-  for(const [slot,{x,y}] of layout.slots.slice(0,tray?5:10).entries()){
+  for(const [slot,{x,y}] of layout.slots.slice(0,ghost?0:tray?5:10).entries()){
     const rect=manifest.atlases.img029_ja.rects[64+slot];
     body+='<rect x="'+(x+2)+'" y="'+(y+2)+'" width="111" height="85" fill="#54472a"/><rect x="'+x+'" y="'+y+'" width="111" height="85" fill="#9b8247"/>'+sprite('img029_ja',64+slot,x+55-Math.trunc(rect[2]/2),y+42-Math.trunc(rect[3]/2),rect[2],rect[3]);
   }
@@ -64,8 +65,8 @@ function actionSvg(label,action,content){
       // 0063fa4c / 00a8b028: 元画像の自然寸法を保ち、uni.imgcutの110×85を切り抜く。
       contents+='<svg x="'+x+'" y="'+y+'" width="110" height="85" viewBox="'+manifest.unitIcon.rect.join(' ')+'" preserveAspectRatio="none"><image href="'+escape(database.imageBase+form.icon)+'"/></svg>';
       // 005d1bb4 → 00448048。通常編成のcut60〜70、文字間隔-3、右寄せと円の予約幅22。
-      const price=String(preview&&deployment?Math.trunc(deployment.slots[slot].cost/100):Math.floor(form.cost*1.5));
-      contents+=digits(price,'img023_ja',60,x+88-price.length*15,y+61,26,-3)+sprite('img023_ja',70,x+91,y+61,22,26);
+      const price=deployment?String(deployment.slots[slot].cost):null;
+      if(price!==null)contents+=digits(price,'img023_ja',60,x+88-price.length*15,y+61,26,-3)+sprite('img023_ja',70,x+91,y+61,22,26);
     }
     if(form&&deployment?.slots[slot].reasons)contents+=blockedBadgeSvg(manifest,x,y);
     if(selected===slot&&form&&floating?.slot!==slot)contents+=panel(9,25,x,y,110,85);
@@ -73,13 +74,13 @@ function actionSvg(label,action,content){
       const width=110+Math.trunc(floating.growth*110/100),height=85+Math.trunc(floating.growth*85/100);
       const left=x+floating.x-Math.trunc(floating.growth*110/200),top=y+floating.y-Math.trunc(floating.growth*85/200);
       floatingBody='<g pointer-events="none" opacity="'+((255-floating.alpha)/255)+'" transform="translate('+left+' '+top+') scale('+(width/110)+' '+(height/85)+') translate('+(-x)+' '+(-y)+')">'+contents+'</g>';
-    }else body+='<g transform="translate('+shifts[slot].x+' '+shifts[slot].y+')">'+contents+'</g>';
+    }else if(slot!==hiddenSlot)body+='<g transform="translate('+shifts[slot].x+' '+shifts[slot].y+')">'+contents+'</g>';
     body+='<rect role="button" tabindex="0" data-slot="'+slot+'" aria-label="枠'+(slot+1)+' '+escape(form?.name??'空き')+'" aria-pressed="'+(selected===slot)+'" x="'+x+'" y="'+y+'" width="110" height="85" fill="transparent"/>';
 
   }
-  if(!tray)body+=actionSvg('城砲を変更','cannon',panel(101,102,layout.width-172,59,271,27)+'<text x="'+(layout.width-86)+'" y="79" text-anchor="middle" fill="white" font-size="18" font-weight="bold">'+names[doc.cannon.id]+'</text>'+sprite('img029_ja',100,layout.width-55,90,46,36));
-  if(!preview&&!tray)body+=actionSvg('編成中のキャラをすべて外す','clear',sprite('img029_ja',132,13,230,40,40));body+=floatingBody;
-  return '<svg class="formation-native" viewBox="'+(tray?'288 88 698 89':'0 0 1188 278')+'" aria-label="'+(tray?'一時キャラ枠':'キャラクター編成')+'">'+body+'</svg>';
+  if(!tray&&!ghost)body+=actionSvg('城砲を変更','cannon',panel(101,102,layout.width-172,59,271,27)+'<text x="'+(layout.width-86)+'" y="79" text-anchor="middle" fill="white" font-size="18" font-weight="bold">'+names[doc.cannon.id]+'</text>'+sprite('img029_ja',100,layout.width-55,90,46,36));
+  if(!preview&&!tray&&!ghost)body+=actionSvg('編成中のキャラをすべて外す','clear',sprite('img029_ja',132,13,230,40,40));body+=floatingBody;
+  return '<svg class="formation-native" viewBox="'+(ghost?'290 90 110 85':tray?'288 88 698 89':'0 0 1188 278')+'" aria-label="'+(tray?'一時キャラ枠':'キャラクター編成')+'">'+body+'</svg>';
  };
 }
 export function fitFormationName(root,manifest){

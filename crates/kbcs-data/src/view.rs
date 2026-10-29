@@ -105,6 +105,11 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
         let mut original = None;
         for index in 0..summary.forms {
             let form = database.form(region, summary.id, index)?;
+            // 原本には未使用の形態行もある。通常キャラは画像・攻撃モーションが実在する形態だけを公開する。
+            // 精霊には専用アイコンがない原本がある。
+            if (form.icon_path.is_none() && !form.is_spirit) || form.animation_length.is_none() {
+                continue;
+            }
             let value = form_value(&form);
             for ability in value["abilities"].as_array().into_iter().flatten() {
                 abilities.insert(
@@ -117,7 +122,9 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
             }
             forms.push(value);
         }
-        let original = original.ok_or_else(|| anyhow::anyhow!("形態なし"))?;
+        let Some(original) = original else {
+            continue;
+        };
         growth.push(
             (0..=200)
                 .map(|level| {

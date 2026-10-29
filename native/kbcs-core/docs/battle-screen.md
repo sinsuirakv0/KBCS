@@ -69,3 +69,7 @@ JP15.7.2 ARM64/SHA6122e248…の006ddfb8を追跡。`actor_top.inc`の`kbcs_core
 残時間はscore_type1ではmode4以外、type3ではmode0かつ有限時間で描く。原本どおり30F/秒、1/100秒は余りF×100/30、残り900F以下は赤。数字83番台とcut93を使用する。PRのFeverはFeverEffect.png/imgcutの6〜9番、表示時計の3F点滅とwait/期間・gaugeから求める294幅の覆いをそのまま命令化する。UIでスコア式・時計・Fever進行を再計算しない。
 
 `research/verify/battle_top.py`とtests/battle-top-probe.cppで原本の数値補間128条件、実数字整形/横伸縮を含む描画152条件を照合。幅960/1280、mode0/4、900F境界、拡縮、Fever待機/点滅を含む。probeは解決済みの所有表示状態を入れるfixtureで、個体更新/全main/Android GPU画素の一致を主張しない。
+
+## 2026-10-29: ホスト停止中のチート入力
+
+原本と区別した拡張として、advance_customのimmediateが有効かつ0tick/phase2のときだけ、既存hitで通常キャラ枠を判定してhook1へ渡す。intro完了/非終了/メニュー非表示/枠の存在と制限を検査する。時計は一切増やさず、所有Battle::deployが費用・個体上限・生成等を再検査する。通常入口はimmediate=0なので従来の原本分岐を維持。bridgeの既存screen witnessに、通常0tickでは要求なし、チート0tickでは枠0要求・各時計と資金は不変という回帰を追加した。

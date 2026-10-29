@@ -26,3 +26,17 @@ compatibility::calculation_versionはsettings-catalogの全27採用元SHAを公�
 
 
 0.1.36: app_asset_nameがWindows x64/Mac arm64/Mac x64の配布名を選ぶ。latest_appは当該環境用のZIPを持つkbcs-v版だけを比較する。extractはUnixの実行ビットを保持し、Macの更新用実行ファイルを再起動できるようにする。データZIPと同じストリーム検証・パス拒否を共用し、symlink/setuid等は採用しない。3環境の命名・起動検査はアプリ領域のbuild.mdを参照。
+
+## 2026-10-29: 取り込み時の重複処理
+
+取り込みは原本ZIPの展開とは別に、CSVの正規化、出典の保持、モーション/ステージ/報酬等のSQLite索引構築、整合性検査、完成snapshotの公開を行う。
+
+統合リリースのモーション画像は展開先に存在するため、motions/effectsで画像BLOBを再保存しない。asset_referenceのパス/サイズ/SHAを用い、source::assetが実際の要求時に読み取り・照合する。Database::sourceもDBのdata-dirから同じ本文へ戻れる。legacy Git経路は従来のBLOB保存を継続。PNG descriptorと存在検査は索引だけでも動作する。旧DBのBLOBもそのまま利用でき、schema8/importer13の解釈は変えず、容量削減だけのための強制再取り込みは行わない。
+
+read_assetは同じトランザクションですでに検証・保持した原本を再利用し、再取得・再ハッシュを避ける。新規DB構築中のSQLiteページキャッシュは32MiB。正式なassets/releases配下の管理済みデータでは、manifestから先に完成DBの識別を求め、同一DBがあれば全キャラ説明/能力CSVの再走査を省く。外部の開発用原本は従来通り内容を検証し、変更をキャッシュで隠さない。
+
+motions::resourcesはmanifestと同じbody/soul/animationのパスを、ファイル本文なしで返す。戦闘開始前の画像取得とRust Sessionはこちらを使う。資料閲覧用manifestは全文を維持。Sessionは各モデルのcut/model本文を一度読み、各clipのC++パースへ共用する。戦闘計算やモーション時計は変更しない。
+
+統合ZIP由来のテキスト原本は、最大8並列で準備し、SHAを確認した内容を取り込み中だけ共有する。CSV/JSON/モーション定義に限定した128MiB上限のメモリキャッシュで、名前の読取・正規化・モーションの各工程による再オープン/再ハッシュを避ける。容量に入るものだけを先読みし、画像は対象外。Git作業ツリーの毎回検証、通常のasset要求時のSHA照合、次回取り込みでの再検証は維持する。DBへの書込み・解釈の順序は変えない。
+
+隔離済み15.7.4原本の全件変換で112.549秒、完成DB再利用で0.549秒。DBは480,440,320→226,963,456bytes。unit/form/enemy/stage/asset_reference/talent/talent_levelの件数は旧DBと一致。通常キャラの未使用形態を隠したcatalogは882キャラ/2177形態（精霊を含む）。同一入力の30/60/90Fで旧版とstate/runtime/layout/sceneが一致し、RNGも一致。0tickの通常/即生産では味方数0/1/2、frameとui_frameは0のまま。APIの本文付き/パスのみのmanifestは同じbody/soul等を返し、例ID94の応答は9184→1328bytes。これらは単一環境の参考値で、ZIP取得/展開時間や実画面の検証を含まない。記録は.local/fix-verification.jsonと.local/fix-api-verification.json。

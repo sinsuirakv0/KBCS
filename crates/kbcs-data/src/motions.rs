@@ -74,7 +74,7 @@ pub(crate) fn import(
         {
             // 本家005bcea8は%s.pngで結合する。imgcut内の制作PCパスは参照しない。
             let image = format!("Number/{stem}.png");
-            if dataset.files.contains_key(&image) {
+            if dataset.files.contains_key(&image) && dataset.release.is_none() {
                 read_asset(source, dataset, connection, &image)?;
             }
         }
@@ -91,7 +91,7 @@ pub(crate) fn descriptor(database: &Database, path: &str, role: &str) -> Result<
     if path.ends_with(".png") {
         // 画像本体はasset要求で読む。manifestのためにBLOBを複製しない。
         return Ok(database.connection.query_row(
-            "SELECT original_path,source_kind,sha256,length(bytes) FROM source_file WHERE path=?",
+            "SELECT original_path,source_kind,sha256,length(bytes) FROM source_file WHERE path=?1 UNION ALL SELECT original_path,source_kind,sha256,size FROM asset_reference WHERE path=?1 LIMIT 1",
             [path],
             |r| Ok(json!({"path":path,"role":role,"original":r.get::<_,String>(0)?,"sourceKind":r.get::<_,String>(1)?,"sha256":r.get::<_,String>(2)?,"size":r.get::<_,i64>(3)?,"text":null})),
         )?);
@@ -108,6 +108,28 @@ pub fn manifest(
     kind: &str,
     id: u32,
     form: usize,
+) -> Result<Value> {
+    describe(database, region, kind, id, form, true)
+}
+
+// 戦闘開始時はファイル本文をJSONへ複製せず、同じ解決済みのパスだけを返す。
+pub fn resources(
+    database: &Database,
+    region: &str,
+    kind: &str,
+    id: u32,
+    form: usize,
+) -> Result<Value> {
+    describe(database, region, kind, id, form, false)
+}
+
+fn describe(
+    database: &Database,
+    region: &str,
+    kind: &str,
+    id: u32,
+    form: usize,
+    include_files: bool,
 ) -> Result<Value> {
     ensure!(
         kind == "unit" || kind == "enemy",
@@ -137,7 +159,7 @@ pub fn manifest(
         .and_then(|p| p.strip_suffix("02.maanim"))
         .context("攻撃モーションのパスが不正です")?;
     let mut files = BTreeMap::new();
-    let body = resource(database, stem, "body", &mut files)?
+    let body = resource(database, stem, "body", &mut files, include_files)?
         .context("モーション素材が未導入です。データ管理から更新してください")?;
     let common = if soul >= 0 {
         resource(
@@ -145,6 +167,7 @@ pub fn manifest(
             &format!("battle_soul_{soul:03}"),
             "soul",
             &mut files,
+            include_files,
         )?
     } else {
         None
@@ -159,12 +182,13 @@ fn resource(
     stem: &str,
     key: &str,
     files: &mut BTreeMap<String, Value>,
+    include_files: bool,
 ) -> Result<Option<Value>> {
     let cut = format!("ImageData/{stem}.imgcut");
     let model = format!("ImageData/{stem}.mamodel");
     let exists = |path: &str| -> Result<bool> {
         Ok(database.connection.query_row(
-            "SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?)",
+            "SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?1 UNION ALL SELECT 1 FROM asset_reference WHERE path=?1)",
             [path],
             |r| r.get(0),
         )?)
@@ -172,15 +196,16 @@ fn resource(
     if !exists(&cut)? || !exists(&model)? {
         return Ok(None);
     }
-    let cut_file = descriptor(database, &cut, "分割定義")?;
     let image = format!("Number/{stem}.png");
     ensure!(exists(&image)?, "スプライト画像が未収録です: {image}");
-    files.insert(cut.clone(), cut_file);
-    files.insert(model.clone(), descriptor(database, &model, "モデル")?);
-    files.insert(
-        image.clone(),
-        descriptor(database, &image, "スプライト画像")?,
-    );
+    if include_files {
+        files.insert(cut.clone(), descriptor(database, &cut, "分割定義")?);
+        files.insert(model.clone(), descriptor(database, &model, "モデル")?);
+        files.insert(
+            image.clone(),
+            descriptor(database, &image, "スプライト画像")?,
+        );
+    }
     let mut statement = database
         .connection
         .prepare("SELECT path FROM source_file WHERE path GLOB ? ORDER BY path")?;
@@ -207,7 +232,9 @@ fn resource(
         };
         let motion_key = if suffix.is_empty() { "soul" } else { suffix };
         animations.push(json!({"key":motion_key,"name":label,"path":path}));
-        files.insert(path.clone(), descriptor(database, &path, "モーション")?);
+        if include_files {
+            files.insert(path.clone(), descriptor(database, &path, "モーション")?);
+        }
     }
     Ok(Some(
         json!({"key":key,"stem":stem,"image":image,"cut":cut,"model":model,"animations":animations}),

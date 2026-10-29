@@ -1,4 +1,18 @@
-﻿# 公開完了（2026-10-29 / KBCS 0.1.36）
+﻿# 編成・取り込み・停止中操作の修正（2026-10-29）
+
+ユーザーの「完了したらコミットしてpush、以後の自動ビルド確認は不要」に基づきmainへ反映する。今回はタグ/リリース作成・版番号変更は行わず、pushによる3環境の自動ビルドへ渡す。実画面の確認はユーザー担当。
+
+- 準備の価格を円からさらに100除算していた誤りと、通常編成で本能値引きを使わない表示経路を修正。両画面とも既存C++ deploy_costへ接続。img031の出陣ボタンは入れ子SVGへCSSが広がる切抜き不良を修正し、原本cut10/11の画像と配置を維持。
+- ニムエ(ID89)、10式戦車(54)、ネコでありんした(45)、ネコチーター(673)等の未使用行を最大形態として選ばない。通常キャラは画像/攻撃モーションのある形態をcatalogへ出し、旧保存は実効形態へ解決する。アイコンのない精霊876は正規の例外として残す。
+- 一時5枠から通常枠へ長押しドラッグで入れ替える。相手も一時枠へ移し、Lv/本能/玉を保持する。元の番号背景を残し、共通描画と既存浮遊曲線を使う。空きへのクリック移動も維持。
+- 操作盤の停止中は即生産チートだけを0tick入力でC++ deployへ渡す。通常は出撃せず、チートでは同じFで個体生成・支払う。0.1/0.2/0.25/0.5/0.75倍の再生を追加。
+- 統合原本のテキストを最大8並列・本文128MiB以内で準備し、取り込み中だけ検証済み内容を共有。モーション画像の二重保存、同じ原本の再取得、同一完成DB確認での全キャラCSV再走査を削減。画像の実要求時のSHA照合・開発用Git原本の変更検出は維持。schema8/importer13を変えず旧DBも利用できる。
+- 資料用のモーション全文と戦闘用のパス索引を分け、開始時のJSON本文複製・各clipでのcut/model再読込を削減。
+- ローカルRust39件＋compile_fail1、JS3本、clippyを通過。隔離データで全件変換112.549秒、再利用0.549秒、DB480,440,320→226,963,456bytes。原本/DB件数を維持し、通常戦闘30/60/90Fは旧版とstate/runtime/layout/scene（RNG込み）が一致。停止0tickの味方数は通常0、チート1→2。初回計測はZIP取得/展開を含まない。最初の計測は検証側の300秒制限で中断し、キャッシュ改善後に全件を完了した。
+
+記録.local/fix-verification.json、.local/fix-api-verification.json。検証DBは.local/import-performance、原本は.local/integrated-dataを共有参照。ユーザーのAppData/既存GUIは操作していない。詳細はui/docs/formation.md、ui/docs/stage-sortie.md、crates/kbcs-data/docs/releases.md、native/kbcs-core/docs/battle-screen.md。
+
+# 公開完了（2026-10-29 / KBCS 0.1.36）
 
 公開URL: https://github.com/sinsuirakv0/KBCS/releases/tag/kbcs-v0.1.36 。タグは`0d6a50ec3779a0ba424f80f2a492cbc7d577a1ba`。Windows x64・Mac arm64・Mac x64の3ZIPと各SHA/ビルドJSONを公開した。READMEとリリース説明にはOS別の直接リンク、Source code ZIP、導入手順を置いた。MacはmacOS 14以上・開発用署名で、Developer ID/公証は未設定。
 

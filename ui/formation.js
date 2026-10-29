@@ -1,5 +1,5 @@
 ﻿import {formationLayout,insertMember,stepFloating} from './formation-layout.js';
-import {addFormationMember,moveTrayMember} from './formation-tray.js';
+import {addFormationMember,moveTrayMember,swapTrayMember} from './formation-tray.js';
 import {loadUnitDatabase} from './src/shared/game/units.js';
 import {createFormationMember,resolveFormationMember,formationDisplayName,formationListForm} from './formation-model.js';
 import {formationIconHtml,createFormationView,fitFormationName} from './formation-view.js';
@@ -15,7 +15,7 @@ const status=node('formation-status'),screen=node('formation-screen');status.tex
 let paintFormation,database,manifest,equipment=[],entry,count=0,index=0,selected=0,changed=false,saving=Promise.resolve(),timer,busy=false,dragged=null;
 const units=new Map();
 let floating=null,suppressClick=false,stageContext=null,deployment=null,deployVersion=0,deployTimer;
-let tray=Array(5).fill(null),trayEntry=null,selectedTray=-1;
+let tray=Array(5).fill(null),trayEntry=null,selectedTray=-1,trayDrag=null,trayDeployment=null,suppressTrayClick=false;
 const trayHost=document.createElement('section');trayHost.className='formation-tray';trayHost.hidden=true;screen.after(trayHost);
 const activeMember=()=>selectedTray>=0?tray[selectedTray]:entry.document.slots[selected];
 function storeTray(){try{sessionStorage.setItem('kbcs:formation-tray:'+entry.id,JSON.stringify(tray));}catch{}}
@@ -32,14 +32,14 @@ function blank(){return {format:'kbcs-formation',schemaVersion:1,region:'jp',gam
 function draw(){
   loadTray();const doc=entry.document;
   trayHost.hidden=!doc.slots.every(Boolean)&&!tray.some(Boolean);
-  trayHost.innerHTML='<div class="formation-tray-label">一時枠<button type="button" data-tray-clear>空にする</button></div>'+paintFormation({...doc,slots:[...tray,...Array(5).fill(null)]},{tray:true,selected:selectedTray});
+  trayHost.innerHTML='<div class="formation-tray-label">一時枠<button type="button" data-tray-clear>空にする</button></div>'+paintFormation({...doc,slots:[...tray,...Array(5).fill(null)]},{tray:true,selected:selectedTray,deployment:trayDeployment,hiddenSlot:trayDrag?.ghost?trayDrag.index:-1});
   screen.innerHTML=paintFormation(doc,{index,selected:selectedTray<0?selected:-1,floating,shifts,deployment});fitFormationName(screen,manifest);
   document.title=formationDisplayName(doc,index)+' | KBCS';
   node('formation-position').textContent=index+' / '+count;node('formation-name').value=formationDisplayName(doc,index);
   if(entry.id){const route=new URLSearchParams(location.search);route.set('id',entry.id);history.replaceState(null,'','/pages/formation/?'+route);}
 }
-function mark(){storeTray();clearTimeout(deployTimer);deployTimer=setTimeout(updateRestrictions,180);changed=true;status.textContent='保存待ち';clearTimeout(timer);timer=setTimeout(()=>save().catch(showError),350);}
-function markMember(){if(selectedTray>=0)storeTray();else mark();}
+function mark(){deployment=null;trayDeployment=null;++deployVersion;storeTray();clearTimeout(deployTimer);deployTimer=setTimeout(updateRestrictions,180);changed=true;status.textContent='保存待ち';clearTimeout(timer);timer=setTimeout(()=>save().catch(showError),350);}
+function markMember(){if(selectedTray>=0){trayDeployment=null;++deployVersion;storeTray();clearTimeout(deployTimer);deployTimer=setTimeout(updateRestrictions,180);}else mark();}
 function showError(error){status.textContent=error.message;status.dataset.error='true';}
 async function save(){
   clearTimeout(timer);
@@ -58,11 +58,12 @@ async function exclusive(task){
   try{await save();await task();}catch(error){showError(error);}finally{busy=false;for(const control of controls)control.inert=false;}
 }
 async function updateRestrictions(){
-  if(!entry||!stageContext)return;
+  if(!entry)return;
   const version=++deployVersion;
   try{
-    const value=await stageDeployment(database,stageContext.map,stageContext.stage,stageContext.crown,battleFormation(database,entry.document));
-    if(version!==deployVersion)return;deployment=value;draw();
+    const calculate=document=>stageDeployment(database,stageContext?.map,stageContext?.stage,stageContext?.crown,battleFormation(database,document));
+    const [value,pending]=await Promise.all([calculate(entry.document),tray.some(Boolean)?calculate({...entry.document,slots:[...tray,...Array(5).fill(null)]}):null]);
+    if(version!==deployVersion)return;deployment=value;trayDeployment=pending;draw();
   }catch(error){if(version===deployVersion)showError(error);}
 }
 
@@ -82,7 +83,7 @@ function renderMember(){
   const orbs=capacity?'<details><summary>本能玉 '+Math.min(member.orbs.length,capacity)+' / '+capacity+'</summary>'+orbRows(member)+'<button data-orb-add '+(member.orbs.length>=capacity?'disabled':'')+'>玉を追加</button>'+(member.orbs.length>capacity?'<button data-orb-trim>上限を超えた設定を外す</button>':'')+'</details>':'';
   host.innerHTML='<h2>'+escape(unit.forms.find(form=>form.index===effective.form)?.name??'未収録キャラ')+'</h2><label>形態<select data-member="form">'+unit.forms.map(form=>'<option value="'+form.index+'" '+(form.index===effective.form?'selected':'')+' '+(advancedLocked&&form.index===3?'disabled':'')+'>'+escape(form.name)+'</option>').join('')+'</select></label>'+((advancedLocked&&(unit.forms.some(form=>form.index===3)||unit.talents.some(talent=>talent.limit)))?'<p class="formation-level-lock">超本能・第4形態はLv60から有効</p>':'')+'<div class="formation-levels"><label>Lv<input type="number" min="1" max="'+unit.maxLevel+'" value="'+member.level+'" data-member="level"></label><label>＋<input type="number" min="0" max="'+(unit.plusLevel??0)+'" value="'+member.plus+'" data-member="plus"></label></div><button data-remove>枠から外す</button>'+talents+orbs+(selectedTray>=0?'<button data-tray-move '+(entry.document.slots.every(Boolean)?'disabled':'')+'>編成へ移す</button>':'<div class="formation-move"><button data-move="-1">◀ 枠移動</button><button data-move="1">枠移動 ▶</button></div>');
 }
-function render(){draw();renderMember();renderSettings();updateRestrictions();}
+function render(){deployment=null;trayDeployment=null;++deployVersion;draw();renderMember();renderSettings();updateRestrictions();}
 function filter(){
   const query=node('formation-search').value.normalize('NFKC').toLowerCase(),choice=node('formation-display-form').value;
   const found=database.units.filter(unit=>!unit.isSpirit&&(String(unit.id)===query||[...unit.aliases,...unit.forms.map(form=>form.name)].join(' ').normalize('NFKC').toLowerCase().includes(query)));
@@ -114,8 +115,34 @@ function finishDrag(cancel=false){
   }
   if(screen.hasPointerCapture(captured.pointerId))screen.releasePointerCapture(captured.pointerId);
 }
+function startTrayDrag(event){
+ const target=event.target.closest('[data-slot]');if(!target||event.button!==0||busy||dragged||floating)return;
+ const index=Number(target.dataset.slot);if(!tray[index])return;
+ event.preventDefault();trayDrag={index,pointerId:event.pointerId,x:event.clientX,y:event.clientY,ticks:0,growth:0,alpha:0,held:true,ghost:null};
+ trayHost.setPointerCapture(event.pointerId);
+}
+function paintTrayDrag(){
+ const value=trayDrag;if(!value)return;
+ if(!value.ghost){const ghost=document.createElement('div');ghost.className='formation-drag-preview';ghost.innerHTML=paintFormation({...entry.document,slots:[tray[value.index],...Array(9).fill(null)]},{ghost:true,deployment:trayDeployment?{slots:[trayDeployment.slots[value.index]]}:null});document.body.append(ghost);value.ghost=ghost;draw();}
+ stepFloating(value);
+ const scale=screen.getBoundingClientRect().width/1188,width=(110+Math.trunc(value.growth*110/100))*scale,height=(85+Math.trunc(value.growth*85/100))*scale;
+ Object.assign(value.ghost.style,{left:(value.x-width/2)+'px',top:(value.y-height/2)+'px',width:width+'px',height:height+'px',opacity:(255-value.alpha)/255});
+}
+function moveTrayDrag(event){if(trayDrag&&trayDrag.pointerId===event.pointerId){trayDrag.x=event.clientX;trayDrag.y=event.clientY;}}
+function finishTrayDrag(event){
+ if(!trayDrag||event&&event.pointerId!==trayDrag.pointerId)return;
+ const value=trayDrag;trayDrag=null;value.ghost?.remove();
+ if(value.ticks>=5){
+  suppressTrayClick=true;setTimeout(()=>{suppressTrayClick=false;},0);
+  if(event){const point=pointerPosition(event),target=formationLayout().slots.findIndex(slot=>point.x>=slot.x&&point.x<slot.x+110&&point.y>=slot.y&&point.y<slot.y+85);
+   if(swapTrayMember(entry.document.slots,tray,value.index,target)){selected=target;selectedTray=-1;mark();renderMember();}}
+  draw();
+ }
+ if(trayHost.hasPointerCapture(value.pointerId))trayHost.releasePointerCapture(value.pointerId);
+}
 function animateFormation(){
   if(!entry)return;
+  if(trayDrag){++trayDrag.ticks;if(trayDrag.ticks>=5)paintTrayDrag();}
   const layout=formationLayout();let dirty=false;
   for(const shift of shifts){if(shift.x||shift.y){shift.x=Math.trunc(shift.x/2);shift.y=Math.trunc(shift.y/2);dirty=true;}}
   if(dragged){
@@ -176,20 +203,26 @@ try{
   node('formation-search').addEventListener('input',filter);
   node('formation-display-form').addEventListener('change',event=>{try{sessionStorage.setItem('kbcs:formation:display-form',event.target.value);}catch{}filter();});
   trayHost.addEventListener('click',event=>{
-    if(busy||dragged||floating)return;
+    if(suppressTrayClick||busy||dragged||floating)return;
     if(event.target.closest('[data-tray-clear]')){tray.fill(null);selectedTray=-1;storeTray();draw();renderMember();return;}
     const target=event.target.closest('[data-slot]');if(!target)return;const index=Number(target.dataset.slot);if(!tray[index])return;
     const moved=moveTrayMember(entry.document.slots,tray,index);
     if(moved>=0){selected=moved;selectedTray=-1;mark();}else selectedTray=index;
     storeTray();draw();renderMember();
   });
+  trayHost.addEventListener('pointerdown',startTrayDrag);
+  trayHost.addEventListener('pointermove',moveTrayDrag);
+  trayHost.addEventListener('pointerup',finishTrayDrag);
+  trayHost.addEventListener('pointercancel',()=>finishTrayDrag(null));
+  trayHost.addEventListener('lostpointercapture',()=>finishTrayDrag(null));
+  window.addEventListener('blur',()=>finishTrayDrag(null));
   trayHost.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)&&event.target.hasAttribute('data-slot')){event.preventDefault();event.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
   node('formation-results').addEventListener('click',event=>{
     const button=event.target.closest('[data-unit]');if(!button||busy||dragged||floating)return;
     const result=addFormationMember(entry.document.slots,tray,createFormationMember(units.get(Number(button.dataset.unit))));
     if(!result){status.textContent='一時枠がいっぱいです';return;}
     selectedTray=result.group==='tray'?result.index:-1;if(selectedTray<0)selected=result.index;
-    if(result.changed){if(result.group==='slots')mark();else storeTray();}draw();renderMember();
+    if(result.changed){if(result.group==='slots')mark();else{storeTray();updateRestrictions();}}draw();renderMember();
   });
   node('formation-member').addEventListener('change',event=>{const target=event.target,member=activeMember();if(!member||!target.checkValidity())return;if(target.dataset.member)member[target.dataset.member]=Number(target.value);if(target.dataset.talent)member.talents[target.dataset.talent]=Number(target.value);if(target.dataset.orb!==undefined)member.orbs[Number(target.dataset.orb)]=target.value?Number(target.value):null;markMember();draw();if(target.dataset.member==='form'||target.dataset.member==='level')renderMember();});
   node('formation-member').addEventListener('click',event=>{const button=event.target.closest('button'),member=activeMember();if(!button||!member||dragged||floating)return;if(button.hasAttribute('data-tray-move')){const moved=moveTrayMember(entry.document.slots,tray,selectedTray);if(moved>=0){selected=moved;selectedTray=-1;mark();draw();renderMember();}return;}if(button.hasAttribute('data-orb-add')){if(member.orbs.length<units.get(member.unitId).orbSlots){member.orbs.push(null);markMember();renderMember();}return;}if(button.hasAttribute('data-orb-trim')){member.orbs=member.orbs.slice(0,units.get(member.unitId).orbSlots);markMember();renderMember();return;}if(button.dataset.orbRemove!==undefined){member.orbs.splice(Number(button.dataset.orbRemove),1);markMember();renderMember();return;}if(button.dataset.move){const next=(selected+Number(button.dataset.move)+10)%10;insertMember(entry.document.slots,selected,next);selected=next;mark();draw();renderMember();return;}if(event.target.closest('[data-remove]')){if(selectedTray>=0){tray[selectedTray]=null;selectedTray=-1;storeTray();}else{entry.document.slots[selected]=null;mark();}draw();renderMember();}});

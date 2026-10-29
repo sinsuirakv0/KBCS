@@ -121,7 +121,7 @@ enum Location {
 // DBに索引だけ保存した画像も、取り込み時のcommit/SHAへ固定して取得する。
 pub fn asset(database: &crate::store::Database, root: &Path, logical: &str) -> Result<Vec<u8>> {
     safe_path(logical)?;
-    if let Ok((_, _, _, bytes)) = database.source(logical) {
+    if let Some((_, _, _, bytes)) = database.stored_source(logical)? {
         return Ok(bytes);
     }
     let descriptor = database
@@ -182,8 +182,22 @@ pub fn asset(database: &crate::store::Database, root: &Path, logical: &str) -> R
         origin: origin.clone(),
         cache: Some(root.join("assets")),
         previous: None,
+        prefetched: None,
     };
     source.checked_named(&descriptor, logical)
+}
+
+const MEMORY_LIMIT: usize = 128 * 1024 * 1024;
+#[derive(Default)]
+struct MemoryFiles {
+    files: BTreeMap<String, Vec<u8>>,
+    bytes: usize,
+}
+fn is_text(path: &str) -> bool {
+    matches!(
+        path.rsplit('.').next(),
+        Some("csv" | "tsv" | "json" | "txt" | "maanim" | "imgcut" | "mamodel")
+    )
 }
 
 pub struct Source {
@@ -193,6 +207,7 @@ pub struct Source {
     pub origin: String,
     cache: Option<PathBuf>,
     previous: Option<Mutex<crate::store::Database>>,
+    prefetched: Option<Mutex<MemoryFiles>>,
 }
 
 impl Source {
@@ -235,6 +250,7 @@ impl Source {
                 origin: location.into(),
                 cache: None,
                 previous: None,
+                prefetched: None,
             })
         } else {
             let root = Path::new(location)
@@ -249,6 +265,7 @@ impl Source {
                     agent,
                     cache: None,
                     previous: None,
+                    prefetched: Some(Mutex::new(MemoryFiles::default())),
                 });
             }
             let git = |args: &[&str]| -> Result<String> {
@@ -272,6 +289,7 @@ impl Source {
                 origin: location.into(),
                 cache: None,
                 previous: None,
+                prefetched: None,
             })
         }
     }
@@ -365,6 +383,21 @@ impl Source {
                 && descriptor.sha256.bytes().all(|b| b.is_ascii_hexdigit()),
             "不正な原本SHA-256"
         );
+        safe_path(&descriptor.path)?;
+        safe_path(logical)?;
+        if let Some(memory) = &self.prefetched {
+            let memory = memory
+                .lock()
+                .map_err(|_| anyhow::anyhow!("原本準備のロック失敗"))?;
+            if let Some(bytes) = memory.files.get(&descriptor.sha256) {
+                ensure!(
+                    bytes.len() as u64 == descriptor.size,
+                    "サイズ/SHA-256不一致: {}",
+                    descriptor.path
+                );
+                return Ok(bytes.clone());
+            }
+        }
         let path = self
             .cache
             .as_ref()
@@ -399,6 +432,22 @@ impl Source {
         }
         let bytes = self.read_original(&descriptor.path)?;
         verify(&bytes, descriptor)?;
+        // 統合ZIPの固定原本だけを共有。開発用Gitの変更検出と画像の逐次照合は維持する。
+        if is_text(logical)
+            && let Some(memory) = &self.prefetched
+        {
+            let mut memory = memory
+                .lock()
+                .map_err(|_| anyhow::anyhow!("原本準備のロック失敗"))?;
+            if !memory.files.contains_key(&descriptor.sha256)
+                && bytes.len() <= MEMORY_LIMIT - memory.bytes
+            {
+                memory.bytes += bytes.len();
+                memory
+                    .files
+                    .insert(descriptor.sha256.clone(), bytes.clone());
+            }
+        }
         if remote && let Some(path) = path {
             self.save_cache(&path, &bytes)?;
         }
@@ -411,9 +460,41 @@ impl Source {
         paths: &[String],
         progress: &(impl Fn(String) + Sync),
     ) -> Result<()> {
-        if !matches!(self.location, Location::Remote(_)) || self.cache.is_none() {
+        self.prefetch_files(&dataset.files, paths, progress)
+    }
+
+    fn prefetch_files(
+        &self,
+        files: &BTreeMap<String, Descriptor>,
+        paths: &[String],
+        progress: &(impl Fn(String) + Sync),
+    ) -> Result<()> {
+        let paths = if let Some(memory) = &self.prefetched {
+            let memory = memory
+                .lock()
+                .map_err(|_| anyhow::anyhow!("原本準備のロック失敗"))?;
+            let mut remaining = MEMORY_LIMIT - memory.bytes;
+            paths
+                .iter()
+                .filter(|path| {
+                    let Some(file) = files.get(*path) else {
+                        return false;
+                    };
+                    if !is_text(path)
+                        || memory.files.contains_key(&file.sha256)
+                        || file.size > remaining as u64
+                    {
+                        return false;
+                    }
+                    remaining -= file.size as usize;
+                    true
+                })
+                .collect::<Vec<_>>()
+        } else if matches!(self.location, Location::Remote(_)) && self.cache.is_some() {
+            paths.iter().collect()
+        } else {
             return Ok(());
-        }
+        };
         let next = AtomicUsize::new(0);
         let complete = AtomicUsize::new(0);
         let failed = AtomicBool::new(false);
@@ -429,9 +510,8 @@ impl Source {
                             let Some(path) = paths.get(index) else {
                                 break;
                             };
-                            let result = dataset
-                                .files
-                                .get(path)
+                            let result = files
+                                .get(*path)
                                 .context("取得対象が索引にありません")
                                 .and_then(|descriptor| self.checked_named(descriptor, path));
                             if let Err(error) = result {
@@ -440,7 +520,7 @@ impl Source {
                             }
                             let count = complete.fetch_add(1, Ordering::Relaxed) + 1;
                             if count.is_multiple_of(200) || count == paths.len() {
-                                progress(format!("原本を保存: {count}/{}", paths.len()));
+                                progress(format!("原本を準備: {count}/{}", paths.len()));
                             }
                         }
                         Ok(())
@@ -464,7 +544,7 @@ impl Source {
         if let Location::Local(root) = &self.location
             && root.join("release.json").is_file()
         {
-            return self.integrated_dataset(root, region);
+            return self.integrated_dataset(root, region, true);
         }
         let current_bytes = self.read(&format!("metadata/{region}/current.json"))?;
         let current: Current = parse_json(&current_bytes)?;
@@ -539,19 +619,34 @@ impl Source {
         })
     }
 
-    fn integrated_dataset(&self, root: &Path, region: &str) -> Result<Dataset> {
-        let installed = crate::releases::installed(root)?;
-        let manifest = &installed.release.manifest;
-        ensure!(
-            manifest.header.source_region == region && manifest.schema_version == 1,
-            "統合データの地域・形式が不一致です"
-        );
-        for (logical, descriptor) in &installed.files {
-            safe_path(logical)?;
-            ensure!(logical == &descriptor.path, "統合データのパスが不一致です");
+    pub(crate) fn import_dataset(&self, data_root: &Path, region: &str) -> Result<Dataset> {
+        let managed = data_root.join("assets/releases").canonicalize().ok();
+        if let Location::Local(root) = &self.location
+            && managed
+                .as_deref()
+                .is_some_and(|parent| root.parent() == Some(parent))
+            && root.join("release.json").is_file()
+        {
+            return self.integrated_dataset(root, region, false);
         }
+        self.dataset(region)
+    }
+
+    pub(crate) fn integrated_characters(
+        &self,
+        files: &BTreeMap<String, Descriptor>,
+    ) -> Result<Vec<Character>> {
+        let paths = files
+            .keys()
+            .filter(|path| {
+                path.starts_with("res/Unit_Explanation")
+                    || path.starts_with("Data/unit") && path.ends_with(".csv")
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        self.prefetch_files(files, &paths, &|_| {})?;
         let mut characters = Vec::new();
-        for path in installed.files.keys() {
+        for path in files.keys() {
             let Some(id) = path
                 .strip_prefix("res/Unit_Explanation")
                 .and_then(|name| name.strip_suffix("_ja.csv"))
@@ -561,15 +656,14 @@ impl Source {
                 continue;
             };
             let numeric = format!("Data/unit{id:03}.csv");
-            if !installed.files.contains_key(&numeric) {
+            if !files.contains_key(&numeric) {
                 continue;
             }
-            let rows = crate::model::csv_rows(&self.checked(&installed.files[path])?)?;
+            let rows = crate::model::csv_rows(&self.checked(&files[path])?)?;
             // 説明だけ先行して追加・重複する原本があるため、実在する能力行数までに限る。
-            let form_count =
-                crate::model::numeric_rows(&self.checked(&installed.files[&numeric])?)?
-                    .len()
-                    .min(4);
+            let form_count = crate::model::numeric_rows(&self.checked(&files[&numeric])?)?
+                .len()
+                .min(4);
             let forms = rows
                 .into_iter()
                 .take(form_count)
@@ -596,6 +690,30 @@ impl Source {
         }
         characters.sort_by_key(|unit| unit.id.parse::<u32>().unwrap_or(u32::MAX));
         ensure!(!characters.is_empty(), "統合データのキャラ説明が空です");
+        Ok(characters)
+    }
+
+    fn integrated_dataset(
+        &self,
+        root: &Path,
+        region: &str,
+        include_characters: bool,
+    ) -> Result<Dataset> {
+        let installed = crate::releases::installed(root)?;
+        let manifest = &installed.release.manifest;
+        ensure!(
+            manifest.header.source_region == region && manifest.schema_version == 1,
+            "統合データの地域・形式が不一致です"
+        );
+        for (logical, descriptor) in &installed.files {
+            safe_path(logical)?;
+            ensure!(logical == &descriptor.path, "統合データのパスが不一致です");
+        }
+        let characters = if include_characters {
+            self.integrated_characters(&installed.files)?
+        } else {
+            Vec::new()
+        };
         let proof = serde_json::to_vec(manifest)?;
         Ok(Dataset {
             current: Current {
@@ -664,6 +782,7 @@ mod tests {
                 origin: "test".into(),
                 cache: Some(root.clone()),
                 previous: Some(Mutex::new(crate::store::Database { connection })),
+                prefetched: None,
             };
             let path = root.join("objects").join(&descriptor.sha256);
             std::fs::write(&path, b"corrupt")?;
@@ -703,8 +822,19 @@ mod tests {
             std::fs::write(&managed, bytes)?;
             // 保存時のoriginが別PCを指しても、移動後のdata-dirから原本を解決する。
             assert_eq!(asset(&database, &root, "Image/img043.png")?, bytes);
-            std::fs::write(managed, b"corrupt")?;
+            std::fs::write(&managed, b"corrupt")?;
             assert!(asset(&database, &root, "Image/img043.png").is_err());
+            // BLOBを省いたDBでも、移設可能なdata-dirから原本本文を取得できる。
+            std::fs::write(&managed, bytes)?;
+            std::fs::create_dir_all(root.join("official"))?;
+            let saved = root.join("official/reference.sqlite");
+            database
+                .connection
+                .execute("VACUUM INTO ?", [saved.to_str().unwrap()])?;
+            let indexed = crate::store::Database {
+                connection: rusqlite::Connection::open(saved)?,
+            };
+            assert_eq!(indexed.source("Image/img043.png")?.3, bytes);
             Ok(())
         })();
         std::fs::remove_dir_all(root)?;

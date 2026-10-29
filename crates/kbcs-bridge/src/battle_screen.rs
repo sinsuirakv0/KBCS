@@ -183,6 +183,64 @@ fn native_screen_witnesses() {
         })
         .unwrap()
     };
+    // 停止中の即生産だけは0tickで入力を受け、戦闘・表示時計と残高を進めない。
+    unsafe extern "C" {
+        fn kbcs_core_battle_screen_advance_custom(
+            config: *const Config,
+            state: *const State,
+            input: *const Input,
+            out: *mut State,
+            layout: *mut Layout,
+            hook: Option<unsafe extern "C" fn(*mut std::ffi::c_void, i32, *mut State) -> u32>,
+            user: *mut std::ffi::c_void,
+            immediate: i32,
+        ) -> u32;
+    }
+    for immediate in [0, 1] {
+        let config = Config {
+            present: [1; 10],
+            ..config.clone()
+        };
+        let input = Input {
+            phase: 2,
+            x: 171,
+            y: 465,
+            ..Input::default()
+        };
+        let (mut state, mut layout) = (State::default(), Layout::default());
+        assert_eq!(
+            unsafe {
+                kbcs_core_battle_screen_advance_custom(
+                    &config,
+                    &base,
+                    &input,
+                    &mut state,
+                    &mut layout,
+                    None,
+                    std::ptr::null_mut(),
+                    immediate,
+                )
+            },
+            0
+        );
+        assert_eq!(state.request_slot, if immediate == 1 { 0 } else { -1 });
+        assert_eq!(
+            (
+                state.frame,
+                state.ui_frame,
+                state.hud_frame,
+                state.money,
+                state.guard
+            ),
+            (
+                base.frame,
+                base.ui_frame,
+                base.hud_frame,
+                base.money,
+                base.guard
+            )
+        );
+    }
     for case in data["fade"].as_array().unwrap() {
         let value = call(
             config.clone(),

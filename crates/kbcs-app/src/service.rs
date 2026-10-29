@@ -879,7 +879,12 @@ impl Service {
                     &get("id").unwrap_or_else(|| "skill_wave_attack".into()),
                 )?));
             }
-            return Ok(Reply::json(kbcs_data::motions::manifest(
+            let describe = if get("files").as_deref() == Some("0") {
+                kbcs_data::motions::resources
+            } else {
+                kbcs_data::motions::manifest
+            };
+            return Ok(Reply::json(describe(
                 &database,
                 &self.region,
                 &get("kind").unwrap_or_else(|| "unit".into()),

@@ -55,7 +55,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  let painter;try{painter=createStagePainter(backgroundCanvas,()=>++cameraVersion,resources.sceneImages);}catch(error){resources.dispose();throw error;}
  let playbackPaused=false,stepQueue=0,paints=0,activeMs=0,activePaints=0,cheats=0,settingsVersion=0,appliedSettings=-1;
  const speed=controls.querySelector('[data-battle-speed]'),cheatPanel=controls.querySelector('#battle-cheats');
- speed.innerHTML='<option value="0">アイテムに従う</option>'+Array.from({length:20},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'倍</option>').join('');
+ speed.innerHTML='<option value="0">アイテムに従う</option>'+[.1,.2,.25,.5,.75,...Array.from({length:20},(_,i)=>i+1)].map(value=>'<option value="'+value+'">'+value+'倍</option>').join('');
  cheatPanel.hidden=true;for(const input of cheatPanel.querySelectorAll('input'))input.checked=false;
  controls.querySelector('[data-debug=cheats]').setAttribute('aria-expanded','false');
  function changeSettings(){cheats=[...cheatPanel.querySelectorAll('input:checked')].reduce((flags,input)=>flags|Number(input.dataset.cheat),0);++settingsVersion;accumulator=0;lastTime=0;}
@@ -108,7 +108,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(version===cameraVersion)camera=next.layout;
  }
  async function update(ticks,stepping=false){
-  const input=stepping?{ticks,phase:0,x:0,y:0,control:10}:{ticks,...pointer,control};if(ticks)pointer.phase=0;control=0;
+  const input=stepping?{ticks,phase:0,x:0,y:0,control:10}:{ticks,...pointer,control};if(ticks||playbackPaused&&(cheats&4))pointer.phase=0;control=0;
   const version=cameraVersion,sentSettings=settingsVersion;
   const sceneInput=stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session});
   const {value:next,timing:measured}=await frames.load({session,input,cheats,scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
@@ -214,7 +214,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  const cameraPointers=new Set();
  function cameraArea(event){const {x,y}=coordinates(event);return y>=134&&y<(state.rows===2?449:543)&&!view?.slots.some(([sx,sy,w,h])=>x>=sx&&x<=sx+w&&y>=sy-1&&y<=sy+h+2);}
  const gestures=initializeSceneGestures(canvas,()=>state.intro>=24&&!state.paused&&!runtime.result?.mode?{...camera,viewport_width:screenWidth,maximum:1}:null,value=>{camera={...camera,...value};++cameraVersion;},{acceptPointer:event=>{if(!cameraArea(event))return false;pointer={...pointer,phase:3};cameraPointers.add(event.pointerId);return true;},acceptWheel:cameraArea});
- function input(event){if(runtime.result?.mode&&!runtime.receipt)return;if(cameraPointers.has(event.pointerId)){if(event.type==='pointerup'||event.type==='pointercancel')cameraPointers.delete(event.pointerId);return;}if(state.intro<24||playbackPaused&&!state.paused)return;event.preventDefault();const phase={pointerdown:1,pointerup:2,pointercancel:3,pointermove:4}[event.type];if(phase===4&&!state.pointer_down&&pointer.phase!==1)return;pointer={...coordinates(event),phase};if(phase===1)canvas.setPointerCapture(event.pointerId);}
+ function input(event){if(runtime.result?.mode&&!runtime.receipt)return;if(cameraPointers.has(event.pointerId)){if(event.type==='pointerup'||event.type==='pointercancel')cameraPointers.delete(event.pointerId);return;}if(state.intro<24||playbackPaused&&!state.paused&&!(cheats&4))return;event.preventDefault();const phase={pointerdown:1,pointerup:2,pointercancel:3,pointermove:4}[event.type];if(phase===4&&!state.pointer_down&&pointer.phase!==1)return;pointer={...coordinates(event),phase};if(phase===1)canvas.setPointerCapture(event.pointerId);}
  for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.addEventListener(type,input);
  function wheel(event){if(runtime.result?.mode||state.paused||state.rows!==1||state.intro<24||!event.deltaY)return;const point=coordinates(event);if(point.y<543||point.x<159+(screenWidth-960)/2||point.x>801+(screenWidth-960)/2)return;event.preventDefault();control=event.deltaY>0?9:8;}
  canvas.addEventListener('wheel',wheel,{passive:false});
@@ -248,7 +248,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    const elapsed=now-lastTime;if(!playbackPaused&&!state.paused&&state.intro>=24)activeMs+=elapsed;
    if(!playbackPaused||state.paused)accumulator+=elapsed*30/1000*(state.intro>=24&&!state.paused&&!state.battle_mode?battlePlaybackRate(Number(speed.value),state.speed_mode):1);
   }lastTime=now;
-  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion)){
+  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion||playbackPaused&&(cheats&4)&&pointer.phase===2)){
    busy=true;const stepping=!control&&stepQueue>0,ticks=control?0:stepping?Math.min(30,stepQueue):Math.min(playbackPaused?1:30,Math.floor(accumulator));if(stepping)stepQueue-=ticks;else accumulator-=ticks;
    try{await update(ticks,stepping);paint();}catch(e){if(!stopped){error=true;failure={frame:state.frame,message:e.message};message.textContent='戦闘停止: '+e.message;message.title=message.textContent;message.setAttribute('role','alert');if(audio)audio.pause();for(const button of controls.querySelectorAll('button'))button.disabled=!['report','return'].includes(button.dataset.debug);}}finally{busy=false;}
   }

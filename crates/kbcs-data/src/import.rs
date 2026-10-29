@@ -5,7 +5,7 @@
     store::{self, Database},
 };
 use anyhow::{Context, Result, ensure};
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, OptionalExtension, params};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, File, OpenOptions},
@@ -149,8 +149,8 @@ pub fn import(
         location
     };
     let source = Source::open_cached(location, root, region)?;
-    let dataset = source.dataset(region)?;
-    let header = &dataset.current.header;
+    let mut dataset = source.import_dataset(root, region)?;
+    let header = dataset.current.header.clone();
     let identity = hash(
         format!(
             "{}:{}:{}:{}",
@@ -177,8 +177,12 @@ pub fn import(
             );
             progress("データは最新です。保存済みデータを再利用します".into());
         } else {
+            if dataset.characters.is_empty() {
+                dataset.characters = source.integrated_characters(&dataset.files)?;
+            }
             let mut connection = Connection::open(&temporary)?;
             connection.execute_batch(include_str!("schema.sql"))?;
+            connection.execute_batch("PRAGMA cache_size=-32768")?;
             let transaction = connection.transaction()?;
             let mut count = 0;
             build(&source, &dataset, &transaction, &progress, &mut count)?;
@@ -243,6 +247,17 @@ pub(crate) fn read_asset(
     connection: &Connection,
     path: &str,
 ) -> Result<Vec<u8>> {
+    // 同一の取り込み中に検証・保存済みの原本を再取得しない。
+    if let Some(bytes) = connection
+        .query_row(
+            "SELECT bytes FROM source_file WHERE path=?",
+            [path],
+            |row| row.get(0),
+        )
+        .optional()?
+    {
+        return Ok(bytes);
+    }
     let descriptor = dataset
         .files
         .get(path)
@@ -265,6 +280,15 @@ fn build(
     progress: &(impl Fn(String) + Sync),
     form_count: &mut usize,
 ) -> Result<()> {
+    if dataset.release.is_some() {
+        let paths = dataset
+            .files
+            .keys()
+            .filter(|path| path.starts_with("Data/") || path.starts_with("res/"))
+            .cloned()
+            .collect::<Vec<_>>();
+        source.prefetch(dataset, &paths, progress)?;
+    }
     let header = &dataset.current.header;
     let region = &header.source_region;
     for (key, value) in [

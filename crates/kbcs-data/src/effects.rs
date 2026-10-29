@@ -53,6 +53,9 @@ pub(crate) fn import(
         progress,
     )?;
     for path in &images {
+        if dataset.release.is_some() {
+            continue;
+        }
         read_asset(source, dataset, connection, path)?;
     }
     if dataset.files.contains_key("Data/param.tsv") {

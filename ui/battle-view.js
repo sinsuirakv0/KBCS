@@ -9,5 +9,5 @@ export function battleViewportWidth(choice,width,height){
 // 指定速度は通常の1倍基準。0は本家スピードアップの設定に従う。
 export function battlePlaybackRate(speed,speedMode){
  const nativeRate=speedMode+1;
- return speed>0?Math.min(20,Math.max(1,speed))/nativeRate:1;
+ return speed>0?Math.min(20,Math.max(.1,speed))/nativeRate:1;
 }

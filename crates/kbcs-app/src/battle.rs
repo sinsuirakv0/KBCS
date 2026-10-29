@@ -123,7 +123,7 @@ fn motion(
     form: usize,
     revive: i32,
 ) -> Result<(actor::Motion, i32, i32, MotionSet)> {
-    let manifest = kbcs_data::motions::manifest(
+    let manifest = kbcs_data::motions::resources(
         db,
         region,
         if side == 0 { "unit" } else { "enemy" },
@@ -147,6 +147,8 @@ fn motion(
         let texture = scene.texture(image);
         let cut = resource["cut"].as_str().context("分割原本なし")?;
         let model = resource["model"].as_str().context("モデル原本なし")?;
+        let cut_text = text(db, cut)?;
+        let model_text = text(db, model)?;
         for animation in resource["animations"]
             .as_array()
             .context("モーション一覧なし")?
@@ -169,7 +171,12 @@ fn motion(
                     }
                 }
             };
-            let m = load_model(db, cut, model, animation["path"].as_str())?;
+            let animation = animation["path"]
+                .as_str()
+                .map(|path| text(db, path))
+                .transpose()?;
+            let m = render::Model::parse(&cut_text, &model_text, animation.as_deref())
+                .map_err(anyhow::Error::msg)?;
             let lengths = native(m.clock_lengths())?;
             if index == 9 {
                 death_frames = lengths[0];

@@ -113,6 +113,12 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
  if(in.control==5&&(c.items&1))toggle_speed(c,s);
  if(in.control==6&&(c.items&8))s.items_on^=8;
  if(in.control==7&&(c.items&32))s.items_on^=32;
+ // ホスト側で止めた同一Fでは、即生産チートだけを入力として処理する。
+ if(!in.ticks&&immediate&&in.phase==2&&!s.paused&&!s.battle_mode&&s.intro>=24){
+  const int target=hit(c,s,in.x,in.y);
+  if(target>=0&&target<10&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
+  s.pointer_down=0;s.holding=-1;s.hold_frames=0;
+ }
  for(int tick=0;tick<in.ticks;++tick){
   const int previous_target=s.pointer_down?hit(c,s,s.pointer_x,s.pointer_y):-1;
   ++s.ui_frame;

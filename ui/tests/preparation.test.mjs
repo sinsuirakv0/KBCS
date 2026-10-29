@@ -52,3 +52,27 @@ bindDetailNavigation('unit-detail','/pages/unit-detail/',()=>new URLSearchParams
 handlers[0]({target:{closest:()=>({href:'kbcs://localhost/pages/unit-detail/?id=42'})}});
 assert.equal(saved.get('kbcs:view:unit-detail:42'),'id=42');
 globalThis.location=oldLocation;globalThis.document=oldDocument;globalThis.sessionStorage=oldSession;
+
+// 円単位の価格を桁落ちさせず、編集と準備で同じ値引き済み結果を描く。
+const {readFileSync}=await import('node:fs');
+const {createFormationView}=await import('../formation-view.js');
+const {resolveFormationMember}=await import('../formation-model.js');
+const {stageDeployment}=await import('../battle-support.js');
+const artwork=JSON.parse(readFileSync(new URL('../images/native-formation/manifest.json',import.meta.url),'utf8').replace(/^\uFEFF/,''));
+const unit={id:45,rarity:1,orbSlots:0,forms:[{index:0,name:'a',icon:'a.png',cost:300},{index:1,name:'b',icon:'b.png',cost:600}],talents:[]};
+const stored={unitId:45,form:2,level:50,plus:0,talents:{},orbs:[]},document={slots:[stored,...Array(9).fill(null)],cannon:{id:0}},db={units:[unit],imageBase:'/api/asset/'};
+assert.equal(resolveFormationMember(unit,stored).form,1);assert.equal(stored.form,2);
+const paint=createFormationView(db,artwork),deployment={slots:Array.from({length:10},()=>({cost:4500,reasons:0}))};
+for(const preview of [false,true])assert.equal((paint(document,{deployment,preview}).match(/native-formation\/img023_ja.png/g)||[]).length,5);
+const fetchBefore=globalThis.fetch;
+globalThis.fetch=async(path,options)=>{const input=JSON.parse(options.body);assert.equal(input.costs[0].raw,600);assert.equal(input.costs[0].reduction,100);return {ok:true,json:async()=>({costs:[750,...Array(9).fill(0)],checks:[0,0]})};};
+try{
+ unit.talents=[{index:0,effect:{key:'cost'},values:[[100,0,0,0]]}];unit.forms.push({index:2,name:'c',icon:'c.png',cost:600});stored.talents={0:1};
+ const costs=await stageDeployment(db,null,null,null,document);assert.equal(costs.slots[0].cost,750);
+}finally{globalThis.fetch=fetchBefore;}
+const {swapTrayMember}=await import('../formation-tray.js');
+const pending=tray[0]={unitId:99,level:33,talents:{2:7},orbs:[5]},previous=slots[1];
+assert.equal(swapTrayMember(slots,tray,0,1),true);assert.equal(slots[1],pending);assert.equal(tray[0],previous);
+assert.equal(swapTrayMember(slots,tray,0,-1),false);
+for(const mode of [0,1,2])assert.ok(Math.abs(battlePlaybackRate(.1,mode)*(mode+1)-.1)<1e-10);
+console.log('price units, discounts, unavailable forms, tray swap and slow playback passed');

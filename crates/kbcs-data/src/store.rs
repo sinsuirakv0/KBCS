@@ -4,7 +4,7 @@
     source::parse_json,
 };
 use anyhow::{Context, Result, ensure};
-use rusqlite::{Connection, OpenFlags, params};
+use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -64,6 +64,8 @@ pub fn validate(connection: &Connection) -> Result<()> {
     );
     Ok(())
 }
+
+pub(crate) type SourceRecord = (String, String, String, Vec<u8>);
 
 pub struct Database {
     pub connection: Connection,
@@ -169,11 +171,30 @@ impl Database {
     }
 
     pub fn source(&self, path: &str) -> Result<(String, String, String, Vec<u8>)> {
-        Ok(self.connection.query_row(
-            "SELECT original_path,source_kind,sha256,bytes FROM source_file WHERE path=?",
+        if let Some(value) = self.stored_source(path)? {
+            return Ok(value);
+        }
+        let (original, kind, sha): (String, String, String) = self.connection.query_row(
+            "SELECT original_path,source_kind,sha256 FROM asset_reference WHERE path=?",
             [path],
-            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
-        )?)
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )?;
+        let root = self
+            .connection
+            .path()
+            .and_then(|path| Path::new(path).parent()?.parent())
+            .context("原本保存先がありません")?;
+        Ok((original, kind, sha, crate::source::asset(self, root, path)?))
+    }
+    pub(crate) fn stored_source(&self, path: &str) -> Result<Option<SourceRecord>> {
+        Ok(self
+            .connection
+            .query_row(
+                "SELECT original_path,source_kind,sha256,bytes FROM source_file WHERE path=?",
+                [path],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+            )
+            .optional()?)
     }
 }
 

@@ -31,7 +31,7 @@ export async function prepareBattleAssets(stage,formation,scene,report,signal){
   actors.push(...formation.slots.filter(Boolean).map(member=>({kind:'unit',id:member.unitId,form:member.form})));
   const manifests=[];let completed=0;
   async function workers(values,run){let index=0;await Promise.all(Array.from({length:Math.min(4,values.length)},async()=>{while(index<values.length){signal.throwIfAborted();const value=values[index++];await run(value);}}));}
-  await workers(actors,async actor=>{manifests.push(await readBattleJson('/api/motion?'+new URLSearchParams(actor),{signal}));report('キャラ素材',++completed,actors.length);});
+  await workers(actors,async actor=>{manifests.push(await readBattleJson('/api/motion?'+new URLSearchParams({...actor,files:0}),{signal}));report('キャラ素材',++completed,actors.length);});
   const paths=new Set(scene.textures.filter(Boolean));
   for(const manifest of manifests)for(const resource of [manifest.body,manifest.soul])if(resource?.image)paths.add(resource.image);
   const images=new Map();completed=0;
@@ -45,7 +45,8 @@ export function effectiveStageLimit(map,stage,crown){
 }
 export function deploymentReason(bits){return [[1,'レア度制限'],[2,'編成1ページ目のみ'],[4,'生産コスト制限'],[8,'キャラ指定制限'],[16,'レア度別の編成数制限']].filter(([mask])=>bits&mask).map(([,text])=>text).join('・');}
 export async function stageDeployment(database,map,stage,crown,document){
-  const limit=effectiveStageLimit(map,stage,crown),known=new Map(database.units.map(unit=>[unit.id,unit])),rules=new Map((map.rules||[]).map(rule=>[rule.id,rule.parameters]));
+  map??={limits:[],rules:[],series:''};
+  const limit=stage?effectiveStageLimit(map,stage,crown):{},known=new Map(database.units.map(unit=>[unit.id,unit])),rules=new Map((map.rules||[]).map(rule=>[rule.id,rule.parameters]));
   const costs=document.slots.map(member=>{
     if(!member)return {raw:0,reduction:0,chapter:1,multiplier:0,fixed:-1,rarity_rate:100};
     const unit=known.get(member.unitId),form=unit.forms.find(form=>form.index===member.form);

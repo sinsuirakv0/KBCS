@@ -18,3 +18,9 @@ export function moveTrayMember(slots,tray,index){
  if(target<0||!tray[index])return -1;
  slots[target]=tray[index];tray[index]=null;return target;
 }
+
+// ドロップ先の個別設定も一時枠へ戻し、どちらのキャラも失わない。
+export function swapTrayMember(slots,tray,index,target){
+ if(!Number.isInteger(target)||target<0||target>=slots.length||!tray[index])return false;
+ [slots[target],tray[index]]=[tray[index],slots[target]];return true;
+}

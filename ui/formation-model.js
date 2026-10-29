@@ -8,7 +8,8 @@ export function createFormationMember(unit){
 // 設定値と実際に使う値を分け、Lvを戻した際も第四形態・本能Lvを保持する。
 export function resolveFormationMember(unit,member){
   const advancedUnlocked=unit.rarity!==4||member.level>=60;
-  return {...member,orbs:member.orbs.slice(0,unit.orbSlots??0),form:!advancedUnlocked&&member.form===3?2:member.form,talents:Object.fromEntries(unit.talents.map(talent=>[talent.index,!advancedUnlocked&&talent.limit?0:member.talents[talent.index]??0]))};
+  const requested=!advancedUnlocked&&member.form===3?2:member.form,form=formationListForm(unit,requested).index;
+  return {...member,orbs:member.orbs.slice(0,unit.orbSlots??0),form,talents:Object.fromEntries(unit.talents.map(talent=>[talent.index,!advancedUnlocked&&talent.limit?0:member.talents[talent.index]??0]))};
 }
 
 export function formationDisplayName(document,index){
