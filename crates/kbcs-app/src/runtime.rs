@@ -1,6 +1,47 @@
 ﻿use serde_json::{Value, json};
 use std::time::Instant;
 
+pub fn system() -> Value {
+    let mut value = json!({"os":std::env::consts::OS,"architecture":std::env::consts::ARCH,"processId":std::process::id(),"logicalProcessors":std::thread::available_parallelism().map_or(1,usize::from),"cpu":std::env::var("PROCESSOR_IDENTIFIER").ok()});
+    #[cfg(windows)]
+    unsafe {
+        #[link(name = "ntdll")]
+        unsafe extern "system" {
+            fn RtlGetVersion(info: *mut u32) -> i32;
+        }
+        let mut info = [0u32; 69];
+        info[0] = std::mem::size_of_val(&info) as u32;
+        if RtlGetVersion(info.as_mut_ptr()) == 0 {
+            value["osVersion"] = json!(format!("{}.{}.{}", info[1], info[2], info[3]));
+        }
+    }
+    #[cfg(target_os = "macos")]
+    unsafe {
+        for (key, name) in [
+            ("osVersion", c"kern.osproductversion"),
+            ("model", c"hw.model"),
+            ("cpu", c"machdep.cpu.brand_string"),
+        ] {
+            let mut bytes = [0u8; 512];
+            let mut length = bytes.len();
+            if libc::sysctlbyname(
+                name.as_ptr(),
+                bytes.as_mut_ptr().cast(),
+                &mut length,
+                std::ptr::null_mut(),
+                0,
+            ) == 0
+            {
+                value[key] = json!(
+                    String::from_utf8_lossy(&bytes[..length.min(bytes.len())])
+                        .trim_end_matches('\0')
+                );
+            }
+        }
+    }
+    value
+}
+
 #[derive(Default)]
 pub struct Monitor {
     previous: Option<(Instant, u64, u64)>,

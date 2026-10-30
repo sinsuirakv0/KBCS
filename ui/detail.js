@@ -1,4 +1,5 @@
-﻿import {loadUnitDatabase} from './src/shared/game/units.js';
+﻿import {unitSheetHtml,unitInformationRow as information} from './src/features/units/sheet.js';
+import {loadUnitDatabase} from './src/shared/game/units.js';
 import {readUnitSettings,unitDetailUrl} from './src/shared/game/unit-stats.js';
 import {createNativeStatistics} from './native-calculation.js';
 import {createDamageCalculator} from './damage-calculator.js';
@@ -9,7 +10,7 @@ import {isStatCombo} from './src/features/units/combo-model.js';
 import {saveElementImage} from './src/shared/browser/capture.js';
 import {readGameSettings} from './src/shared/browser/game-settings.js';
 import {readPageParams,writePageParams,bindDetailNavigation} from './native-state.js';
-import {escapeHtml,formatNumber,formatTime,propertyIconHtml,imageHtml,rarityIconHtml,abilitiesHtml,handleUnitImages} from './src/features/units/view.js';
+import {escapeHtml,formatNumber,formatTime,propertyIconHtml,handleUnitImages} from './src/features/units/view.js';
 
 const element=id=>document.getElementById(id),params=readPageParams('unit-detail');
 const settings=readUnitSettings(params,readGameSettings());
@@ -21,8 +22,6 @@ let growthPanel,growthForm,comboBuilder;
 const restore=key=>{try{const value=JSON.parse(params.get(key)||'{}');return value&&typeof value==='object'?value:{};}catch{return {};}};
 const restored={...restore('calc'),...restore('display')};
 const displaySettings=()=>element('table-treasure').checked?settings:{...settings,healthTreasure:0,attackTreasure:0,healthTreasureBonus:0,attackTreasureBonus:0,fruitByTarget:{},researchTreasure:0,researchReductionOverride:(settings.researchLevel-1)*6};
-const cells=(label,value)=>'<th scope="row">'+label+'</th><td class="unit-value">'+escapeHtml(value)+'</td>';
-const information=(label,html,extra=false)=>'<tr'+(extra?' class="unit-extra"':'')+'><th scope="row">'+label+'</th><td colspan="5" class="unit-information">'+html+'</td></tr>';
 
 function progressionHtml(value){
   const lines=[],description=value.description.trim();
@@ -39,28 +38,13 @@ function progressionHtml(value){
 
 function sheet(form){
   const profile=calculateTalentStats(unit,form,database.growth[unit.growth],displaySettings(),{talents:element('detail-apply-talents').checked,talentLevels});
-  form=profile.form;
-  const stats=profile.stats,time=value=>formatTime(value,settings.seconds);
-  const traits=new Set(['omni','long-range','multi-hit']);
-  const abilities=abilitiesHtml(database,form.abilities.filter(ability=>!traits.has(ability.key)),settings.seconds);
   const evolution=unit.evolution.find(value=>value.form===form.index);
-  return '<table class="unit-sheet" id="unit-sheet-'+form.code+'"><colgroup><col><col><col><col><col><col></colgroup><tbody>'+
-    '<tr><th class="unit-id">'+String(unit.id).padStart(3,'0')+'-'+(form.index+1)+'</th><th colspan="3" class="unit-form-name"><h2>'+escapeHtml(form.name)+'</h2></th><td colspan="2">'+rarityIconHtml(database,unit)+(unit.isSpirit?'・精霊':'')+'</td></tr>'+
-    '<tr><td colspan="2" rowspan="3" class="unit-portrait">'+imageHtml(database,form,56,43)+'</td>'+cells('体力',formatNumber(stats.hp))+cells('KB',formatNumber(stats.knockbacks))+'</tr>'+
-    '<tr>'+cells('攻撃力',formatNumber(stats.attack))+cells('速度',formatNumber(stats.speed))+'</tr>'+
-    '<tr>'+cells('DPS',formatNumber(stats.dps))+cells('射程',formatNumber(stats.range))+'</tr>'+
-    '<tr>'+cells('コスト',formatNumber(stats.cost))+cells('攻撃頻度',time(stats.attackCycle))+cells('攻撃発生',time(stats.foreswing))+'</tr>'+
-    '<tr>'+cells('再生産',time(stats.respawn))+cells('待機時間',time(stats.attackCycle==null?null:stats.attackCycle-form.foreswings.at(-1)))+cells('攻撃後',time(stats.backswing))+'</tr>'+
-    (form.targets.length?information('対象',form.targets.map(key=>propertyIconHtml(database,key,database.targets.find(target=>target.key===key)?.label||key)).join(' ')):'')+
-    information('攻撃特性','<ul class="unit-abilities"><li>'+propertyIconHtml(database,form.attackType==='範囲'?'area':'single',form.attackType)+'</li>'+abilitiesHtml(database,form.abilities.filter(ability=>traits.has(ability.key)),settings.seconds)+(stats.attacks.length>1?'<li>連続攻撃 '+stats.attacks.length+'回</li>':'')+'</ul>')+
-    information('特性',abilities?'<ul class="unit-abilities">'+abilities+'</ul>':'なし')+
-    (form.ranges.length?information('攻撃範囲',escapeHtml(form.ranges.map(range=>range.join('〜')).join(' / '))):'')+
-    (stats.attacks.length>1?information('連続攻撃',stats.attacks.map((attack,index)=>escapeHtml(formatNumber(attack)+'（発生 '+time(form.foreswings[index])+'）')).join(' / ')):'')+
+  return unitSheetHtml(database,unit,profile,settings,
     information('説明','<span class="unit-description">'+escapeHtml(form.description)+'</span>',true)+
     (form.index===0?information('入手条件',progressionHtml(unit.acquisition),true):'')+
     (evolution?information('進化条件',progressionHtml(evolution),true):'')+
     information('表示','<a href="/pages/unit-motion/?id='+unit.id+'&form='+form.code+'">モーション</a> <button type="button" data-capture="unit-sheet-'+form.code+'">画像保存</button>')+
-    (form.index===unit.forms.at(-1).index&&unit.talents.length?information('本能','<div id="unit-talent-host"></div>'):'')+'</tbody></table>';
+    (form.index===unit.forms.at(-1).index&&unit.talents.length?information('本能','<div id="unit-talent-host"></div>'):'') );
 }
 
 function talentFields(){

@@ -1,4 +1,5 @@
-﻿import {createSessionId} from './src/shared/browser/session-id.js';
+﻿import {readBattleKeys,battleKeyAction,createBattleKeyQueue,editableKeyTarget} from './keyboard.js';
+import {createSessionId} from './src/shared/browser/session-id.js';
 import {battleAspects,battleViewportWidth,battlePlaybackRate} from './battle-view.js';
 import {audioBlobUrl} from './src/shared/browser/audio-preview.js';
 import {createBattleResults} from './battle-results.js';
@@ -10,14 +11,14 @@ import {createBattleMonitor} from './battle-monitor.js';
 import {createBattleFrameClient} from './battle-frame.js';
 import {initializeSceneGestures} from './src/features/stages/scene-controls.js';
 
-function configuration(database,snapshot){
+export function battleScreenConfiguration(database,snapshot){
  const {formation,map,items,deployment}=snapshot,profile=formation.profile;
  const facility=id=>{const v=profile.facilities[id];return v.level+v.plus-1;};
  const treasure=type=>catalog.treasures.filter(v=>v.effectType===type&&!v.effectFlag).reduce((sum,v)=>sum+Math.trunc(v.maximumEffect*profile.treasures[v.id]/100),0);
  const team=new Map(formation.slots.slice(0,5).filter(Boolean).map(v=>[v.unitId,v.form]));
  const combo=type=>database.combos.filter(v=>v.type===type&&v.members.every(m=>team.has(m.id)&&team.get(m.id)>=m.form)).reduce((sum,v)=>sum+database.comboEffects[type].values[v.grade],0);
  const rule=(map.rules||[]).find(v=>v.id===0),mask=battleItems.reduce((bits,v,index)=>bits|(items[v.key]?1<<index:0),0);
- return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:3,fixed_money:rule?rule.parameters[0]*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?rule.parameters[0]*100:combo(5)*100};
+ return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:snapshot.speed===3?3:2,fixed_money:rule?rule.parameters[0]*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?rule.parameters[0]*100:combo(5)*100};
 }
 export async function prepareBattleScreen(database,snapshot,assets,signal,report){
  const [atlas,options]=await Promise.all([readBattleJson('/images/native-battle/manifest.json',{signal}),readBattleJson('/api/battle-options',{signal})]);
@@ -32,7 +33,7 @@ export async function prepareBattleScreen(database,snapshot,assets,signal,report
  let count=0;
  const images=new Map();
  for(const path of paths){signal.throwIfAborted();const image=assets.images.get(path)||new Image();if(!image.src)image.src=atlasUrls.get(path)||'/api/asset/'+path;try{await image.decode();}catch{throw Error('戦闘UI画像を読み込めません：'+path);}signal.throwIfAborted();images.set(path,image);report('戦闘UI',++count,paths.length);}
- const values=configuration(database,snapshot);values.config.description_lines=forms.map(form=>Math.min(3,Array.isArray(form?.description)?form.description.filter(Boolean).length:form?.description?String(form.description).split('\n').filter(Boolean).length:0));
+ const values=battleScreenConfiguration(database,snapshot);values.config.description_lines=forms.map(form=>Math.min(3,Array.isArray(form?.description)?form.description.filter(Boolean).length:form?.description?String(form.description).split('\n').filter(Boolean).length:0));
  const audioUrls=new Map(),audioErrors=new Map(),audioController=new AbortController();
  const dispose=()=>{audioController.abort();for(const url of audioUrls.values())URL.revokeObjectURL(url);audioUrls.clear();};
  signal.addEventListener('abort',dispose,{once:true});
@@ -65,6 +66,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  const messageHome=message.parentElement;controls.querySelector('.battle-status-line').prepend(message);
  message.textContent='';
  const labels=resources.forms.map(v=>v?.name||'空き枠');
+ const keyBindings=readBattleKeys(),keyQueue=createBattleKeyQueue(keyBindings);
  let state={frame:0,intro:12,rows:2,page:0,page_frame:0,page_direction:1,paused:0,money:resources.money,worker:resources.worker,cannon:0,holding:-1,hold_frames:0,pointer_down:0,pointer_x:0,pointer_y:0,guard:0,pending_control:-1,items_on:resources.config.items,request_slot:-1,request_cannon:0,ui_frame:0,speed_mode:(resources.config.items&1)?(snapshot.speed===3?2:1):0,wallet_flash:0,description_item:-1,description_wait:0,start_x:0,start_y:0,gesture:0,page_step:1,request_action:0,bgm_level:3,se_level:3,vibration_on:0,info_mode:0,info_slot:0,saved_rows:2,hud_frame:0};
  let runtime={wait:Array(10).fill(0),maximum:Array(10).fill(0)},sessionCreated=false;
  Object.assign(state,{rows:resources.options.rows,saved_rows:resources.options.rows,bgm_level:resources.options.bgmLevel,se_level:resources.options.seLevel});
@@ -108,14 +110,18 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(version===cameraVersion)camera=next.layout;
  }
  async function update(ticks,stepping=false){
-  const input=stepping?{ticks,phase:0,x:0,y:0,control:10}:{ticks,...pointer,control};if(ticks||playbackPaused&&(cheats&4))pointer.phase=0;control=0;
+  const immediate=playbackPaused&&!state.paused&&!!(cheats&4);
+  const action=!stepping&&!control&&!pointer.phase&&!state.pointer_down?keyQueue.take(state,ticks,immediate):null;
+  const input=stepping?{ticks,phase:0,x:0,y:0,control:10}:action?{ticks,phase:0,x:0,y:0,control:action.control??1000+action.target}:{ticks,...pointer,control};
+  if(ticks||immediate)pointer.phase=0;control=0;
   const version=cameraVersion,sentSettings=settingsVersion;
   const sceneInput=stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session});
   const {value:next,timing:measured}=await frames.load({session,input,cheats,scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
   Object.assign(timing,measured);timing.coreMs=next.coreMs;
   if(stopped)return;appliedSettings=sentSettings;state=next.state;view=next.layout;runtime=next.runtime;
   persistOptions();
-  results.update(runtime);
+  if(runtime.result.mode)keyQueue.clear();
+  results.update(runtime,screenWidth,resources.atlas);
   sounds.update(runtime.sounds||[],state.se_level,state.speed_mode+1,playbackPaused&&!stepping,!!runtime.result.mode);
   actorsInfo.textContent='味方 '+runtime.units+' / 敵 '+runtime.enemies+'　城 '+runtime.castleHp.map(value=>value.toLocaleString()).join(' / ');
   const result=runtime.result,rules=runtime.rules,finished=!!result.mode;
@@ -226,7 +232,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   const button=event.target.closest('[data-debug],[data-battle-control]');if(!button)return;
   const action=button.dataset.debug;
   if(action==='cheats'){cheatPanel.hidden=!cheatPanel.hidden;button.setAttribute('aria-expanded',String(!cheatPanel.hidden));}
-  else if(action==='toggle'){playbackPaused=!(playbackPaused||state.paused);accumulator=0;lastTime=0;if(playbackPaused&&!state.paused){state.pointer_down=0;state.holding=-1;state.hold_frames=0;pointer.phase=0;}if(state.paused&&!playbackPaused)control=1;button.textContent=playbackPaused?'再開':'一時停止';sounds.update([],state.se_level,1,playbackPaused,!!runtime.result.mode);if(audio){if(playbackPaused)audio.pause();else if(audioStarted&&!audio.ended&&!runtime.result.mode)audio.play().catch(()=>{});}}
+  else if(action==='toggle'){keyQueue.clear();playbackPaused=!(playbackPaused||state.paused);accumulator=0;lastTime=0;if(playbackPaused&&!state.paused){state.pointer_down=0;state.holding=-1;state.hold_frames=0;pointer.phase=0;}if(state.paused&&!playbackPaused)control=1;button.textContent=playbackPaused?'再開':'一時停止';sounds.update([],state.se_level,1,playbackPaused,!!runtime.result.mode);if(audio){if(playbackPaused)audio.pause();else if(audioStarted&&!audio.ended&&!runtime.result.mode)audio.play().catch(()=>{});}}
   else if(action==='step'||action==='ten'){playbackPaused=true;stepQueue+=action==='step'?1:10;accumulator=0;if(state.paused)control=1;}
   else if(action==='menu')control=2;
   else if(action==='rows')control=3;
@@ -238,9 +244,18 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  }
  controls.addEventListener('click',command);
  root.addEventListener('click',command);
- function key(event){if(event.key==='Escape'){event.preventDefault();control=state.paused?1:2;}}
+ function key(event){
+  if(event.isComposing||event.ctrlKey||event.altKey||event.metaKey||editableKeyTarget(event.target))return;
+  // 2段で切替操作が無効でも、Spaceでフォーカス中の段数ボタンを押さない。
+  if(event.code===keyBindings.page)event.preventDefault();
+  if(event.repeat||state.intro<24||runtime.result?.mode)return;
+  if(state.paused&&event.code!==keyBindings.options)return;
+  const action=battleKeyAction(event.code,keyBindings,state);if(!action)return;
+  if(playbackPaused&&!state.paused&&action.target!==100&&(!(cheats&4)||!Number.isInteger(action.target)||action.target>=10))return;
+  event.preventDefault();if(playbackPaused&&action.target===100){keyQueue.clear();control=2;return;}if(!keyQueue.push(event.code))message.textContent='キー入力待ちが多すぎます';
+ }
  window.addEventListener('keydown',key);
- function visibility(){if(document.hidden)control=2;}
+ function visibility(){if(document.hidden){keyQueue.clear();control=2;}}
  document.addEventListener('visibilitychange',visibility);
  async function animate(now){
   if(stopped)return;
@@ -248,7 +263,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    const elapsed=now-lastTime;if(!playbackPaused&&!state.paused&&state.intro>=24)activeMs+=elapsed;
    if(!playbackPaused||state.paused)accumulator+=elapsed*30/1000*(state.intro>=24&&!state.paused&&!state.battle_mode?battlePlaybackRate(Number(speed.value),state.speed_mode):1);
   }lastTime=now;
-  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion||playbackPaused&&(cheats&4)&&pointer.phase===2)){
+  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||playbackPaused&&!state.paused&&(cheats&4)&&keyQueue.pending&&!state.page_frame&&!state.pointer_down&&!pointer.phase||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion||playbackPaused&&(cheats&4)&&pointer.phase===2)){
    busy=true;const stepping=!control&&stepQueue>0,ticks=control?0:stepping?Math.min(30,stepQueue):Math.min(playbackPaused?1:30,Math.floor(accumulator));if(stepping)stepQueue-=ticks;else accumulator-=ticks;
    try{await update(ticks,stepping);paint();}catch(e){if(!stopped){error=true;failure={frame:state.frame,message:e.message};message.textContent='戦闘停止: '+e.message;message.title=message.textContent;message.setAttribute('role','alert');if(audio)audio.pause();for(const button of controls.querySelectorAll('button'))button.disabled=!['report','return'].includes(button.dataset.debug);}}finally{busy=false;}
   }

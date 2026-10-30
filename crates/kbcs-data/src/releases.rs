@@ -528,6 +528,21 @@ pub fn install_data(
     root: &Path,
     progress: &(impl Fn(String) + Sync),
 ) -> Result<PathBuf> {
+    install_data_mode(data, root, progress, false)
+}
+pub fn repair_data(
+    data: &DataRelease,
+    root: &Path,
+    progress: &(impl Fn(String) + Sync),
+) -> Result<PathBuf> {
+    install_data_mode(data, root, progress, true)
+}
+fn install_data_mode(
+    data: &DataRelease,
+    root: &Path,
+    progress: &(impl Fn(String) + Sync),
+    force: bool,
+) -> Result<PathBuf> {
     validate_manifest(
         &data.manifest,
         &data.release,
@@ -542,8 +557,37 @@ pub fn install_data(
             installed.release.manifest.revision == data.manifest.revision,
             "同じ版の原本が変更されています"
         );
-        return Ok(destination);
+        let complete = !force
+            && installed
+                .files
+                .iter()
+                .all(|(name, descriptor)| source_path_is_complete(&destination, name, descriptor));
+        if complete {
+            return Ok(destination);
+        }
+        progress("不足・破損した原本を再取得します".into());
     }
+    let unpacked = data
+        .manifest
+        .archives
+        .values()
+        .map(|v| v.uncompressed_size)
+        .try_fold(0u64, |total, size| {
+            total.checked_add(size).context("展開容量の上限超過")
+        })?;
+    let archive = data
+        .manifest
+        .archives
+        .values()
+        .map(|v| v.size)
+        .max()
+        .unwrap_or(0);
+    crate::storage::require(
+        root,
+        unpacked
+            .saturating_add(archive)
+            .saturating_add(512 * 1024 * 1024),
+    )?;
     let pending = directory.join(format!(".pending-{}", data.release.tag_name));
     // この処理だけが所有する中間フォルダ。公開済みデータは失敗時も維持する。
     if pending.exists() {
@@ -592,7 +636,33 @@ pub fn install_data(
         file.write_all(&bytes)?;
         file.sync_all()?;
         drop(file);
-        fs::rename(&pending, &destination)?;
+        let backup = directory.join(format!(
+            ".replaced-{}-{}",
+            data.release.tag_name,
+            std::process::id()
+        ));
+        ensure!(
+            directory.canonicalize()?.starts_with(root.canonicalize()?),
+            "原本保存先が管理フォルダ外です"
+        );
+        if destination.exists() {
+            fs::rename(&destination, &backup)?;
+        }
+        if let Err(error) = fs::rename(&pending, &destination) {
+            if backup.exists() {
+                let _ = fs::rename(&backup, &destination);
+            }
+            return Err(error.into());
+        }
+        if backup.exists() {
+            ensure!(
+                backup
+                    .canonicalize()?
+                    .starts_with(directory.canonicalize()?),
+                "削除先が原本保存先の外部です"
+            );
+            fs::remove_dir_all(&backup)?;
+        }
         Ok(())
     })();
     if result.is_err() {
@@ -600,6 +670,15 @@ pub fn install_data(
     }
     result?;
     Ok(destination)
+}
+
+fn source_path_is_complete(root: &Path, name: &str, descriptor: &Descriptor) -> bool {
+    if crate::source::safe_path(name).is_err() {
+        return false;
+    }
+    root.join(name)
+        .metadata()
+        .is_ok_and(|value| value.is_file() && value.len() == descriptor.size)
 }
 
 pub fn installed(directory: &Path) -> Result<Installed> {

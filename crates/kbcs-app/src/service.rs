@@ -68,12 +68,14 @@ impl Reply {
 
 #[derive(Default)]
 struct Progress {
+    verification: Option<Value>,
     message: String,
     error: Option<String>,
 }
 
 #[derive(Clone)]
 pub struct Service {
+    started: std::time::Instant,
     pub root: PathBuf,
     pub region: String,
     source: String,
@@ -145,6 +147,7 @@ pub fn dispatch(service: &Service, path: &str, job: impl FnOnce(Service, bool) +
 impl Service {
     pub fn new(root: PathBuf, region: String, source: String) -> Self {
         Self {
+            started: std::time::Instant::now(),
             updates: Arc::new(crate::updates::Manager::new(root.clone(), region.clone())),
             desktop: false,
             root,
@@ -213,6 +216,87 @@ impl Service {
     fn route(&self, method: &str, path: &str, body: &[u8]) -> Result<Reply> {
         let url = url::Url::parse(&format!("http://kbcs.localhost{path}"))?;
         let path = url.path();
+        if path == "/api/storage" {
+            let query = url.query_pairs().collect::<BTreeMap<_, _>>();
+            let relative = query.get("path").map_or("", |v| v.as_ref());
+            if method == "DELETE" {
+                ensure!(
+                    !self.busy.load(Ordering::SeqCst) && !self.updates.busy.load(Ordering::SeqCst),
+                    "更新・検査中です"
+                );
+                ensure!(
+                    self.battles.lock().unwrap().is_empty(),
+                    "戦闘を終了してから削除してください"
+                );
+                let _update = kbcs_data::releases::lock(&self.root.join("update.lock"))?;
+                let _download = kbcs_data::releases::lock(&self.root.join("download.lock"))?;
+                kbcs_data::maintenance::delete(&self.root, relative)?;
+                self.catalog.lock().unwrap().clear();
+                self.scenes.lock().unwrap().clear();
+                self.poses.lock().unwrap().clear();
+                return Ok(Reply::json(json!({"deleted":true})));
+            }
+            ensure!(method == "GET", "GETが必要です");
+            return Ok(Reply::json(
+                if query.get("inspect").is_some_and(|v| v == "1") {
+                    kbcs_data::maintenance::inspect(&self.root, relative)?
+                } else {
+                    kbcs_data::maintenance::browse(&self.root, relative)?
+                },
+            ));
+        }
+        if path == "/api/data/summary" {
+            ensure!(method == "GET", "GETが必要です");
+            return Ok(Reply::json(kbcs_data::maintenance::summary(
+                &self.root,
+                &self.region,
+            )?));
+        }
+        if path == "/api/data/verify" {
+            ensure!(
+                method == "POST" && !self.updates.busy.load(Ordering::SeqCst),
+                "更新中は検査できません"
+            );
+            ensure!(
+                self.busy
+                    .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+                    .is_ok(),
+                "処理中です"
+            );
+            *self.progress.lock().unwrap() = Progress {
+                message: "整合性を検査しています".into(),
+                ..Default::default()
+            };
+            let service = self.clone();
+            std::thread::spawn(move || {
+                let result =
+                    kbcs_data::maintenance::verify(&service.root, &service.region, |message| {
+                        service.progress.lock().unwrap().message = message;
+                    });
+                let mut progress = service.progress.lock().unwrap();
+                match result {
+                    Ok(value) => {
+                        progress.message = if value["ok"] == true {
+                            "検査が完了しました"
+                        } else {
+                            "不足・破損を検出しました。データ取得・更新を実行してください"
+                        }
+                        .into();
+                        progress.verification = Some(value);
+                    }
+                    Err(error) => progress.error = Some(format!("{error:#}")),
+                };
+                service.busy.store(false, Ordering::SeqCst);
+            });
+            return Ok(Reply::json(json!({"accepted":true})));
+        }
+        if path == "/api/system" {
+            ensure!(method == "GET", "GETが必要です");
+            let runtime = self.route("GET", "/api/runtime", &[])?;
+            return Ok(Reply::json(
+                json!({"version":env!("CARGO_PKG_VERSION"),"abi":kbcs_bridge::abi_version(),"ruleset":kbcs_bridge::ruleset_version(),"platform":crate::runtime::system(),"uptimeSeconds":self.started.elapsed().as_secs(),"desktop":self.desktop,"region":self.region,"data":kbcs_data::maintenance::summary(&self.root,&self.region)?,"runtime":serde_json::from_slice::<Value>(&runtime.bytes)?,"activeBattles":self.battles.lock().unwrap().len(),"updates":self.updates.status(self.desktop)}),
+            ));
+        }
         if path == "/api/updates" {
             ensure!(method == "GET", "GETが必要です");
             return Ok(Reply::json(self.updates.status(self.desktop)));
@@ -282,7 +366,7 @@ impl Service {
                 "通知配置の入力が不正です"
             );
             let inputs: Vec<kbcs_bridge::battle::PopupInput> = serde_json::from_slice(body)?;
-            ensure!(inputs.len() <= 5, "通知配置が多すぎます");
+            ensure!(inputs.len() <= 64, "通知配置が多すぎます");
             let values = inputs
                 .iter()
                 .map(|input| {
@@ -721,7 +805,9 @@ impl Service {
             let hashes = paths
                 .into_iter()
                 .map(|path| {
-                    let hash: String = statement.query_row([&path], |row| row.get(0))?;
+                    let hash: String = statement
+                        .query_row([&path], |row| row.get(0))
+                        .with_context(|| format!("原本照合の索引がありません: {path}"))?;
                     Ok((path, hash))
                 })
                 .collect::<Result<BTreeMap<_, _>>>()?;
@@ -759,16 +845,23 @@ impl Service {
                 .progress
                 .lock()
                 .map_err(|_| anyhow::anyhow!("進捗ロック失敗"))? = Progress {
+                verification: None,
                 message: "取り込み中".into(),
                 error: None,
             };
+            let rebuild = value["rebuild"] == true;
             let service = self.clone();
             std::thread::spawn(move || {
-                let result = import::import(&location, &service.root, &service.region, |message| {
+                let progress = |message| {
                     if let Ok(mut progress) = service.progress.lock() {
                         progress.message = message;
                     }
-                });
+                };
+                let result = if rebuild {
+                    import::rebuild(&location, &service.root, &service.region, progress)
+                } else {
+                    import::import(&location, &service.root, &service.region, progress)
+                };
                 if let Ok(mut progress) = service.progress.lock() {
                     match result {
                         Ok(report) => {
@@ -833,7 +926,7 @@ impl Service {
                 .lock()
                 .map_err(|_| anyhow::anyhow!("進捗ロック失敗"))?;
             return Ok(Reply::json(
-                json!({"busy":self.busy.load(Ordering::SeqCst),"message":progress.message,"error":progress.error,"metadata":metadata,"source":self.source,"updateSource":kbcs_data::DEFAULT_SOURCE,"dataDir":self.root,"assetDir":self.root.join("assets")}),
+                json!({"verification":progress.verification,"busy":self.busy.load(Ordering::SeqCst),"message":progress.message,"error":progress.error,"metadata":metadata,"source":self.source,"updateSource":kbcs_data::DEFAULT_SOURCE,"dataDir":self.root,"assetDir":self.root.join("assets")}),
             ));
         }
         if let Some(id) = path.strip_prefix("/api/stage-audio/") {
@@ -1032,7 +1125,18 @@ impl Service {
             return Ok(Reply {
                 status: 200,
                 mime,
-                bytes: file.contents().to_vec(),
+                bytes: if mime.starts_with("text/html") {
+                    // blocking scriptを本文より先に読み、moduleの依存取得中もホームを隠す。
+                    String::from_utf8_lossy(file.contents())
+                        .replacen(
+                            "<head>",
+                            "<head><script src=\"/startup-boot.js\"></script>",
+                            1,
+                        )
+                        .into_bytes()
+                } else {
+                    file.contents().to_vec()
+                },
             });
         }
         Ok(Reply{status:404,mime:"text/html; charset=utf-8",bytes:"<!doctype html><meta charset=utf-8><link rel=stylesheet href=/src/shared/ui/site.css><main class=page-main><h1>未実装</h1><a href=/>ホームへ</a></main>".as_bytes().to_vec()})
@@ -1144,6 +1248,39 @@ fn native_calculation_service_contract() {
     std::fs::remove_dir(options_root.join("user")).unwrap();
     std::fs::remove_dir(options_root).unwrap();
     let service = Service::new(PathBuf::new(), "jp".into(), String::new());
+    let home = service.handle("GET", "/", b"");
+    let html = String::from_utf8(home.bytes).unwrap();
+    assert!(html.find("/startup-boot.js").unwrap() < html.find("type=\"module\"").unwrap());
+    assert!(html.find("/startup-boot.js").unwrap() < html.find("<body").unwrap());
+    let popup: Vec<Value> = (0..5).map(|frame| json!({"viewport":1422,"count":1,"widths":[200,0,0,0,0,0,0,0],"scaleFrame":frame,"cut":[0,0,100,100],"padding":[6,6]})).collect();
+    let single = service.handle(
+        "POST",
+        "/api/battle-popup",
+        &serde_json::to_vec(&popup).unwrap(),
+    );
+    assert_eq!(single.status, 200);
+    let expected: Value = serde_json::from_slice(&single.bytes).unwrap();
+    let batch = service.handle(
+        "POST",
+        "/api/battle-popup",
+        &serde_json::to_vec(&(0..50).map(|i| popup[i % 5].clone()).collect::<Vec<_>>()).unwrap(),
+    );
+    assert_eq!(batch.status, 200);
+    let layouts: Vec<Value> = serde_json::from_slice(&batch.bytes).unwrap();
+    assert_eq!(layouts.len(), 50);
+    for group in layouts.chunks(5) {
+        assert_eq!(group, expected.as_array().unwrap());
+    }
+    assert_eq!(
+        service
+            .handle(
+                "POST",
+                "/api/battle-popup",
+                &serde_json::to_vec(&vec![popup[0].clone(); 65]).unwrap()
+            )
+            .status,
+        400
+    );
     for (key, fixture) in [
         (
             "enemyStats",

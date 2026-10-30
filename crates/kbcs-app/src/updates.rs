@@ -106,20 +106,21 @@ impl Manager {
             let local_version = metadata.as_ref().and_then(|m| m.get("version_code")).and_then(|v| v.parse::<u64>().ok());
             let local_tag = metadata.as_ref().and_then(|m| m.get("release_tag"));
             let local_published = metadata.as_ref().and_then(|m| m.get("release_published"));
+            let rebuild = metadata.as_ref().and_then(|m|m.get("importer_version")).is_some_and(|v|v!=kbcs_data::IMPORTER_VERSION);
             let available = local_version.is_none_or(|v| v <= data.manifest.header.version_code)
-                && (missing || (local_tag.is_none_or(|tag| tag != &data.manifest.tag)
+                && (missing || rebuild || (local_tag.is_none_or(|tag| tag != &data.manifest.tag)
                 && local_published.is_none_or(|published| published < &data.release.published_at)));
             json!({"version":data.manifest.header.version_name,"tag":data.release.tag_name,
-                "available":available,"missing":missing,
+                "available":available,"missing":missing,"rebuildRequired":rebuild,
                 "size":data.manifest.archives.values().map(|a|a.size).sum::<u64>(),
-                "localVersion":metadata.as_ref().and_then(|m|m.get("version")),"url":data.release.html_url})
+                "localTag":local_tag,"localVersion":metadata.as_ref().and_then(|m|m.get("version")),"url":data.release.html_url})
         });
         let app = state.app.as_ref().map(|release| json!({
             "version":releases::app_version(&release.tag_name).map(|v|v.to_string()),
             "available":releases::app_version(&release.tag_name).is_some_and(|v| v > semver_current()),
-            "url":release.html_url,"ready":state.app_directory.is_some(),
+            "url":release.html_url,"ready":state.app_directory.as_ref().is_some_and(|path|path.is_dir()),
         }));
-        json!({"checking":state.checking,"checked":state.checked,"busy":self.busy.load(Ordering::SeqCst),
+        json!({"localDataPresent":!missing,"checking":state.checking,"checked":state.checked,"busy":self.busy.load(Ordering::SeqCst),
             "startupPending":!self.startup_claimed.load(Ordering::SeqCst),
             "data":data,"app":app,"currentVersion":env!("CARGO_PKG_VERSION"),"desktop":desktop,
             "dataError":state.data_error,"appError":state.app_error,
@@ -131,7 +132,10 @@ impl Manager {
     }
 
     pub fn start(self: &Arc<Self>, kind: &str) -> Result<()> {
-        ensure!(matches!(kind, "data" | "app"), "更新対象が不正です");
+        ensure!(
+            matches!(kind, "data" | "repair" | "app"),
+            "更新対象が不正です"
+        );
         ensure!(
             self.busy
                 .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
@@ -162,19 +166,23 @@ impl Manager {
         let progress = |message| {
             self.state.lock().unwrap().message = message;
         };
-        if kind == "data" {
+        if kind == "data" || kind == "repair" {
             let cached = self.state.lock().unwrap().data.clone();
             let data = match cached {
                 Some(data) => data,
                 None => releases::latest_data(&self.region)?,
             };
-            let directory = releases::install_data(&data, &self.root, &progress)?;
-            let report = import::import(
-                directory.to_str().context("保存先の文字コード不正")?,
-                &self.root,
-                &self.region,
-                progress,
-            )?;
+            let directory = if kind == "repair" {
+                releases::repair_data(&data, &self.root, &progress)?
+            } else {
+                releases::install_data(&data, &self.root, &progress)?
+            };
+            let location = directory.to_str().context("保存先の文字コード不正")?;
+            let report = if kind == "repair" {
+                import::rebuild(location, &self.root, &self.region, progress)
+            } else {
+                import::import(location, &self.root, &self.region, progress)
+            }?;
             let mut state = self.state.lock().unwrap();
             state.data = Some(data);
             state.message = format!(

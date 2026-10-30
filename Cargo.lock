@@ -1206,6 +1206,7 @@ dependencies = [
  "anyhow",
  "csv",
  "flate2",
+ "libc",
  "rusqlite",
  "semver",
  "serde",

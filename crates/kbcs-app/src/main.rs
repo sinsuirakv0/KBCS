@@ -159,6 +159,24 @@ fn main() -> Result<()> {
             }
             println!("{}", serde_json::to_string(&results)?);
         }
+        Some("data-check") => println!(
+            "{}",
+            serde_json::to_string_pretty(&kbcs_data::maintenance::verify(
+                &root,
+                &region,
+                |message| eprintln!("{message}")
+            )?)?
+        ),
+        Some("system-info") => {
+            let service = service::Service::new(root, region, source);
+            let reply = service.handle("GET", "/api/system", &[]);
+            anyhow::ensure!(
+                reply.status == 200,
+                "{}",
+                String::from_utf8_lossy(&reply.bytes)
+            );
+            println!("{}", String::from_utf8(reply.bytes)?);
+        }
         Some("verify") => {
             let database = Database::open(&root, &region)?;
             kbcs_data::store::validate(&database.connection)?;
@@ -166,7 +184,7 @@ fn main() -> Result<()> {
             println!("C++ ABI: {}", kbcs_bridge::abi_version());
         }
         Some("--help") | Some("help") => println!(
-            "kbcs [import|list|show|verify|catalog|motion|scene|preview|battle-replay] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
+            "kbcs [import|list|show|verify|data-check|system-info|catalog|motion|scene|preview|battle-replay] [--assets PATH_OR_GITHUB_URL] [--data-dir PATH] [--region jp] [--query TEXT] [--id N] [--form 0..3]\nコマンド省略でGUIを起動します。"
         ),
         Some("preview") => service::serve(
             root,

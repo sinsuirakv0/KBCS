@@ -8,5 +8,7 @@ initializeSiteSettings();
 import {initializeWorkspace} from "/workspace.js";
 initializeWorkspace();
 
-import {initializeUpdates} from '/updates.js';
+import {initializeUpdates,observeUpdates} from '/updates.js';
+import {initializeStartup} from '/startup.js';
+initializeStartup(observeUpdates);
 initializeUpdates();

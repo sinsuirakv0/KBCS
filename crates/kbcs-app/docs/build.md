@@ -57,3 +57,5 @@ WKWebViewの初期化スクリプトのdynamic importはdocumentのURLを明示�
 実WebViewの検査はpackage.pyでDLL/Info.plist/署名を揃えた後の配布物に対して実行する。ビルドツリーの実行ファイルや、開発用PATH内のWebView2Loaderを前提にしない。検査成功後にZIPを作る。
 
 GitHubのdraftはreleases/tags/TAGで404になる。公開前のSHA検証ではgh release view --json apiUrlから解決したrelease IDのAPIを使う。0.1.36は三環境のタグビルドが成功した同一成果物を維持し、この取得経路だけを修正して公開処理へ引き継ぐ。タグは書き換えない。
+
+2026-10-30: 提供された正方形画像をアプリアイコンへ採用。build.rsはWindowsのllvm-rcでassets/app.icoをexeへ埋め、taoは同じ図柄のRGBAを使う。Macはpackage.pyがapp.icnsをResourcesへ置き、CFBundleIconFileを設定してから署名する。原画とサイズ変換はscripts/prepare-brand.ps1、UIのロゴ遷移はui/docs/settings.md。

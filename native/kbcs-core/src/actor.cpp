@@ -672,6 +672,13 @@ extern "C" uint32_t kbcs_core_actor_health(KbcsActor actors[2][51],int32_t side,
  }catch(...){actorAt(actors,side,slot)=backup;*seed=previous_seed;return 3;}
 }
 
+extern "C" uint32_t kbcs_core_actor_protection_clock(KbcsActor *actor,int32_t barrier_frames,int32_t shield_frames){
+ if(!actor)return 1;auto &w=actor->words;
+ if(w[133]&&++w[134]>=barrier_frames)w[133]=0;
+ if(w[192]&&++w[193]>=shield_frames)w[192]=0;
+ return 0;
+}
+
 extern "C" uint32_t kbcs_core_actor_protect(KbcsActor actors[2][51],int32_t side,int32_t slot,KbcsActorProtection *out){
  if(!actors||!out||side<0||side>1||slot<0||slot>=actorEnd())return 1;
  const auto backup=actorAt(actors,side,slot);

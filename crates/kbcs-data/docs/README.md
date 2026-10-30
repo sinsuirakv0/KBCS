@@ -83,3 +83,13 @@ combos::readのgroupは既存source_file/NyancomboData.csv列2から補う。tar
 `stage_media::battle_title`は009f560cの種別別ファイル名を解決し、Map/ImageのPNGとimgcutを返す。PNGはsource_fileのbytes保存対象でなくasset_referenceにだけ存在することがある。存在確認を両表へ広げ、共通asset取得の固定revision/SHA・AppDataキャッシュを使う。画像をDBへ再取込する必要はない。宇宙編のkind -7/-14/-15/-25はscを使う。画像はSessionの初期texturesへ登録し、暗転中の一括読込とbattle-replay --validate-assetsの対象になる。
 
 統合ZIPの配置・採用元・音源・更新排他は[releases.md](releases.md)を参照。
+
+## 2026-10-29: 背景の画像寸法と索引のみの原本
+
+Apple Silicon利用者から背景7/139/1057でQuery returned no rows、開始不可との報告。Windowsの現行15.7.4 DBでは3背景の描画要求は成功したため、Macでの直接再現・原因の同定までは行っていない。
+
+確認した不足はstage_media::image_sizeがsource_fileのBLOBだけをquery_rowしていた点。画像APIのsource::asset/Database::sourceには固定SHA・移設後の原本/キャッシュへの経路があるため、寸法取得も本文がDBにない場合はこの共通入口を使う。既存BLOBの24bytesだけを読む高速経路は保持する。scene_sourceの素材パス列挙もsource_fileとasset_referenceを結合する。Database::sourceと寸法/原本照合のエラーに論理パスを含め、汎用SQLメッセージだけにしない。存在しない画像を別の背景で補わない。DB schema/importerは変えず、再取り込みを強制しない。
+
+既存cache試験内で、移設済み原本と索引だけのPNG寸法、BLOB付きPNG寸法、欠損時のパス表示を検査する。Mac利用者の原本/キャッシュが完全に欠けている場合まで修復できたという意味ではない。
+
+2026-10-30: 変換器14の[欠損検査・再生成・持ち物画像・管理API](validation.md)。schema8を維持し、旧DBの再生成案内と検査/原本再取得を追加した。

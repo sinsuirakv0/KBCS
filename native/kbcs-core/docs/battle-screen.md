@@ -73,3 +73,9 @@ JP15.7.2 ARM64/SHA6122e248…の006ddfb8を追跡。`actor_top.inc`の`kbcs_core
 ## 2026-10-29: ホスト停止中のチート入力
 
 原本と区別した拡張として、advance_customのimmediateが有効かつ0tick/phase2のときだけ、既存hitで通常キャラ枠を判定してhook1へ渡す。intro完了/非終了/メニュー非表示/枠の存在と制限を検査する。時計は一切増やさず、所有Battle::deployが費用・個体上限・生成等を再検査する。通常入口はimmediate=0なので従来の原本分岐を維持。bridgeの既存screen witnessに、通常0tickでは要求なし、チート0tickでは枠0要求・各時計と資金は不変という回帰を追加した。
+
+## 2026-10-30: PC入力の残留状態
+
+control=1000+対象番号はPCの独立したタップであり、以前のpointer_down/gesture/holding/hold_framesを引き継がない。1段の切替後にgesture=1が残り、次のキーのreleaseまで通常スワイプとして拒否していた。既存Windows確認版のAPIでも、page1/gesture1へ1005を送るとrequest_slot=-1を確認した。キー用入口だけを初期化し、control0の本家pointer releaseではgestureによる拒否を維持する。Rustの同じテスト内で、キーはスロット6（index5）の要求を返す一方、スワイプreleaseは要求しないことを検査する。PC用拡張の条件であり、ARMのタップ経路へ新しい状態消去を追加したものではない。
+
+速度の通常/3倍対応はconfig.speed=2/3の既存分岐を共用する。準備側が選んだ上限を渡す。両方の切替列をbridgeで検査する。

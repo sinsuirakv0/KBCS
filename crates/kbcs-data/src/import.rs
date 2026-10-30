@@ -134,6 +134,24 @@ pub fn import(
     region: &str,
     progress: impl Fn(String) + Sync,
 ) -> Result<ImportReport> {
+    run_import(location, root, region, progress, false)
+}
+
+pub fn rebuild(
+    location: &str,
+    root: &Path,
+    region: &str,
+    progress: impl Fn(String) + Sync,
+) -> Result<ImportReport> {
+    run_import(location, root, region, progress, true)
+}
+fn run_import(
+    location: &str,
+    root: &Path,
+    region: &str,
+    progress: impl Fn(String) + Sync,
+    rebuild: bool,
+) -> Result<ImportReport> {
     fs::create_dir_all(root.join("official"))?;
     let lock_path = root.join("update.lock");
     let mut lock_file = crate::releases::lock(&lock_path)?;
@@ -158,7 +176,22 @@ pub fn import(
         )
         .as_bytes(),
     );
-    let filename = format!("{region}-{identity}.sqlite");
+    let prefix = format!("{region}-{identity}");
+    let filename = if rebuild {
+        format!(
+            "{prefix}-{}.sqlite",
+            SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos()
+        )
+    } else {
+        store::catalog(root)?
+            .regions
+            .get(region)
+            .filter(|v| {
+                v.starts_with(&prefix) && v.ends_with(".sqlite") && !v.contains(['/', '\\', ':'])
+            })
+            .cloned()
+            .unwrap_or_else(|| format!("{prefix}.sqlite"))
+    };
     let final_path = root.join("official").join(&filename);
     let unique = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();
     let temporary = root
@@ -180,6 +213,14 @@ pub fn import(
             if dataset.characters.is_empty() {
                 dataset.characters = source.integrated_characters(&dataset.files)?;
             }
+            let previous_size = store::current_path(root, region)
+                .ok()
+                .and_then(|path| path.metadata().ok())
+                .map_or(0, |value| value.len());
+            crate::storage::require(
+                root,
+                (512 * 1024 * 1024).max(previous_size.saturating_mul(2)),
+            )?;
             let mut connection = Connection::open(&temporary)?;
             connection.execute_batch(include_str!("schema.sql"))?;
             connection.execute_batch("PRAGMA cache_size=-32768")?;
@@ -224,7 +265,11 @@ pub fn import(
     if result.is_err() {
         let _ = fs::remove_file(&temporary);
     }
-    result
+    result.map_err(|error|{
+        if matches!(error.downcast_ref::<rusqlite::Error>(),Some(rusqlite::Error::SqliteFailure(info,_)) if info.code==rusqlite::ErrorCode::DiskFull) {
+            error.context(format!("DB生成中に空き容量が不足しました。保存先: {} / 空き: {} bytes",root.display(),crate::storage::space(root).and_then(|v|v["available"].as_u64()).unwrap_or(0)))
+        }else{error}
+    })
 }
 
 fn retain(

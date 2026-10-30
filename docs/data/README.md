@@ -34,7 +34,7 @@
 
 HP・速度・射程・コスト等はINTEGER、欠測可能な発生・モーション長はNULL。すべてをJSONで保存しない。`raw_cells` は列数・空欄を保持する可変拡張領域で、原本bytesも別に保持する。ゼロ、空欄、未収録列（配列の範囲外）を区別する。負値・無効値の意味を勝手に消さない。JSONのraw_cellsはコメントを除いた数値行、原本bytesにはコメント・改行・BOMも残る。
 
-`PRAGMA user_version=8` と `IMPORTER_VERSION=13` を別々に管理。公式DBは再生成方式で、未知スキーマは拒否して再取り込みを案内する。変換仕様を修正したらIMPORTER_VERSIONも上げる。同じsnapshotを黙って古い解釈で再利用しない。ユーザーDBは将来別のマイグレーション体系を設計する。現時点で自作DBの表や空実装は追加しない。
+`PRAGMA user_version=8` と `IMPORTER_VERSION=14` を別々に管理。公式DBは再生成方式で、未知スキーマは拒否して再取り込みを案内する。変換仕様を修正したらIMPORTER_VERSIONも上げる。同じsnapshotを黙って古い解釈で再利用しない。ユーザーDBは将来別のマイグレーション体系を設計する。現時点で自作DBの表や空実装は追加しない。
 
 ## フィールド対応（列番号は0始まり）
 
@@ -191,3 +191,5 @@ assetsはキャッシュであり、原本は引き続きsnapshotのsource_file�
 
 
 0.1.27のunit catalogはorbSlotsを追加する。公式schema8を変更せず、採用元SHA付きData/equipmentslot.csvの同版組込み定義からキャラ別最大枠を得る。生成はscripts/sync-equipment.py、消費はequipment::capacity→view::catalog / formations::Document::validate。同版以外を推測して適用しない。
+
+2026-10-30: [変換器14と欠損・再生成の契約](../../crates/kbcs-data/docs/validation.md)。

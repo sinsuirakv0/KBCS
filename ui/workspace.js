@@ -1,4 +1,5 @@
-﻿const element=id=>document.getElementById(id);
+﻿import {mountUnitSearchForm} from './src/features/units/search-controls.js';
+const element=id=>document.getElementById(id);
 const icons={left:'M3 3h18v18H3zM9 3v18',right:'M3 3h18v18H3zM15 3v18',bottom:'M3 3h18v18H3zM3 15h18',close:'m6 6 12 12M6 18 18 6'};
 const icon=name=>'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+icons[name]+'"/></svg>';
 const create=(tag,className,html='')=>{const node=document.createElement(tag);node.className=className;node.innerHTML=html;return node;};
@@ -12,13 +13,15 @@ export function initializeWorkspace(){
   const shell=document.querySelector('.site-shell'),main=element('main');
   if(!shell||!main)return;
   const header=shell.querySelector('.site-header');
+  header.querySelector('.theme-switcher')?.remove();
+  const favicon=document.querySelector('link[rel=icon]');if(favicon)favicon.href='/images/brand/app-icon.png';
   const navigation=header.querySelector('.site-nav');
   navigation.innerHTML='<a href="/">ホーム</a><button type="button" data-page-back aria-label="戻る" title="戻る">←</button><button type="button" data-page-forward aria-label="次へ" title="次へ">→</button><button type="button" data-page-reload aria-label="ページを再読み込み" title="ページを再読み込み">↻</button>';
   navigation.querySelector('[data-page-back]').addEventListener('click',()=>history.back());
   navigation.querySelector('[data-page-forward]').addEventListener('click',()=>history.forward());
   navigation.querySelector('[data-page-reload]').addEventListener('click',()=>location.reload());
   const page=location.pathname.split('/').filter(Boolean).at(-1)||'home';
-  const titles={'inventory':'持ち物','stage-sortie':'出撃準備','formation':'キャラクター編成','stage-play':'ステージ Play','unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
+  const titles={'settings':'設定','inventory':'持ち物','stage-sortie':'出撃準備','formation':'キャラクター編成','stage-play':'ステージ Play','unit-motion':'キャラモーション','enemy-motion':'敵モーション','effect-motion':'その他モーション','unit-search':'キャラ検索','unit-detail':'キャラ詳細','tunit-search':'敵検索','tunit-detail':'敵詳細','stage-search':'ステージ検索','stage-detail':'ステージ詳細',home:'ホーム'};
   const title=titles[page]||main.querySelector('h1')?.textContent||'KBCS';
   let saved={};
   try{saved=JSON.parse(localStorage.getItem('kbcs:workspace')||'{}')||{};}catch{}
@@ -41,6 +44,13 @@ export function initializeWorkspace(){
     return separator;
   });
   body.append(left.panel,separators[0],editor,separators[1],right.panel);shell.append(body);
+  const edges={};
+  for(const side of ['left','right']){
+    const button=create('button','workspace-edge workspace-edge-'+side,'<span>サイドバーを開く</span>');button.type='button';
+    button.setAttribute('aria-label',(side==='left'?'左':'右')+'サイドバーを開く');button.setAttribute('aria-controls','workspace-'+side);
+    button.addEventListener('click',()=>controls.querySelector('[data-workspace-toggle="'+side+'"]').click());
+    edges[side]=button;body.append(button);
+  }
   const bottom=create('details','workspace-bottom','<summary><span>情報</span><span id="workspace-status" role="status"></span><span id="workspace-version"></span></summary><div class="workspace-information"></div>');
   const information=bottom.querySelector('.workspace-information');editor.append(bottom);
   const controls=create('div','workspace-controls');
@@ -54,8 +64,12 @@ export function initializeWorkspace(){
   const settingsGroup=create('div','workspace-settings');right.content.append(settingsGroup);
 
   // 要素は複製せず移動し、元WebのIDと状態をそのまま利用する。
-  if(page==='unit-search'){
+  if(page==='settings'){
+    left.panel.querySelector('h2').textContent='設定';move('#settings-navigation',left.content);
+    right.panel.querySelector('h2').textContent='状態';move('#settings-context',right.content);
+  }else if(page==='unit-search'){
     main.classList.add('workspace-search');
+    mountUnitSearchForm();
     const form=move('#unit-search-form',left.content);
     // 形態・種類は検索側、Lv・時間・本能反映は計算側へ配置する。
     for(const id of ['unit-level','unit-time','unit-apply-talents'])moveLabel(id,settingsGroup);
@@ -79,7 +93,7 @@ export function initializeWorkspace(){
   }else if(page==='formation'){
     left.panel.querySelector('h2').textContent='絞り込み';
     right.panel.querySelector('h2').textContent='キャラ・城砲設定';
-    move('#formation-search',left.content);moveLabel('formation-display-form',left.content);
+    mountUnitSearchForm(left.content);
     move('#formation-member',right.content);move('#formation-profile',right.content);
     right.content.classList.add('formation-options');
   }else if(page==='stage-sortie'){
@@ -138,7 +152,7 @@ export function initializeWorkspace(){
     move('#enemy-capture-status',information);
   }
   for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
-  const profileEditor=page.endsWith('-motion')||['formation','stage-play','stage-sortie','inventory'].includes(page)?null:createSimulationSettings(right.content);
+  const profileEditor=page.endsWith('-motion')||['formation','stage-play','stage-sortie','inventory','settings'].includes(page)?null:createSimulationSettings(right.content);
   window.addEventListener('kbcs:open-simulation-settings',()=>{state.right=true;if(innerWidth<800)state.left=false;store();apply();profileEditor?.open();});
   if(!settingsGroup.childElementCount)settingsGroup.remove();
   if(!left.content.childElementCount){
@@ -154,7 +168,8 @@ export function initializeWorkspace(){
   function apply(){
     for(const [side,panel] of [['left',left.panel],['right',right.panel]]){
       const shown=available[side]&&state[side];panel.hidden=!shown;
-      shell.style.setProperty('--workspace-'+side,shown?state[side+'Width']+'px':'0px');
+      edges[side].hidden=shown||!available[side];
+      shell.style.setProperty('--workspace-'+side,shown?state[side+'Width']+'px':available[side]?'24px':'0px');
       shell.style.setProperty('--workspace-'+side+'-handle',shown?'5px':'0px');
       const separator=separators[side==='left'?0:1];separator.hidden=!shown;
       separator.setAttribute('aria-valuemin','200');separator.setAttribute('aria-valuemax','440');separator.setAttribute('aria-valuenow',String(state[side+'Width']));

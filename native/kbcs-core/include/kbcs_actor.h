@@ -82,6 +82,8 @@ typedef struct { int32_t encoded[4],plain[4],forms[2][51],kill_orb[51],kill_thre
 uint32_t kbcs_core_actor_walk(KbcsActor actors[2][51],const KbcsActorEnvironment*,int32_t side,int32_t slot,int32_t *handled);
 uint32_t kbcs_core_actor_begin(KbcsActor actors[2][51],const KbcsActorEnvironment*,int32_t side,int32_t slot);
 uint32_t kbcs_core_actor_clock(KbcsActor actors[2][51],const KbcsActorClock*);
+/* 006d951c..006d95dc。砲/二次攻撃の後、保護確定の前。長さは選択したencoded値。 */
+uint32_t kbcs_core_actor_protection_clock(KbcsActor*,int32_t barrier_frames,int32_t shield_frames);
 typedef struct { int32_t encoded[8],plain[8],soul_frames; } KbcsActorMotion;
 uint32_t kbcs_core_actor_motion(KbcsActor actors[2][51],int32_t side,int32_t slot,const KbcsActorMotion*);
 /* 006ecae4。境界は00a9490cのモデル/城を含む取得経路から解決する。 */

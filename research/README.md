@@ -141,3 +141,5 @@ python research/verify/stages.py --assets D:/KBC/KBC-rakv0-assets --python-libs 
 
 
 [JP15.7.2の音源経路](docs/audio-1572.md)はSound_setting、APK同梱音源、内部保存音源、追加ZIPのURL生成の静的追跡。KBCSのBGM補完と同版原本の採用を区別する。
+
+[戦闘エフェクト監査](../native/kbcs-core/docs/effects-audit-20261030.md)では`verify/battle_effect_state.py`が呪いの文字列構築、保護表示時計、固定/可変プールの寿命、死亡時烈波の描画要求を同版ARM64へ比較する。所有logicalへの接続と単体関数の比較範囲を区別し、解析専用DLLの作成手順・根拠・未検証条件も同文書へ記録した。

@@ -56,6 +56,7 @@ typedef struct {
  KbcsActor castle;KbcsCannonRules cannon;
  uint32_t seed;
 } KbcsBattleConfig;
+/* kind: 0..4=二次攻撃、5=砲、6=独立演出、7=状態、8=衝撃波、9=反射待ち、10=死亡時烈波の魂。 */
 typedef struct {int32_t kind,side,slot,phase,frame,x,y,layer,root[2];} KbcsBattleVisual;
 typedef struct { int32_t gauges[10][5],health[2][3];double anchors[2][2],scale;int32_t title[2],summons[10][5]; } KbcsBattleHud;
 typedef struct {int32_t frame,id;} KbcsBattleSound;

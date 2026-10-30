@@ -8,6 +8,26 @@ import sys
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'research/verify'))
 from stages import Assets,SHA
+
+def recent_inline_name(before,heap,declarations):
+    # local_f0の短い文字列が、直前のヒープ文字列を置き換える経路も読む。
+    tags=list(re.finditer(r'local_f0\._0_1_ = (0x[0-9a-f]+|\d+);',before))
+    if not tags or tags[-1].start()<max(heap,before.rfind('FUN_00469f7c(&local_f0,')) or int(tags[-1][1],0)&1:return None
+    data=bytearray(24);written=set()
+    for line in before[tags[-1].start():].splitlines():
+        field=re.search(r'local_f0\._(\d+)_(\d+)_ = (0x[0-9a-f]+|\d+);',line)
+        stack=re.search(r'(uStack|bStack|abStack)_([0-9a-f]+)(?:\[(\d+)\])? = (0x[0-9a-f]+|\d+);',line)
+        if field:at,size,value=int(field[1]),int(field[2]),int(field[3],0)
+        elif stack:
+            kind,offset,index,value=stack.groups();at=0xf0-int(offset,16)+(int(index) if index else 0)
+            size=1 if index else declarations.get(kind+'_'+offset,1);value=int(value,0)
+        else:continue
+        if 0<=at and at+size<=24:
+            data[at:at+size]=value.to_bytes(size,'little');written.update(range(at,at+size))
+    length=data[0]//2
+    assert length<=22 and set(range(length+1))<=written,'incomplete inline filename'
+    return data[1:length+1].decode('ascii')
+
 assets=Assets(Path(sys.argv[1]))
 reference=json.loads((ROOT/'research/.local/reference.json').read_text(encoding='utf-8-sig'))
 identity=json.loads((Path(reference['cache'])/'identity.json').read_text(encoding='utf-8-sig'))
@@ -42,6 +62,7 @@ for offset in [0x1988,0x1a68,0x1de8,0x2168,0x2248,0x30d8,0x3148,0x27f8,0x2830,0x
             if 0<=at<24:
                 size=declarations.get(name,1);data[at:at+size]=int(value,0).to_bytes(size,'little')
         name=data[1:1+data[0]//2].decode('ascii')
+    name=recent_inline_name(before,heap,declarations) or name
     assert name.endswith('.maanim'),(hex(offset),name)
     path='ImageData/'+name
     assert path in assets.files,path

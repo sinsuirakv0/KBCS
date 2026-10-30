@@ -1,4 +1,5 @@
-﻿let state=null,timer,started=false,pendingStartup=false,presenting=false;
+﻿import {showStartupProgress} from './startup.js';
+let state=null,timer,started=false,pendingStartup=false,presenting=false;
 const listeners=new Set();
 async function request(path,body){
   const response=await fetch('/api/updates'+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -15,7 +16,7 @@ function notice(message){
   let node=document.getElementById('update-notice');
   if(!node){node=document.createElement('div');node.id='update-notice';node.className='update-notice';node.setAttribute('role','status');document.body.append(node);}
   node.replaceChildren(document.createTextNode(message+' '));
-  const link=document.createElement('a');link.href='/#data-management';link.textContent='データ管理';node.append(link);
+  const link=document.createElement('a');link.href='/pages/settings/#data';link.textContent='データ管理';node.append(link);
   const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','閉じる');close.onclick=()=>node.remove();node.append(close);
 }
 function ask(title,message,positive='ダウンロード',negative='いいえ'){
@@ -32,20 +33,7 @@ function ask(title,message,positive='ダウンロード',negative='いいえ'){
     actions.append(no,yes);dialog.append(heading,text,actions);document.body.append(dialog);dialog.showModal();
   });
 }
-function progressDialog(){
-  const dialog=document.createElement('dialog');dialog.className='update-dialog';
-  const heading=document.createElement('h2');heading.textContent='初回データをダウンロードしています';
-  const text=document.createElement('p');text.textContent='ステージ・キャラ・画像・音源の全ZIPを取得して展開します。';
-  const output=document.createElement('p');output.setAttribute('role','status');
-  const progress=document.createElement('progress');progress.removeAttribute('value');
-  const close=document.createElement('button');close.type='button';close.textContent='バックグラウンドで続ける';close.onclick=()=>dialog.close();
-  dialog.append(heading,text,output,progress,close);document.body.append(dialog);dialog.showModal();
-  const stop=observeUpdates(value=>{
-    output.textContent=value.error||value.message;
-    if(!value.busy){progress.hidden=true;heading.textContent=value.error?'データの取得に失敗しました':'データの導入が完了しました';close.textContent='閉じる';if(value.error)notice('ホームのデータ管理から再試行できます。');}
-  });
-  dialog.addEventListener('close',()=>{stop();dialog.remove();},{once:true});
-}
+function progressDialog(){showStartupProgress('初回データを準備しています',state?.message||'原本をダウンロードしています…');}
 async function startup(){
   if(presenting||!pendingStartup||!state?.checked)return;
   presenting=true;pendingStartup=false;
@@ -53,9 +41,10 @@ async function startup(){
     if(state.data?.missing&&state.busy&&state.job==='data')progressDialog();
     else if(state.data?.available&&!state.busy){
       const size=(state.data.size/1048576).toFixed(0);
-      if(await ask('最新のデータをダウンロードする必要があります！','データ v'+state.data.version+' が利用可能です（全ZIP 約'+size+' MB）。ダウンロードしますか？'))await downloadUpdate('data');
-      else notice('データはホームのデータ管理からダウンロードできます。');
-    }else if(state.dataError)notice('データの更新確認ができませんでした。ホームのデータ管理から再試行できます。');
+      const rebuild=state.data.rebuildRequired&&state.data.localTag===state.data.tag;
+      if(await ask(rebuild?'データベースの更新が必要です':'最新のデータをダウンロードする必要があります！',rebuild?'保存済みの原本を確認し、新しい変換器でDBを作り直します。更新しますか？':'データ v'+state.data.version+' が利用可能です（全ZIP 約'+size+' MB）。ダウンロードしますか？',rebuild?'更新する':'ダウンロード'))await downloadUpdate('data');
+      else notice('データはホームの「設定 → データ管理」からダウンロードできます。');
+    }else if(state.dataError)notice('データの更新確認ができませんでした。ホームの「設定 → データ管理」から再試行できます。');
     if(state.app?.available){
       // データの初回取得と本体更新を同時に走らせない。
       while(state.busy)await new Promise(resolve=>setTimeout(resolve,1000));
@@ -64,9 +53,9 @@ async function startup(){
         while(state.busy)await new Promise(resolve=>setTimeout(resolve,1000));
         if(state.app?.ready&&state.desktop&&await ask('KBCSの更新を適用できます','再起動して更新しますか？','再起動して更新','後で'))await applyUpdate();
       }
-      else notice('KBCS本体はホームのデータ管理から更新できます。');
+      else notice('KBCS本体はホームの「設定 → データ管理」から更新できます。');
     }
-  }catch(error){notice(error.message+'。ホームのデータ管理から再試行できます。');}
+  }catch(error){notice(error.message+'。ホームの「設定 → データ管理」から再試行できます。');}
   finally{presenting=false;}
 }
 async function refresh(){

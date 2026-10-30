@@ -7,6 +7,7 @@ import {resolveStageRoute,applicableLimits} from './src/features/stages/model.js
 import {loadStageScene,stageMediaHtml,initializeStageMedia} from './src/features/stages/native-media.js';
 import {prepareBattleScreen,startBattleScreen} from './battle-screen.js';
 import {createFormationView,fitFormationName} from './formation-view.js';
+import {createFormationReorder} from './formation-reorder.js';
 import {readSortiePreferences,sortieItemsHtml,toggleSortieItem,sortieLaunchHtml} from './sortie-view.js';
 import {formationDisplayName} from './formation-model.js';
 import {stageRulesHtml,stageFormationHtml} from './src/features/stages/view.js';
@@ -15,17 +16,39 @@ import {readBattleJson,battleFormation,castleHealth,prepareBattleAssets,effectiv
 const node=id=>document.getElementById('sortie-'+id),route=new URLSearchParams(location.search);
 let artwork,battleArtwork,paintFormation,formationIndex=1,deployment,deployVersion=0,battle;
 let database,enemies,units,map,stages=[],stage,entry,health,choiceVersion=0,controller,loadedAssets,prepared;
+let reorder,formationSaving=false,formationSelected=-1;
 let saved={items:{},speed:2};try{saved=readSortiePreferences(localStorage,sessionStorage);}catch{}
 let crown=Math.max(1,Number(route.get('crown'))||1),items={...saved.items},speed=saved.speed;
 const stageMedia=initializeStageMedia(node('media'),id=>stages.find(value=>value.id===id));
 function status(message,error=false){node('message').textContent=message;node('message').classList.toggle('sortie-status-error',error);}
 function store(){saved={formation:entry?.id??saved.formation,items,speed};try{for(const storage of [localStorage,sessionStorage])storage.setItem('kbcs:sortie',JSON.stringify(saved));}catch{}}
-function ready(){node('launch').disabled=!!controller||!entry||!health||!deployment||!stage||!!(stage.variants?.length&&!stage.patternSource)||!(stage.width>0)||stage.background==null;}
+function ready(){node('launch').disabled=!!controller||formationSaving||!!reorder?.active||!entry||!health||!deployment||!stage||!!(stage.variants?.length&&!stage.patternSource)||!(stage.width>0)||stage.background==null;}
 function drawFormation(){
   if(!entry){node('formation-preview').innerHTML='<a href="/pages/formation/">編成を作成</a>';return;}
   const document=battleFormation(units,entry.document);
   node('formation-edit').href='/pages/formation/?'+new URLSearchParams({id:entry.id,map:map.key,stage:stage.index,crown});
-  node('formation-preview').innerHTML=paintFormation(document,{index:formationIndex,deployment,preview:true});fitFormationName(node('formation-preview'),artwork);
+  node('formation-preview').innerHTML=paintFormation(document,{index:formationIndex,selected:formationSelected,deployment,preview:true,...reorder?.view});fitFormationName(node('formation-preview'),artwork);reorder?.renderFloating();ready();
+}
+async function refreshFormationStats(version){
+  const current=entry,value=await castleHealth(units,battleFormation(units,current.document));
+  if(version!==choiceVersion||entry!==current)return;
+  health=value;node('health-breakdown').innerHTML=[['施設',value.facility],['城開発',value.development],['お宝',value.beforeCombo-value.facility-value.development],['コンボ加算',value.maximum-value.beforeCombo]].map(([name,amount])=>'<dt>'+name+'</dt><dd>'+formatNumber(amount)+'</dd>').join('');node('castle-health').textContent=formatNumber(value.maximum);node('sniper-damage').textContent=formatNumber(value.sniper);store();status('');await refreshDeployment();
+}
+async function saveFormationOrder(before){
+  const current=entry,version=++choiceVersion;formationSaving=true;health=null;deployment=null;++deployVersion;
+  node('formation').disabled=true;node('formation-edit').inert=true;drawFormation();status('編成を保存中');
+  try{
+    const result=await readBattleJson('/api/formations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:current.id,revision:current.revision,document:structuredClone(current.document)})});
+    current.revision=result.entry.revision;
+    try{localStorage.setItem('kbcs:formation-update',Date.now()+':'+current.id+':'+current.revision);}catch{}
+    await refreshFormationStats(version);
+  }catch(error){
+    // 競合や応答切断時は保存済みの版を取り直し、未保存の並びで出撃しない。
+    try{const latest=await readBattleJson('/api/formations?current='+current.id);entry=latest.entry;}catch{current.document.slots=before;}
+    reorder.cancel();
+    try{if(entry)await refreshFormationStats(version);}catch{}
+    drawFormation();status(error.message,true);
+  }finally{formationSaving=false;node('formation').disabled=false;node('formation-edit').inert=false;ready();}
 }
 async function refreshDeployment(){
   if(!entry||!stage||!artwork)return;
@@ -40,17 +63,19 @@ async function refreshDeployment(){
 async function refreshFormationList(preferred=entry?.id??saved.formation){
   preferred=Number(preferred);
   const list=await readBattleJson('/api/formations?list=1');
+  if(formationSaving||reorder?.active)return;
   node('formation').innerHTML=list.entries.map((value,index)=>'<option value="'+value.id+'">'+esc(formationDisplayName(value,index+1))+'</option>').join('');
   const id=list.entries.some(value=>value.id===preferred)?preferred:list.entries[0]?.id;
   await chooseFormation(id);
 }
 async function chooseFormation(id){
+  if(formationSaving)return;reorder?.cancel();formationSelected=-1;
   const version=++choiceVersion;++deployVersion;health=null;deployment=null;ready();status('編成を読み込み中');
   try{
     const result=await readBattleJson('/api/formations'+(id?'?current='+encodeURIComponent(id):''));
     if(version!==choiceVersion)return;entry=result.entry;formationIndex=result.index;
     drawFormation();
-    if(entry){node('formation').value=entry.id;const value=await castleHealth(units,battleFormation(units,entry.document));if(version!==choiceVersion)return;health=value;node('health-breakdown').innerHTML=[['施設',value.facility],['城開発',value.development],['お宝',value.beforeCombo-value.facility-value.development],['コンボ加算',value.maximum-value.beforeCombo]].map(([name,amount])=>'<dt>'+name+'</dt><dd>'+formatNumber(amount)+'</dd>').join('');node('castle-health').textContent=formatNumber(value.maximum);node('sniper-damage').textContent=formatNumber(value.sniper);store();status('');await refreshDeployment();}
+    if(entry){node('formation').value=entry.id;await refreshFormationStats(version);}
     else status('使用する編成を作成してください');
   }catch(error){status(error.message,true);}finally{if(version===choiceVersion)ready();}
 }
@@ -99,13 +124,14 @@ node('stages').addEventListener('click',event=>{const target=event.target.closes
 node('crowns').addEventListener('click',event=>{const target=event.target.closest('[data-crown]');if(target){crown=Number(target.dataset.crown);renderStage();}});
 node('pattern').addEventListener('change',async event=>{const index=stage.index;node('launch').disabled=true;try{const value=await loadStageVariant(map.key,index,event.target.value);stages=stages.map(stage=>stage.index===index?value:stage);if(stage.index===index){stage=value;renderStage();status('');}}catch(error){status(error.message,true);}finally{ready();}});
 node('formation-preview').addEventListener('click',event=>{
+ if(formationSaving||reorder?.active||reorder?.suppressClick)return;
  const target=event.target.closest('[data-action],[data-slot]');if(!target)return;
  const action=target.dataset.action;
  if(action==='previous'||action==='next'){
   const select=node('formation'),count=select.options.length;
   if(count)chooseFormation(Number(select.options[(select.selectedIndex+(action==='next'?1:-1)+count)%count].value));
  }else if(action==='menu'){node('formation').focus();try{node('formation').showPicker?.();}catch{}}
- else if(action==='cannon'||target.dataset.slot!=null){const url=new URL(node('formation-edit').href);if(target.dataset.slot!=null)url.searchParams.set('slot',target.dataset.slot);location.href=url;}
+ else if(target.dataset.slot!=null){formationSelected=Number(target.dataset.slot);drawFormation();}
 });
 node('formation-preview').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){const button=event.target.closest('[role=button]');if(button){event.preventDefault();button.dispatchEvent(new MouseEvent('click',{bubbles:true}));}}});
 node('items').addEventListener('click',event=>{const button=event.target.closest('[data-item]'),key=button?.dataset.item;if(key){const focused=document.activeElement===button;speed=toggleSortieItem(items,speed,key);node('items').innerHTML=sortieItemsHtml(battleArtwork,items,speed);if(focused)node('items').querySelector('[data-item="'+key+'"]').focus({preventScroll:true});store();}});
@@ -118,13 +144,18 @@ async function load(){
     map=detail.maps.find(value=>value.key===routeResult.map.key);stages=detail.stages;stage=stages.find(value=>value.id===routeResult.selected)||stages[0];crown=Math.min(map.stars.length,crown);
 
     paintFormation=createFormationView(units,artwork);
+    reorder=createFormationReorder(node('formation-preview'),{
+      getDocument:()=>entry?.document,getDeployment:()=>deployment,paint:paintFormation,allowRemove:false,
+      canStart:()=>!!(entry&&health&&deployment&&!controller&&!formationSaving),
+      onSelect:slot=>{formationSelected=slot;},onDraw:drawFormation,onCommit:saveFormationOrder
+    });
     node('items').innerHTML=sortieItemsHtml(battleArtwork,items,speed);node('launch').innerHTML=sortieLaunchHtml(battleArtwork);
     renderStage();node('status').hidden=true;node('content').hidden=false;
     await refreshFormationList(saved.formation);
   }catch(error){node('status').textContent=error.message;}
 }
 let refreshTime=0;
-function refreshSavedFormation(){if(!map||!units||controller||Date.now()-refreshTime<300)return;refreshTime=Date.now();refreshFormationList().catch(error=>status(error.message,true));}
+function refreshSavedFormation(){if(!map||!units||controller||formationSaving||reorder?.active||Date.now()-refreshTime<300)return;refreshTime=Date.now();refreshFormationList().catch(error=>status(error.message,true));}
 window.addEventListener('pageshow',event=>{if(event.persisted)refreshSavedFormation();});
 window.addEventListener('focus',refreshSavedFormation);
 window.addEventListener('storage',event=>{if(event.key==='kbcs:formation-update')refreshSavedFormation();});

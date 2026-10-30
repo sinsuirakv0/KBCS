@@ -96,7 +96,24 @@ extern "C" void kbcs_core_battle_screen_economy(const KbcsBattleScreenConfig *co
 }
 extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScreenConfig *config,const KbcsBattleScreenState *state,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view,KbcsBattleScreenHook hook,void *user,int32_t immediate) {
  if(!config||!state||!input||!out||!view||immediate<0||immediate>1)return 1;
- const auto &c=*config;auto s=*state;const auto &in=*input;
+ const auto &c=*config;auto s=*state;auto in=*input;
+ // PCのキー入力も、同じrelease分岐・5表示tickの待機・生産判定を使う。
+ const int key=in.control>=1000?in.control-1000:-1;
+ if(key>=0){
+  if(!((key>=0&&key<10)||(key>=100&&key<=102)||key==200||key==203||key==205||key==300||key==308))return 1;
+  if(in.phase)return 1;in.control=0;in.phase=2;
+  // キーは独立したタップ。以前のスワイプ/長押しを引き継がない。
+  s.pointer_down=0;s.gesture=0;s.holding=-1;s.hold_frames=0;
+ }
+ const auto inputTarget=[&](int x,int y){
+  if(key<0)return hit(c,s,x,y);
+  if(key<10&&s.rows==1&&(key/5!=s.page||s.page_frame))return -1;
+  if(key>=200&&key<206&&!(c.items&(1<<(key-200))))return -1;
+  if(s.paused&&!s.info_mode&&key<300)return -1;
+  if(key==300&&(!s.paused||s.info_mode))return -1;
+  if(key==308&&(!s.paused||!s.info_mode))return -1;
+  return key;
+ };
  // ホストのコマ送りは速度アイテムを保持し、1更新を1論理Fとして進める。
  const bool stepping=in.control==10;
  if(stepping&&(s.paused||s.intro<24||in.phase||in.ticks<1))return 1;
@@ -115,7 +132,7 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
  if(in.control==7&&(c.items&32))s.items_on^=32;
  // ホスト側で止めた同一Fでは、即生産チートだけを入力として処理する。
  if(!in.ticks&&immediate&&in.phase==2&&!s.paused&&!s.battle_mode&&s.intro>=24){
-  const int target=hit(c,s,in.x,in.y);
+  const int target=inputTarget(in.x,in.y);
   if(target>=0&&target<10&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
   s.pointer_down=0;s.holding=-1;s.hold_frames=0;
  }
@@ -145,9 +162,10 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
 
    }if(tick==0&&(in.phase==2||in.phase==3))s.pointer_down=0;if(s.description_wait)--s.description_wait;if(hook){const auto code=hook(user,5,&s);if(code)return code;}continue;}
   if(!s.paused&&hook){const auto code=hook(user,3,&s);if(code)return code;}
-  int target=hit(c,s,s.pointer_x,s.pointer_y);
+  int target=inputTarget(s.pointer_x,s.pointer_y);
   // 006dca34..006dcf80 / オプションのcallback event0。押し直し・領域への再進入だけ。
   const bool press_sound=(target>=0&&target<10)||(target>=100&&target<=102)||(target>=300&&target<=308&&target!=306);
+  if(key>=0&&tick==0&&!s.battle_mode&&press_sound){const auto code=sound(10);if(code)return code;}
   if(!s.battle_mode&&s.pointer_down&&!s.gesture&&press_sound&&(target!=previous_target||(tick==0&&in.phase==1))){
    const auto code=sound(10);if(code)return code;
   }

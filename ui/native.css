@@ -1,4 +1,5 @@
-﻿.native-home-links { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 20px; }
+﻿@import url('./startup.css');
+.native-home-links { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 20px; }
 .native-home-links a { display:inline-flex; min-width:128px; min-height:30px; justify-content:center; align-items:center; padding:4px 10px; border:1px solid var(--color-border); border-radius:var(--radius); background:var(--color-control); text-decoration:none; }
 .native-home-links a:hover { border-color:var(--color-accent); }
 #asset-source { width:min(520px,65vw); }
@@ -194,3 +195,14 @@ body:has(.workspace) { height:100dvh; min-height:0; overflow:hidden; background:
 .update-dialog{width:min(480px,calc(100vw - 40px));padding:22px;color:var(--color-text);background:var(--color-surface,#0b1930);border:1px solid var(--color-border);border-radius:3px}
 .update-dialog::backdrop{background:#0009}.update-dialog h2{font-size:18px;margin:0 0 14px}.update-dialog p{white-space:pre-wrap;overflow-wrap:anywhere}.update-dialog progress{width:100%;margin:12px 0}.update-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:20px}
 .update-notice{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:10000;max-width:calc(100vw - 32px);padding:10px 14px;color:var(--color-text);background:var(--color-surface,#0b1930);border:1px solid var(--color-border);box-shadow:0 2px 12px #0008}.update-notice button{margin-left:12px}.home-update-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+
+/* 閉じたパネルにも、中央の幅を侵食しない開閉口を残す。 */
+.workspace-edge{grid-row:1;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;gap:6px;width:24px;min-width:0;padding:10px 0;border:0;background:var(--color-surface);color:var(--color-muted);font-size:11px;letter-spacing:2px}
+.workspace-edge-left{grid-column:1;border-right:1px solid var(--color-border)}
+.workspace-edge-right{grid-column:5;border-left:1px solid var(--color-border)}
+.workspace-edge[hidden]{display:none}.workspace-edge:hover{color:var(--color-text);background:var(--color-control)}
+
+/* 編成の浮遊画像は左右ペイン・中央SVGのクリップより外側へ描く。 */
+.formation-native{touch-action:none;user-select:none}
+.formation-drag-preview{position:fixed;z-index:10001;pointer-events:none;user-select:none}
+.formation-drag-preview>.formation-native{display:block;width:100%;height:100%}

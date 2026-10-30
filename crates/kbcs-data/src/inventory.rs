@@ -256,7 +256,13 @@ pub fn catalog(database: &crate::store::Database) -> Result<Value> {
         if name.is_empty() {
             continue;
         }
-        let path = format!("Image/gatyaitemD_{id:02}_f.png");
+        // 006f3104/006f53b8: 画像は内部行番号。列11が−1以外なら、その画像IDで上書きする。
+        let image_id = definition
+            .get(11)
+            .copied()
+            .filter(|v| *v != -1)
+            .unwrap_or(internal as i32);
+        let path = format!("Image/gatyaitemD_{image_id:02}_f.png");
         let exists=database.connection.query_row("SELECT EXISTS(SELECT 1 FROM source_file WHERE path=? UNION SELECT 1 FROM asset_reference WHERE path=?)",[&path,&path],|r|r.get::<_,bool>(0))?;
         items.insert(id,json!({"id":id,"name":crate::model::plain_text(name),"icon":if exists {Some(path)}else{None}}));
     }

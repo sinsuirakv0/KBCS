@@ -78,3 +78,5 @@ API根拠: [wry](https://docs.rs/wry/0.57.0/wry/)、[tao](https://docs.rs/tao/0.
 ## 2026-10-29: Windows・macOS共通GUI
 
 GUIのWindows限定を解除し、Apple Silicon/Intel Macもtao+wry→共通Service→bridge/C++へ接続する。macOSはWKWebViewとApplication Supportを使う。戦闘のOS別実装を作らず、3環境のGitHub Actionsで同じ計算ベクトルを実行する。配布・署名・更新の関係は[ビルド](../../crates/kbcs-app/docs/build.md)、[本体更新](../../crates/kbcs-app/docs/updates.md)へ記録する。上記の初期設計にあるWindows専用の記述は過去の状態。
+
+2026-10-30: [起動画面・設定・戦闘キー](../../ui/docs/settings.md)と[data::maintenance](../../crates/kbcs-data/docs/validation.md)を追加。入力の確定と描画/設定/データ管理を分離し、既存のC++生産・待機へ接続する。

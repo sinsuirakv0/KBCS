@@ -39,5 +39,18 @@
 
 .formation-tray{width:calc(100% * 698 / 1188);margin-left:calc(100% * 288 / 1188)}
 
-.formation-drag-preview{position:fixed;z-index:10001;pointer-events:none;user-select:none}
-.formation-drag-preview>.formation-native{width:100%;height:100%}
+
+/* PC用の一時置き場。キャラ枠の原本座標と縮尺は共通viewのまま。 */
+.formation-tray-area{display:flex;align-items:center;gap:8px;margin-top:8px}
+.formation-tray-area .formation-tray{flex:0 0 calc(100% * 698 / 1188);margin-top:0}
+#formation-trash{display:flex;flex-direction:column;align-items:center;justify-content:center;width:44px;min-width:36px;align-self:stretch;font-size:10px;padding:4px}
+#formation-trash svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6}
+.formation-member-sheet{margin-top:14px;overflow:auto}
+.formation-member-sheet .unit-sheet{font-size:9px;min-width:250px;margin-bottom:0}
+.formation-member-sheet .unit-sheet th,.formation-member-sheet .unit-sheet td{padding:2px;height:20px}
+.formation-member-sheet .unit-sheet h2{font-size:11px;margin:0}
+.formation-member-sheet .unit-portrait .unit-image{max-width:100%}
+.formation-library>.db-toolbar{justify-content:space-between;font-size:11px}
+.formation-library>.db-toolbar label{margin:0}
+
+#formation-results{min-height:52px}

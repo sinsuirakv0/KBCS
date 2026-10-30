@@ -47,6 +47,11 @@ fn start(root: PathBuf, region: String, source: String, check: bool) -> Result<(
         });
     }
     let window = WindowBuilder::new()
+        .with_window_icon(Some(tao::window::Icon::from_rgba(
+            include_bytes!("../assets/app-icon.rgba").to_vec(),
+            256,
+            256,
+        )?))
         .with_visible(!check)
         .with_title("KBCS")
         .with_inner_size(tao::dpi::LogicalSize::new(1180.0, 820.0))

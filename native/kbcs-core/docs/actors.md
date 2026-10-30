@@ -170,6 +170,8 @@ KB終了時は00a952f8/006ec9f4の行動復帰を通し、HP0なら行動4と妨
 
 ## 検証と残る範囲
 
+2026-10-30の[エフェクト監査](effects-audit-20261030.md)で、砲/二次攻撃後・protect前の表示時計を`actor_protection_clock`へ分離し、所有logicalへ接続した。`actor_clock`と更新位置が異なる。死亡4/21の状態表示除外と21の専用魂は`battle_visuals`が担当し、Rustは本体を描かない場合も所有演出を走査する。
+
 発生後はC++所有の`Areas`へ登録し、烈波→反射待ち→爆波を原本順で更新する。[履歴・反射・寿命・退場待ち・安全な借用契約](secondary.md)。96条件/17424更新/1258命中呼出と所有者走査512条件をARM64へ照合した。代表値とエラー/panic後の継続拒否は既存Rust1試験へ統合する。
 
 `research/verify/actors.py --python-libs D:/KBC/KBC-rakv0-lab/unit-db/research/python-libs --library research/.local/actor-test-displace.dll --assets D:/KBC/KBC-rakv0-assets --publish`。`--all-assets`で原本の全形態・敵も加える。元SOのSHA/ABIとアセットのsize/SHAを確認し、Unicornで実命令を走らせる。Rustの代表1試験は採取fixtureをC++へ再投入する。

@@ -183,6 +183,139 @@ fn native_screen_witnesses() {
         })
         .unwrap()
     };
+    // キーとポインタは同じ待機を通し、出撃確定を早めない。
+    let keyboard_config = Config {
+        present: [1; 10],
+        ..config.clone()
+    };
+    let layout = call(keyboard_config.clone(), base.clone(), Input::default()).layout;
+    let mut keyboard = call(
+        keyboard_config.clone(),
+        base.clone(),
+        Input {
+            ticks: 1,
+            control: 1000,
+            ..Input::default()
+        },
+    )
+    .state;
+    let mut pointer = call(
+        keyboard_config.clone(),
+        base.clone(),
+        Input {
+            ticks: 1,
+            phase: 2,
+            x: layout.slots[0][0] + 10,
+            y: layout.slots[0][1] + 10,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(keyboard.guard, pointer.guard);
+    assert_eq!(keyboard.pending_control, pointer.pending_control);
+    for _ in 0..5 {
+        keyboard = call(
+            keyboard_config.clone(),
+            keyboard,
+            Input {
+                ticks: 1,
+                ..Input::default()
+            },
+        )
+        .state;
+        pointer = call(
+            keyboard_config.clone(),
+            pointer,
+            Input {
+                ticks: 1,
+                ..Input::default()
+            },
+        )
+        .state;
+        assert_eq!(keyboard.frame, pointer.frame);
+        assert_eq!(keyboard.request_slot, pointer.request_slot);
+    }
+    assert_eq!(keyboard.request_slot, 0);
+    let unavailable = call(
+        keyboard_config.clone(),
+        State {
+            rows: 1,
+            ..base.clone()
+        },
+        Input {
+            ticks: 1,
+            control: 1005,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(unavailable.pending_control, -1);
+    let swiped = State {
+        rows: 1,
+        page: 1,
+        gesture: 1,
+        holding: 5,
+        hold_frames: 14,
+        ..base.clone()
+    };
+    let fresh_key = call(
+        keyboard_config.clone(),
+        swiped.clone(),
+        Input {
+            ticks: 6,
+            control: 1005,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(fresh_key.request_slot, 5);
+    assert_eq!(fresh_key.gesture, 0);
+    let touch = call(
+        keyboard_config.clone(),
+        swiped,
+        Input {
+            ticks: 1,
+            phase: 2,
+            x: 200,
+            y: 570,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(touch.pending_control, -1);
+    assert_eq!(touch.request_slot, -1);
+    let absent_item = call(
+        keyboard_config,
+        base.clone(),
+        Input {
+            ticks: 1,
+            control: 1205,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(absent_item.items_on, 0);
+    assert_eq!(absent_item.pending_control, -1);
+    let closed = call(
+        config.clone(),
+        State {
+            paused: 1,
+            info_mode: 1,
+            rows: 2,
+            saved_rows: 1,
+            ..base.clone()
+        },
+        Input {
+            ticks: 6,
+            control: 1308,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(closed.paused, 0);
+    assert_eq!(closed.info_mode, 0);
+    assert_eq!(closed.rows, 1);
+
     // 停止中の即生産だけは0tickで入力を受け、戦闘・表示時計と残高を進めない。
     unsafe extern "C" {
         fn kbcs_core_battle_screen_advance_custom(
@@ -196,13 +329,14 @@ fn native_screen_witnesses() {
             immediate: i32,
         ) -> u32;
     }
-    for immediate in [0, 1] {
+    for (immediate, keyboard) in [(0, false), (1, false), (0, true), (1, true)] {
         let config = Config {
             present: [1; 10],
             ..config.clone()
         };
         let input = Input {
-            phase: 2,
+            phase: if keyboard { 0 } else { 2 },
+            control: if keyboard { 1000 } else { 0 },
             x: 171,
             y: 465,
             ..Input::default()
@@ -504,29 +638,32 @@ fn native_screen_witnesses() {
             }
         }
     }
-    let mut speed_state = State {
-        items_on: 1,
-        speed_mode: 1,
-        ..base.clone()
-    };
-    for expected in [2, 0, 1] {
-        let result = call(
-            Config {
-                items: 1,
-                ..config.clone()
-            },
-            speed_state,
-            Input {
-                control: 5,
-                ..Input::default()
-            },
-        );
-        assert_eq!(result.state.speed_mode, expected);
-        assert_eq!(
-            result.layout.speed_value,
-            if expected == 0 { 1 } else { expected + 1 }
-        );
-        speed_state = result.state;
+    for (limit, expected_modes) in [(2, [0, 1, 0]), (3, [2, 0, 1])] {
+        let mut speed_state = State {
+            items_on: 1,
+            speed_mode: 1,
+            ..base.clone()
+        };
+        for expected in expected_modes {
+            let result = call(
+                Config {
+                    items: 1,
+                    speed: limit,
+                    ..config.clone()
+                },
+                speed_state,
+                Input {
+                    control: 5,
+                    ..Input::default()
+                },
+            );
+            assert_eq!(result.state.speed_mode, expected);
+            assert_eq!(
+                result.layout.speed_value,
+                if expected == 0 { 1 } else { expected + 1 }
+            );
+            speed_state = result.state;
+        }
     }
     for case in controls["camera"].as_array().unwrap() {
         let rows = case["rows"].as_i64().unwrap() as i32;

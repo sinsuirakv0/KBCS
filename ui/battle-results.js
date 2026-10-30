@@ -28,7 +28,9 @@ export function createBattleResults(controls){
  }
  fetch('/api/inventory/catalog').then(r=>r.json()).then(value=>{for(const item of value.items||[])metadata.set(item.id,item);if(runtime?.receipt)render();}).catch(()=>{});
  return {
-  update(value){runtime=value;const visible=!!runtime.result.mode;button.hidden=!visible;panel.hidden=!visible;if(!visible)return;
+  update(value,width,atlas){runtime=value;const visible=!!runtime.result.mode;button.hidden=!visible;panel.hidden=!visible;if(!visible)return;
+   // phase0から準備し、勝利文字/経験値の演出中に通知の配置を取得する。
+   if(runtime.receipt)popup.prepare(runtime.receipt.notifications||[],width,atlas);
    const key=runtime.receipt?'saved':runtime.receiptError;if(key!==last||lastEx!==runtime.ex?.source){last=key;lastEx=runtime.ex?.source;render();}
   },
   paint(context,width,sprite,number,atlas,images){
@@ -47,7 +49,7 @@ export function createBattleResults(controls){
    if(e.ready){
     const b=e.visualButton,buttons=runtime.rules.scoreType===1?'img101_nekoDojo':'img101';sprite(buttons,3,...b);sprite('img006_ja',1,...e.label);if(e.pressed||e.guard)sprite(buttons,e.guard&&Math.trunc(e.guard/2)%2?5:4,...b);
    }
-   if(runtime.receipt){popup.prepare(runtime.receipt.notifications||[],width,atlas);if(e.phase===8)popup.paint(context,e.popup,width,atlas,images);}
+   if(runtime.receipt&&e.phase===8)popup.paint(context,e.popup,width,atlas,images);
   },
   stop(){popup.stop();panel.remove();button.remove();},
  };

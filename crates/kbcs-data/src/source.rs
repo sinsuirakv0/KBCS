@@ -154,6 +154,24 @@ pub fn asset(database: &crate::store::Database, root: &Path, logical: &str) -> R
             Ok(root.join("assets/releases").join(tag))
         })
         .transpose()?;
+    // 移設・欠損時だけ固定SHAのキャッシュへ戻る。存在する原本の破損は隠さない。
+    safe_path(&descriptor.path)?;
+    ensure!(
+        descriptor.sha256.len() == 64 && descriptor.sha256.bytes().all(|v| v.is_ascii_hexdigit()),
+        "不正な原本SHA-256"
+    );
+    let local = managed
+        .as_ref()
+        .map(|dir| dir.join(&descriptor.path))
+        .or_else(|| {
+            (!origin.starts_with("https://")).then(|| Path::new(origin).join(&descriptor.path))
+        });
+    if local.is_some_and(|path| !path.exists())
+        && let Ok(bytes) = std::fs::read(root.join("assets/objects").join(&descriptor.sha256))
+        && verify(&bytes, &descriptor).is_ok()
+    {
+        return Ok(bytes);
+    }
     let location = if let Some(directory) = managed.filter(|directory| directory.is_dir()) {
         Location::Local(directory.canonicalize()?)
     } else if let Some(repository) = origin.strip_prefix("https://github.com/") {
@@ -824,6 +842,8 @@ mod tests {
             assert_eq!(asset(&database, &root, "Image/img043.png")?, bytes);
             std::fs::write(&managed, b"corrupt")?;
             assert!(asset(&database, &root, "Image/img043.png").is_err());
+            std::fs::remove_file(&managed)?;
+            assert_eq!(asset(&database, &root, "Image/img043.png")?, bytes);
             // BLOBを省いたDBでも、移設可能なdata-dirから原本本文を取得できる。
             std::fs::write(&managed, bytes)?;
             std::fs::create_dir_all(root.join("official"))?;
@@ -835,6 +855,34 @@ mod tests {
                 connection: rusqlite::Connection::open(saved)?,
             };
             assert_eq!(indexed.source("Image/img043.png")?.3, bytes);
+            // 本文がDBにない背景も、索引と移設済み原本から寸法を読める。
+            let png = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR\0\0\0\x80\0\0\0\x40";
+            std::fs::write(
+                root.join("assets/releases/fixture/jp/server/bg007.png"),
+                png,
+            )?;
+            indexed.connection.execute(
+                "INSERT INTO asset_reference VALUES ('Image/bg007.png','jp/server/bg007.png',?,?,'local')",
+                rusqlite::params![hash(png), png.len() as i64],
+            )?;
+            assert_eq!(
+                crate::stage_media::image_size(&indexed, "Image/bg007.png")?,
+                [128, 64]
+            );
+            indexed.connection.execute(
+                "INSERT INTO source_file VALUES ('Image/bg007.png','jp/server/bg007.png','local',?,?)",
+                rusqlite::params![hash(png), png.as_slice()],
+            )?;
+            assert_eq!(
+                crate::stage_media::image_size(&indexed, "Image/bg007.png")?,
+                [128, 64]
+            );
+            assert!(
+                crate::stage_media::image_size(&indexed, "Image/missing.png")
+                    .unwrap_err()
+                    .to_string()
+                    .contains("Image/missing.png")
+            );
             Ok(())
         })();
         std::fs::remove_dir_all(root)?;

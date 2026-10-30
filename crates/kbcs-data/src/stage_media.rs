@@ -4,6 +4,7 @@
     store::Database,
 };
 use anyhow::{Context, Result, ensure};
+use rusqlite::OptionalExtension;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -255,7 +256,10 @@ pub fn scene_source(database: &Database, id: i64) -> Result<Value> {
     while let Some(id) = next.take() {
         ensure!(seen.insert(id), "背景定義の参照が循環しています");
         let path = format!("Data/bg{id:03}.json");
-        if let Ok(content) = text(database, &path) {
+        let exists=database.connection.query_row("SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?1 UNION ALL SELECT 1 FROM asset_reference WHERE path=?1)",[&path],|r|r.get::<_,bool>(0))?;
+        if exists {
+            let content =
+                text(database, &path).with_context(|| format!("背景定義の読み込み失敗: {path}"))?;
             let value = definition(content.as_bytes())?;
             next = value["id"].as_i64();
             for segment in value["data"].as_array().into_iter().flatten() {
@@ -271,7 +275,7 @@ pub fn scene_source(database: &Database, id: i64) -> Result<Value> {
             files.insert(path, content);
         }
     }
-    let mut statement=database.connection.prepare("SELECT path FROM source_file WHERE path GLOB 'ImageData/bg*' OR path GLOB 'Image/bg*' OR path GLOB 'Number/bg*' OR path GLOB '*nyankoCastle*' OR path='ImageData/000_a.imgcut'")?;
+    let mut statement=database.connection.prepare("SELECT path FROM (SELECT path FROM source_file UNION SELECT path FROM asset_reference) WHERE path GLOB 'ImageData/bg*' OR path GLOB 'Image/bg*' OR path GLOB 'Number/bg*' OR path GLOB '*nyankoCastle*' OR path='ImageData/000_a.imgcut'")?;
     let mut paths = statement
         .query_map([], |r| r.get::<_, String>(0))?
         .collect::<rusqlite::Result<BTreeSet<_>>>()?;
@@ -549,14 +553,29 @@ pub(crate) fn annotate(stage: &mut Value, series: &str) {
 }
 
 pub fn image_size(database: &Database, path: &str) -> Result<[i32; 2]> {
-    let header: Vec<u8> = database.connection.query_row(
-        "SELECT substr(bytes,1,24) FROM source_file WHERE path=?",
-        [path],
-        |row| row.get(0),
-    )?;
+    let stored: Option<Vec<u8>> = database
+        .connection
+        .query_row(
+            "SELECT substr(bytes,1,24) FROM source_file WHERE path=?",
+            [path],
+            |row| row.get(0),
+        )
+        .optional()
+        .with_context(|| format!("PNG寸法の取得に失敗: {path}"))?;
+    // 索引だけの素材も、画像APIと同じ固定SHA・原本キャッシュから読む。
+    let header = match stored {
+        Some(header) => header,
+        None => database
+            .source(path)
+            .with_context(|| format!("PNG原本がありません: {path}"))?
+            .3
+            .into_iter()
+            .take(24)
+            .collect(),
+    };
     ensure!(
         header.len() == 24 && header.starts_with(b"\x89PNG\r\n\x1a\n"),
-        "PNGヘッダーが不正です"
+        "PNGヘッダーが不正です: {path}"
     );
     Ok([
         i32::try_from(u32::from_be_bytes(header[16..20].try_into()?))?,

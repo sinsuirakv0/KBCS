@@ -62,6 +62,7 @@ pub fn validate(connection: &Connection) -> Result<()> {
         !connection.prepare("SELECT 1 FROM stage_reward WHERE item_id<0 OR amount<=0 OR kind NOT IN ('normal','weight','score','clear') LIMIT 1")?.exists([])?,
         "ステージ報酬が不正です"
     );
+    crate::motions::validate(connection)?;
     Ok(())
 }
 
@@ -174,11 +175,14 @@ impl Database {
         if let Some(value) = self.stored_source(path)? {
             return Ok(value);
         }
-        let (original, kind, sha): (String, String, String) = self.connection.query_row(
-            "SELECT original_path,source_kind,sha256 FROM asset_reference WHERE path=?",
-            [path],
-            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
-        )?;
+        let (original, kind, sha): (String, String, String) = self
+            .connection
+            .query_row(
+                "SELECT original_path,source_kind,sha256 FROM asset_reference WHERE path=?",
+                [path],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            )
+            .with_context(|| format!("原本の索引がありません: {path}"))?;
         let root = self
             .connection
             .path()

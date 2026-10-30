@@ -250,7 +250,7 @@ pub fn choices(database: &Database, region: &str, kind: &str) -> Result<Value> {
     let mut entries = Vec::new();
     if kind == "unit" {
         let mut statement = database.connection.prepare(
-            "SELECT unit_id,form_index,name FROM form WHERE region=? ORDER BY unit_id,form_index",
+            "SELECT f.unit_id,f.form_index,f.name FROM form f WHERE f.region=? AND EXISTS(SELECT 1 FROM source_file WHERE path=substr(f.motion_path,1,length(f.motion_path)-9)||'.mamodel' UNION ALL SELECT 1 FROM asset_reference WHERE path=substr(f.motion_path,1,length(f.motion_path)-9)||'.mamodel') ORDER BY f.unit_id,f.form_index",
         )?;
         let rows = statement.query_map([region], |r| {
             Ok((
@@ -282,4 +282,35 @@ pub fn choices(database: &Database, region: &str, kind: &str) -> Result<Value> {
         }
     }
     Ok(json!({"metadata":database.metadata()?,"entries":entries}))
+}
+
+pub(crate) fn validate(connection: &Connection) -> Result<()> {
+    let mut query=connection.prepare("SELECT unit_id,form_index,motion_path FROM form WHERE icon_path IS NOT NULL AND animation_length IS NOT NULL")?;
+    let rows = query.query_map([], |r| {
+        Ok((
+            r.get::<_, u32>(0)?,
+            r.get::<_, u32>(1)?,
+            r.get::<_, String>(2)?,
+        ))
+    })?;
+    let mut exists=connection.prepare("SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?1 UNION ALL SELECT 1 FROM asset_reference WHERE path=?1)")?;
+    for row in rows {
+        let (unit, form, attack) = row?;
+        let stem = attack
+            .strip_prefix("ImageData/")
+            .and_then(|v| v.strip_suffix("02.maanim"))
+            .context("攻撃モーションのパス不正")?;
+        for path in [
+            format!("ImageData/{stem}.imgcut"),
+            format!("ImageData/{stem}.mamodel"),
+            format!("Number/{stem}.png"),
+            attack,
+        ] {
+            ensure!(
+                exists.query_row([&path], |r| r.get::<_, bool>(0))?,
+                "キャラ{unit} 形態{form}の必須素材がありません: {path}"
+            );
+        }
+    }
+    Ok(())
 }

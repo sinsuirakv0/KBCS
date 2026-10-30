@@ -85,7 +85,7 @@ struct KbcsBattle {
  static KbcsBattleVisual effect(int phase,int x,int y){return {6,0,-1,phase,0,x,y,0,{}};}
  template<size_t N> static KbcsBattleVisual *freeEffect(std::array<KbcsBattleVisual,N> &pool){auto it=std::find_if(pool.begin(),pool.end(),[](const auto &v){return !v.phase;});return it==pool.end()?nullptr:&*it;}
  void effectClock(){
-  const auto advance=[&](auto &pool){for(auto &v:pool)if(v.phase){if(v.phase==0x10e8&&!v.frame)battleSound(44);if(++v.frame>=effectLength(v.phase,true))v.phase=0;}};
+  const auto advance=[&](auto &pool){for(auto &v:pool)if(v.phase){if(v.phase==0x10e8&&!v.frame)battleSound(44);if(++v.frame>=effectLength(v.phase,true)){if(v.phase==0x10e8)v={};else v.phase=0;}}};
   for(auto &side:impacts)for(auto &v:side)if(v[0]>0)--v[0];for(auto &record:pool.extra)for(auto &v:record.impacts)if(v[0]>0)--v[0];
   advance(critical_visuals);advance(killer_visuals);advance(barrier_visuals);advance(shield_visuals);
   // 可変長リストは末尾から更新・削除し、初回SEも原本の順序を保つ。
@@ -370,7 +370,10 @@ struct KbcsBattle {
   }
   diagnostic[1]=13;bool shield_hits[2][51]{};std::vector<std::array<bool,2>> extra_hits(pool.extra.size());const auto shieldHit=[&](int side,int slot)->bool&{return slot<51?shield_hits[side][slot]:extra_hits[slot-51][side];};
   for(int side=0;side<2;++side)for(int slot=0;slot<actorEnd();++slot){
-   auto &words=actorAt(actors,side,slot).words;if(!words[0])continue;
+   auto &actor=actorAt(actors,side,slot);auto &words=actor.words;
+   // 006d951c。空き枠も含めて表示時計を進め、同Fの被弾ではprotectが再び0へ戻す。
+   check(kbcs_core_actor_protection_clock(&actor,words[133]?effectLength(0x2328):0,words[192]?effectLength(0x2440+words[192]*0x38):0));
+   if(!words[0])continue;
    if(side){
     const auto metal=hits.metal.find(slot);if(metal!=hits.metal.end()){
      int basis=words[8];for(int rate:metal->second){const int damage=std::max(1,(rate*basis)/100);KbcsActorDamageContext context{config.guard_enabled,{notice[0],notice[1]},rows.data(),states.data(),int32_t(rows.size())};check(kbcs_core_actor_damage(actors,&config.environment,&context,side,slot,damage));std::copy_n(context.notice,2,notice);basis=std::max(0,basis-damage);}
@@ -698,6 +701,9 @@ extern "C" uint32_t kbcs_core_battle_visuals(KbcsBattle *battle,const KbcsBattle
   KbcsActorDefinition definition{};KbcsSpawnRequest request{};Context context{definition,battle->config.environment,battle->actors,request,battle->seed};context.clock=&battle->config.clock;
   for(int side=0;side<2;++side)for(int slot=1;slot<actorEnd();++slot){const auto &w=actorAt(battle->actors,side,slot).words;if(!w[0])continue;
    const int x=w[3]/10,y=w[4]/10+w[5]*4;
+   // 006ddfb8の死亡列。21は専用悪魔魂のみで、4/21の状態異常表示は出さない。
+   if(w[1]==21)list.push_back({10,side,slot,0x27f8+side*0x38,w[2],x,y-97,w[5],{}});
+   if(w[1]==4||w[1]==21)continue;
    const auto draw=[&](int phase,int at,int px,int py){list.push_back({7,side,slot,phase,at,px,py,w[5],{}});};
    if(w[1]!=14&&w[1]!=15&&w[1]!=18&&w[1]!=19&&w[1]!=20)for(int i=0;i<4;++i){const int px=x+i*(side?60:-60);switch(n_00a9cafc(context,side,slot,i)){
     case 1:if(int(n_00a9bfcc(context,side,slot))>0&&w[66]>0)draw(side?0x1d08:0x16e8,w[66]-n_00a9bfcc(context,side,slot),px,y);else if(int(n_00a9c1c4(context,side,slot))>0&&w[67]>0)draw(side?0x1c28:0x1608,w[67]-n_00a9c1c4(context,side,slot),px,y);break;

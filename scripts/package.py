@@ -63,10 +63,14 @@ def macos_files(binary, folder, version):
     executable.parent.mkdir(parents=True)
     shutil.copy2(binary, executable)
     executable.chmod(0o755)
+    resources = app / "Contents/Resources"
+    resources.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(ROOT / "crates/kbcs-app/assets/app.icns", resources / "app.icns")
     info = {
         "CFBundleIdentifier": "io.github.sinsuirakv0.kbcs",
         "CFBundleName": "KBCS", "CFBundleDisplayName": "KBCS",
         "CFBundleExecutable": "kbcs", "CFBundlePackageType": "APPL",
+        "CFBundleIconFile": "app.icns",
         "CFBundleShortVersionString": version.split("-")[0].split("+")[0],
         "CFBundleVersion": version.split("-")[0].split("+")[0],
         "KBCSVersion": version, "LSMinimumSystemVersion": "14.0",

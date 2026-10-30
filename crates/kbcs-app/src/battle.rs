@@ -767,7 +767,11 @@ impl Session {
                     .get(&(talent.index as u32))
                     .copied()
                     .unwrap_or(0) as usize;
-                if level == 0 || form.rarity == 4 && member.level < 60 && talent.limit > 0 {
+                if level == 0
+                    || form.rarity == 4
+                        && u32::from(member.level) + u32::from(member.plus) < 60
+                        && talent.limit > 0
+                {
                     continue;
                 }
                 ensure!(
@@ -1234,36 +1238,38 @@ impl Session {
                 .context("個体モデルなし")?;
             let action = words[1];
             let clip = match action {
-                0 => 0,
-                1 | 16 | 18 | 19 | 20 => 1,
-                2 => 2,
-                3 | 5 | 6 | 17 => 3,
-                7 => 0,
-                10 => 7,
-                11 => 4,
-                12 => 5,
-                13 => 6,
-                4 | 21 => 8,
-                _ => continue,
+                0 | 7 => Some(0),
+                1 | 16 | 18 | 19 | 20 => Some(1),
+                2 => Some(2),
+                3 | 5 | 6 | 17 => Some(3),
+                10 => Some(7),
+                11 => Some(4),
+                12 => Some(5),
+                13 => Some(6),
+                4 => Some(8),
+                _ => None,
             };
-            if let Some(asset) = model.clips.get(&clip) {
-                paint_clip(
-                    &mut commands,
-                    asset,
-                    &frame.layout,
-                    if action == 7 { 0 } else { words[2] },
-                    f64::from(words[3] / 10),
-                    f64::from(words[4] / 10 + words[5] * 4 - if clip == 9 { 97 } else { 0 }),
-                    clip != 9,
-                )
-                .with_context(|| {
-                    format!(
-                        "{}: side={side}, slot={slot}, action={action}, frame={}",
-                        model.name, words[2]
+            // 006ddfb8は本体を描かない蘇生待ち14でも、後続の所有演出を描く。
+            if let Some(clip) = clip {
+                if let Some(asset) = model.clips.get(&clip) {
+                    paint_clip(
+                        &mut commands,
+                        asset,
+                        &frame.layout,
+                        if action == 7 { 0 } else { words[2] },
+                        f64::from(words[3] / 10),
+                        f64::from(words[4] / 10 + words[5] * 4),
+                        true,
                     )
-                })?;
-            } else if action != 4 && action != 21 && action != 10 {
-                anyhow::bail!("{}: 行動{action}のモーション{clip}がありません", model.name)
+                    .with_context(|| {
+                        format!(
+                            "{}: side={side}, slot={slot}, action={action}, frame={}",
+                            model.name, words[2]
+                        )
+                    })?;
+                } else if action != 4 && action != 10 {
+                    anyhow::bail!("{}: 行動{action}のモーション{clip}がありません", model.name)
+                }
             }
             if action == 10
                 && let Some(entry) = model.clips.get(&10)
@@ -1284,7 +1290,7 @@ impl Session {
                     false,
                 )?;
             }
-            if (action == 4 || action == 21)
+            if action == 4
                 && let Some(soul) = model.clips.get(&9)
             {
                 paint_clip(
@@ -1301,7 +1307,8 @@ impl Session {
             for value in visuals
                 .iter()
                 .filter(belonging)
-                .filter(|v| v.kind == 7)
+                .filter(|v| v.kind == 10)
+                .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 7))
                 .chain(
                     visuals
                         .iter()
@@ -1314,12 +1321,12 @@ impl Session {
                 let asset = self
                     .effects
                     .get(&(
-                        if value.kind == 7 || value.kind == 9 {
+                        if matches!(value.kind, 7 | 9 | 10) {
                             6
                         } else {
                             value.kind
                         },
-                        if value.kind == 7 || value.kind == 9 {
+                        if matches!(value.kind, 7 | 9 | 10) {
                             0
                         } else {
                             value.side
@@ -1543,4 +1550,20 @@ fn paint_packets(
         commands.push(native(render::transform(layout, &command, x, y, 0.))?);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn native_effect_bindings() {
+        let fixture: serde_json::Value = serde_json::from_str(
+            include_str!("../../../native/kbcs-core/tests/effect-state-vectors.json")
+                .trim_start_matches('\u{feff}'),
+        )
+        .unwrap();
+        let input = super::inputs().unwrap();
+        for (phase, path) in fixture["bindings"].as_object().unwrap() {
+            assert_eq!(&input["clocks"][phase]["path"], path);
+        }
+    }
 }

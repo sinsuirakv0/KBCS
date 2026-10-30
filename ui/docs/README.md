@@ -131,3 +131,11 @@ workspace.jsが上部をホーム・履歴の戻る/次へ・再読み込みへ�
 画面と戦闘ロジックは共通。battle-screen.jsの通信IDはshared/browser/session-id.jsのcreateSessionIdを使い、randomUUIDがない専用スキームではgetRandomValuesから生成する。ゲーム内RNG/論理Fとは独立。native-state.jsの詳細ページ保存はlocation.hrefでURLを解決し、protocol/hostで同じアプリを判定する。WKWebViewのoriginがnullでも検索・詳細の状態保存を続ける。
 
 preparation.test.mjsで通信IDのフォールバックと専用スキームでの履歴保存を検査する。CIのpackage.py→check-desktop.py→desktop-checkは実際の配布用WebViewでmodule/PNG/POST本文/C++/WebGLを検査する。画面を操作せず、ゲーム原本の自動取得を止めた隔離data-dirを使う。WindowsはWebView2、MacはWKWebView。公開と署名の条件はアプリ領域のbuild.mdを参照。
+
+## 2026-10-29: 共通検索と折りたたみ口
+
+units/search-controls.jsに検索フォームと入力条件を抽出し、workspaceがフォームを配置してからキャラ検索/編成が初期化する。unit-searchのHTMLは空のフォーム要素を持ち、mountUnitSearchFormが同じテンプレートを入れる。コード同期時はこの抽出とsheet.js・native-unit-search.jsの共有入口を維持すること。元Webの参照リポジトリへは変更しない。
+
+workspaceの左右を閉じても各24pxの縦ボタンを残す。ヘッダーの既存toggleへ接続し、開閉状態・幅の保存を共用する。中央下の情報バーは中央ペインだけを使う既存仕様を維持する。開いている側には縦ボタンを重ねない。
+
+2026-10-30: [起動画面・設定・キー操作](settings.md)。提供画像のアイコン/ロゴ、設定への集約、データ管理と診断、戦闘入力の共用を記録した。

@@ -72,9 +72,9 @@ fn array<const N: usize>(value: &Value) -> Result<[i32; N]> {
         .try_into()
         .map_err(|_| anyhow::anyhow!("描画の列数が不正です"))
 }
-fn parsed_cuts(database: &Database, path: &str) -> Vec<Cut> {
-    stage_media::cuts(database, path)
-        .unwrap_or_default()
+fn parsed_cuts(database: &Database, path: &str) -> Result<Vec<Cut>> {
+    Ok(stage_media::cuts(database, path)
+        .with_context(|| format!("分割定義の読み込み失敗: {path}"))?
         .into_iter()
         .map(|[x, y, width, height]| Cut {
             x,
@@ -82,7 +82,7 @@ fn parsed_cuts(database: &Database, path: &str) -> Vec<Cut> {
             width,
             height,
         })
-        .collect()
+        .collect())
 }
 struct Asset {
     model: Model,
@@ -221,8 +221,8 @@ impl Scene {
             })
             .unwrap_or([0, 0, 127]);
         let cut_id = background["raw"][13].as_i64().context("背景の分割IDなし")?;
-        let cuts = parsed_cuts(database, &format!("ImageData/bg{cut_id:02}.imgcut"));
-        let common = parsed_cuts(database, "ImageData/000_a.imgcut");
+        let cuts = parsed_cuts(database, &format!("ImageData/bg{cut_id:02}.imgcut"))?;
+        let common = parsed_cuts(database, "ImageData/000_a.imgcut")?;
         let classic = if [
             2, 3, 13, 14, 15, 26, 27, 33, 34, 40, 41, 46, 47, 55, 58, 72, 75, 81, 101, 123, 146,
             169, 197, 1008, 1074,

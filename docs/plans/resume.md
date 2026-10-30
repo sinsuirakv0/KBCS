@@ -1,4 +1,31 @@
-﻿# 再開メモ（2026-10-29 / mainの自動採番・Release公開）
+﻿# 再開メモ（2026-10-30 / UI・キー操作の修正）
+
+- 起動のホーム先行表示は、全HTMLのheadへ同期startup-boot.jsを挿入し、本文より前に青背景/中央ロゴを出して解消する。startup.jsは不透明な画面を設置して遮蔽を解除する。ホーム設定リンクは他の機能と同じボタン列へ移動。
+- 準備2倍は戦闘の上限2、3倍は上限3。2段のSpaceは操作しないだけでなくbuttonの既定クリックも抑止し、フォーカス中の段数ボタンを押さない。repeatでも抑止する。
+- キーはFIFOで保持。0tick/guard/page_frameでは消費せず、送信時のページへ対応する。以前の1変数上書きと0tickでの消失を修正。C++のPC入口だけで直前のgesture/holdを初期化し、段切替後にキーまで拒否される差も修正。通常pointerの拒否と5表示tick待機は保持。
+- 勝利文字/XPの遅延は両方との回答。原本005e1a5c/005bc00c/005e97d8はphase0で20表示更新/カメラ完了待ち。旧確認版の実DB fixtureも750勝利→770文字開始→831操作可能で一致。この待機を短縮せず、通知の配置準備をphase0へ前倒しし、5倍率×通知数の個別要求を50件ずつの一括取得へ変更。Service上限は64件、本文16KiBを維持。
+- 最終検証: app7/bridge24＋compile_fail1、JS4本、clippy、配布5ファイルで非表示WebView起動が成功。APIでスワイプ後のキーはindex5を要求し、通常swipe releaseは拒否、新しいtouchは許可。2倍/3倍の切替列と50配置一括取得、HTML遮蔽scriptの順序、埋込UI7ファイルを確認した。勝利～操作可能までの106応答の時計/phase/表示要求は変更前と一致（750→770→831）。実画面の確認とは区別する。
+- 最新確認用アプリはC:/Users/ABC/AppData/Local/Temp/KBCS-settings-20261030/review-ui-fixes/kbcs.exe（旧reviewは維持）。記録はresearch/.local/ui-fixes-{verification,result-after,js-tests,final-bridge,final-clippy,final-build}。
+- 検証は隔離したCのデータを使用。旧版のgesture1→request_slot=-1と、勝利の時計/時間をresearch/.local/ui-fixes-*-baseline.jsonへ記録。実画面はユーザー確認。コミット/push/版変更は今回依頼されていない。
+
+# 再開メモ（2026-10-30 / 起動・設定・データ管理）
+
+- 提供画像をそのままアプリアイコン/起動画面へ採用。中央ロゴから原画244px分を上へスライドし、初回取得・展開・変換の進捗を下へ表示する。WindowsのICO/RGBAとMacのICNS/Info.plistを接続した。
+- ホームの設定へ見た目・データ管理・キーボード・システム情報を集約。保存先の閲覧/削除、DB再生成、全原本のSHA検査、原本の全再取得を追加。編成/持ち物と使用中のDB/原本は削除から保護する。
+- 初期キーは2段D/F/G/H/JとC/V/B/N/M。1段ではC/V/B/N/Mで表示中の5枠、Spaceで前後5枠を切替。財布X、砲Comma、I/O/Pの3アイテム、Escオプション。個別変更可能で、出撃はC++の既存release/5tick待機/制限経路を共用する。
+- 持ち物画像は原本006f3104/0061c4e8の内部番号とCSV列11による上書きへ訂正。ARM64の15入力で照合。変換器14でモデル/分割/画像の参照を公開前検査し、欠損原本をrelease.jsonだけで導入済みと判定しない。
+- Dの残容量約76MBで実データ生成がDiskFullになった。既存データを変更せず、検証先/ビルドはC:/Users/ABC/AppData/Local/Temp/KBCS-settings-20261030へ移動。新実装は容量の事前検査と、失敗時の保存先/空き容量を表示する。Macの壊れた保存一式は未取得、Mac実機での直接再現は未確認。
+- 実データ生成882キャラ/2618形態、全54338素材のSHA検査と必須モーション2176形態が不足0件。ネコモヒカンと背景7/139/1057のmanifest/描画要求も成功。Rust43＋文書1、JS3本、clippyが成功。確認用Windowsアプリは上記C一時領域のreview/kbcs.exe。実画面はユーザーが確認する。
+- 詳細は[UI設定](../../ui/docs/settings.md)、[データ検査](../../crates/kbcs-data/docs/validation.md)。本作業のコミット/push・リリース/版変更は依頼されていない。先行する編成/エフェクト変更とユーザーのAGENTS.mdを保持する。
+
+# 再開メモ（2026-10-30 / 戦闘エフェクト監査）
+
+- 現在の対象はバリア残留/イングリッスのゾンビキラー誤表示を含む戦闘エフェクト。JP15.7.2 ARM64（SHA6122e248…）の保存済み疑似コード・実命令で確認し、詳細は[native監査報告](../../native/kbcs-core/docs/effects-audit-20261030.md)へ記録した。実画面の確認はユーザー担当。
+- 呪い2枠の素材誤抽出、砲/二次攻撃後の保護表示時計欠落、蘇生待ちの所有演出省略、死亡時烈波の専用魂、死亡中の状態表示、クリティカル終了時の残値を修正。特定キャラの例外・見た目だけの補正は追加していない。
+- 新規battle_effect_state.pyと解析専用effect-state-probe.cppで、所有時計288/固定プール20/可変プール40/描画要求8条件を検査し、死亡時烈波の両陣営2条件は原本の描画呼出まで比較。保護864/react804/砲の既存・追加条件とRust42件＋文書1件も成功。全main/GPU画素/クアラルン池の同一操作列の連続一致は未検証。
+- 小さい実命令由来の表示時計48件と素材名2件はeffect-state-vectors.json。元SO・Ghidra・参照assetsは変更していない。大きい比較ログ/DLLはresearch/.local。コミット/push・版番号変更・稼働アプリの切替は、この監査では依頼されていないため未実施。先行する編成UI/背景取得の変更と、ユーザーが編集したAGENTS.mdも未コミットのまま保持している。
+
+# 再開メモ（2026-10-29 / mainの自動採番・Release公開）
 
 - ユーザーの「version指定なしなら自動で上げる」依頼により、mainのpushでprepare→三環境build→Release公開へ接続する。Cargoで既存タグより上げてあればその版、指定がなければpatch+1、手動Actionsのversion入力でも指定可能。PR/他ブランチ/forkはビルドのみ。
 - 自動コミットでCargo/Cargo.lock/README/説明を揃え、そのSHAを全buildとpublishへ渡す。既存タグは移動せず、新規タグは三環境の成功後。GITHUB_TOKENのpushは別workflowを起動しないため、同じrunで完結する。設計はscripts/docs/release.mdとcrates/kbcs-app/docs/build.md。

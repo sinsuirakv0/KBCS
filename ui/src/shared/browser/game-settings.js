@@ -14,7 +14,7 @@ export function gameSettingsFieldsHtml(group,prefix='') {
 function readPreferences(){const value=readStoredValue(preferencesKey);return value?.version===1?value:null;}
 export function readGameSettings(){const legacy=normalizeGameSettings(readPreferences()?.database||readStoredValue(storageKey));return {...legacy,...deriveSimulationSettings(readSimulationProfile(legacy))};}
 export function updateGameSettings(values){return saveSettings({site:readSiteSettings(),database:normalizeGameSettings({...readGameSettings(),...values})});}
-function readSiteSettings(){return normalizeSiteSettings(readPreferences()?.site||{...readStoredValue(siteKey),theme:document.documentElement.dataset.theme||'original'});}
+export function readSiteSettings(){return normalizeSiteSettings(readPreferences()?.site||{...readStoredValue(siteKey),theme:document.documentElement.dataset.theme||'original'});}
 function applySiteSettings(value){
   const root=document.documentElement;root.dataset.siteBorder=value.border;setTheme(value.theme);
   root.style.setProperty('--site-scale',value.scale/100);
@@ -39,6 +39,7 @@ function collectSettings(){
   return {site:normalizeSiteSettings(Object.fromEntries(Object.keys(defaultSiteSettings).map(key=>[key,formElementValue('site-'+key)]))),database:normalizeGameSettings({...readGameSettings(),...values})};
 }
 export function openSiteSettings(panel='site'){
+  if(panel==='site'){location.href='/pages/settings/#appearance';return;}
   initializeSiteSettings();
   applyDatabase=panel==='database';
   const saved=readGameSettings(),current=applyDatabase?context?.readCurrent()||{}:{};
@@ -78,4 +79,18 @@ export function initializeSiteSettings(){
 export function initializeGameSettings(toolbar,readCurrent,onApply){
   context={readCurrent,onApply};initializeSiteSettings();
   const button=document.createElement('button');button.type='button';button.textContent='お宝・施設';button.addEventListener('click',()=>window.dispatchEvent(new Event('kbcs:open-simulation-settings')));toolbar.append(button);
+}
+
+export function updateSiteSettings(values){
+ const site=normalizeSiteSettings({...readSiteSettings(),...values});
+ if(!saveSettings({site,database:normalizeGameSettings(readGameSettings())}))throw Error('設定を保存できませんでした');
+ applySiteSettings(site);return site;
+}
+export function mountAppearance(container){
+ initializeSiteSettings();
+ const fields=dialog.querySelector('#settings-site .game-settings-fields').cloneNode(true);
+ container.append(fields);for(const [key,value] of Object.entries(readSiteSettings()))fields.querySelector('[name="site-'+key+'"]').value=value;
+ const sync=()=>{for(const key of ['scale','border'])fields.querySelector('[data-value="'+key+'"]').value=fields.querySelector('[name="site-'+key+'"]').value+(key==='scale'?'%':'');};
+ fields.addEventListener('input',()=>{updateSiteSettings(Object.fromEntries([...fields.querySelectorAll('input,select')].map(node=>[node.name.slice(5),node.value])));sync();});sync();
+ const reset=document.createElement('button');reset.type='button';reset.textContent='見た目を標準に戻す';reset.onclick=()=>{const value=updateSiteSettings(defaultSiteSettings);for(const [key,item] of Object.entries(value))fields.querySelector('[name="site-'+key+'"]').value=item;sync();};container.append(reset);
 }

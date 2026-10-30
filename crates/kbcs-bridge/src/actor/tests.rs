@@ -15,6 +15,47 @@ fn sparse(pool: &mut Pool, values: &Value) {
 }
 
 #[test]
+fn native_protection_visual_clock() {
+    unsafe extern "C" {
+        fn kbcs_core_actor_protection_clock(actor: *mut Actor, barrier: i32, shield: i32) -> u32;
+    }
+    let fixture: Value = serde_json::from_str(
+        include_str!("../../../../native/kbcs-core/tests/effect-state-vectors.json")
+            .trim_start_matches('\u{feff}'),
+    )
+    .unwrap();
+    let fields = [133, 134, 192, 193];
+    for record in fixture["records"].as_array().unwrap() {
+        let mut actor = Actor { words: [17; WORDS] };
+        let values = array::<4>(&record["before"]);
+        for (field, value) in fields.iter().zip(values) {
+            actor.words[*field] = value;
+        }
+        let before = actor.words;
+        let lengths = array::<4>(&record["lengths"]);
+        assert_eq!(
+            unsafe {
+                kbcs_core_actor_protection_clock(
+                    &mut actor,
+                    lengths[0],
+                    lengths[values[2] as usize],
+                )
+            },
+            0
+        );
+        assert_eq!(
+            fields.map(|field| actor.words[field]),
+            array::<4>(&record["after"])
+        );
+        for (i, value) in before.iter().enumerate() {
+            if !fields.contains(&i) {
+                assert_eq!(actor.words[i], *value);
+            }
+        }
+    }
+}
+
+#[test]
 fn native_actor_states() {
     let waves: Value = serde_json::from_str(
         include_str!("../../../../native/kbcs-core/tests/actor-wave-step-vectors.json")

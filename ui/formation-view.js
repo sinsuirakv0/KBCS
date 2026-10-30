@@ -2,6 +2,9 @@
 import {resolveFormationMember} from './formation-model.js';
 import {escapeHtml as esc} from './src/shared/game/database-view.js';
 
+// 00a82394→DAT_002f2664の19要素。20は同じアトラスの追加画像。
+const slotNumberCuts=[44,45,46,47,48,49,50,51,52,53,113,114,115,116,117,125,126,138,140,141];
+
 // 00a82394: 編成不可cut139は枠の右端+3、上端+61へ右揃えで重ねる。
 export function blockedBadgeSvg(manifest,x=0,y=0){
   const rect=manifest.atlases.img029_ja.rects[139];
@@ -40,8 +43,13 @@ function actionSvg(label,action,content){
   const layout=formationLayout();
   let body='<rect width="1188" height="278" fill="#d4b15f"/>'+sprite('img008_ja',0,0,0,1188,55)+sprite('img008_ja',3,8,3,297,46)+'<path d="M0 55H1188V79H0Z" fill="#ffe290"/><path d="M0 79H1188" stroke="#706241"/>';
   if(!tray&&!ghost){
-  // 原本の子スプライトは親中心+51、中心揃え。11件以上の保存番号はPC用文字表示。
-  const badgeNumber=index<=10?sprite('img029_ja',43+index,layout.badgeX+124-Math.trunc(25/2),67,25,24):'<text x="'+(layout.badgeX+124)+'" y="89" text-anchor="middle" fill="white" stroke="black" stroke-width="2" paint-order="stroke" font-size="'+Math.min(24,44/String(index).length)+'" font-weight="bold">'+index+'</text>';
+  // 原本の子スプライトは親中心+51、中心揃え。21以降はPC拡張として原画の数字を合成する。
+  const number=String(index),numberX=layout.badgeX+124-Math.trunc(25/2),cut=slotNumberCuts[index-1];
+  const badgeNumber=cut!==undefined?sprite('img029_ja',cut,numberX,67,25,24):[...number].map((character,i)=>{
+    // 0はcut53（10）の右側。原画の黒縁を含む16×24の範囲を使う。
+    const rect=character==='0'?[829,167,16,24]:manifest.atlases.img029_ja.rects[43+Number(character)];
+    return spriteRect('img029_ja',rect,numberX+i*25/number.length,67,25/number.length,24);
+  }).join('');
   body+=actionSvg('出陣スロットの操作','menu',sprite('img029_ja',5,layout.badgeX,61,147,36)+badgeNumber);
   // 00a71320 / 00a82394: 名前欄はcut120/121、中央揃え、原本param.tsvの余白。
   const parameters=manifest.parameters.values;
@@ -78,7 +86,10 @@ function actionSvg(label,action,content){
     body+='<rect role="button" tabindex="0" data-slot="'+slot+'" aria-label="枠'+(slot+1)+' '+escape(form?.name??'空き')+'" aria-pressed="'+(selected===slot)+'" x="'+x+'" y="'+y+'" width="110" height="85" fill="transparent"/>';
 
   }
-  if(!tray&&!ghost)body+=actionSvg('城砲を変更','cannon',panel(101,102,layout.width-172,59,271,27)+'<text x="'+(layout.width-86)+'" y="79" text-anchor="middle" fill="white" font-size="18" font-weight="bold">'+names[doc.cannon.id]+'</text>'+sprite('img029_ja',100,layout.width-55,90,46,36));
+  if(!tray&&!ghost){
+    const cannon=panel(101,102,layout.width-172,59,271,27)+'<text x="'+(layout.width-86)+'" y="79" text-anchor="middle" fill="white" font-size="18" font-weight="bold">'+names[doc.cannon.id]+'</text>'+sprite('img029_ja',100,layout.width-55,90,46,36);
+    body+=preview?cannon:actionSvg('城砲を変更','cannon',cannon);
+  }
   if(!preview&&!tray&&!ghost)body+=actionSvg('編成中のキャラをすべて外す','clear',sprite('img029_ja',132,13,230,40,40));body+=floatingBody;
   return '<svg class="formation-native" viewBox="'+(ghost?'290 90 110 85':tray?'288 88 698 89':'0 0 1188 278')+'" aria-label="'+(tray?'一時キャラ枠':'キャラクター編成')+'">'+body+'</svg>';
  };

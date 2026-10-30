@@ -27,12 +27,13 @@ export function createResultPopup(reportError){
     const rows=lines(message),textures=['rgb(255,255,0)','rgb(255,0,255)'].map(color=>rows.map(row=>row.map(run=>texture(run,color)))),widths=textures[0].map(row=>row.reduce((sum,run)=>sum+run.w,0));
     return {rows,widths,textures};
    });
-   Promise.all(entries.map(async entry=>{
-    const cut=atlas.atlases.img005_1.rects;
-    const input=Array.from({length:5},(_,scaleFrame)=>({viewport:width,count:entry.rows.length,widths:Array.from({length:8},(_,i)=>entry.widths[i]||0),scaleFrame,cut:cut[0],padding:cut[8].slice(0,2)}));
-    const layouts=await readBattleJson('/api/battle-popup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});
-    return {...entry,layouts};
-   })).then(value=>{if(!closed&&key===next)prepared=value;}).catch(error=>{if(!closed)reportError(error.message);});
+   // 通知ごとの要求を並列に増やさず、Serviceの64件/16KiB以内でまとめる。
+   const cut=atlas.atlases.img005_1.rects,input=entries.flatMap(entry=>Array.from({length:5},(_,scaleFrame)=>({viewport:width,count:entry.rows.length,widths:Array.from({length:8},(_,i)=>entry.widths[i]||0),scaleFrame,cut:cut[0],padding:cut[8].slice(0,2)})));
+   return (async()=>{
+    const layouts=[];
+    for(let offset=0;offset<input.length;offset+=50)layouts.push(...await readBattleJson('/api/battle-popup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input.slice(offset,offset+50))}));
+    return entries.map((entry,index)=>({...entry,layouts:layouts.slice(index*5,index*5+5)}));
+   })().then(value=>{if(!closed&&key===next)prepared=value;}).catch(error=>{if(!closed&&key===next)reportError(error.message);});
   },
   paint(context,popup,width,atlas,images){
    const entry=prepared?.[popup.index];if(!entry)return;

@@ -1,7 +1,8 @@
 ﻿// 起動通知の拒否・受諾・初回取得と、ホームの再取得/再起動要求だけを検証する。
 import assert from 'node:assert/strict';
 class Element {
-  constructor(tag,owner){this.tag=tag;this.owner=owner;this.children=[];this.handlers={};this.textContent='';}
+  constructor(tag,owner){this.tag=tag;this.owner=owner;this.children=[];this.handlers={};this.textContent='';const classes=new Set();this.classList={add:(...values)=>values.forEach(v=>classes.add(v)),contains:value=>classes.has(value)};}
+  querySelector(selector){this.nodes??=new Map();if(!this.nodes.has(selector))this.nodes.set(selector,new Element('div',this.owner));return this.nodes.get(selector);}
   append(...children){this.children.push(...children);}
   replaceChildren(...children){this.children=children;}
   setAttribute(){}
@@ -14,6 +15,7 @@ class Element {
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function settle(check){for(let i=0;i<100;i++){await tick();if(check())return;}assert.fail('更新通知が完了しませんでした');}
 const originalFetch=globalThis.fetch;
+globalThis.requestAnimationFrame=callback=>callback();globalThis.Image=class{decode(){return Promise.resolve();}};
 try{
   for(const accept of [false,true]){
     const document={dialogs:[],createElement(tag){return new Element(tag,this);},createTextNode(text){return {textContent:text};},getElementById(){return null;}};
@@ -48,11 +50,11 @@ try{
     return {ok:true,json:async()=>structuredClone(first)};
   };
   const updates=await import('../updates.js?first-run');updates.initializeUpdates();
-  await settle(()=>document.dialogs.length===1);
+  await settle(()=>document.body.children.some(node=>node.className==='startup-screen'));
   assert.equal(downloads,0);
-  assert.equal(document.dialogs[0].children[0].textContent,'初回データをダウンロードしています');
+  const progress=document.body.children.find(node=>node.className==='startup-screen');
+  assert.equal(progress.querySelector('h1').textContent,'初回データを準備しています');
   first.busy=false;await updates.checkUpdates();
-  assert.equal(document.dialogs[0].children[0].textContent,'データの導入が完了しました');
-  document.dialogs[0].children.at(-1).onclick();
-}finally{globalThis.fetch=originalFetch;delete globalThis.document;delete globalThis.window;}
+  assert.equal(downloads,0);
+}finally{globalThis.fetch=originalFetch;delete globalThis.document;delete globalThis.window;delete globalThis.Image;delete globalThis.requestAnimationFrame;}
 console.log('startup consent, decline notice, manual download and restart passed');

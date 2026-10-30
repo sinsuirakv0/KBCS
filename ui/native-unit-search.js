@@ -1,3 +1,5 @@
+﻿import {calculateTalentStats} from './talents.js';
+import {calculateUnitStats} from './src/shared/game/unit-stats.js';
 import {calculateNative} from './native-calculation.js';
 import {applyUnitTalents} from './talent-effects.js';
 let savedKey,pending;
@@ -15,4 +17,14 @@ export function prepareUnitSearch(database,settings){
     const values=[];for(let offset=0;offset<inputs.length;offset+=4000)values.push(...(await calculateNative({stats:inputs.slice(offset,offset+4000)})).stats);
     return new Map([...rows].map(([id,row])=>[id,{hp:values[row.hp],attacks:row.attacks.map(i=>values[i])}]));
   })().catch(error=>{if(savedKey===key)savedKey=null;throw error;});return pending;
+}
+
+export function unitSearchProfile(database,unit,form,settings,nativeProfiles) {
+  const levels=Object.fromEntries(unit.talents.map(talent=>[talent.index,talent.maxLevel]));
+  const profile=settings.applyTalents?calculateTalentStats(unit,form,database.growth[unit.growth],settings,{talents:true,talentLevels:levels},calculateUnitStats):{form,stats:calculateUnitStats(unit,form,database.growth[unit.growth],settings)};
+  const native=nativeProfiles.get(unit.id+':'+form.code);if(!native)throw Error('ネイティブのキャラステータスを準備中です。');profile.stats={...profile.stats,...native,attack:native.attacks.reduce((a,b)=>a+b,0)};profile.stats.dps=profile.stats.attackCycle>0?profile.stats.attack*30/profile.stats.attackCycle:null;
+  if(!settings.includeTalents)return profile;
+  const potential=applyUnitTalents(unit,form,levels,60,true).form;
+  // 検索用の属性・特性だけ補い、表示ステータスと詳細へ渡す本能ON/OFFは変えない。
+  return {...profile,form:{...profile.form,targets:potential.targets,abilities:potential.abilities}};
 }

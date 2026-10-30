@@ -60,7 +60,7 @@ def compare(actors,state,label):
 rules=Rules((c.c_int32*4)(27,31,22,13),100);env=Environment();env.unit_modes[:]=[1,0];env.stage_width=20000;env.castle_slot=-1
 context=HitContext();context.effects.target_count=1;context.effects.scenario_level=1
 clock=Clock();damage=Damage();hits=0
-for kind,condition,action in itertools.product(range(8),['plain','metal','zombie','dodge','wave-ignore','wave-stop','barrier','effects','curse'],[0,12,14]):
+for kind,condition,action in itertools.product(range(8),['plain','metal','zombie','dodge','wave-ignore','wave-stop','barrier','barrier-visible','shield','shield-visible','effects','curse'],[0,12,14]):
  actors=Actors();state=State();events=Events();castle=actors[0][0].words;target=actors[1][1].words
  for k,v in {0:1,3:16800,4:4400,6:12,7:236000,8:236000,13:7,17:kind,20:4550,21:1000,22:1,27:250,28:1,30:150,31:200}.items():castle[k]=v
  for k,v in {0:2,1:action,3:7000,4:4400,7:10001,8:5001,22:0,126:-1,168:59}.items():target[k]=v
@@ -69,7 +69,10 @@ for kind,condition,action in itertools.product(range(8),['plain','metal','zombie
  if condition=='dodge':target[165]=100
  if condition=='wave-ignore':target[85]=1;castle[5]=1
  if condition=='wave-stop':target[86]=1;castle[5]=1
- if condition=='barrier':target[117]=10001
+ if condition.startswith('barrier'):target[130]=10001
+ if condition=='barrier-visible':target[133]=1;target[134]=13
+ if condition.startswith('shield'):target[184]=target[190]=10001
+ if condition=='shield-visible':target[192]=1;target[193]=7
  if condition=='effects':castle[61]=100;castle[62]=30;castle[64]=100;castle[65]=31;castle[78]=100;castle[79]=32
  if condition=='curse':target[153]=39
  reset(actors,state);n.call(0x5d6c3c,game,0,1,7)
@@ -90,6 +93,20 @@ for kind,side,remaining in itertools.product([0,5],[0,1],[4,5,8,9,13,31]):
  code=lib.kbcs_core_actor_cannon_step(c.byref(state),c.byref(actors),c.byref(env),c.byref(context),c.byref(clock),c.byref(damage),c.byref(rules),side,c.byref(seed),c.byref(events));assert code==0,('step error',kind,side,remaining,hex(lib.kbcs_core_actor_last_error()))
  compare(actors,state,('step',kind,side,remaining));assert seed.value==native_seed;steps+=1
 updates=0
+lightning_steps=0
+# 雷砲の矩形命中は5..15Fだけ。バリアの実耐久と表示済み状態を別々に与える。
+for condition,frame,attack in itertools.product(['plain','barrier','barrier-visible','shield'],[4,5,15,16],[100,20000]):
+ actors=Actors();state=State();events=Events();castle=actors[0][0].words;target=actors[1][1].words
+ for k,v in {0:1,3:16800,4:4400,7:236000,8:236000,9:5,10:frame,13:7,17:3,18:8000,20:attack,21:2000,61:100,62:30}.items():castle[k]=v
+ for k,v in {0:2,3:8000,4:4400,7:100001,8:100001,126:-1,168:59}.items():target[k]=v
+ if condition.startswith('barrier'):target[130]=10001
+ if condition=='barrier-visible':target[133]=1;target[134]=13
+ if condition=='shield':target[184]=target[190]=10001
+ reset(actors,state);n.call(0x5d6740,game,0)
+ seed=c.c_uint32(0x12345678)
+ code=lib.kbcs_core_actor_cannon_step(c.byref(state),c.byref(actors),c.byref(env),c.byref(context),c.byref(clock),c.byref(damage),c.byref(rules),0,c.byref(seed),c.byref(events));assert code==0,('lightning step',condition,frame,attack,code)
+ compare(actors,state,('lightning',condition,frame,attack));assert seed.value==native_seed
+ lightning_steps+=1
 for side,pair,frame,pool_full in itertools.product([0,1],[(kind,action) for kind,actions in enumerate([[0,1,2],[3],[6],[4,5],[7,8],[9,10],[11],[12]]) for action in actions],[0,3,4,5,10,16,17,22,27,31,32,33,48],[0,1]):
  kind,action=pair
  actors=Actors();state=State();w=actors[side][0].words
@@ -132,5 +149,5 @@ for kind,remaining,action,available,raw in itertools.product(range(8),[0,1],[0,1
  compare(actors,state,('fire',kind,remaining,action,available,raw));assert seed.value==native_seed
  assert bool(out.fired)==(19 in sounds);assert out.sound in sounds if out.sound>=0 else True
  fire_cases+=1
-report={'version':'15.7.2','nativeSha256':SHA,'librarySha256':digest(args.library.read_bytes()),'hitCases':hits,'actionCases':updates,'fireCases':fire_cases,'contactSteps':steps,'limits':['制御されたステージ補正/モデル長/表示用文字列とコンテナ','所有戦闘の全フレーム/音声/GPU画素の一致ではない']}
+report={'version':'15.7.2','nativeSha256':SHA,'librarySha256':digest(args.library.read_bytes()),'hitCases':hits,'actionCases':updates,'fireCases':fire_cases,'contactSteps':steps,'lightningSteps':lightning_steps,'limits':['制御されたステージ補正/モデル長/表示用文字列とコンテナ','所有戦闘の全フレーム/音声/GPU画素の一致ではない']}
 (ROOT/'research/.local/actor-cannon-1572.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8-sig');print(json.dumps(report))

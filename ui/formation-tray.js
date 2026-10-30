@@ -21,6 +21,6 @@ export function moveTrayMember(slots,tray,index){
 
 // ドロップ先の個別設定も一時枠へ戻し、どちらのキャラも失わない。
 export function swapTrayMember(slots,tray,index,target){
- if(!Number.isInteger(target)||target<0||target>=slots.length||!tray[index])return false;
+ if(!Number.isInteger(target)||target<0||target>=slots.length||!Number.isInteger(index)||index<0||index>=tray.length||(!tray[index]&&!slots[target]))return false;
  [slots[target],tray[index]]=[tray[index],slots[target]];return true;
 }

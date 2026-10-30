@@ -1,0 +1,12 @@
+﻿.startup-screen{position:fixed;inset:0;z-index:10000;background:#0b1c3f;color:#f4f6fa;opacity:1;transition:opacity .2s;overflow:hidden;isolation:isolate}
+.startup-visible{opacity:1}.startup-done{opacity:0;pointer-events:none}
+.startup-art{position:absolute;left:50%;top:50%;width:min(100vw,160vh);aspect-ratio:8/5;transform:translate(-50%,-50%);transition:transform .65s cubic-bezier(.2,.7,.2,1),top .65s}
+.startup-art img{display:block;width:100%;height:auto}
+.startup-raised .startup-art{top:0;transform:translate(-50%,-20.333333%)}
+.startup-progress{position:absolute;left:50%;top:clamp(230px,calc(min(100vw,160vh)*.36),65vh);transform:translateX(-50%);width:min(740px,85vw);text-align:center;opacity:0;transition:opacity .3s .3s}
+.startup-raised .startup-progress{opacity:1}.startup-progress h1{font-size:clamp(16px,2vw,24px);margin:16px 0}.startup-progress p{min-height:3em;overflow-wrap:anywhere;font-size:14px}.startup-progress progress{width:min(380px,90%);height:6px;accent-color:#c79d32}.startup-progress a{color:#a2ceff;display:inline-block;padding:10px}.startup-progress a[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){.startup-art,.startup-progress,.startup-screen{transition:none}}
+
+.startup-top .startup-art{top:0;transform:translateX(-50%);transition:none}
+
+.startup-progress p{max-height:25vh;overflow:auto}
