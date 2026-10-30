@@ -24,3 +24,10 @@ Managerはupdates_macos::prepare/applyを使う。同じ配布アセット命名
 適用CLIは新しく展開したKBCS.appの実行ファイルから起動する。kill(pid,0)で元プロセスの終了を待ち、SHA再検証→インストール先と同じ親に一時.appを作成→署名再検証→旧版を退避→renameで交換する。交換失敗時は旧版を戻す。成功後に/usr/bin/open -n ... --argsで同じdata-dir/regionを引き継ぎ起動する。元アプリが読み取り専用の場所にある場合は更新を失敗させ、~/Applicationsへ移動する案内を保存する。親のアプリを強制終了しない。実行中本体やユーザーDBを書き換えて試す検証は行わない。
 
 配布Mac版は既定で開発用ad-hoc署名。Developer ID署名/Apple公証とは区別する。build.mdに配布と初回OS確認の関係を記録する。
+
+
+## OS別の部分公開（2026-10-30）
+
+CIは各OSのbuildとpublishを独立実行する。先に成功した環境のZIPを公開し、後から成功した環境を同じソース/タグへ追加できる。公開処理はJSON/チェックサムのGitHub側検証を先に済ませ、ZIPを最後に置く。対応ZIPのないOSへ他CPUの版を案内しない。
+
+releases::latest_app → latest_app_forは、ドラフト・本体以外のタグ・対象OS/CPUのZIPなし・size=0・不正/欠落SHAを除外してSemVer最大を選ぶ。Windowsのみ新版が成功した場合はWindowsへ新版、Macへ最後に成功した版を返す。Macの追加公開は次の起動/手動checkで検出する。実際のダウンロード時のsize/SHA/CPU/署名検査は従来通りで、更新ファイル形式とapply-update CLIを変えない。旧アプリにもOS/CPU別ZIPの選択は既にあるため、この公開方式を使うための先行更新を必須にしない。

@@ -20,11 +20,15 @@
 
 RunnerのCPUは[GitHubの一覧](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)を確認した。macos-latestへの暗黙依存を避ける。Rust 1.98.1、WindowsのLLVM-MinGW 20260922を固定し、LLVM配布ZIPのSHA-256を照合する。C++20・ffp-contract=off・fwrapvは既存bridge/build.rsを共用する。MacのMACOSX_DEPLOYMENT_TARGETとInfo.plistは14.0を揃える。
 
-各jobはCargo.lock固定のworkspace releaseテスト、clippy、既存JS回帰、releaseビルドを実行し、package.pyが成果物のCPU種別・単独help起動・SHA-256を確認する。C++の同じ原本照合ベクトルを全CPUで使う。UIの見た目やWKWebViewの実機操作まで検証したことにはしない。
+各OSのjobはCargo.lock固定のworkspace releaseテスト → release clippy → releaseビルドを行い、テスト用にコード生成した依存をclippyでも再利用する。配布物のCPU種別・単独help/WebView起動・SHA-256を確認する。C++の同じ原本照合ベクトルを全CPUで使う。UIの見た目やWKWebViewの実機操作まで検証したことにはしない。
 
-ActionsのArtifactsは14日保存し、ZIP・SHA・版/commit/コンパイラ情報JSONを含む。mainへのpushはprepare-release.pyが配布版を確定し、全build成功後にrelease jobが3種類のZIP・SHA・JSONを収集する。版指定なしは最新のkbcs-vタグからパッチ番号を1上げ、Cargo.tomlで明示的に上げた未使用版、または手動実行のversion入力を優先する。Cargo.lock・READMEのリンク・未作成のリリース説明も揃えてbotコミットをmainへpushし、そのSHAを三環境と公開処理へ渡す。明示的なkbcs-vVERSIONタグのpushも従来通り使える。PR・他ブランチ・forkはビルドだけを行う。採番・再実行・関数関係は[scriptsの設計](../../../scripts/docs/release.md)を参照。
+共通のJS/Python回帰はOSごとに繰り返さない。ccのparallel機能はCargoのjobserverに従い、C++20・ffp-contract=off・fwrapvを維持して並列コンパイルする。配布版のthin LTOは維持。Cargoのregistry/git/targetをOS/CPU/コンパイラ別に復元し、失敗後にも途中成果物を保存する。Cargoのtimings HTMLは7日、インストーラのZIP/SHA/情報JSONは14日保存する。
 
-公開処理は三環境の版・commit・SHAを照合してからタグを作成し、ドラフトの配布ZIPをGitHub側のサイズ・SHAとも照合して公開開発版へ切り替える。既存タグの指し先と公開済みリリースは変更しない。途中失敗は公開せず、本体更新機能には完成したReleasesだけを渡す。GITHUB_TOKENによるbotコミット・タグは別のpush workflowを起動しないため、採番コミットをcheckoutした同じrunでビルドと公開を完了する。追加PATは不要。mainには自動コミットが加わるので、次の修正前に作業ツリーを保持したままfast-forwardで取り込む。今回の自動採番・公開はユーザーの明示依頼による。
+mainへのpushではprepare-release.pyが版・Cargo.lock・README・未作成の説明を揃え、botコミットのSHAを各buildと公開へ渡す。指定なしは最新kbcs-vタグからpatchを1上げ、未公開の予約版またはversion入力を優先する。PR・他ブランチ・forkはビルドだけ。GITHUB_TOKENで作るコミット/タグは別workflowを起動しないため、同じrunで完了する。
+
+build.ymlはmatrixからbuild-platform.ymlを呼び、OSごとのbuild → publishが独立して進む。他OSが失敗・実行中でも、成功した環境の三点とGitHub側のsize/digestを検証して公開する。公開処理だけをqueue: maxの共通concurrency groupで直列化する。最初の成功OSがドラフトから公開し、後続の成功OSは同じソース/タグへ追加。既存タグ・完成した環境のZIP/SHA/情報JSONは上書きしない。再実行・途中失敗の回復と検証範囲は[scriptsの設計](../../../scripts/docs/release.md)を参照。
+
+更新確認は端末のOS/CPUに対応するZIPがある最新公開版を選ぶ。Windowsだけ成功してもWindowsを更新でき、Macは最後に成功した対応版を使う。READMEのダウンロード案内とRelease説明も部分公開を前提とする。ビルド失敗を成功表示へ変える処理はなく、失敗したOSのjobは赤いまま残す。
 
 ## 配布パッケージ
 

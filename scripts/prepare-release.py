@@ -79,12 +79,14 @@ def update_files(root, version, previous):
     if not notes.exists():
         tag = "kbcs-v" + version
         base = f"https://github.com/{REPOSITORY}"
-        lines = [f"# KBCS {version}", "", "Windows・Apple Silicon Mac・Intel Mac用の自動ビルドです。", ""]
-        for label, platform in [("Windows", "windows-x64"), ("Mac・Mシリーズ", "macos-arm64"), ("Mac・Intel", "macos-x64")]:
-            filename = f"KBCS-{version}-{platform}.zip"
-            lines.append(f"- **{label}**: [{filename}]({base}/releases/download/{tag}/{filename})")
+        lines = [f"# KBCS {version}", "", "テスト・ビルド・単独起動検査に成功した環境から順に公開します。", "",
+                 "下の **Assets** から使用する端末のZIPを取得してください。", "",
+                 "| 端末 | ファイル名の末尾 |", "| --- | --- |",
+                 "| Windows | `windows-x64.zip` |", "| Mac・Mシリーズ | `macos-arm64.zip` |",
+                 "| Mac・Intel | `macos-x64.zip` |", "",
+                 "未掲載の環境はビルド中または失敗しています。前のリリースの対応ZIPを利用してください。アプリの更新確認も端末ごとに利用可能な最新版を選びます。"]
         lines += ["", f"[インストール手順]({base}/blob/{tag}/README.md)", "",
-                  "三環境のテスト・ビルド・単独起動検査を通過してから公開しています。ZIPのSHA-256とビルド情報JSONを添付し、全ソースはSource codeから取得できます。"]
+                  "ZIPのSHA-256とビルド情報JSONを添付し、全ソースはSource codeから取得できます。配布済みZIPは上書きしません。"]
         if previous:
             lines += ["", f"[前回からの変更]({base}/compare/{previous}...{tag})"]
         notes.parent.mkdir(parents=True, exist_ok=True)

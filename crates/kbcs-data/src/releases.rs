@@ -207,16 +207,27 @@ pub fn app_version(tag: &str) -> Option<semver::Version> {
 }
 
 pub fn latest_app() -> Result<Option<Release>> {
+    Ok(latest_app_for(
+        list(APP_REPOSITORY)?,
+        std::env::consts::OS,
+        std::env::consts::ARCH,
+    ))
+}
+
+fn latest_app_for(releases: Vec<Release>, os: &str, architecture: &str) -> Option<Release> {
     // 本体の開発版は公開対象。native-v等の解析資料は対象外。
-    Ok(list(APP_REPOSITORY)?
+    releases
         .into_iter()
         .filter(|r| {
             !r.draft
                 && app_version(&r.tag_name).is_some()
-                && app_asset_name(&r.tag_name, std::env::consts::OS, std::env::consts::ARCH)
-                    .is_ok_and(|name| r.assets.iter().any(|a| a.name == name))
+                && app_asset_name(&r.tag_name, os, architecture).is_ok_and(|name| {
+                    r.assets
+                        .iter()
+                        .any(|a| a.name == name && a.size > 0 && digest(a).is_ok())
+                })
         })
-        .max_by_key(|r| app_version(&r.tag_name)))
+        .max_by_key(|r| app_version(&r.tag_name))
 }
 
 pub fn app_asset_name(tag: &str, os: &str, architecture: &str) -> Result<String> {
@@ -701,6 +712,55 @@ pub fn lock(path: &Path) -> Result<File> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn partial_releases_select_latest_available_platform() {
+        let make_release = |version: &str, platforms: &[&str], draft: bool| Release {
+            tag_name: format!("kbcs-v{version}"),
+            published_at: String::new(),
+            html_url: String::new(),
+            draft,
+            assets: platforms
+                .iter()
+                .map(|platform| Asset {
+                    name: format!("KBCS-{version}-{platform}.zip"),
+                    size: 1,
+                    browser_download_url: String::new(),
+                    digest: Some(format!("sha256:{}", "a".repeat(64))),
+                })
+                .collect(),
+        };
+        let mut releases = vec![
+            make_release(
+                "0.1.37",
+                &["windows-x64", "macos-arm64", "macos-x64"],
+                false,
+            ),
+            make_release("0.1.38", &["windows-x64"], false),
+            make_release("0.1.39", &["macos-arm64"], true),
+            make_release("0.1.40", &["windows-x64"], false),
+        ];
+        releases[3].assets[0].digest = None;
+        for (os, architecture, expected) in [
+            ("windows", "x86_64", "kbcs-v0.1.38"),
+            ("macos", "aarch64", "kbcs-v0.1.37"),
+            ("macos", "x86_64", "kbcs-v0.1.37"),
+        ] {
+            assert_eq!(
+                latest_app_for(releases.clone(), os, architecture)
+                    .unwrap()
+                    .tag_name,
+                expected
+            );
+        }
+        releases[1] = make_release("0.1.38", &["windows-x64", "macos-arm64"], false);
+        assert_eq!(
+            latest_app_for(releases, "macos", "aarch64")
+                .unwrap()
+                .tag_name,
+            "kbcs-v0.1.38"
+        );
+    }
 
     fn serve_body(bytes: Vec<u8>) -> Result<(String, std::thread::JoinHandle<()>)> {
         let size = bytes.len();

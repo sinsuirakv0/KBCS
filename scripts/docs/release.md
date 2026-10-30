@@ -1,25 +1,39 @@
-﻿# 自動採番と三環境の公開（2026-10-29）
+﻿# 自動採番・OS別公開（2026-10-30）
 
 ## 呼出しと責務
 
-`.github/workflows/build.yml` の prepare → build（三環境）→ release。prepareだけがmainを更新し、buildとreleaseはprepare.outputs.commitをcheckoutする。元イベントのGITHUB_SHAと自動コミットは異なるため、package.pyのgit HEADとpublish-release.pyのKBCS_RELEASE_COMMITを同じ値へ固定する。ZIP・アプリ内のCARGO_PKG_VERSION・タグのソース・Cargo.lockを一致させる。
+`build.yml` のprepareが版とソースSHAを確定する。UI回帰チェックはprepareと並列。公開用Python試験はprepareで、PR等ではchecksで実行し、共通試験をOSごとに繰り返さない。prepareは版・lock・README・説明だけを変更するため、UIチェックは開始SHA、各OSのビルドと公開はprepare.outputs.commitを使う。
 
-prepare-release.pyのselect_versionはX.Y.Zの数値順でkbcs-vタグを比較する。version入力なし、Cargoも既存タグと同じ版ならpatch+1。Cargoが既存タグより新しい場合は明示指定/未公開の予約版として維持する。手動実行のversion入力は現在のCargo以上・既存タグより新しい版だけを許可する。native-v等のタグは数えない。
+`build`はmatrixから`build-platform.yml`を呼ぶ。Windows、Apple Silicon、Intelごとにbuild → publishが独立し、他OSの成功・終了を待たない。fail-fast=falseで一つの失敗から他OSを中断しない。各buildはread権限、公開jobだけがwrite権限を使う。呼出し元は再利用workflowへwriteを渡すが、fork PRのtokenはGitHubによりreadへ制限され、PRの公開条件もfalseになる。
 
-update_filesはworkspace.package.version、workspace memberだけのCargo.lock、READMEの配布リンク/見出しを更新する。手書きのdocs/releases/VERSION.mdがあれば保持し、なければ三環境へのリンク・ソース取得・前回タグからの比較を含む説明を生成する。日本語はUTF-8 BOM。依存パッケージの版やロック内容は変更しない。
+採番はprepare-release.pyのselect_version。X.Y.Zの数値順でkbcs-vタグだけを比較する。入力なしでCargoが最新タグと同じ版ならpatch+1、未公開の予約版なら維持。明示版はCargo以上・既存タグより新しい版だけを許可する。workspace memberのCargo.lockだけを書き換える。README・日本語の説明はUTF-8 BOM。説明の自動生成は存在しない場合のみで、全OS成功という未確認の記述や、まだ存在しない配布物へのリンクを作らない。
 
-prepareは開始SHAとremote mainを確認し、変更対象を限定してgithub-actions[bot]のコミットをpushする。KBCS-Release-Sourceトレーラーと親SHAを持つ直後のbotコミットは再実行時に再利用する。さらにmainが進んでいたら古い実行からの書込みを中止する。pushはfast-forwardのみ。ビルド失敗でタグがまだなければ予約版を次の修正でも使える。タグ/ドラフト作成後の失敗は同じrunの再実行で復旧し、公開済みの版は上書きしない。
+prepareは開始SHAとremote mainを比較し、github-actions[bot]のコミットをfast-forwardでpushする。同じ開始SHAを親に持つKBCS-Release-Sourceトレーラー付きbotコミットは再実行で再利用する。それ以上mainが進んでいれば古い実行を止める。元イベントのGITHUB_SHAと採番コミットは異なるため、package.pyのgit HEADと公開jobのKBCS_RELEASE_COMMITを一致させる。タグ指定では採番せずCargoとの一致を確認する。PR・他ブランチ・forkは公開しない。
 
-タグ指定の経路はCargoとの一致を確認して採番しない。公開対象以外のイベントではprepare jobをskipし、buildは元イベントのSHAを使う。workflow_dispatchのversionは環境変数で渡し、シェルへ直接展開しない。PRにwrite jobは実行しない。
+GITHUB_TOKENのpushは新たなpush workflowを起動しないため、同じrunで採番・ビルド・公開を完了する。[GitHubのイベント規則](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow)。
 
-publish-release.pyは三環境のZIP・checksum・JSONを検証し、指定タグがなければそのSHAへ新規作成する。既存タグは注釈付きタグもcommitまで辿り、異なるSHAなら拒否する。タグ作成後の公開は同じrunで行う。公開途中のドラフト再利用と、GitHub側ZIPのサイズ・digest照合は従来通り。release jobは同じconcurrency groupで直列化する。
+## ビルド時間と失敗対策
 
-GITHUB_TOKENのpushは新たなpushイベントのworkflowを開始しないため、自動コミット/タグを契機に再実行する設計にはしない。参照: [GitHub公式のイベント規則](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow)。
+Rust 1.98.1、LLVM-MinGW 20260922、macOS 14.0 deployment targetを維持する。workspaceのreleaseテスト → 全ターゲットのrelease clippy → releaseビルド → 単独起動検査を行う。先にテスト依存をコード生成し、clippyでもその成果物を再利用する。型エラーのためだけの別プロファイルや重複したcargo checkは追加しない。C++のcc parallel機能はCargoのjobserverに従い、同じ最適化・浮動小数点・整数フラグのまま翻訳単位を並列にコンパイルする。配布物のthin LTOを省略して速くする変更はしていない。[ccの仕様](https://docs.rs/cc/latest/cc/#parallel)。
 
-## 検証
+Cargo registry/git/targetをOS・CPU・Rust/LLVM・lock・ソースSHA・run_attemptでキャッシュする。過去の同OS/CPUキャッシュも復元し、Cargoが必要な差分を再構築する。restore/saveを分け、コンパイル失敗後にも有効な途中成果物を保存する。キャンセル時は保存しない。run_attemptを含め、失敗した同じrunの再実行でも新しいキャッシュを保存できる。キー世代をv2へ変更した最初の実行はコールドビルドになる。Cargo --timingsのHTMLを7日保存し、以降の時間改善を実測できるようにする。インストーラは14日保存。
 
-`python -m unittest discover -s scripts/tests` はGitHubへ書き込まず、一時的なbare Gitリポジトリで通常のpatch採番、明示版、lock/README/説明、同一run再利用、古いmainからの公開拒否、タグ一致、公開対象外の無変更を確認する。version文字列の不正・巻戻し・再利用も拒否する。
+## 部分公開と再実行
 
-workflowの構文はactionlint、実workspaceの採番後Cargo.lockは隔離したmanifestでcargo metadata --locked --offline --no-depsを確認する。Cargo.lockの版番号によるハッシュ変更後も、OS/コンパイラ別のキャッシュを復元し、Cargo自身に変更依存だけを再構築させる。
+publish-release.pyはKBCS_RELEASE_PLATFORMの一環境を必須とし、ZIP・JSON・checksumの三点を検査する。版・commit・CPU target・archive名・SHA-256をpackage_filesで照合する。既存タグは注釈付きもcommitまで辿り、異なるソースなら移動させず停止する。
 
-ローカル検証は4テスト、actionlint 1.7.12、実workspace三crateを0.1.37に揃えたcargo metadata --locked --offline --no-depsが通過。公開処理はGitHubを模した応答で成功・別コミットの既存タグ・配布先SHA不一致を確認し、検証失敗時に公開しないことを検査する。
+公開jobは共通のconcurrency groupで短い公開処理だけを直列化する。`queue: max`で三環境の待機jobを保持し、既定の「待機一件を後着jobで置換」による公開取り消しを防ぐ。[GitHub公式のqueue仕様](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)。actionlint 1.7.12はこのキーが未対応のため、そのキーに対する診断だけを除外して検証する。残りの構文・式・再利用workflowの入力は同ツールで確認する。
+
+最初の成功OSがドラフトを作る。JSON・checksumを先にアップロードしてGitHub側のsize/digestも検査し、最後にZIPを置く。三点のsize/digestが一致してから公開開発版へ切り替える。以降のOSは同じタグ/ソースの公開版へ追加する。ZIPが完成している環境の既存三点は上書きしない。同じ成果物の再実行はアップロードを省く。
+
+まだZIPがない環境の途中の付属情報だけは再送可能。中断されたstate=starterの同環境ZIPは削除して再試行する。公開済み版への新ZIPの検査失敗時は、その未検証ZIPだけを除き、先に成功した環境を保持する。ドラフトの失敗は非公開を維持し再実行で回復する。公開後のソース修正は別の版でビルドし、既存タグを付け替えない。
+
+アプリのlatest_app_forは自分のOS/CPUに対応する、正のsizeと有効なSHA-256を持つZIPがある公開版だけを数値版で比較する。Windowsのみ0.1.38が成功すればWindowsへ案内し、Macは0.1.37を選ぶ。後からMacのZIPが追加されると、次の起動時/手動の更新確認で同じ0.1.38を案内する。新しい配布フォーマットの導入はなく、旧アプリも元からOS別ZIPで選択する。
+
+## 原因と検証範囲
+
+[run 41013298009](https://github.com/sinsuirakv0/KBCS/actions/runs/41013298009)はWindows成功・Mac両CPU失敗。Darwin libc 0.2.191のstatvfsはfsblkcnt_tがu32、f_frsizeがu64であり、storage::spaceのsaturating_mulが型不一致だった。ブロック数をu64へ広げてから乗算する。フレーム計算・ゲーム仕様の変更ではない。
+
+最小回帰試験はローカルbare Gitで採番/同じrun再利用/古いmainの拒否、GitHub模擬応答で一環境だけの公開・後続OS追加・同一成果物再実行・別ソース/CPU/不足物拒否・配布済み成果物の不変性・付属情報破損・中断・失敗時の他OS保持を確認する。外部GitHubへ書き込んで試験しない。Rustは部分公開時のOS別選択・Mac ZIP追加・ドラフト/不正SHA除外を確認する。
+
+ローカルWindowsではstorage.rsとappのruntime.rsそのものを隔離crateへ参照し、Apple Silicon/Intelの実ターゲットと同じlibc/mach2を使ってclippyの型チェックを通した。Macアプリ全体のリンク・WKWebView起動はMac runner上のテスト/単独起動検査で確認する。WindowsでMacの実機動作を確認したとは扱わない。

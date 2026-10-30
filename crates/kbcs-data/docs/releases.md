@@ -54,3 +54,10 @@ agentは接続20秒・応答ヘッダー60秒を設定し、本文だけの短�
 ## 2026-10-29: Intel Mac CIの通信試験
 
 Actions run 40862502160のmacos-x64は、コンパイル後のdownload_allows_slow_body_and_retries_interrupted_transferで失敗した。旧本文期限によるRecvBodyエラーは正しく発生していたが、期限前にpartialへ必ず1byte以上返ると仮定した追加assertが失敗。中間受信量はOSのバッファリングや実行タイミングに依存し、空であることはタイムアウトの誤りを意味しない。その量のassertを削除し、RecvBodyそのものの判定を残す。後段の低速取得の全bytes/SHA一致、切断後の1回再取得、3試行での打切り/part削除、破損時は再試行しない検査を維持する。アプリの取得処理・期限・リトライ条件とworkflowは変更しない。
+
+
+## OS別公開版の選択（2026-10-30）
+
+本体の取得入口はlatest_app → latest_app_for → app_asset。latest_app_forは受け取った公開版一覧をOS/CPUで絞り、sizeが正でdigestが有効な対応ZIPのあるSemVer最大を返す。Windowsだけ新版が公開されてもMacの更新を壊さず、Mac ZIPの追加は次回の更新確認で認識する。ドラフト・別CPU・SHA欠落を除外する回帰試験を追加した。配布物の追加/不変性と公開順は[scriptsの設計](../../../scripts/docs/release.md)に記録。
+
+保存先のstorage::spaceはDarwin statvfsのu32ブロック数をu64へ広げてから、u64のブロックサイズと飽和乗算する。Apple Silicon/Intel両ターゲットで型チェックを確認する。ダウンロードの容量判定の単位とWindowsの取得経路は変更しない。

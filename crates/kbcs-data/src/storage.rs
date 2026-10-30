@@ -32,7 +32,7 @@ pub fn space(path: &Path) -> Option<Value> {
         let mut info: libc::statvfs = std::mem::zeroed();
         if libc::statvfs(name.as_ptr(), &mut info) == 0 {
             return Some(
-                json!({"available":info.f_bavail.saturating_mul(info.f_frsize),"total":info.f_blocks.saturating_mul(info.f_frsize)}),
+                json!({"available":u64::from(info.f_bavail).saturating_mul(info.f_frsize),"total":u64::from(info.f_blocks).saturating_mul(info.f_frsize)}),
             );
         }
     }

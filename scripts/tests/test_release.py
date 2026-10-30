@@ -84,63 +84,155 @@ class ReleaseTest(unittest.TestCase):
                 release.prepare(root, tag="kbcs-v0.1.37")
             self.assertEqual(release.git(root, "status", "--porcelain"), "")
 
-    def test_publish_checks_source_tag_and_remote_hash_before_publication(self):
-        with tempfile.TemporaryDirectory(prefix="kbcs-publish-") as temporary:
-            root, commit = Path(temporary), "a" * 40
-            (root / "Cargo.toml").write_text('[workspace.package]\nversion = "0.1.37"\n', encoding="utf-8")
-            (root / "docs/releases").mkdir(parents=True)
-            (root / "docs/releases/0.1.37.md").write_text("fixture\n", encoding="utf-8-sig")
-            folder = root / ".local/release"
-            folder.mkdir(parents=True)
-            assets = []
-            for platform in ["windows-x64", "macos-arm64", "macos-x64"]:
-                name = f"KBCS-0.1.37-{platform}"
-                data = platform.encode("ascii")
-                digest = hashlib.sha256(data).hexdigest()
-                (folder / (name + ".zip")).write_bytes(data)
-                (folder / (name + ".json")).write_text(json.dumps({"version": "0.1.37", "commit": commit, "sha256": digest}), encoding="utf-8")
-                (folder / (name + ".zip.sha256")).write_text(f"{digest}  {name}.zip\n", encoding="ascii")
-                assets.append({"name": name + ".zip", "size": len(data), "digest": "sha256:" + digest})
-            environment = {"GITHUB_REF_NAME": "main", "GITHUB_SHA": "b" * 40, "GITHUB_REPOSITORY": "sinsuirakv0/KBCS",
-                           "KBCS_RELEASE_TAG": "kbcs-v0.1.37", "KBCS_RELEASE_COMMIT": commit}
-            for scenario in ["success", "different-tag", "corrupt-remote"]:
-                with self.subTest(scenario=scenario):
-                    state = {"tag": scenario == "different-tag", "draft": False, "published": False, "created": False}
 
-                    def gh(*args, check=True):
-                        output, code = {}, 0
-                        if args[0] == "api":
-                            url = args[1]
-                            if "/git/ref/tags/" in url:
-                                if state["tag"]:
-                                    output = {"object": {"type": "commit", "sha": "c" * 40 if scenario == "different-tag" else commit}}
-                                else:
-                                    code = 1
-                            elif url.endswith("/git/refs"):
-                                self.assertIn("sha=" + commit, args)
-                                state["tag"] = True
-                            else:
-                                output = {"assets": [{**asset, "digest": "sha256:wrong"} if scenario == "corrupt-remote" else asset for asset in assets]}
-                        elif args[1] == "view":
-                            if not state["created"]:
-                                code = 1
-                            else:
-                                output = {"isDraft": True, "apiUrl": "https://api.github.com/repos/sinsuirakv0/KBCS/releases/1", "url": "fixture"}
-                        elif args[1] == "create":
-                            state.update(created=True, draft=True)
-                        elif args[1] == "edit":
-                            state.update(published=True, draft=False)
-                        return subprocess.CompletedProcess(args, code, json.dumps(output), "")
+class PublisherTest(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="kbcs-publish-")
+        self.addCleanup(temporary.cleanup)
+        self.root, self.commit = Path(temporary.name), "a" * 40
+        (self.root / "Cargo.toml").write_text('[workspace.package]\nversion = "0.1.38"\n', encoding="utf-8")
+        notes = self.root / "docs/releases/0.1.38.md"
+        notes.parent.mkdir(parents=True)
+        notes.write_text("fixture\n", encoding="utf-8-sig")
+        self.folder = self.root / ".local/release"
+        self.folder.mkdir(parents=True)
+        for platform, target in publisher.TARGETS.items():
+            name = f"KBCS-0.1.38-{platform}"
+            data = platform.encode("ascii")
+            digest = hashlib.sha256(data).hexdigest()
+            (self.folder / (name + ".zip")).write_bytes(data)
+            (self.folder / (name + ".json")).write_text(json.dumps({
+                "version": "0.1.38", "commit": self.commit, "sha256": digest,
+                "target": target, "archive": name + ".zip"}), encoding="utf-8")
+            (self.folder / (name + ".zip.sha256")).write_text(f"{digest}  {name}.zip\n", encoding="ascii")
+        self.environment = {"GITHUB_REPOSITORY": "sinsuirakv0/KBCS", "KBCS_RELEASE_TAG": "kbcs-v0.1.38",
+                            "KBCS_RELEASE_COMMIT": self.commit, "KBCS_RELEASE_PLATFORM": "windows-x64"}
+        self.tag_commit, self.created, self.draft = None, False, True
+        self.assets, self.uploads, self.deleted = {}, [], []
+        self.corrupt = ""
 
-                    with patch.object(publisher, "ROOT", root), patch.object(publisher, "gh", gh), patch.object(publisher.subprocess, "check_output", return_value=commit), patch.dict(publisher.os.environ, environment):
-                        if scenario == "success":
-                            publisher.main()
-                            self.assertTrue(state["published"])
-                        else:
-                            with self.assertRaises(ValueError):
-                                publisher.main()
-                            self.assertFalse(state["published"])
-                            self.assertEqual(state["draft"], scenario == "corrupt-remote")
+    def gh(self, *args, check=True):
+        output, code = {}, 0
+        if args[0] == "api":
+            url = args[1]
+            if "/git/ref/tags/" in url:
+                code = 0 if self.tag_commit else 1
+                output = {"object": {"type": "commit", "sha": self.tag_commit}}
+            elif url.endswith("/git/refs"):
+                self.assertIn("sha=" + self.commit, args)
+                self.tag_commit = self.commit
+            else:
+                output = {"assets": list(self.assets.values())}
+        elif args[1] == "view":
+            code = 0 if self.created else 1
+            output = {"isDraft": self.draft, "apiUrl": "https://api.github.com/repos/sinsuirakv0/KBCS/releases/1", "url": "fixture"}
+        elif args[1] == "create":
+            self.created = True
+        elif args[1] == "upload":
+            path = Path(args[3])
+            if not self.draft:
+                if "--clobber" in args:
+                    self.assertFalse(path.name.endswith(".zip"))
+                    archive = path.name.removesuffix(".json").removesuffix(".zip.sha256") + ".zip"
+                    self.assertNotIn(archive, self.assets)
+                else:
+                    self.assertNotIn(path.name, self.assets)
+            self.uploads.append(path.name)
+            self.assets[path.name] = {"name": path.name, "size": path.stat().st_size,
+                                      "digest": "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()}
+            if path.name.endswith(self.corrupt) and self.corrupt:
+                self.assets[path.name]["digest"] = "sha256:wrong"
+        elif args[1] == "delete-asset":
+            self.deleted.append(args[3])
+            self.assets.pop(args[3], None)
+        elif args[1] == "edit":
+            self.draft = False
+        else:
+            self.fail("Unexpected GitHub call: " + str(args))
+        return subprocess.CompletedProcess(args, code, json.dumps(output), "")
+
+    def publish(self, platform="windows-x64"):
+        environment = {**self.environment, "KBCS_RELEASE_PLATFORM": platform}
+        with patch.object(publisher, "ROOT", self.root), patch.object(publisher, "gh", self.gh), \
+                patch.object(publisher.subprocess, "check_output", return_value=self.commit), \
+                patch.dict(publisher.os.environ, environment), patch("builtins.print"):
+            publisher.main()
+
+    def test_platforms_publish_independently_and_retry_without_overwriting(self):
+        for index, platform in enumerate(publisher.TARGETS, 1):
+            self.publish(platform)
+            self.assertFalse(self.draft)
+            self.assertEqual(len(self.assets), index * 3)
+            self.assertEqual(self.uploads[-3:], [f"KBCS-0.1.38-{platform}{suffix}"
+                                               for suffix in [".json", ".zip.sha256", ".zip"]])
+            count = len(self.uploads)
+            self.publish(platform)
+            self.assertEqual(len(self.uploads), count)
+
+    def test_wrong_source_and_cpu_are_rejected_before_upload(self):
+        self.tag_commit = "b" * 40
+        with self.assertRaisesRegex(ValueError, "コミット"):
+            self.publish()
+        self.assertFalse(self.created)
+        self.tag_commit = None
+        path = self.folder / "KBCS-0.1.38-windows-x64.json"
+        metadata = json.loads(path.read_text(encoding="utf-8"))
+        metadata["target"] = "aarch64-apple-darwin"
+        path.write_text(json.dumps(metadata), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "CPU"):
+            self.publish()
+        self.assertEqual(self.uploads, [])
+
+    def test_incomplete_package_is_rejected_before_release_creation(self):
+        (self.folder / "KBCS-0.1.38-windows-x64.zip.sha256").unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.publish()
+        self.assertFalse(self.created)
+
+    def test_public_assets_are_immutable(self):
+        self.publish()
+        self.assets[self.uploads[-1]]["digest"] = "sha256:wrong"
+        with self.assertRaisesRegex(ValueError, "上書き"):
+            self.publish()
+        self.assertEqual(len(self.uploads), 3)
+        self.assertEqual(self.deleted, [])
+
+    def test_bad_sidecar_keeps_first_release_private_and_retry_repairs_draft(self):
+        self.corrupt = ".json"
+        with self.assertRaisesRegex(ValueError, "付属情報"):
+            self.publish()
+        self.assertTrue(self.draft)
+        self.assertFalse(any(name.endswith(".zip") for name in self.assets))
+        self.corrupt = ""
+        self.publish()
+        self.assertFalse(self.draft)
+        self.assertEqual(len(self.assets), 3)
+
+    def test_failed_mac_addition_removes_only_its_unverified_zip(self):
+        self.publish()
+        windows = dict(self.assets)
+        self.corrupt = ".zip"
+        with self.assertRaisesRegex(ValueError, "SHA"):
+            self.publish("macos-arm64")
+        self.assertFalse(self.draft)
+        self.assertEqual(self.deleted, ["KBCS-0.1.38-macos-arm64.zip"])
+        for name, asset in windows.items():
+            self.assertEqual(self.assets[name], asset)
+        self.corrupt = ""
+        self.publish("macos-arm64")
+        self.assertEqual(len(self.assets), 6)
+
+    def test_incomplete_public_sidecars_and_interrupted_upload_can_be_retried(self):
+        self.publish()
+        self.corrupt = ".json"
+        with self.assertRaisesRegex(ValueError, "付属情報"):
+            self.publish("macos-arm64")
+        name = "KBCS-0.1.38-macos-arm64.zip"
+        self.assets[name] = {"name": name, "state": "starter", "size": 0, "digest": None}
+        self.corrupt = ""
+        self.publish("macos-arm64")
+        self.assertEqual(len(self.assets), 6)
+        self.assertEqual(self.assets[name]["size"], len(b"macos-arm64"))
 
 
 if __name__ == "__main__":
