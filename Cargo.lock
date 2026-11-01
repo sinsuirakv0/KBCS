@@ -1184,7 +1184,7 @@ dependencies = [
 
 [[package]]
 name = "kbcs-app"
-version = "0.1.39"
+version = "0.1.40"
 dependencies = [
  "anyhow",
  "flate2",
@@ -1204,7 +1204,7 @@ dependencies = [
 
 [[package]]
 name = "kbcs-bridge"
-version = "0.1.39"
+version = "0.1.40"
 dependencies = [
  "cc",
  "serde",
@@ -1213,7 +1213,7 @@ dependencies = [
 
 [[package]]
 name = "kbcs-data"
-version = "0.1.39"
+version = "0.1.40"
 dependencies = [
  "anyhow",
  "csv",
