@@ -68,6 +68,29 @@ fn integer(value: &Value) -> Result<i32> {
         .and_then(|n| i32::try_from(n).ok())
         .context("戦闘の整数入力がありません")
 }
+fn equipment_orb(entry: &Value, masks: &Value) -> Result<battle::Orb> {
+    let effect = integer(&entry["content"]).context("本能玉の効果種別なし")?;
+    ensure!((0..32).contains(&effect), "本能玉の効果種別が範囲外です");
+    let mut values = [0; 4];
+    let raw = entry["value"].as_array().context("本能玉効果なし")?;
+    ensure!(raw.len() <= values.len(), "本能玉列範囲外");
+    for (out, value) in values.iter_mut().zip(raw) {
+        *out = integer(value)?;
+    }
+    // 属性別の集計は0〜4だけ。撃破後強化・生産系などにはattribute自体が存在しない。
+    let mask = if effect < 5 {
+        let attribute =
+            usize::try_from(integer(&entry["attribute"]).context("属性別本能玉の属性なし")?)?;
+        integer(&masks[attribute]).context("本能玉の属性が範囲外です")?
+    } else {
+        0
+    };
+    Ok(battle::Orb {
+        effect,
+        mask,
+        values,
+    })
+}
 fn native<T>(value: std::result::Result<T, u32>) -> Result<T> {
     value.map_err(|code| anyhow::anyhow!("戦闘コア: {code}"))
 }
@@ -807,28 +830,14 @@ impl Session {
                     .get(id.checked_sub(30000).context("本能玉ID範囲外")? as usize)
                     .context("本能玉なし")?;
                 {
-                    let effect = integer(&entry["content"])? as usize;
-                    ensure!(effect < 32 && orb_count < 8, "本能玉範囲外");
-                    let mut values = [0; 4];
-                    for (i, value) in entry["value"]
-                        .as_array()
-                        .context("本能玉効果なし")?
-                        .iter()
-                        .enumerate()
-                    {
-                        ensure!(i < 4, "本能玉列範囲外");
-                        values[i] = integer(value)?;
-                        definition.orbs[effect][i] += values[i];
+                    let orb = equipment_orb(entry, &constants["equipmentMasks"])?;
+                    let effect = orb.effect as usize;
+                    ensure!(orb_count < 8, "本能玉範囲外");
+                    for (out, value) in definition.orbs[effect].iter_mut().zip(orb.values) {
+                        *out += value;
                     }
                     definition.orb_present[effect] = 1;
-                    let mask = integer(
-                        &constants["equipmentMasks"][integer(&entry["attribute"])? as usize],
-                    )?;
-                    orbs[orb_count] = battle::Orb {
-                        effect: effect as i32,
-                        mask,
-                        values,
-                    };
+                    orbs[orb_count] = orb;
                     orb_count += 1;
                 }
             }
@@ -1681,6 +1690,26 @@ fn paint_packets(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn equipment_attributes_are_required_only_for_targeted_effects() {
+        let masks = super::inputs().unwrap()["equipmentMasks"].clone();
+        for effect in [5, 18, 19, 31] {
+            let orb = super::equipment_orb(
+                &serde_json::json!({"gradeID":4,"content":effect,"value":[20]}),
+                &masks,
+            )
+            .unwrap();
+            assert_eq!(
+                (orb.effect, orb.mask, orb.values),
+                (effect, 0, [20, 0, 0, 0])
+            );
+        }
+        let entry = serde_json::json!({"content":0,"attribute":3,"value":[20]});
+        assert_eq!(super::equipment_orb(&entry, &masks).unwrap().mask, 8);
+        assert!(
+            super::equipment_orb(&serde_json::json!({"content":0,"value":[20]}), &masks).is_err()
+        );
+    }
     #[test]
     fn native_effect_bindings() {
         let fixture: serde_json::Value = serde_json::from_str(
