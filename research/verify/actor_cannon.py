@@ -65,7 +65,7 @@ for kind,condition,action in itertools.product(range(8),['plain','metal','zombie
  for k,v in {0:1,3:16800,4:4400,6:12,7:236000,8:236000,13:7,17:kind,20:4550,21:1000,22:1,27:250,28:1,30:150,31:200}.items():castle[k]=v
  for k,v in {0:2,1:action,3:7000,4:4400,7:10001,8:5001,22:0,126:-1,168:59}.items():target[k]=v
  if condition=='metal':target[43]=1
- if condition=='zombie':target[46]=1
+ if condition=='zombie':target[47]=1
  if condition=='dodge':target[165]=100
  if condition=='wave-ignore':target[85]=1;castle[5]=1
  if condition=='wave-stop':target[86]=1;castle[5]=1
@@ -76,6 +76,7 @@ for kind,condition,action in itertools.product(range(8),['plain','metal','zombie
  if condition=='effects':castle[61]=100;castle[62]=30;castle[64]=100;castle[65]=31;castle[78]=100;castle[79]=32
  if condition=='curse':target[153]=39
  reset(actors,state);n.call(0x5d6c3c,game,0,1,7)
+ if kind==5 and condition=='zombie' and action==0:assert struct.unpack('<i',n.cpu.mem_read(game+0x90884+0x3ec+107*4,4))[0]==1,'Angel zombie branch'
  seed=c.c_uint32(0x12345678)
  code=lib.kbcs_core_actor_cannon_hit(c.byref(state),c.byref(actors),c.byref(env),c.byref(context),c.byref(clock),c.byref(damage),c.byref(rules),0,1,7,c.byref(seed),c.byref(events))
  assert code==0,('hit error',kind,condition,action,code,hex(lib.kbcs_core_actor_last_error()))

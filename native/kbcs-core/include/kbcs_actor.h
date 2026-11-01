@@ -81,6 +81,8 @@ typedef struct { int32_t encoded[4],plain[4],forms[2][51],kill_orb[51],kill_thre
 /* beginと敵の砲/衝撃波処理の後。歩行0、敵の潜行11..13/蘇生待機14..16だけを処理し、対応可否を返す。 */
 uint32_t kbcs_core_actor_walk(KbcsActor actors[2][51],const KbcsActorEnvironment*,int32_t side,int32_t slot,int32_t *handled);
 uint32_t kbcs_core_actor_begin(KbcsActor actors[2][51],const KbcsActorEnvironment*,int32_t side,int32_t slot);
+/* 006d7dc4。追加生産後・個体時計前。107のsetterはunit-modeでは書き換えない。 */
+uint32_t kbcs_core_actor_frame_marks(KbcsActor actors[2][51],const KbcsActorEnvironment*);
 uint32_t kbcs_core_actor_clock(KbcsActor actors[2][51],const KbcsActorClock*);
 /* 006d951c..006d95dc。砲/二次攻撃の後、保護確定の前。長さは選択したencoded値。 */
 uint32_t kbcs_core_actor_protection_clock(KbcsActor*,int32_t barrier_frames,int32_t shield_frames);

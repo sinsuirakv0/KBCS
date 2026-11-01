@@ -4,6 +4,13 @@ export function sceneGestureView(view,previous,current,rectangle){
   const offset=point=>(point-rectangle.left-rectangle.width/2)*(view.viewport_width||960)/rectangle.width;
   return {zoom,center:view.center+offset(previous.x)/view.zoom-offset(current.x)/zoom};
 }
+// PCキーも既存カメラの倍率・中心と同じ制限で解決する。戦闘時計は進めない。
+export function sceneKeyboardView(view,action){
+ const width=view.viewport_width||960;
+ if(action==='cameraLeft'||action==='cameraRight')return {zoom:view.zoom,center:view.center+(action==='cameraLeft'?-1:1)*width/(10*view.zoom)};
+ const ratio=Math.exp(action==='cameraIn'?.15:-.15);
+ return sceneGestureView(view,{x:width/2,distance:1},{x:width/2,distance:ratio},{left:0,width});
+}
 export function initializeSceneGestures(canvas,readView,applyView,options={}){
   const pointers=new Map();let previous;
   function measure(){const values=[...pointers.values()];if(!values.length)return null;return values.length===1?{x:values[0].x,distance:0}:{x:(values[0].x+values[1].x)/2,distance:Math.hypot(values[0].x-values[1].x,values[0].y-values[1].y)};}

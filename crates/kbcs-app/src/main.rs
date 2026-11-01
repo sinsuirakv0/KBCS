@@ -10,6 +10,7 @@ mod motion_pose;
 mod runtime;
 mod scene;
 mod service;
+mod shortcut;
 mod updates;
 mod workers;
 

@@ -8,7 +8,7 @@ using I = int64_t;
 int width(const KbcsBattleScreenConfig &c){return c.viewport_width?c.viewport_width:960;}
 int press(int counter){const int sizes[6]={0,0,6,-10,0,0};return sizes[counter];}
 void toggle_speed(const KbcsBattleScreenConfig &c,KbcsBattleScreenState &s){s.speed_mode=(s.speed_mode+1)%(c.speed==3?3:2);if(s.speed_mode)s.items_on|=1;else s.items_on&=~1;}
-void change_page(KbcsBattleScreenState &s,int direction){if(s.rows!=1)return;if(!s.page_frame){s.page_frame=1;s.page_direction=direction;s.page_step=1;}else if(s.page_direction!=direction){s.page_step=-1;}s.holding=-1;s.hold_frames=0;s.gesture=1;}
+void change_page(KbcsBattleScreenState &s,int direction){if(s.rows!=1)return;if(!s.page_frame){s.page_frame=1;s.page_direction=direction;s.page_step=1;}else if(s.page_direction!=direction){s.page_step=-1;}s.holding=-1;s.hold_frames=0;s.hold_wait=0;s.gesture=1;}
 int wallet(const KbcsBattleScreenConfig &c,int worker) {
  if(c.fixed_money>=0)return c.fixed_money;
  return int(((I(worker*5+10)*(c.wallet_level+1)*1000+c.wallet_treasure)*(100+c.wallet_combo))/100);
@@ -59,7 +59,7 @@ void layout(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,KbcsB
  if(s.paused&&!s.info_mode){
   sprite(0,53,center-198,215,406,191);sprite(0,79,center-198,142,406,93);sprite(0,49,center-198,382,391,91);sprite(0,52,center-232,215,39,191);sprite(0,80,center-232,142,164,93);sprite(0,48,center-232,382,164,91);sprite(0,52,center+232,215,-39,191);sprite(0,78,center+190,142,42,93);sprite(0,51,center+190,382,42,91);sprite(0,16,center-87,158,179,49);sprite(0,75,center-147,324,114,31);
   for(const auto &r:controls){const int action=r[0],x=r[1],y=r[2],w=r[3],h=r[4];const bool active=s.guard&&s.pending_control==action;const int blink=active?1+(s.ui_frame/2)%2:0;
-   if(action==300)sprite(0,21+blink,x,y,w,h);
+   if(action==300){sprite(0,21,x,y,w,h);if(blink)sprite(0,21+blink,x,y,w,h);}
    else if(action==301){sprite(0,74,x,y,w,h);sprite(0,73,x+(w-129)/2,y+(h-35)/2,129,35);if(blink)sprite(0,blink==1?30:31,x,y,w,h);}
    else if(action==302){sprite(0,6,x,y,w,h);sprite(0,10,x+(w-155)/2,y+(h-45)/2,155,45);if(blink)sprite(0,blink==1?17:18,x,y,w,h);}
    else if(action==303)sprite(0,s.rows==2?77:76,x,y,w,h);
@@ -69,7 +69,12 @@ void layout(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,KbcsB
    else if(action==307){sprite(1,339,x,y,w,h);sprite(1,343,x+8,y+14,112,34);}
   }
  }
- if(s.info_mode){o.info_box[0]=center-473;o.info_box[1]=93;o.info_box[2]=946;o.info_box[3]=180+39*c.description_lines[s.info_slot];}
+ // 006ddfb8 / 002b12d0: 長押しの開き方は0→50→90→100%。説明行の高さは加算する。
+ if(s.info_mode||(!s.paused&&s.holding>=0&&(s.hold_frames>=14||s.hold_wait))){
+  const int sizes[4]={0,50,90,100},slot=s.info_mode?s.info_slot:s.holding;
+  const int percent=s.info_mode?100:sizes[s.hold_frames>=14?std::min(3,s.hold_frames-13):s.hold_wait],w=946*percent/100,h=180*percent/100;
+  o.info_box[0]=center-w/2;o.info_box[1]=93+(180-h)/2;o.info_box[2]=w;o.info_box[3]=h+39*c.description_lines[slot];
+ }
  if(s.intro>=24)return;
  auto triangle=[&](int x0,int y0,int x1,int y1,int x2,int y2){const int i=o.fade_count++;o.fade_sizes[i]=3;int *p=o.fade[i];p[0]=x0;p[1]=y0;p[2]=x1;p[3]=y1;p[4]=x2;p[5]=y2;};
  auto rect=[&](int x,int width){const int i=o.fade_count++;o.fade_sizes[i]=4;int *p=o.fade[i];p[0]=x;p[1]=0;p[2]=x;p[3]=640;p[4]=x+width;p[5]=640;p[6]=x+width;p[7]=0;};
@@ -103,7 +108,7 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
   if(!((key>=0&&key<10)||(key>=100&&key<=102)||key==200||key==203||key==205||key==300||key==308))return 1;
   if(in.phase)return 1;in.control=0;in.phase=2;
   // キーは独立したタップ。以前のスワイプ/長押しを引き継がない。
-  s.pointer_down=0;s.gesture=0;s.holding=-1;s.hold_frames=0;
+  s.pointer_down=0;s.gesture=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;
  }
  const auto inputTarget=[&](int x,int y){
   if(key<0)return hit(c,s,x,y);
@@ -117,31 +122,56 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
  // ホストのコマ送りは速度アイテムを保持し、1更新を1論理Fとして進める。
  const bool stepping=in.control==10;
  if(stepping&&(s.paused||s.intro<24||in.phase||in.ticks<1))return 1;
- if(c.worker_level<0||c.worker_level>29||c.wallet_level<0||c.wallet_level>29||c.attack_level<0||c.attack_level>29||c.charge_level<0||c.charge_level>29||c.chapter<0||c.chapter>3||c.income_treasure<0||c.income_treasure>10000||c.wallet_treasure<0||c.wallet_treasure>10000000||c.charge_treasure<0||c.charge_treasure>10000||c.speed_treasure<0||c.speed_treasure>10000||c.income_combo<0||c.income_combo>1000||c.wallet_combo<0||c.wallet_combo>1000||c.charge_combo<0||c.charge_combo>100||c.charge_start_combo<0||c.charge_start_combo>100||c.items<0||c.items>63||c.speed<2||c.speed>3||c.fixed_money< -1||c.fixed_money>1000000000||s.frame<0||s.frame>100000000||s.intro<0||s.intro>24||s.rows<1||s.rows>2||s.page<0||s.page>1||s.page_frame<0||s.page_frame>5||s.page_direction<0||s.page_direction>1||s.paused<0||s.paused>1||s.money<0||s.money>1000000000||s.worker<0||s.worker>7||s.cannon<0||s.cannon>100000||s.holding< -1||s.holding>9||s.pointer_down<0||s.pointer_down>1||s.items_on<0||s.items_on>63||(s.items_on&~c.items)||s.hold_frames<0||s.hold_frames>100000||s.guard<0||s.guard>5||s.pending_control< -1||s.pending_control>308||in.ticks<0||in.ticks>30||in.phase<0||in.phase>4||in.control<0||in.control>10||c.viewport_width<0||c.viewport_width>3840||s.speed_mode<0||s.speed_mode>2||s.wallet_flash<0||s.wallet_flash>14||s.description_item< -1||s.description_item>5||s.description_wait<0||s.description_wait>5||s.ui_frame<0||s.ui_frame>100000000||s.gesture<0||s.gesture>1||s.page_step< -1||s.page_step>1||s.bgm_level<0||s.bgm_level>3||s.se_level<0||s.se_level>3||s.vibration_on<0||s.vibration_on>1||s.info_mode<0||s.info_mode>1||s.info_slot<0||s.info_slot>9||s.saved_rows<0||s.saved_rows>2||s.hud_frame<0||s.hud_frame>100000000)return 1;
+ if(c.worker_level<0||c.worker_level>29||c.wallet_level<0||c.wallet_level>29||c.attack_level<0||c.attack_level>29||c.charge_level<0||c.charge_level>29||c.chapter<0||c.chapter>3||c.income_treasure<0||c.income_treasure>10000||c.wallet_treasure<0||c.wallet_treasure>10000000||c.charge_treasure<0||c.charge_treasure>10000||c.speed_treasure<0||c.speed_treasure>10000||c.income_combo<0||c.income_combo>1000||c.wallet_combo<0||c.wallet_combo>1000||c.charge_combo<0||c.charge_combo>100||c.charge_start_combo<0||c.charge_start_combo>100||c.items<0||c.items>63||c.speed<2||c.speed>3||c.fixed_money< -1||c.fixed_money>1000000000||s.frame<0||s.frame>100000000||s.intro<0||s.intro>24||s.rows<1||s.rows>2||s.page<0||s.page>1||s.page_frame<0||s.page_frame>5||s.page_direction<0||s.page_direction>1||s.paused<0||s.paused>1||s.money<0||s.money>1000000000||s.worker<0||s.worker>7||s.cannon<0||s.cannon>100000||s.holding< -1||s.holding>9||s.pointer_down<0||s.pointer_down>1||s.items_on<0||s.items_on>63||(s.items_on&~c.items)||s.hold_frames<0||s.hold_frames>100000||s.hold_wait<0||s.hold_wait>3||s.guard<0||s.guard>5||s.pending_control< -1||s.pending_control>308||in.ticks<0||in.ticks>30||in.phase<0||in.phase>4||in.control<0||in.control>10||c.viewport_width<0||c.viewport_width>3840||s.speed_mode<0||s.speed_mode>2||s.wallet_flash<0||s.wallet_flash>14||s.description_item< -1||s.description_item>5||s.description_wait<0||s.description_wait>5||s.ui_frame<0||s.ui_frame>100000000||s.gesture<0||s.gesture>1||s.page_step< -1||s.page_step>1||s.bgm_level<0||s.bgm_level>3||s.se_level<0||s.se_level>3||s.vibration_on<0||s.vibration_on>1||s.info_mode<0||s.info_mode>1||s.info_slot<0||s.info_slot>9||s.saved_rows<0||s.saved_rows>2||s.hud_frame<0||s.hud_frame>100000000)return 1;
  for(int i=0;i<10;++i)if(c.costs[i]<0||c.costs[i]>10000000||c.present[i]<0||c.present[i]>1||c.blocked[i]<0||c.description_lines[i]<0||c.description_lines[i]>3)return 1;
  s.request_slot=-1;s.request_cannon=0;s.request_action=0;
  const auto sound=[&](int id){return hook?hook(user,KBCS_BATTLE_SCREEN_SOUND+id,&s):0;};
  if(in.control==1){if(s.info_mode){s.info_mode=0;s.rows=s.saved_rows?s.saved_rows:2;}s.paused=0;}
- if(in.control==2){s.paused=1;s.pointer_down=0;s.holding=-1;s.hold_frames=0;}
- if(in.control==3){s.rows=3-s.rows;s.page_frame=0;s.pointer_down=0;s.holding=-1;s.hold_frames=0;}
+ if(in.control==2){s.paused=1;s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;}
+ if(in.control==3){s.rows=3-s.rows;s.page_frame=0;s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;}
  if(in.control==4)change_page(s,1);
  if(in.control==8)change_page(s,0);
  if(in.control==9)change_page(s,1);
  if(in.control==5&&(c.items&1))toggle_speed(c,s);
  if(in.control==6&&(c.items&8))s.items_on^=8;
  if(in.control==7&&(c.items&32))s.items_on^=32;
+ const auto release=[&](int target)->uint32_t{
+   if(s.paused){if(s.info_mode&&target>=0&&target<10&&c.present[target])s.info_slot=target;if(target>=300&&target!=306){
+     // 008ff260/008ff388はrelease時に音量を変え、その音量でSE11を鳴らす。
+     if(target==304)s.bgm_level=(s.bgm_level+1)%4;
+     if(target==305)s.se_level=(s.se_level+1)%4;
+     const auto code=sound(11);if(code)return code;s.pending_control=target;s.guard=1;
+    }}
+   else if(!s.gesture&&!s.battle_mode){
+    if(target==100||target==200||target==203||target==205){const auto code=sound(11);if(code)return code;s.pending_control=target;s.guard=1;}
+    if(target==101){s.request_cannon=1;if(hook){const auto code=hook(user,2,&s);if(code)return code;}}
+    if(target==102){const bool allowed=s.worker<7&&s.money>=upgrade(c,s.worker);if(allowed){s.money-=upgrade(c,s.worker);++s.worker;s.wallet_flash=13;}const auto code=sound(allowed?19:15);if(code)return code;}
+    if(target>=0&&target<10&&s.hold_frames<14){
+     if(immediate&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
+     else{s.pending_control=target;s.guard=1;}
+    }
+   }
+   s.pointer_down=0;if(s.holding<0||s.hold_frames<14){s.holding=-1;s.hold_frames=0;s.hold_wait=0;}
+  return 0;
+ };
+ // PCキーは入力だけを直ちに処理し、論理Fや待機中のキー列を増やさない。
+ if(key>=0&&!in.ticks&&!s.guard&&s.intro>=24&&!s.battle_mode){
+  const int target=inputTarget(in.x,in.y);if(target>=0){const auto pressed=sound(10);if(pressed)return pressed;const auto code=release(target);if(code)return code;}
+ }
  // ホスト側で止めた同一Fでは、即生産チートだけを入力として処理する。
- if(!in.ticks&&immediate&&in.phase==2&&!s.paused&&!s.battle_mode&&s.intro>=24){
+ if(key<0&&!in.ticks&&immediate&&in.phase==2&&!s.paused&&!s.battle_mode&&s.intro>=24){
   const int target=inputTarget(in.x,in.y);
   if(target>=0&&target<10&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
-  s.pointer_down=0;s.holding=-1;s.hold_frames=0;
+  s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;
  }
  for(int tick=0;tick<in.ticks;++tick){
   const int previous_target=s.pointer_down?hit(c,s,s.pointer_x,s.pointer_y):-1;
   ++s.ui_frame;
+  // 006d6d04の13f8/1400。解放フレームの後は3→2→1で閉じる。
+  if(!s.pointer_down&&!(tick==0&&(in.phase==1||in.phase==2))){s.hold_frames=0;if(s.hold_wait>0&&--s.hold_wait==0)s.holding=-1;}
   if(s.wallet_flash&&!s.paused)--s.wallet_flash;
   if(s.intro<24){++s.intro;continue;}
-  if(s.battle_mode){s.speed_mode=0;s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.guard=0;s.pending_control=-1;}
+  if(s.battle_mode){s.speed_mode=0;s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;s.guard=0;s.pending_control=-1;}
   if(hook&&!s.paused){const auto code=hook(user,4,&s);if(code)return code;}
   if(s.page_frame&&!s.paused&&!(tick==0&&(in.control==4||in.control==8||in.control==9))){s.page_frame+=s.page_step?s.page_step:1;if(s.page_frame>5){s.page=1-s.page;s.page_frame=0;}else if(s.page_frame<1)s.page_frame=0;}
   if(tick==0&&in.phase){s.pointer_x=in.x;s.pointer_y=in.y;if(in.phase==1){s.pointer_down=1;s.start_x=in.x;s.start_y=in.y;s.gesture=0;}}
@@ -177,25 +207,8 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
    const int direction=int(angle);
    if((dy< -24&&direction>224&&direction<316)||(dy>24&&direction>=45&&direction<=135))change_page(s,dy>0?1:0);
   }
-  if(tick==0&&in.phase==2){
-   if(s.paused){if(s.info_mode&&target>=0&&target<10&&c.present[target])s.info_slot=target;if(target>=300&&target!=306){
-     // 008ff260/008ff388はrelease時に音量を変え、その音量でSE11を鳴らす。
-     if(target==304)s.bgm_level=(s.bgm_level+1)%4;
-     if(target==305)s.se_level=(s.se_level+1)%4;
-     const auto code=sound(11);if(code)return code;s.pending_control=target;s.guard=1;
-    }}
-   else if(!s.gesture&&!s.battle_mode){
-    if(target==100||target==200||target==203||target==205){const auto code=sound(11);if(code)return code;s.pending_control=target;s.guard=1;}
-    if(target==101){s.request_cannon=1;if(hook){const auto code=hook(user,2,&s);if(code)return code;}}
-    if(target==102){const bool allowed=s.worker<7&&s.money>=upgrade(c,s.worker);if(allowed){s.money-=upgrade(c,s.worker);++s.worker;s.wallet_flash=13;}const auto code=sound(allowed?19:15);if(code)return code;}
-    if(target>=0&&target<10&&s.hold_frames<14){
-     if(immediate&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
-     else{s.pending_control=target;s.guard=1;}
-    }
-   }
-   s.pointer_down=0;s.holding=-1;s.hold_frames=0;
-  }else if(tick==0&&in.phase==3){s.pointer_down=0;s.holding=-1;s.hold_frames=0;}
-  if(s.pointer_down&&!s.paused&&!s.gesture&&target>=0&&target<10){if(s.holding!=target){s.holding=target;s.hold_frames=0;}else s.hold_frames=std::min(14,s.hold_frames+1);}
+  if(tick==0&&in.phase==2){const auto code=release(target);if(code)return code;}else if(tick==0&&in.phase==3){s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;}
+  if(s.pointer_down&&!s.paused&&!s.gesture&&target>=0&&target<10&&c.present[target]){if(s.holding!=target){s.holding=target;s.hold_frames=0;s.hold_wait=0;}else s.hold_frames=std::min(100000,s.hold_frames+1);if(s.hold_frames>=14)s.hold_wait=3;}
   if(s.description_wait)--s.description_wait;
   if(hook){const auto code=hook(user,5,&s);if(code)return code;}
 

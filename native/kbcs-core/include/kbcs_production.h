@@ -45,6 +45,7 @@ uint32_t kbcs_core_production_deploy(const KbcsProductionInput*,KbcsProductionSt
     uint32_t*,KbcsSpawnConstructor,void*,KbcsProductionOutput*);
 /* 006d6d04の再生産待ち1論理F。上限へ戻すFには減算しない。 */
 uint32_t kbcs_core_production_clock(KbcsProductionState*,const int32_t recharge[10],uint32_t* ready);
+uint32_t kbcs_core_production_delay(int32_t recharge,int32_t rate,int32_t frames,int32_t *wait,int32_t *maximum,int32_t *red);
 
 typedef struct { int32_t row,slot; } KbcsEnemyProductionOutput;
 /* 生成→全体抽選→行抽選→commit→初回出現フラグを同じ呼出内で行う。 */

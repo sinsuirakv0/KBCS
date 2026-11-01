@@ -162,6 +162,19 @@ extern "C" uint32_t kbcs_core_production_clock(KbcsProductionState *state,
  *ready=result;return 0;
 }
 
+// 006db348..006db434。遅延率を同じ枠で合算してから、生産済み進捗を戻す。
+extern "C" uint32_t kbcs_core_production_delay(int32_t recharge,int32_t rate,int32_t frames,
+    int32_t *wait,int32_t *maximum,int32_t *red) {
+ if(!wait||!maximum||!red||recharge<0||*wait<0||frames<0)return 1;
+ if(!rate)return 0;
+ if(!*red||*wait<*maximum)*maximum=*wait;
+ const int32_t progress=int32_t(uint32_t(recharge)-uint32_t(*wait));
+ const int32_t product=int32_t(uint32_t(progress)*uint32_t(rate));
+ const int32_t high=int32_t(uint64_t(int64_t(product)*-0x51eb851fLL)>>32);
+ const int32_t remaining=std::max(int32_t(uint32_t(progress)+uint32_t((high>>5)-(high>>31))),0);
+ *wait=int32_t(uint32_t(recharge)-uint32_t(remaining));*red=frames;return 0;
+}
+
 extern "C" uint32_t kbcs_core_production_enemy(const KbcsStageRow *rows,
     KbcsStageState *states,int32_t count,KbcsStageContext *context,uint32_t *seed,
     int32_t *seen,int32_t seen_count,KbcsSpawnConstructor construct,void *user,

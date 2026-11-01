@@ -792,6 +792,16 @@ impl Pool {
         let code = unsafe { kbcs_core_actor_begin(self.0.as_mut_ptr(), environment, side, slot) };
         if code == 0 { Ok(()) } else { Err(code) }
     }
+    pub fn frame_marks(&mut self, environment: &Environment) -> Result<(), u32> {
+        unsafe extern "C" {
+            fn kbcs_core_actor_frame_marks(
+                actors: *mut [Actor; SLOTS],
+                environment: *const Environment,
+            ) -> u32;
+        }
+        let code = unsafe { kbcs_core_actor_frame_marks(self.0.as_mut_ptr(), environment) };
+        if code == 0 { Ok(()) } else { Err(code) }
+    }
     pub fn react(
         &mut self,
         environment: &Environment,

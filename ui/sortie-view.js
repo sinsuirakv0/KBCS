@@ -1,6 +1,14 @@
 ﻿import {battleItems} from './battle-support.js';
 import {escapeHtml as esc} from './src/shared/game/database-view.js';
 
+// ルール0の所持金。PCで指定した円を、既存の100分の1円単位へ渡す前に検査する。
+export function sortieFixedMoney(map,override){
+ const rule=map.rules?.find(value=>value.id===0);if(!rule)return null;
+ const value=override??rule.parameters[0];
+ if(!Number.isInteger(value)||value<0||value>10000000)throw Error('所持金は0〜10,000,000円の整数で指定してください');
+ return value;
+}
+
 export function readSortiePreferences(local,session){
  const read=storage=>{try{return JSON.parse(storage.getItem('kbcs:sortie')||'{}')||{};}catch{return {};}};
  const saved={...read(session),...read(local)};

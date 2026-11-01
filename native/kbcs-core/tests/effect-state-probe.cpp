@@ -39,3 +39,10 @@ extern "C" uint32_t kbcs_audit_actor_visuals(int side,const KbcsActor *actor,Kbc
  const KbcsBattleVisual *values=nullptr;const auto code=kbcs_core_battle_visuals(&battle,&values,count);
  if(code)return code;if(*count>32)return 1;std::copy_n(values,*count,after);return 0;
 }
+
+// 全251語を受け渡し、原本のフレーム境界と同じ所有側の入口を検証する。
+extern "C" uint32_t kbcs_audit_frame_marks(KbcsActor (*actors)[51],const int32_t modes[2]){
+ if(!actors||!modes)return 1;KbcsBattleConfig config{};config.seed=1;KbcsBattle battle(config);
+ std::copy_n(modes,2,battle.config.environment.unit_modes);std::copy_n(&actors[0][0],102,&battle.actors[0][0]);battle.beginFrame();
+ std::copy_n(&battle.actors[0][0],102,&actors[0][0]);return 0;
+}

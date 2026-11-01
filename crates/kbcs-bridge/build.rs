@@ -14,6 +14,7 @@ fn main() {
         .file("../../native/kbcs-core/src/motion.cpp")
         .file("../../native/kbcs-core/src/battle_support.cpp")
         .file("../../native/kbcs-core/src/battle_screen.cpp")
+        .file("../../native/kbcs-core/src/interface.cpp")
         .file("../../native/kbcs-core/src/render.cpp")
         .file("../../native/kbcs-core/src/scene_effects.cpp")
         .flag_if_supported("-ffp-contract=off")

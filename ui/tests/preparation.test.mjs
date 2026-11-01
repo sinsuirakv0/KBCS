@@ -134,3 +134,20 @@ assert.deepEqual(battleKeyAction('Space',defaultBattleKeys,{rows:1,page:0}),{con
 assert.equal(battleKeyAction('Space',defaultBattleKeys,{rows:2,page:0}),null);
 assert.equal(normalizeBattleKeys({wallet:'invalid'}).wallet,'KeyX');
 assert.equal(normalizeBattleKeys({wallet:''}).wallet,'');
+
+// 固定所持金の既定・上書き・0円と、不正値を検査する。
+const {sortieFixedMoney}=await import('../sortie-view.js');
+const fixedMap={rules:[{id:0,parameters:[25000]}]};
+assert.equal(sortieFixedMoney({rules:[]}),null);assert.equal(sortieFixedMoney(fixedMap),25000);assert.equal(sortieFixedMoney(fixedMap,0),0);assert.equal(sortieFixedMoney(fixedMap,10000000),10000000);
+for(const value of [-1,1.5,NaN,10000001])assert.throws(()=>sortieFixedMoney(fixedMap,value));
+const {sceneKeyboardView}=await import('../src/features/stages/scene-controls.js');
+const camera={center:3000,zoom:1,minimum:.5,maximum:1,viewport_width:1000};
+assert.equal(sceneKeyboardView(camera,'cameraLeft').center,2900);assert.equal(sceneKeyboardView(camera,'cameraRight').center,3100);assert.equal(sceneKeyboardView(camera,'cameraIn').zoom,1);
+assert.equal(sceneKeyboardView({...camera,zoom:.5},'cameraOut').zoom,.5);
+// 自動セットで移る既存キャラのLv・本能・玉はそのまま保持する。
+const {applyComboPlan,activeFormationCombos}=await import('../formation-combos.js');
+const comboMember={unitId:45,form:2,level:59,plus:1,talents:{0:5},orbs:[12]};
+const comboDatabase={units:[unit],combos:[{id:0,members:[{id:45,form:2}]}]};
+const applied=applyComboPlan(comboDatabase,[comboMember,...Array(9).fill(null)],{slots:[-1,45,...Array(8).fill(-1)]});
+assert.deepEqual(applied[1],comboMember);assert.notEqual(applied[1],comboMember);assert.equal(activeFormationCombos(comboDatabase,applied).length,1);
+console.log('fixed money, camera keys and preserved combo member settings passed');

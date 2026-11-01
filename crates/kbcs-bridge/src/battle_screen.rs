@@ -71,6 +71,8 @@ pub struct State {
     pub hud_frame: i32,
     #[serde(default)]
     pub battle_mode: i32,
+    #[serde(default)]
+    pub hold_wait: i32,
 }
 #[repr(C)]
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
@@ -189,6 +191,65 @@ fn native_screen_witnesses() {
         ..config.clone()
     };
     let layout = call(keyboard_config.clone(), base.clone(), Input::default()).layout;
+    let tapped = call(
+        keyboard_config.clone(),
+        base.clone(),
+        Input {
+            control: 1000,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(
+        (tapped.frame, tapped.guard, tapped.pending_control),
+        (base.frame, 1, 0)
+    );
+    let ignored = call(
+        keyboard_config.clone(),
+        tapped,
+        Input {
+            control: 1001,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(ignored.pending_control, 0);
+    let completed = call(
+        keyboard_config.clone(),
+        ignored,
+        Input {
+            ticks: 5,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!(completed.request_slot, 0);
+    assert_eq!(
+        call(
+            keyboard_config.clone(),
+            completed,
+            Input {
+                ticks: 5,
+                ..Input::default()
+            }
+        )
+        .state
+        .request_slot,
+        -1
+    );
+    let closing = call(
+        config.clone(),
+        State {
+            paused: 1,
+            guard: 1,
+            pending_control: 300,
+            ..base.clone()
+        },
+        Input::default(),
+    );
+    let menu = &closing.layout.menu_sprites[..closing.layout.menu_count as usize];
+    assert!(menu.iter().any(|p| p[0] == 0 && p[1] == 21));
+    assert!(menu.iter().any(|p| p[0] == 0 && p[1] == 22));
     let mut keyboard = call(
         keyboard_config.clone(),
         base.clone(),
@@ -316,7 +377,7 @@ fn native_screen_witnesses() {
     assert_eq!(closed.info_mode, 0);
     assert_eq!(closed.rows, 1);
 
-    // 停止中の即生産だけは0tickで入力を受け、戦闘・表示時計と残高を進めない。
+    // 0tickのキーは通常の押下待ちへ進み、即生産チートなら同一Fで出撃する。
     unsafe extern "C" {
         fn kbcs_core_battle_screen_advance_custom(
             config: *const Config,
@@ -371,7 +432,11 @@ fn native_screen_witnesses() {
                 base.ui_frame,
                 base.hud_frame,
                 base.money,
-                base.guard
+                if keyboard && immediate == 0 {
+                    1
+                } else {
+                    base.guard
+                }
             )
         );
     }
@@ -536,6 +601,52 @@ fn native_screen_witnesses() {
         },
     );
     assert_eq!(held.state.hold_frames, 14);
+    assert_eq!(held.layout.info_box[2], 473);
+    let opened = call(
+        enabled.clone(),
+        held.state.clone(),
+        Input {
+            ticks: 2,
+            ..Default::default()
+        },
+    );
+    assert_eq!(opened.state.hold_frames, 16);
+    assert_eq!(opened.layout.info_box[2], 946);
+    let released = call(
+        enabled.clone(),
+        opened.state,
+        Input {
+            ticks: 1,
+            phase: 2,
+            x: 160,
+            y: 450,
+            ..Default::default()
+        },
+    );
+    assert_eq!(released.state.hold_wait, 3);
+    assert_eq!(released.layout.info_box[2], 946);
+    let closing = call(
+        enabled.clone(),
+        released.state,
+        Input {
+            ticks: 1,
+            ..Default::default()
+        },
+    );
+    assert_eq!(closing.state.hold_frames, 0);
+    assert_eq!(closing.state.hold_wait, 2);
+    assert_eq!(closing.layout.info_box[2], 851);
+    let closed = call(
+        enabled.clone(),
+        closing.state,
+        Input {
+            ticks: 2,
+            ..Default::default()
+        },
+    );
+    assert_eq!(closed.state.holding, -1);
+    assert_eq!(closed.layout.info_box[2], 0);
+
     let up = call(
         enabled.clone(),
         held.state,

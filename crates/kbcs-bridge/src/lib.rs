@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub mod battle_support;
 pub mod enemy;
 pub mod experience;
+pub mod interface;
 pub mod inventory;
 pub mod materials;
 pub mod motion;
@@ -286,7 +287,7 @@ pub fn enemy_poison(input: &PoisonInput) -> Result<PoisonOutput, u32> {
 
 #[test]
 fn native_witnesses() {
-    assert_eq!(abi_version(), 4);
+    assert_eq!(abi_version(), 5);
     assert_eq!(ruleset_version(), 1507021);
     let fixture: serde_json::Value = serde_json::from_str(
         include_str!("../../../native/kbcs-core/tests/native-vectors.json")

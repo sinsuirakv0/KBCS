@@ -2,6 +2,7 @@
 import argparse
 import ctypes as c
 import json
+import itertools
 import os
 from pathlib import Path
 import sqlite3
@@ -36,11 +37,11 @@ for side in [0,1]:
  for barrier in [0,100]:
   for barrier_flag in [0,1,2]:
    for shield in [0,49,50,100]:
-    for shield_flag in [0,1,2]:
+    for shield_flag,shield_visual in itertools.product([0,1,2],range(4)):
      for damage in [0,49,50,51,100,101]:
       pool=Pool();word=pool[side][1].words
       for i in range(251):word[i]=(i*17+3)%13
-      for i,v in {0:2,3:12345,4:-200,19:damage,130:barrier,131:barrier_flag,162:1,184:100,190:shield,192:shield_flag,194:0}.items():word[i]=v
+      for i,v in {0:2,3:12345,4:-200,19:damage,130:barrier,131:barrier_flag,162:1,184:100,190:shield,191:shield_flag,192:shield_visual,194:0}.items():word[i]=v
       before=list(word)
       n.cpu.mem_write(game,bytes(0x500000));n.cpu.mem_write(game+0x84080,bytes(pool))
       tree=n.memory+0x4000;node=n.memory+0x5000;sp=n.stack+0x8000

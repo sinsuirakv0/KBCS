@@ -1,5 +1,7 @@
 ﻿use crate::{actor, battle_screen, production, render, stage};
 use std::ptr::NonNull;
+#[cfg(test)]
+mod tests;
 #[repr(C)]
 struct RawActorRef {
     actor: *const actor::Actor,
@@ -203,6 +205,7 @@ pub struct Config {
     pub death_surge_time: i32,
     pub death_surge_motion: [i32; 2],
     pub guard_enabled: i32,
+    pub red_gauge_frames: i32,
     pub castle_offsets: [i32; 6],
     pub summon_position: i32,
     pub boss_frames: i32,

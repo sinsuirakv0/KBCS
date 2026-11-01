@@ -158,6 +158,8 @@ fn source(root: &Path, region: &str) -> Result<()> {
         ("res/Nyancombo1_ja.csv","攻撃力アップ".into()),
         ("res/Nyancombo2_ja.csv","【小】".into()),
         ("Data/NyancomboParam.tsv","10\t15\t20".into()),
+        ("Data/Charagroup.csv","0,combo_fixture_group,3,0".into()),
+        ("res/localizable.tsv","combo_fixture_group\tFixture group".into()),
     ];
     let data = data.into_iter().chain([
         (
@@ -337,6 +339,7 @@ fn import_is_offline_repeatable_region_safe_and_preserves_old_db_on_failure() ->
     );
     assert!(progression[2].materials[0].icon.is_none());
     let combos = kbcs_data::combos::read(&old.connection, "jp")?;
+    assert_eq!(combos[0].group_name, "Fixture group");
     let enemies = kbcs_data::enemies::read(&old.connection, "jp")?;
     assert_eq!(enemies.len(), 2);
     assert_eq!(

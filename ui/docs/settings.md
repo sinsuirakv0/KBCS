@@ -16,6 +16,8 @@ keyboard.jsの操作一覧/正規化を設定・戦闘・試験で共用する�
 
 PC拡張のcontrol=1000+本家のボタン対象番号をC++へ送り、既存release/SE/待機/経済/制限判定へ流す。JS/Rustで直接出撃を確定せず、5表示tickを省略しない。停止0tickの即生産は既存チートの条件だけ。元のARM照合用control=0..10は変更しない。キーボード自体を本家仕様として扱わない。
 
+2026-11-01: キーのFIFO保存を廃止。battle-screen.jsは押下時に軽量な `/api/battle-session/input` へ0tickを送り、描画RPCのbusyで保留しない。Serviceは既存SessionのMutexで同じC++へ直列化する。通常の5表示tickの押下演出、即生産チート、入力拒否条件を共用し、拒否されたキーを後で再生しない。時計とシーン計算を進めない。根拠と試験範囲は[native監査](../../native/kbcs-core/docs/battle-traits-20261101.md)。
+
 ## データ管理と診断
 
 settings.js→Service→kbcs-data::maintenance。公式DB・原本・キャッシュ・user領域を一覧/閲覧する。表示は150件ずつ、本文は256KiBまで。SQLiteは読取専用のスキーマ表示。使用中のDB/原本とuser領域を削除せず、他の削除も確認画面・サーバー側の保存先検証/更新ロック/戦闘中拒否を通す。
@@ -27,3 +29,9 @@ settings.js→Service→kbcs-data::maintenance。公式DB・原本・キャッ�
 ## 2026-10-30: 初回描画の遮蔽
 
 Serviceは全HTMLのhead先頭へ通常scriptのstartup-boot.jsを挿入する。sessionStorageの初回判定だけを同期で読み、本文を隠し、青背景と中央ロゴを描く。moduleの依存取得が終わったらstartup.jsが不透明な画面を設置して遮蔽属性を外す。最初のフレームでホームを描いてからフェードを始めない。ホームの設定はnative-home-links内へ配置し、他の機能と同じボタン部品を使う。
+
+## 2026-11-01: PC操作の追加
+
+カメラの左右/拡大/縮小/初期化を個別キー設定へ追加（既定は矢印/Home）。既存のパン・倍率制限を共用し、戦闘のFや乱数を進めない。チートbit16はにゃんこ砲の充填だけを0にし、発射中の演出を打ち切らない。出撃準備のお小遣い制はマップ別の円単位設定を保存し、既存100分の1円へ変換してC++へ渡す。
+
+Desktop起動だけ、最初の成功時にuser/desktop-shortcut.jsonを保存する。WindowsはWScript.Shellの.lnk、macOSはデスクトップのKBCS.appリンク。設定→システム情報から再作成できる。既存の別項目を削除しない。MacのAppTranslocation下や失敗時は起動・ダウンロードを止めず、次の起動/手動で再試行する。実機Macのショートカットと画面確認は未実施。

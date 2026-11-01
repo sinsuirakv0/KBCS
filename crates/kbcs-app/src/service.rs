@@ -290,6 +290,13 @@ impl Service {
             });
             return Ok(Reply::json(json!({"accepted":true})));
         }
+        if path == "/api/desktop-shortcut" {
+            ensure!(
+                method == "POST" && self.desktop && (body.is_empty() || body == b"{}"),
+                "デスクトップ版から操作してください"
+            );
+            return Reply::serialized(&crate::shortcut::create()?);
+        }
         if path == "/api/system" {
             ensure!(method == "GET", "GETが必要です");
             let runtime = self.route("GET", "/api/runtime", &[])?;
@@ -425,6 +432,53 @@ impl Service {
                 json!({"session":id,"runtime":stats,"textures":textures,"title":title}),
             ));
         }
+        if path == "/api/battle-session/input" {
+            #[derive(serde::Deserialize)]
+            #[serde(deny_unknown_fields)]
+            struct KeyInput {
+                session: String,
+                control: i32,
+                cheats: u32,
+            }
+            ensure!(
+                method == "POST" && body.len() <= 1024,
+                "戦闘キー入力が不正です"
+            );
+            let request: KeyInput = serde_json::from_slice(body)?;
+            ensure!(
+                request.control == 2 || request.control == 4 || request.control >= 1000,
+                "戦闘キー操作が不正です"
+            );
+            let session = self
+                .battles
+                .lock()
+                .map_err(|_| anyhow::anyhow!("戦闘ロック失敗"))?
+                .get(&request.session)
+                .cloned()
+                .context("戦闘が終了しています")?;
+            let mut session = session
+                .lock()
+                .map_err(|_| anyhow::anyhow!("戦闘更新ロック失敗"))?;
+            session
+                .core
+                .cheats(request.cheats)
+                .map_err(|code| anyhow::anyhow!("チート設定: {code}"))?;
+            // 描画RPC待ちのキーをUIへ貯めない。論理F・シーン計算を進めず入力だけを処理する。
+            let frame = session
+                .core
+                .advance(&kbcs_bridge::battle_screen::Input {
+                    control: request.control,
+                    ..Default::default()
+                })
+                .map_err(|code| anyhow::anyhow!("戦闘キー操作: {code}"))?;
+            let sounds = session
+                .core
+                .sounds()
+                .map_err(|code| anyhow::anyhow!("戦闘音源: {code}"))?;
+            return Ok(Reply::json(
+                json!({"state":frame.state,"layout":frame.layout,"sounds":sounds}),
+            ));
+        }
         if path == "/api/battle-session/frame" {
             let started = std::time::Instant::now();
             ensure!(
@@ -499,11 +553,14 @@ impl Service {
                 }
             }
             request.scene.frame = battle.state.frame;
+            session.combo_skipped |= request.skip_combos;
             request.scene.battle_rows = battle.state.rows;
             session.ending_camera(&mut request.scene)?;
             // 描画がSceneを借用する前に、同じ配置でHUDを作る。
             let hud_layout = session.layout(&request.scene)?;
             runtime["hud"] = serde_json::to_value(session.hud(&hud_layout)?)?;
+            runtime["comboIntro"] =
+                session.combo_intro(battle.state.frame, request.scene.viewport_width)?;
             let frame = session.draw(&request.scene)?;
             return Reply::battle(
                 BattleFrame {
@@ -566,6 +623,59 @@ impl Service {
                     .packed
                     .then_some((request_started, request.compressed)),
             );
+        }
+        if path == "/api/battle-info" {
+            ensure!(
+                method == "POST" && body.len() <= 65536,
+                "キャラ情報の入力が不正です"
+            );
+            let input: Vec<kbcs_bridge::interface::UnitInfoInput> = serde_json::from_slice(body)?;
+            ensure!(input.len() <= 10, "キャラ情報の件数が不正です");
+            let result = input
+                .iter()
+                .map(kbcs_bridge::interface::unit_info)
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(|code| anyhow::anyhow!("キャラ情報の配置: {code}"))?;
+            return Ok(Reply::json(serde_json::to_value(result)?));
+        }
+        if path == "/api/combo-layout" {
+            ensure!(method == "GET", "GETが必要です");
+            let width = url
+                .query_pairs()
+                .find(|(key, _)| key == "width")
+                .map(|(_, value)| value.parse::<i32>())
+                .transpose()?
+                .unwrap_or(1188);
+            let rows = [false, true]
+                .into_iter()
+                .map(|grouped| {
+                    (0..4)
+                        .map(|row| kbcs_bridge::interface::combo_row(width, row, grouped))
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(|code| anyhow::anyhow!("コンボ配置: {code}"))?;
+            let popup = (0..5)
+                .map(|phase| kbcs_bridge::interface::combo_dialog(width, phase))
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(|code| anyhow::anyhow!("コンボ確認窓の配置: {code}"))?;
+            return Ok(Reply::json(json!({"rows":rows,"popup":popup})));
+        }
+        if path == "/api/combo-plan" {
+            ensure!(
+                method == "POST" && body.len() <= 1_000_000,
+                "コンボ入力が不正です"
+            );
+            #[derive(serde::Deserialize)]
+            #[serde(deny_unknown_fields)]
+            struct PlanRequest {
+                combos: Vec<kbcs_bridge::interface::ComboDefinition>,
+                selection: kbcs_bridge::interface::ComboSelection,
+            }
+            let input: PlanRequest = serde_json::from_slice(body)?;
+            let result = kbcs_bridge::interface::combo_plan(&input.combos, &input.selection)
+                .map_err(|code| anyhow::anyhow!("コンボ自動セット: {code}"))?;
+            return Ok(Reply::json(serde_json::to_value(result)?));
         }
         if path == "/api/battle-support" {
             ensure!(
@@ -1305,7 +1415,7 @@ fn native_calculation_service_contract() {
         let reply = service.handle("POST", "/api/calculate", &body);
         assert_eq!(reply.status, 200);
         let result: Value = serde_json::from_slice(&reply.bytes).unwrap();
-        assert_eq!(result["abi"], 4);
+        assert_eq!(result["abi"], 5);
         assert_eq!(result["ruleset"], 1507021);
         assert_eq!(result[key].as_array().unwrap().len(), rows.len());
         for (row, output) in rows.iter().zip(result[key].as_array().unwrap()) {

@@ -3,6 +3,7 @@ import {createFormationReorder,createFormationGhost} from './formation-reorder.j
 import {addFormationMember,moveTrayMember,swapTrayMember} from './formation-tray.js';
 import {createFormationSearch} from './formation-search.js';
 import {createFormationDetails} from './formation-details.js';
+import {createFormationCombos} from './formation-combos.js';
 import {loadUnitDatabase} from './src/shared/game/units.js';
 import {createFormationMember,resolveFormationMember,formationDisplayName,formationAdvancedUnlocked} from './formation-model.js';
 import {createFormationView,fitFormationName} from './formation-view.js';
@@ -180,6 +181,7 @@ try{
     }
   });
   render();status.textContent='保存済み';request('/api/formation-equipment').then(result=>{equipment=result.items;renderMember();}).catch(showError);
+  createFormationCombos(database,()=>entry.document,async slots=>{if(busy||reorder?.active||trayDrag)throw Error('編成の操作が終わってからセットしてください');await save();entry.document.slots=slots;selectedTray=-1;selected=0;mark();await save();await updateRestrictions();draw();renderMember();},request).then(button=>trayArea.after(button)).catch(showError);
   screen.addEventListener('click',event=>{if(reorder.suppressClick||reorder.active)return;const slot=event.target.closest('[data-slot]');if(slot){selectedTray=-1;selected=Number(slot.dataset.slot);draw();renderMember();}else{const target=event.target.closest('[data-action]');if(target)action(target.dataset.action);}});
   screen.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
   setInterval(()=>{if(trayDrag&&++trayDrag.ticks>=5)paintTrayDrag();},1000/30);

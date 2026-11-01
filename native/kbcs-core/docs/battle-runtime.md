@@ -2,6 +2,8 @@
 
 JP15.7.2 / 1507021 / arm64-v8a / SO SHA256 `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`。
 
+2026-11-01の一時印・特殊敵城・遅延・操作修正は[監査結果](battle-traits-20261101.md)を参照。関数の対応、ARM64連続照合と所有戦闘回帰の区別、未検証範囲を記録する。
+
 ## 所有と呼び出し
 
 `battle-screen.js` → `POST /api/battle-session` → Rust `battle::Session` → bridge `Battle` → `kbcs_battle.h` / `actor_battle.inc`。C++が102個体、生成通番、出現行/待機、再生産、RNG、命中予約/寄与者、波動/区間/履歴、烈波/反射/爆波を所有する。Rustは原本と編成の解決、Mutexによる排他、描画素材と転送を担当する。

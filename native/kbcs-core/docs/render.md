@@ -51,3 +51,14 @@ actor_motion_lengths.pyのARM64試験メモリで、前の長いtrackに次の�
 `Session::draw`は背景/城/個体/二次演出の後へ`Battle::top_draw`の命令を加える。C++のtexture0=img001、1=FeverEffect、2=任意のステージ名をRustがsceneのtexture索引へ置換する。続いて`kbcs_core_battle_overlay`のtexture=-2（単色矩形）を加える。タイトルも終了時の乗算/陰影の下になる。
 
 native-media→NativeWebGLRenderer.drawColorGeometryにblendを渡す。原本mode2はDST_COLOR/ZEROであり、同じframebufferの下の背景色を使う。透明の別Canvasへこの矩形を描くと背景色が得られないため、結果帯をHUD Canvasへ描かない。従来の単色呼出は既定mode0を維持する。乗算RGBはbattle-result.mdの原本値を参照。
+
+
+## 2026-11-02: ワープ描画
+
+006ddfb8の006df110〜006df3d8と009f560cの009fb38c〜009fb594を参照。入口18は2b98=skill_warp_entranceと2c08=skill_warp_chara_entrance、出口20は2bd0=skill_warp_exitと2c40=skill_warp_chara_exit。待機19は本体を描かず、入口/出口も生成しない。キャラ専用の例外は追加しない。
+
+本体の制御モデルはskill_warp_chara.mamodel。共用pose評価のpart1から、nativeのbaseScaleX×factorX/scaleUnit²（float32）、縦位置、透過率をkbcs_core_warp_poseで取得する。通常の原画の待機姿勢を00448fa0の式で変形するkbcs_core_warp_packetsへ渡す。個体のワープ時間・距離・SE・状態18→19→20→0は既存actor_transitionを維持し、描画や透明度で戦闘処理・RNGを変更しない。
+
+Rust Sessionは通常モデルの基準点と、unit-modeで選ぶワープ基準点を同じC++ native_pointで取得する。基準点周りの移動/縮小/透過を本体へ適用し、専用エフェクトは同じ個体のレイヤー順でy-350へ置く。通常の待機モーションをワープ中にそのまま描いていた経路を置換した。消滅や死亡の後に独立したタイマーで残留しない。
+
+research/verify/warp.pyは4つの対応を文字列構築・ループのARM64実命令で取得し、同じ原本のmotion_lengthsも照合。00448fa0の浮動小数点変形と整数透過率は同一入力100条件で一致した。小さいfixtureでC++頂点、実制御モデルの境界キー、所有Battleの両陣営/18・19・20/死亡・空枠の表示要求を回帰検査する。Android GPUの全画素・全カメラ位置の一致や実画面確認は含まない。

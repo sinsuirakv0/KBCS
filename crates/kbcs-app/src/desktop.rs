@@ -61,6 +61,7 @@ fn start(root: PathBuf, region: String, source: String, check: bool) -> Result<(
     service.desktop = true;
     if !check {
         service.start_updates();
+        crate::shortcut::ensure_once(root.clone());
     }
     let mut context = WebContext::new(Some(root.join("webview")));
     let builder = WebViewBuilder::new_with_web_context(&mut context);

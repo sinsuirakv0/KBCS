@@ -81,7 +81,7 @@ I track_value(const KbcsRenderKey *keys,int count,I offset,I frame,bool &active)
 
 static uint32_t pose(const KbcsPoseInput *in,const KbcsRenderPart *bases,int32_t count,
     const KbcsRenderCut *cuts,int32_t cut_count,const KbcsRenderTrack *tracks,int32_t track_count,
-    const KbcsRenderKey *keys,int32_t key_count,KbcsPosePacket *output,int32_t *written,int32_t *contact) {
+    const KbcsRenderKey *keys,int32_t key_count,KbcsPosePacket *output,int32_t *written,int32_t *contact,KbcsWarpPose *warp=nullptr) {
   if (!in || !bases || !cuts || !output || !written || count<1 || count>4096 || cut_count<1 || cut_count>8192 ||
       track_count<0 || track_count>32768 || key_count<0 || key_count>262144 || (track_count && !tracks) ||
       (key_count && !keys) || in->units[0]<=0 || in->units[1]<=0 || in->units[2]<=0 ||
@@ -180,6 +180,10 @@ static uint32_t pose(const KbcsPoseInput *in,const KbcsRenderPart *bases,int32_t
       }
       if(!progressed)return 1;
     }
+    if(warp) {
+      if(count<2)return 1;const auto &p=parts[1];
+      *warp={((float(p.base[8])*float(p.factor_x))/float(su))/float(su),integer(double(p.v[5])),integer(double(divide(product(p.alpha,255),ou)))};return 0;
+    }
     if(contact) {
       const int index=std::max(0,in->config[0]);if(index>=count)return 1;const auto &p=parts[size_t(index)];
       // 0044b854の0x4c/0x54は原点の基礎値/加算値。位置ではない。
@@ -219,6 +223,22 @@ extern "C" uint32_t kbcs_core_pose_contact(const KbcsPoseInput *in,const KbcsRen
  const KbcsRenderTrack *tracks,int32_t track_count,const KbcsRenderKey *keys,int32_t key_count,int32_t *out) {
  if(!out)return 1;const KbcsRenderCut cut{};KbcsPosePacket packet{};int32_t written=0;
  return pose(in,parts,count,&cut,1,tracks,track_count,keys,key_count,&packet,&written,out);
+}
+extern "C" uint32_t kbcs_core_warp_pose(const KbcsPoseInput *in,const KbcsRenderPart *parts,int32_t count,const KbcsRenderTrack *tracks,int32_t track_count,const KbcsRenderKey *keys,int32_t key_count,KbcsWarpPose *out) {
+ if(!out)return 1;const KbcsRenderCut cut{};KbcsPosePacket packet{};int32_t written=0;KbcsWarpPose result{};
+ const auto code=pose(in,parts,count,&cut,1,tracks,track_count,keys,key_count,&packet,&written,nullptr,&result);if(!code)*out=result;return code;
+}
+extern "C" uint32_t kbcs_core_warp_packets(const KbcsWarpPose *warp,const int32_t anchor[4],const int32_t origin[2],const KbcsPosePacket *input,int32_t count,KbcsPosePacket *out){
+ if(!warp||!anchor||!origin||count<0||count>4096||(!input&&count)||(!out&&count)||!std::isfinite(warp->scale)||std::abs(warp->scale)>100||warp->alpha<0||warp->alpha>255)return 1;
+ try{std::vector<KbcsPosePacket> result;result.reserve(count);
+  for(int i=0;i<count;++i){auto p=input[i];if(!std::isfinite(p.opacity)||p.opacity<0||p.opacity>1)return 1;
+   const int alpha=int(std::round(p.opacity*255.))*warp->alpha/255;p.opacity=double(alpha)/255.;
+   for(int j=0;j<8;j+=2){
+    p.points[j]=integer(float(std::fma(warp->scale,float(I(p.points[j])-anchor[2]),float(anchor[2]))+float(I(origin[0])-anchor[0])));
+    p.points[j+1]=integer(float(std::fma(warp->scale,float(I(p.points[j+1])-anchor[3]),float(anchor[3]))+float(I(origin[1])-anchor[3]+warp->y)));
+   }result.push_back(p);
+  }std::copy(result.begin(),result.end(),out);return 0;
+ }catch(int code){return uint32_t(code);}catch(...){return 3;}
 }
 
 extern "C" uint32_t kbcs_core_scene_layout(const KbcsSceneInput *in,KbcsSceneLayout *out) {

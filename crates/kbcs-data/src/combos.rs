@@ -20,6 +20,8 @@ pub struct Combo {
     pub kind: i64,
     pub grade: i64,
     pub group: i64,
+    #[serde(rename = "groupName")]
+    pub group_name: String,
     pub active: bool,
     pub name: String,
     pub effect: String,
@@ -140,6 +142,28 @@ pub fn target_groups(connection: &Connection) -> Result<std::collections::BTreeM
 }
 
 pub fn read(connection: &Connection, region: &str) -> Result<Vec<Combo>> {
+    let source = |path| -> Result<Vec<u8>> {
+        Ok(connection.query_row(
+            "SELECT bytes FROM source_file WHERE path=?",
+            [path],
+            |row| row.get(0),
+        )?)
+    };
+    let localization = String::from_utf8(source("res/localizable.tsv")?)?;
+    let localized: std::collections::BTreeMap<_, _> = localization
+        .lines()
+        .filter_map(|line| line.split_once('\t'))
+        .collect();
+    let group_names: std::collections::BTreeMap<i64, String> =
+        csv_rows(&source("Data/Charagroup.csv")?)?
+            .into_iter()
+            .filter_map(|row| {
+                Some((
+                    row.first()?.parse().ok()?,
+                    localized.get(row.get(1)?.as_str())?.to_string(),
+                ))
+            })
+            .collect();
     let bytes: Vec<u8> = connection.query_row(
         "SELECT bytes FROM source_file WHERE path='Data/NyancomboData.csv'",
         [],
@@ -164,6 +188,10 @@ pub fn read(connection: &Connection, region: &str) -> Result<Vec<Combo>> {
             group: *groups
                 .get(id as usize)
                 .ok_or_else(|| anyhow::anyhow!("コンボ対象列なし"))?,
+            group_name: group_names
+                .get(groups.get(id as usize).unwrap_or(&-1))
+                .cloned()
+                .unwrap_or_default(),
             active: true,
             name: row.get(3)?,
             effect: row.get(4)?,

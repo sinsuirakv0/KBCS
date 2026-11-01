@@ -8,7 +8,7 @@ import {loadStageScene,stageMediaHtml,initializeStageMedia} from './src/features
 import {prepareBattleScreen,startBattleScreen} from './battle-screen.js';
 import {createFormationView,fitFormationName} from './formation-view.js';
 import {createFormationReorder} from './formation-reorder.js';
-import {readSortiePreferences,sortieItemsHtml,toggleSortieItem,sortieLaunchHtml} from './sortie-view.js';
+import {readSortiePreferences,sortieItemsHtml,toggleSortieItem,sortieLaunchHtml,sortieFixedMoney} from './sortie-view.js';
 import {formationDisplayName} from './formation-model.js';
 import {stageRulesHtml,stageFormationHtml} from './src/features/stages/view.js';
 import {readBattleJson,battleFormation,castleHealth,prepareBattleAssets,effectiveStageLimit,stageDeployment} from './battle-support.js';
@@ -21,7 +21,13 @@ let saved={items:{},speed:2};try{saved=readSortiePreferences(localStorage,sessio
 let crown=Math.max(1,Number(route.get('crown'))||1),items={...saved.items},speed=saved.speed;
 const stageMedia=initializeStageMedia(node('media'),id=>stages.find(value=>value.id===id));
 function status(message,error=false){node('message').textContent=message;node('message').classList.toggle('sortie-status-error',error);}
-function store(){saved={formation:entry?.id??saved.formation,items,speed};try{for(const storage of [localStorage,sessionStorage])storage.setItem('kbcs:sortie',JSON.stringify(saved));}catch{}}
+function store(){saved={...saved,formation:entry?.id??saved.formation,items,speed};try{for(const storage of [localStorage,sessionStorage])storage.setItem('kbcs:sortie',JSON.stringify(saved));}catch{}}
+const moneyControls=document.createElement('label');moneyControls.className='sortie-fixed-money';moneyControls.hidden=true;
+moneyControls.innerHTML='所持金<input type="number" min="0" max="10000000" step="1" aria-label="お小遣い制ステージの所持金">円<button type="button">ステージ初期値</button>';
+node('items').before(moneyControls);
+const moneyInput=moneyControls.querySelector('input');
+moneyInput.addEventListener('change',()=>{try{const value=sortieFixedMoney(map,moneyInput.valueAsNumber);saved.fixedMoney={...saved.fixedMoney,[map.key]:value};moneyInput.setCustomValidity('');store();}catch(error){moneyInput.setCustomValidity(error.message);moneyInput.reportValidity();}});
+moneyControls.querySelector('button').onclick=()=>{if(saved.fixedMoney)delete saved.fixedMoney[map.key];moneyInput.value=sortieFixedMoney(map);moneyInput.setCustomValidity('');store();};
 function ready(){node('launch').disabled=!!controller||formationSaving||!!reorder?.active||!entry||!health||!deployment||!stage||!!(stage.variants?.length&&!stage.patternSource)||!(stage.width>0)||stage.background==null;}
 function drawFormation(){
   if(!entry){node('formation-preview').innerHTML='<a href="/pages/formation/">編成を作成</a>';return;}
@@ -80,6 +86,7 @@ async function chooseFormation(id){
   }catch(error){status(error.message,true);}finally{if(version===choiceVersion)ready();}
 }
 function renderStage(){
+  const fixed=sortieFixedMoney(map,saved.fixedMoney?.[map.key]);moneyControls.hidden=fixed===null;moneyInput.value=fixed??'';moneyInput.setCustomValidity('');
   node('title').textContent=stage.name;document.title=stage.name+' 出撃準備 | KBCS';node('map').textContent=map.name;
   node('stages').innerHTML=stages.map(value=>'<button type="button" data-stage="'+value.index+'" aria-current="'+(value.index===stage.index)+'">'+(value.index+1)+'. '+esc(value.name)+'</button>').join('');
   node('crowns').innerHTML=map.stars.map((_,index)=>'<button type="button" data-crown="'+(index+1)+'" aria-pressed="'+(crown===index+1)+'"><img src="/icons/stages/crown-'+(index<crown?'on':'off')+'.png" alt="" width="25" height="24">'+(index+1)+'</button>').join('');
@@ -98,14 +105,14 @@ function renderStage(){
 }
 function report(label,current,total){node('loading-status').textContent=label+' '+current+' / '+total;node('progress').max=Math.max(1,total);node('progress').value=current;}
 async function depart(){
-  if(node('launch').disabled)return;
+  if(node('launch').disabled||!moneyInput.reportValidity())return;
   const active=new AbortController();controller=active;ready();node('initial').hidden=false;node('setup').hidden=true;document.dispatchEvent(new CustomEvent('kbcs:battle-mode',{detail:true}));node('blackout').hidden=false;node('loading-status').textContent='ステージを準備中';
   try{
     // 出撃時点の保存版を固定し、編集タブで変更された設定を黙って使わない。
     const latest=await readBattleJson('/api/formations?current='+entry.id,{signal:active.signal});
     if(latest.entry?.revision!==entry.revision){await chooseFormation(entry.id);throw Error('編成が更新されました。設定を確認してから出撃してください');}
     const formation=battleFormation(units,entry.document),currentHealth=await castleHealth(units,formation);
-    const snapshot={schemaVersion:1,version:database.gameVersion,buildId:database.buildId,stage:structuredClone(stage),map:structuredClone(map),crown,formationId:entry.id,formationRevision:entry.revision,formation,items:structuredClone(items),speed:items.speedup?speed:1,seed:0x12345678,limits:applicableLimits(map,stage,crown),castle:currentHealth,deployment:structuredClone(deployment),frame:0};
+    const snapshot={schemaVersion:1,version:database.gameVersion,buildId:database.buildId,stage:structuredClone(stage),map:structuredClone(map),crown,formationId:entry.id,formationRevision:entry.revision,formation,fixedMoney:sortieFixedMoney(map,saved.fixedMoney?.[map.key]),items:structuredClone(items),speed:items.speedup?speed:1,seed:0x12345678,limits:applicableLimits(map,stage,crown),castle:currentHealth,deployment:structuredClone(deployment),frame:0};
     snapshot.stage.musicTracks=(stage.musicTracks||[]).map(track=>({...track,loop:database.musicCatalog?.tracks?.[track.id]?.loop!==false}));
     const scene=await loadStageScene(stage,{frame:0,showEnemy:true,showPlayer:true,showEffects:true});
     if(scene.missing?.length)throw Error('ステージ素材が未収録です：'+scene.missing.join(', '));

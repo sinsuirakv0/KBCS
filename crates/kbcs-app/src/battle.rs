@@ -27,6 +27,8 @@ pub struct Request {
     pub compressed: bool,
     #[serde(default)]
     pub cheats: u32,
+    #[serde(default)]
+    pub skip_combos: bool,
 }
 pub struct Clip {
     pub model: render::Model,
@@ -45,7 +47,10 @@ pub struct Session {
     pub effects: BTreeMap<(i32, i32, i32), Clip>,
     pub key: String,
     pub title: Value,
+    combos: Vec<kbcs_data::combos::Combo>,
+    pub combo_skipped: bool,
     receipt: crate::battle_rewards::Receipt,
+    ending_camera_applied: bool,
     cannon_clips: BTreeMap<i32, Clip>,
     cannon_cuts: Vec<render::Cut>,
     cannon_texture: i32,
@@ -347,6 +352,7 @@ impl Session {
         let combo_groups = kbcs_data::combos::target_groups(&database.connection)?;
         let mut unit_combos: BTreeMap<i32, [i32; 32]> = BTreeMap::new();
         let mut cost_combos = Vec::new();
+        let mut active_combos = Vec::new();
         let effects = kbcs_data::combos::effects(&database.connection, region)?;
         for combo in kbcs_data::combos::read(&database.connection, region)? {
             if combo.members.iter().all(|m| {
@@ -376,9 +382,12 @@ impl Session {
                         unit_combos.entry(unit).or_insert([0; 32])[combo.kind as usize] += value;
                     }
                 }
+                active_combos.push(combo);
             }
         }
         let parameter = |name: &str| integer(&constants["parameters"][name]);
+        // 0088fde0は構成数でstable_sortする。同数ならCSVの順を保つ。
+        active_combos.sort_by_key(|combo| combo.members.len());
         environment.parameters = [
             parameter("battle_af_death_volcano_distance")?,
             parameter("battle_af_death_volcano_width")?,
@@ -1031,6 +1040,10 @@ impl Session {
             global_max: integer(&stage["spawnInterval"][1])?,
             accounting_level: facility("accounting")?,
             death_surge_time: parameter("battle_death_volcano_time")?,
+            // 006db434の9019f4呼出は未収録キーに15を返す。
+            red_gauge_frames: constants["parameters"]["battle_red_gauge_frame"]
+                .as_i64()
+                .unwrap_or(15) as i32,
             death_surge_motion: [clock_length("0x27f8", 0)?, clock_length("0x2830", 0)?],
             guard_enabled: i32::from(stage["bossGuard"] == true),
             castle_offsets: [
@@ -1190,7 +1203,10 @@ impl Session {
             effects,
             key: start.scene.key(),
             title,
+            combos: active_combos,
+            combo_skipped: false,
             receipt,
+            ending_camera_applied: false,
             cannon_clips,
             cannon_cuts,
             cannon_texture,
@@ -1203,6 +1219,7 @@ impl Session {
         })
     }
     pub fn draw(&mut self, input: &crate::scene::Input) -> Result<crate::scene::Frame<'_>> {
+        let intro = self.combo_layout(input.frame, input.viewport_width)?;
         let visuals = native(self.core.visuals())?.to_vec();
         let (actors, _) = native(self.core.actors())?;
         let references = native(self.core.active_actors())?;
@@ -1239,7 +1256,7 @@ impl Session {
             let action = words[1];
             let clip = match action {
                 0 | 7 => Some(0),
-                1 | 16 | 18 | 19 | 20 => Some(1),
+                1 | 16 | 18 | 20 => Some(1),
                 2 => Some(2),
                 3 | 5 | 6 | 17 => Some(3),
                 10 => Some(7),
@@ -1252,21 +1269,37 @@ impl Session {
             // 006ddfb8は本体を描かない蘇生待ち14でも、後続の所有演出を描く。
             if let Some(clip) = clip {
                 if let Some(asset) = model.clips.get(&clip) {
-                    paint_clip(
-                        &mut commands,
-                        asset,
-                        &frame.layout,
-                        if action == 7 { 0 } else { words[2] },
-                        f64::from(words[3] / 10),
-                        f64::from(words[4] / 10 + words[5] * 4),
-                        true,
-                    )
-                    .with_context(|| {
-                        format!(
-                            "{}: side={side}, slot={slot}, action={action}, frame={}",
-                            model.name, words[2]
+                    if matches!(action, 18 | 20) {
+                        let warp = self
+                            .effects
+                            .get(&(6, 0, if action == 18 { 0x2c08 } else { 0x2c40 }))
+                            .context("ワープ制御モデルなし")?;
+                        paint_warp(
+                            &mut commands,
+                            asset,
+                            warp,
+                            &frame.layout,
+                            words[2],
+                            [words[3] / 10, words[4] / 10 + words[5] * 4],
+                            side == 0,
+                        )?;
+                    } else {
+                        paint_clip(
+                            &mut commands,
+                            asset,
+                            &frame.layout,
+                            if action == 7 { 0 } else { words[2] },
+                            f64::from(words[3] / 10),
+                            f64::from(words[4] / 10 + words[5] * 4),
+                            true,
                         )
-                    })?;
+                        .with_context(|| {
+                            format!(
+                                "{}: side={side}, slot={slot}, action={action}, frame={}",
+                                model.name, words[2]
+                            )
+                        })?;
+                    }
                 } else if action != 4 && action != 10 {
                     anyhow::bail!("{}: 行動{action}のモーション{clip}がありません", model.name)
                 }
@@ -1307,7 +1340,8 @@ impl Session {
             for value in visuals
                 .iter()
                 .filter(belonging)
-                .filter(|v| v.kind == 10)
+                .filter(|v| v.kind == 11)
+                .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 10))
                 .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 7))
                 .chain(
                     visuals
@@ -1321,12 +1355,12 @@ impl Session {
                 let asset = self
                     .effects
                     .get(&(
-                        if matches!(value.kind, 7 | 9 | 10) {
+                        if matches!(value.kind, 7 | 9 | 10 | 11) {
                             6
                         } else {
                             value.kind
                         },
-                        if matches!(value.kind, 7 | 9 | 10) {
+                        if matches!(value.kind, 7 | 9 | 10 | 11) {
                             0
                         } else {
                             value.side
@@ -1334,12 +1368,23 @@ impl Session {
                         value.phase,
                     ))
                     .context("効果描画モデルなし")?;
+                let offset = if value.kind == 11 && side == 0 {
+                    let idle = &model
+                        .clips
+                        .get(&1)
+                        .context("ワープ中の待機モデルなし")?
+                        .model;
+                    native(idle.native_point(words[2], 1))?[0]
+                        - native(idle.native_point(words[2], 0))?[0]
+                } else {
+                    0
+                };
                 paint_clip(
                     &mut commands,
                     asset,
                     &frame.layout,
                     value.frame,
-                    f64::from(value.x),
+                    f64::from(value.x + offset),
                     f64::from(value.y),
                     false,
                 )?;
@@ -1411,6 +1456,37 @@ impl Session {
             .position(|c| c.layer > 2)
             .unwrap_or(frame.commands.len());
         frame.commands.splice(at..at, commands);
+        if intro.index >= 0 {
+            // 005d63f8の帯は乗算。同じ描画先の背景・個体へ適用する。
+            let [x, y, w, h] = intro.band.map(f64::from);
+            frame.commands.push(render::Command {
+                texture: -2,
+                layer: 11,
+                count: 4,
+                blend: 2,
+                opacity: 1.,
+                points: [
+                    x,
+                    y,
+                    x,
+                    y + h,
+                    x + w,
+                    y + h,
+                    x + w,
+                    y,
+                    0.,
+                    0.,
+                    0.,
+                    0.,
+                    0.,
+                    0.,
+                    0.,
+                    0.,
+                ],
+                colors: [40, 40, 77, 0, 0, 0],
+                ..Default::default()
+            });
+        }
         if matches!(self.rules.score_type, 1 | 3) {
             frame.commands.extend(native(self.core.top_draw(
                 &self.top_cuts[0],
@@ -1441,9 +1517,12 @@ impl Session {
         }
         Ok(())
     }
-    pub fn ending_camera(&self, input: &mut crate::scene::Input) -> Result<()> {
+    pub fn ending_camera(&mut self, input: &mut crate::scene::Input) -> Result<()> {
         let camera = native(self.core.end_camera())?;
-        if camera.width > 0 {
+        let moving =
+            camera.moving != 0 || camera.zoom < if camera.rows == 2 { 8803 } else { 10000 };
+        if camera.width > 0 && (!self.ending_camera_applied || moving) {
+            self.ending_camera_applied = !moving;
             input.zoom = f64::from(camera.zoom / 100) / 100.;
             input.center = Some(f64::from(camera.left) / 10. + 480. / input.zoom);
             input.focus = 4;
@@ -1479,6 +1558,30 @@ impl Session {
             viewport_width: input.viewport_width,
             battle_rows: input.battle_rows,
         }))
+    }
+    pub fn combo_intro(&self, frame: i32, width: i32) -> Result<Value> {
+        let layout = self.combo_layout(frame, width)?;
+        let combo = usize::try_from(layout.index)
+            .ok()
+            .and_then(|index| self.combos.get(index));
+        Ok(json!({"layout":layout,"combo":combo}))
+    }
+    fn combo_layout(&self, frame: i32, width: i32) -> Result<kbcs_bridge::interface::ComboIntro> {
+        let groups = self
+            .combos
+            .iter()
+            .map(|combo| i32::try_from(combo.group))
+            .collect::<Result<Vec<_>, _>>()?;
+        let count = if self.combo_skipped || native(self.core.outcome())?.mode != 0 {
+            &[][..]
+        } else {
+            &groups[..]
+        };
+        native(kbcs_bridge::interface::combo_intro(
+            frame,
+            if width == 0 { 960 } else { width },
+            count,
+        ))
     }
     pub fn hud(&self, layout: &render::Layout) -> Result<battle::Hud> {
         let (actors, profiles) = native(self.core.actors())?;
@@ -1520,6 +1623,30 @@ fn paint_clip(
         native(asset.model.pose(frame, false, false, 1))?
     };
     paint_packets(commands, asset, layout, &local, x, y)
+}
+fn paint_warp(
+    commands: &mut Vec<render::Command>,
+    asset: &Clip,
+    warp: &Clip,
+    layout: &render::Layout,
+    frame: i32,
+    origin: [i32; 2],
+    unit: bool,
+) -> Result<()> {
+    let shape = native(warp.model.warp_pose(frame))?;
+    if shape.alpha <= 0 {
+        return Ok(());
+    }
+    let base = native(asset.model.native_point(frame, 0))?;
+    let pivot = native(asset.model.native_point(frame, usize::from(unit)))?;
+    let raw = native(asset.model.pose(frame, false, false, 1))?;
+    let packets = native(render::warp_packets(
+        &shape,
+        [base[0], base[1], pivot[0], pivot[1]],
+        origin,
+        &raw,
+    ))?;
+    paint_packets(commands, asset, layout, &packets, 0., 0.)
 }
 fn paint_packets(
     commands: &mut Vec<render::Command>,

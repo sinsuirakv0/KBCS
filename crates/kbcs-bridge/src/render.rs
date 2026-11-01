@@ -51,6 +51,13 @@ pub struct Packet {
     pub points: [i32; 8],
 }
 #[repr(C)]
+#[derive(Default, Debug)]
+pub struct WarpPose {
+    pub scale: f32,
+    pub y: i32,
+    pub alpha: i32,
+}
+#[repr(C)]
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SceneInput {
@@ -114,6 +121,24 @@ pub struct SpriteInput {
     pub cut: [i32; 4],
 }
 unsafe extern "C" {
+    fn kbcs_core_warp_pose(
+        input: *const PoseInput,
+        parts: *const Part,
+        count: i32,
+        tracks: *const Track,
+        track_count: i32,
+        keys: *const Key,
+        key_count: i32,
+        output: *mut WarpPose,
+    ) -> u32;
+    fn kbcs_core_warp_packets(
+        warp: *const WarpPose,
+        anchor: *const i32,
+        origin: *const i32,
+        input: *const Packet,
+        count: i32,
+        output: *mut Packet,
+    ) -> u32;
     fn kbcs_core_pose_contact(
         input: *const PoseInput,
         parts: *const Part,
@@ -262,6 +287,32 @@ fn count(lines: &[&str], cursor: &mut usize, max: usize) -> Result<usize, String
     Ok(value)
 }
 impl Model {
+    pub fn warp_pose(&self, frame: i32) -> Result<WarpPose, u32> {
+        let input = PoseInput {
+            units: self.units,
+            frame,
+            repeat: 0,
+            anchor: 0,
+            facing: 1,
+            config: [0; 6],
+            root_override: 0,
+            root: [0.; 5],
+        };
+        let mut out = WarpPose::default();
+        let code = unsafe {
+            kbcs_core_warp_pose(
+                &input,
+                self.parts.as_ptr(),
+                self.parts.len() as i32,
+                self.tracks.as_ptr(),
+                self.tracks.len() as i32,
+                self.keys.as_ptr(),
+                self.keys.len() as i32,
+                &mut out,
+            )
+        };
+        if code == 0 { Ok(out) } else { Err(code) }
+    }
     pub fn clock_lengths(&self) -> Result<[i32; 2], u32> {
         let mut out = [0; 2];
         let code = unsafe {
@@ -532,6 +583,26 @@ impl Model {
         Ok(packets)
     }
 }
+pub fn warp_packets(
+    warp: &WarpPose,
+    anchor: [i32; 4],
+    origin: [i32; 2],
+    input: &[Packet],
+) -> Result<Vec<Packet>, u32> {
+    let count = i32::try_from(input.len()).map_err(|_| 1u32)?;
+    let mut out = vec![Packet::default(); input.len()];
+    let code = unsafe {
+        kbcs_core_warp_packets(
+            warp,
+            anchor.as_ptr(),
+            origin.as_ptr(),
+            input.as_ptr(),
+            count,
+            out.as_mut_ptr(),
+        )
+    };
+    if code == 0 { Ok(out) } else { Err(code) }
+}
 
 #[test]
 fn integer_pose_reference_vectors() {
@@ -599,4 +670,56 @@ pub fn instance(
     let code =
         unsafe { kbcs_core_scene_instance(layout, input, x, y, spacing, index, &mut output) };
     if code == 0 { Ok(output) } else { Err(code) }
+}
+
+#[test]
+fn native_warp_vectors() {
+    let fixture: serde_json::Value = serde_json::from_str(
+        include_str!("../../../native/kbcs-core/tests/warp-vectors.json")
+            .trim_start_matches('\u{feff}'),
+    )
+    .unwrap();
+    for row in fixture["cases"].as_array().unwrap() {
+        let warp = WarpPose {
+            scale: row["warp"]["scale"].as_f64().unwrap() as f32,
+            y: row["warp"]["y"].as_i64().unwrap() as i32,
+            alpha: row["warp"]["alpha"].as_i64().unwrap() as i32,
+        };
+        let packet = Packet {
+            opacity: row["baseAlpha"].as_f64().unwrap() / 255.,
+            points: serde_json::from_value(row["points"].clone()).unwrap(),
+            ..Default::default()
+        };
+        let out = warp_packets(
+            &warp,
+            serde_json::from_value(row["anchor"].clone()).unwrap(),
+            serde_json::from_value(row["origin"].clone()).unwrap(),
+            &[packet],
+        )
+        .unwrap();
+        assert_eq!(out[0].opacity, row["alpha"].as_f64().unwrap() / 255.);
+        if warp.alpha > 0 && packet.opacity > 0. {
+            assert_eq!(serde_json::json!(out[0].points), row["output"]);
+        }
+    }
+    let control = &fixture["control"];
+    let model = |key: &str| {
+        Model::parse(
+            control["cut"].as_str().unwrap(),
+            control["model"].as_str().unwrap(),
+            control[key].as_str(),
+        )
+        .unwrap()
+    };
+    let entrance = model("entrance");
+    assert_eq!(entrance.warp_pose(0).unwrap().alpha, 255);
+    let point = entrance.warp_pose(20).unwrap();
+    assert_eq!((point.y, point.alpha), (-300, 255));
+    assert!((point.scale - 0.4).abs() < 1e-6);
+    assert_eq!(entrance.warp_pose(22).unwrap().alpha, 0);
+    let exit = model("exit");
+    assert_eq!(exit.warp_pose(0).unwrap().alpha, 0);
+    let point = exit.warp_pose(20).unwrap();
+    assert_eq!((point.y, point.alpha), (0, 255));
+    assert_eq!(point.scale, 1.);
 }

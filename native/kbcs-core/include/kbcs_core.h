@@ -141,6 +141,10 @@ typedef struct { int32_t part,property,loop,first,count; } KbcsRenderTrack;
 uint32_t kbcs_core_motion_lengths(const KbcsRenderTrack*,int32_t,const KbcsRenderKey*,int32_t,int32_t lengths[2]);
 typedef struct { int32_t units[3],frame,loop,anchor,facing,config[6],root_override; double root[5]; } KbcsPoseInput;
 typedef struct { int32_t part,cut,blend; double opacity; int32_t points[8]; } KbcsPosePacket;
+/* 006ddfb8 / 00448fa0。ワープ制御モデルの倍率・縦位置・透過率。 */
+typedef struct { float scale; int32_t y,alpha; } KbcsWarpPose;
+uint32_t kbcs_core_warp_pose(const KbcsPoseInput*,const KbcsRenderPart*,int32_t,const KbcsRenderTrack*,int32_t,const KbcsRenderKey*,int32_t,KbcsWarpPose*);
+uint32_t kbcs_core_warp_packets(const KbcsWarpPose*,const int32_t anchor[4],const int32_t origin[2],const KbcsPosePacket*,int32_t,KbcsPosePacket*);
 uint32_t kbcs_core_pose(const KbcsPoseInput*,const KbcsRenderPart*,int32_t,const KbcsRenderCut*,int32_t,const KbcsRenderTrack*,int32_t,const KbcsRenderKey*,int32_t,KbcsPosePacket*,int32_t*);
 /* 0044b854の整数基準点。contactは初期姿勢、pose_contactは指定Fの姿勢。 */
 uint32_t kbcs_core_model_contact(const KbcsPoseInput*,const KbcsRenderPart*,int32_t,int32_t*);
@@ -184,7 +188,7 @@ typedef struct {
 typedef struct {
  int32_t frame,intro,rows,page,page_frame,page_direction,paused,money,worker,cannon;
  int32_t holding,hold_frames,pointer_down,pointer_x,pointer_y,guard,pending_control,items_on,request_slot,request_cannon;
- int32_t ui_frame,speed_mode,wallet_flash,description_item,description_wait,start_x,start_y,gesture,page_step,request_action,bgm_level,se_level,vibration_on,info_mode,info_slot,saved_rows,hud_frame,battle_mode;
+ int32_t ui_frame,speed_mode,wallet_flash,description_item,description_wait,start_x,start_y,gesture,page_step,request_action,bgm_level,se_level,vibration_on,info_mode,info_slot,saved_rows,hud_frame,battle_mode,hold_wait;
 } KbcsBattleScreenState;
 typedef struct { int32_t ticks,phase,x,y,control; } KbcsBattleScreenInput;
 typedef struct {

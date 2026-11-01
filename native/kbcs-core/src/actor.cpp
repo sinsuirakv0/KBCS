@@ -638,6 +638,16 @@ extern "C" uint32_t kbcs_core_actor_walk(KbcsActor actors[2][51],const KbcsActor
  }catch(...){actorAt(actors,side,slot)=backup;return 3;}
 }
 
+extern "C" uint32_t kbcs_core_actor_frame_marks(KbcsActor actors[2][51],const KbcsActorEnvironment *environment){
+ if(!actors||!environment)return 1;
+ KbcsActorDefinition definition{};auto copy=*environment;KbcsSpawnRequest request{};uint32_t seed=1;
+ Context context{definition,copy,actors,request,seed};
+ for(int side=0;side<2;++side)for(int slot=0;slot<actorCount(actors);++slot){
+  n_00a9dce8(context,side,slot,0);n_00a9bd84(context,side,slot,0);n_00a9cf6c(context,side,slot,0);
+ }
+ return 0;
+}
+
 extern "C" uint32_t kbcs_core_actor_begin(KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t side,int32_t slot){
  if(!actors||!environment||side<0||side>1||slot<0||slot>=actorEnd())return 1;
  const auto backup=actorAt(actors,side,slot);

@@ -49,7 +49,7 @@ typedef struct {
  KbcsActorAreaRules areas;
  KbcsActorWaveRules waves;
  int32_t castle_hp[2],enemy_max,unit_max,global_min,global_max;
- int32_t accounting_level,death_surge_time,death_surge_motion[2],guard_enabled;
+ int32_t accounting_level,death_surge_time,death_surge_motion[2],guard_enabled,red_gauge_frames;
  int32_t castle_offsets[6],summon_position,boss_frames,castle_y_offset,effect_clocks[64][3];
  int32_t price_rule[4];
  KbcsBattleRules rules;
@@ -75,7 +75,7 @@ typedef struct {int32_t deploy,upgrade,fire,page_start,page_step;} KbcsComputerO
 uint32_t kbcs_core_battle_computer(const KbcsComputerInput*,KbcsComputerState*,const KbcsActor opponents[51],uint32_t*,KbcsComputerOutput*);
 typedef struct KbcsBattle KbcsBattle;
 /* KBCS専用。原本ルールは保持し、明示した戦闘のみに上書きを適用する。 */
-enum {KBCS_BATTLE_MONEY=1,KBCS_BATTLE_NO_LIMIT=2,KBCS_BATTLE_INSTANT=4,KBCS_BATTLE_HIDE_SUMMON=8};
+enum {KBCS_BATTLE_MONEY=1,KBCS_BATTLE_NO_LIMIT=2,KBCS_BATTLE_INSTANT=4,KBCS_BATTLE_HIDE_SUMMON=8,KBCS_BATTLE_CANNON_READY=16};
 uint32_t kbcs_core_battle_cheats(KbcsBattle*,uint32_t flags);
 /* 借用個体。次のadvance/参照一覧取得/破棄まで、所有者を排他で保持する。 */
 typedef struct {const KbcsActor *actor;int32_t side,slot,profile;} KbcsBattleActorRef;

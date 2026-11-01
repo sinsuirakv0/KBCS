@@ -1,11 +1,21 @@
-﻿// 描画前の遮蔽、0tick/通信待ちのキー保持、報酬通知の一括準備を検査する。
+﻿// 描画前の遮蔽、入力時点でのキー解決、報酬通知の一括準備を検査する。
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {createBattleKeyQueue,defaultBattleKeys} from '../keyboard.js';
+import {battleKeyAction,defaultBattleKeys} from '../keyboard.js';
 import {createResultPopup} from '../battle-result-popup.js';
 import {battleScreenConfiguration} from '../battle-screen.js';
 import {catalog} from '../simulation-profile.js';
+import {calculateNative} from '../native-calculation.js';
+
+const originalFetch=globalThis.fetch;
+try{
+ for(const abi of [5,4]){
+  globalThis.fetch=async()=>({ok:true,json:async()=>({abi,ruleset:catalog.versionCode})});
+  if(abi===5)assert.equal((await calculateNative({})).abi,5);
+  else await assert.rejects(calculateNative({}),/計算コアの版/);
+ }
+}finally{globalThis.fetch=originalFetch;}
 
 const boot=readFileSync(new URL('../startup-boot.js',import.meta.url),'utf8');
 for(const seen of [false,true]){
@@ -14,18 +24,14 @@ for(const seen of [false,true]){
  assert.equal(attributes.has('data-kbcs-starting'),!seen);assert.equal(styles.length,seen?0:1);
  if(!seen)assert.ok(styles[0].textContent.includes('visibility:hidden'));
 }
-const queue=createBattleKeyQueue(defaultBattleKeys),state={rows:2,page:0,page_frame:0,guard:0,paused:0};
-queue.push('KeyD');queue.push('KeyF');
-assert.equal(queue.take(state,0),null);assert.equal(queue.pending,true);
-assert.deepEqual(queue.take(state,1),{target:0});
-assert.equal(queue.take({...state,guard:3},1),null);
-assert.deepEqual(queue.take(state,1),{target:1});assert.equal(queue.pending,false);
-queue.push('Space');queue.push('KeyC');
-assert.deepEqual(queue.take({...state,rows:1},1),{control:4});
-assert.equal(queue.take({...state,rows:1,page_frame:4},1),null);
-assert.deepEqual(queue.take({...state,rows:1,page:1},1),{target:5});
-queue.push('KeyD');assert.deepEqual(queue.take({...state,guard:4},0,true),{target:0});
-queue.push('KeyF');queue.clear();assert.equal(queue.pending,false);
+const state={rows:2,page:0,page_frame:0,guard:0,paused:0};
+assert.deepEqual(battleKeyAction('KeyD',defaultBattleKeys,state),{target:0});
+assert.equal(battleKeyAction('Space',defaultBattleKeys,state),null);
+assert.deepEqual(battleKeyAction('KeyC',defaultBattleKeys,{...state,rows:1,page:1}),{target:5});
+const screen=readFileSync(new URL('../battle-screen.js',import.meta.url),'utf8');
+assert.ok(!screen.includes('keyQueue'));
+assert.ok(screen.includes("readBattleJson('/api/battle-session/input'"));
+assert.ok(screen.includes('runtime.endCamera.zoom>=(state.rows===2?8803:10000)'));
 const snapshot={formation:{slots:Array(10).fill(null),profile:{facilities:Object.fromEntries(['worker','wallet','cannonAttack','cannonCharge'].map(key=>[key,{level:1,plus:0}])),treasures:Object.fromEntries(catalog.treasures.map(v=>[v.id,100]))}},map:{series:'EOC',number:1,rules:[]},items:{speedup:true},deployment:{slots:Array.from({length:10},()=>({cost:0,reasons:0}))}};
 for(const speed of [2,3]){const {config}=battleScreenConfiguration({combos:[]},{...snapshot,speed});assert.equal(config.speed,speed);assert.equal(config.items,1);}
 
@@ -47,4 +53,4 @@ try{
  assert.equal(draws.length,2);assert.deepEqual(errors,[]);
  popup.stop();draws.length=0;popup.paint(context,{index:0},1422,atlas,new Map());assert.equal(draws.length,0);
 }finally{globalThis.document=beforeDocument;globalThis.fetch=beforeFetch;}
-console.log('first paint, queued keys and batched reward popup passed');
+console.log('first paint, direct keys and batched reward popup passed');

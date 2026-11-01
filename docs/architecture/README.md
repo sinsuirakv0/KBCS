@@ -26,7 +26,7 @@ API根拠: [wry](https://docs.rs/wry/0.57.0/wry/)、[tao](https://docs.rs/tao/0.
 
 ## Rust/C++境界と将来設計
 
-現行ABIは4。0.1.34の特殊戦闘でRules/Profileを拡張したため、ホストとコアを同時に更新する。固定幅整数のPODを呼出中だけ借用し、C++は状態やポインタを保持しない。Serviceの計算APIからkbcs-bridgeの安全なラッパーを経由し、基礎値・味方命中・敵命中・味方メタルキラー・敵毒撃の入口を分ける。基礎値は全Lvを一括計算してUI側で参照する。出現待機と候補選択も借用状態へのtick/commitとして追加したが、UIやHTTPには接続していない。根拠と関数関係は[nativeの設計](../../native/kbcs-core/docs/README.md)に記録する。
+現行ABIは5（2026-11-01、BattleConfigの赤ゲージ設定追加）。0.1.34の特殊戦闘でRules/Profileを拡張したため、ホストとコアを同時に更新する。固定幅整数のPODを呼出中だけ借用し、C++は状態やポインタを保持しない。Serviceの計算APIからkbcs-bridgeの安全なラッパーを経由し、基礎値・味方命中・敵命中・味方メタルキラー・敵毒撃の入口を分ける。基礎値は全Lvを一括計算してUI側で参照する。出現待機と候補選択も借用状態へのtick/commitとして追加したが、UIやHTTPには接続していない。根拠と関数関係は[nativeの設計](../../native/kbcs-core/docs/README.md)に記録する。
 
 戦闘追加時はC++が独立したシミュレーション状態を所有し、Rustはopaque handleの生成・破棄を対にする。バッチ入力・結果取得を基本とし、細かいFFI往復とフレームごとの不要コピーを避ける。借用バッファを返す場合は次のstep/破棄まで等の寿命をAPI契約で定義する。C++例外は境界内で捕捉してエラー値へ変換する。状態を所有する戦闘APIは今回作成せず、明示した入出力の計算と出現待機だけを先に共用する。
 
@@ -80,3 +80,5 @@ API根拠: [wry](https://docs.rs/wry/0.57.0/wry/)、[tao](https://docs.rs/tao/0.
 GUIのWindows限定を解除し、Apple Silicon/Intel Macもtao+wry→共通Service→bridge/C++へ接続する。macOSはWKWebViewとApplication Supportを使う。戦闘のOS別実装を作らず、3環境のGitHub Actionsで同じ計算ベクトルを実行する。配布・署名・更新の関係は[ビルド](../../crates/kbcs-app/docs/build.md)、[本体更新](../../crates/kbcs-app/docs/updates.md)へ記録する。上記の初期設計にあるWindows専用の記述は過去の状態。
 
 2026-10-30: [起動画面・設定・戦闘キー](../../ui/docs/settings.md)と[data::maintenance](../../crates/kbcs-data/docs/validation.md)を追加。入力の確定と描画/設定/データ管理を分離し、既存のC++生産・待機へ接続する。
+
+2026-11-01: [コンボと戦闘キャラ情報](../../native/kbcs-core/docs/interface-20261101.md)を共通PODへ追加。ABI5の未公開変更にはBattleConfigの赤ゲージ設定とBattleScreenStateのhold_waitを含む。編成・マップ別所持金・PCキー・ショートカットの制御と、本家の数値/配置の根拠を分離する。

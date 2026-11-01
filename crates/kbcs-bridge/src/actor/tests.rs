@@ -15,6 +15,173 @@ fn sparse(pool: &mut Pool, values: &Value) {
 }
 
 #[test]
+fn native_zombie_killer_frame_sequences() {
+    #[repr(C)]
+    struct Cannon([[[i32; 3]; 15]; 2]);
+    unsafe extern "C" {
+        fn kbcs_core_actor_cannon_hit(
+            cannon: *mut Cannon,
+            actors: *mut [Actor; SLOTS],
+            environment: *const Environment,
+            context: *const HitContext,
+            clock: *const Clock,
+            damage: *mut DamageContext,
+            rules: *const crate::cannon::Rules,
+            side: i32,
+            target: i32,
+            serial: i32,
+            seed: *mut u32,
+            events: *mut EffectEvents,
+        ) -> u32;
+    }
+    let fixture: Value = serde_json::from_str(
+        include_str!("../../../../native/kbcs-core/tests/battle-traits-vectors.json")
+            .trim_start_matches('\u{feff}'),
+    )
+    .unwrap();
+    for case in fixture["sequences"].as_array().unwrap() {
+        let mut pool = Pool::default();
+        sparse(&mut pool, &case["initial"]);
+        let env = Environment {
+            unit_modes: [1, 0],
+            castle_slot: -1,
+            ..Default::default()
+        };
+        // Clockは整数だけのC POD。妨害・成長・装着玉はこの試験では全て0。
+        let clock: Clock = unsafe { std::mem::zeroed() };
+        let mut context = HitContext::default();
+        context.effects.target_count = 1;
+        context.effects.scenario_level = 1;
+        let rules = crate::cannon::Rules {
+            encoded: [27, 31, 22, 13],
+            attack_rate: 100,
+        };
+        let mut cannon = Cannon([[[0; 3]; 15]; 2]);
+        let mut damage = DamageContext {
+            guard_enabled: 0,
+            notice: [0; 2],
+            rows: std::ptr::null(),
+            states: std::ptr::null(),
+            count: 0,
+        };
+        let mut hits = Hits::new().unwrap();
+        let mut random = Random::new(0x12345678).unwrap();
+        let mut previous_hp = 0;
+        for (phase, step) in case["steps"].as_array().unwrap().iter().enumerate() {
+            match step["kind"].as_str().unwrap() {
+                "marks" => pool.frame_marks(&env).unwrap(),
+                "begin" => pool.begin(&env, 1, 1).unwrap(),
+                "hit" => {
+                    let call = SecondaryHit {
+                        hit: DirectHit {
+                            side: 0,
+                            slot: step["slot"].as_i64().unwrap() as i32,
+                            target: 1,
+                            hit: 0,
+                            kind: 0,
+                            parameter: 0,
+                            rate: 100,
+                            flags: [0; 12],
+                        },
+                        attack_type: 0,
+                    };
+                    assert!(
+                        hits.apply(
+                            HitState {
+                                actors: pool.records_mut(),
+                                environment: &env,
+                                clock: &clock,
+                                rows: &[],
+                                states: &[],
+                                guard_enabled: false,
+                                notice: &mut [0; 2],
+                                random: &mut random
+                            },
+                            &context,
+                            &call
+                        )
+                        .unwrap()
+                        .0
+                    );
+                }
+                "angel" => {
+                    assert_eq!(
+                        unsafe {
+                            kbcs_core_actor_cannon_hit(
+                                &mut cannon,
+                                pool.0.as_mut_ptr(),
+                                &env,
+                                &context,
+                                &clock,
+                                &mut damage,
+                                &rules,
+                                0,
+                                1,
+                                7,
+                                random.state_mut(),
+                                &mut EffectEvents::default(),
+                            )
+                        },
+                        0
+                    );
+                }
+                "protect" => {
+                    pool.protect(1, 1).unwrap();
+                }
+                "health" => {
+                    previous_hp = pool
+                        .health(
+                            1,
+                            1,
+                            &Health {
+                                deployment_slot: -1,
+                                cooldown: 0,
+                                preserve_enemy_castle: 0,
+                            },
+                            &mut random,
+                        )
+                        .unwrap()
+                        .previous_hp;
+                }
+                "react" => {
+                    pool.0[1][1].words[8] = pool.0[1][1].words[8].max(0);
+                    let out = pool
+                        .react(
+                            &env,
+                            1,
+                            1,
+                            &Reaction {
+                                previous_hp,
+                                death_visual_available: 1,
+                            },
+                            &mut random,
+                        )
+                        .unwrap();
+                    assert_eq!(
+                        serde_json::json!(&out.sounds[..out.sound_count as usize]),
+                        step["sounds"]
+                    );
+                    assert_eq!(
+                        [out.death_visual, out.death_x, out.death_y],
+                        ["deathVisual", "deathX", "deathY"]
+                            .map(|key| step[key].as_i64().unwrap() as i32)
+                    );
+                }
+                kind => panic!("unknown phase: {kind}"),
+            }
+            let mut expected = Pool::default();
+            sparse(&mut expected, &step["after"]);
+            assert_eq!(
+                pool.0, expected.0,
+                "{} gap={} phase={phase}",
+                case["source"], case["gap"]
+            );
+            assert_eq!(random.state(), step["seed"].as_u64().unwrap() as u32);
+        }
+    }
+}
+
+#[test]
 fn native_protection_visual_clock() {
     unsafe extern "C" {
         fn kbcs_core_actor_protection_clock(actor: *mut Actor, barrier: i32, shield: i32) -> u32;

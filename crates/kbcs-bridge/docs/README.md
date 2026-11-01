@@ -37,3 +37,5 @@
 所有Battleのoutcome/deploymentはC++の結果・同時数・総生産数・警告時計を取得する。RulesはDB解決値、Outcome/Deploymentは所有者の読取専用スナップショット。ScreenState末尾battle_modeは旧JSONで省略可能だが、FFI利用者は同時に再ビルドする。[関係と未接続範囲](../../../native/kbcs-core/docs/battle-result.md)。
 
 ABI4: battle::RulesへPt/Fever/追加生産/対象別コンボ、Profileへplain再生産とProductionCostを追加。C++と同時ビルド。extras()/points()はC++所有状態の読取。未使用の固定配列をJSONへ送らない。[関数関係](../../../native/kbcs-core/docs/battle-special.md)。
+
+2026-11-01、ABI5: BattleConfigへ赤ゲージ設定を追加し、ホスト/UIと同時に更新する。Pool::frame_marksは追加生産後・個体時計前に一度だけ呼ぶ107/131/191の原本setter群。Pool::beginとは役割が違う。所有Battleも同じ入口を使用する。[原本差分・連続照合・未検証範囲](../../../native/kbcs-core/docs/battle-traits-20261101.md)。

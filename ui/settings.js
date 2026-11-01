@@ -101,3 +101,5 @@ observeUpdates(value=>{
 });
 window.addEventListener('hashchange',selectSection);selectSection();void refreshStatus().catch(showError);
 const timer=setInterval(()=>{if(section==='system')refreshSystem().catch(error=>element('system-status').textContent=error.message);if(busy||updates?.busy)refreshStatus().catch(showError);},1500);window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
+
+element('desktop-shortcut').onclick=async()=>{const button=element('desktop-shortcut');button.disabled=true;try{const value=await request('/api/desktop-shortcut',{});element('desktop-shortcut-status').textContent=(value.created?'追加しました：':'追加済み：')+value.path;}catch(error){element('desktop-shortcut-status').textContent=error.message;}finally{button.disabled=false;}};

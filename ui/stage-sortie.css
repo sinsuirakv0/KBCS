@@ -84,3 +84,5 @@
 
 .battle-cheats{display:flex;flex-wrap:wrap;gap:6px 16px;padding:6px 0;border-block:1px solid var(--color-border)}
 .battle-cheats[hidden]{display:none}.battle-cheats label{display:flex;align-items:center;gap:5px;font-size:12px;white-space:nowrap}.battle-cheats input{width:auto}
+
+.sortie-fixed-money{display:flex;align-items:center;gap:8px;margin-block:12px}.sortie-fixed-money[hidden]{display:none}.sortie-fixed-money input{max-width:160px}

@@ -31,14 +31,14 @@
 1. [Releases](https://github.com/sinsuirakv0/KBCS/releases)でWindows用ZIPがある最新のKBCS版から、`KBCS-<バージョン>-windows-x64.zip`をダウンロードします。
 2. ZIPを右クリックし、**「すべて展開」**を選びます。`kbcs.exe`とDLLファイルは同じフォルダーに置きます。
 3. WebView2 Runtimeが未導入の場合は、[Microsoft公式配布ページ](https://developer.microsoft.com/ja-jp/microsoft-edge/webview2/)から**「エバーグリーン ブートストラップ」**をダウンロードして実行します。
-4. 展開先の**`kbcs.exe`**をダブルクリックして起動します。
+4. 展開先の**`kbcs.exe`**をダブルクリックして起動します。初回起動時にデスクトップへショートカットを追加します。再作成はホームの**「設定 → KBCSシステム情報 → デスクトップに追加」**から行えます。
 
 ### Mac
 
 1. Appleメニューの**「このMacについて」**を開き、チップの種類を確認します。
 2. [Releases](https://github.com/sinsuirakv0/KBCS/releases)で自分のMac用ZIPがある最新のKBCS版から、Mシリーズは`KBCS-<バージョン>-macos-arm64.zip`、Intelは`KBCS-<バージョン>-macos-x64.zip`をダウンロードします。
 3. ZIPを展開し、**`KBCS.app`**を自分のホーム内の**`Applications`**フォルダーへ移動します。フォルダーがなければFinderで作成してください。
-4. 移動した**`KBCS.app`**をダブルクリックして起動します。
+4. 移動した**`KBCS.app`**をダブルクリックして起動します。初回起動時にデスクトップへ起動用リンクを追加します。追加できなかった場合は、移動先のアプリからホームの**「設定 → KBCSシステム情報 → デスクトップに追加」**を実行します。
 5. 現在のMac用自動ビルドは開発用署名です。開発元を確認できないと表示された場合は、配布元を確認し、**「システム設定」→「プライバシーとセキュリティ」→「このまま開く」**から起動します。[Appleの案内](https://support.apple.com/ja-jp/102445)
 
 ### 最新の自動ビルドを使う場合
