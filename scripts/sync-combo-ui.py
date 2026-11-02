@@ -5,6 +5,7 @@ import io
 import json
 from pathlib import Path
 import sys
+import zipfile
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / 'research/verify'))
@@ -12,6 +13,7 @@ from stages import Assets, SHA, digest
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('assets', type=Path)
+parser.add_argument('--apk', type=Path, default=root / 'research/.local/apk/150702/app.apk')
 args = parser.parse_args()
 assets = Assets(args.assets)
 destination = root / 'ui/images/native-combo'
@@ -46,6 +48,15 @@ for kind in [value for row in result['filters'] for value in row['types']]:
     result['filterLabels'][str(kind)] = '/images/native-combo/' + name
 localization = dict(line.split('\t', 1) for line in data('res/localizable.tsv').decode('utf-8-sig').splitlines() if '\t' in line)
 result['texts'] = {key: value for key, value in localization.items() if key.startswith('nyancombo_')}
+definitions=list(csv.reader(io.StringIO(data('Data/Gatyaitembuy.csv').decode('utf-8-sig'))))[1:]
+result['currencies']={'xp':int(definitions[6][3]),'catfood':int(definitions[22][3])}
+verified=json.loads((args.apk.parent/'verified.json').read_text(encoding='utf-8-sig'))
+assert verified['version']['versionCode']==1507021
+assert digest(args.apk.read_bytes())==verified['version']['mergedApkSha256']
+with zipfile.ZipFile(args.apk) as archive:
+    cancel=archive.read('assets/cancel.png')
+(destination/'cancel.png').write_bytes(cancel)
+result['sources']['assets/cancel.png']={'apkSha256':verified['version']['mergedApkSha256'],'sha256':digest(cancel)}
 for key, path in [('attributes', 'Data/nyankoPictureBookData_Attribute.csv'), ('abilities', 'Data/nyankoPictureBookData_EffectAbility.csv')]:
     result[key] = [[int(v) for v in row] for row in csv.reader(io.StringIO(data(path).decode('utf-8-sig')))]
 icons = json.loads((root / 'crates/kbcs-data/resources/property-icons.json').read_text(encoding='utf-8-sig'))

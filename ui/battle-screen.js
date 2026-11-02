@@ -1,4 +1,5 @@
-﻿import {readBattleKeys,battleKeyAction,editableKeyTarget} from './keyboard.js';
+﻿import {nativeFont,loadNativeFonts} from './native-font.js';
+import {readBattleKeys,battleKeyAction,editableKeyTarget} from './keyboard.js';
 import {createSessionId} from './src/shared/browser/session-id.js';
 import {battleAspects,battleViewportWidth,battlePlaybackRate} from './battle-view.js';
 import {audioBlobUrl} from './src/shared/browser/audio-preview.js';
@@ -9,7 +10,7 @@ import {catalog} from './simulation-profile.js';
 import {stageSceneInput,createStagePainter,stageMediaStats} from './src/features/stages/native-media.js';
 import {createBattleMonitor} from './battle-monitor.js';
 import {createBattleFrameClient} from './battle-frame.js';
-import {initializeSceneGestures,sceneKeyboardView} from './src/features/stages/scene-controls.js';
+import {initializeSceneGestures,createSceneMotion} from './src/features/stages/scene-controls.js';
 import {sortieFixedMoney} from './sortie-view.js';
 import {prepareBattleInfo,drawBattleInfo,unitDescription} from './battle-info.js';
 
@@ -23,6 +24,7 @@ export function battleScreenConfiguration(database,snapshot){
  return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:snapshot.speed===3?3:2,fixed_money:rule?fixed*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?fixed*100:combo(5)*100};
 }
 export async function prepareBattleScreen(database,snapshot,assets,signal,report){
+ await loadNativeFonts();
  const [atlas,options]=await Promise.all([readBattleJson('/images/native-battle/manifest.json',{signal}),readBattleJson('/api/battle-options',{signal})]);
  if(atlas.buildId!==snapshot.buildId||atlas.version!==snapshot.version){
   const sources=Object.values(atlas.atlases).flatMap(value=>Object.entries(value.sources)).concat([[atlas.soundSource.path,atlas.soundSource]]),paths=[...new Set(sources.map(([path])=>path))];
@@ -204,9 +206,16 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    sprite('img001_ja',67,x,y,18*scale,18*scale);
   }
   for(const icon of view.item_icons)if(icon[3])sprite('mapicon',...icon);
+  const [warning,warningX,warningY]=hud.warning;
+  if(warning){
+   context.font=nativeFont(30);context.textAlign='center';context.textBaseline='top';context.fillStyle='#000';
+   const text=resources.atlas.deploymentWarnings[warning-1];
+   for(let y=-2;y<=2;++y)for(let x=-2;x<=2;++x)context.fillText(text,warningX+x,warningY+y);
+   context.fillStyle='#ff0';context.fillText(text,warningX,warningY);context.textBaseline='alphabetic';
+  }
   if(view.description_box[2]){
    context.fillStyle='rgba(255,255,255,'+(216/255)+')';context.fillRect(...view.description_box);context.beginPath();const points=view.description_arrow;context.moveTo(points[0],points[1]);context.lineTo(points[2],points[3]);context.lineTo(points[4],points[5]);context.closePath();context.fill();
-   const item=resources.atlas.items[state.description_item],lines=state.description_item===0&&resources.config.speed===2?resources.atlas.normalSpeedLines:[item.name,...item.lines];context.font='30px sans-serif';context.textAlign='center';context.textBaseline='top';
+   const item=resources.atlas.items[state.description_item],lines=state.description_item===0&&resources.config.speed===2?resources.atlas.normalSpeedLines:[item.name,...item.lines];context.font=nativeFont(30);context.textAlign='center';context.textBaseline='top';
    for(let i=0;i<lines.length;++i){context.fillStyle=i===0&&state.description_item===0&&resources.config.speed===3?'#f0f':'#000';context.fillText(lines[i],screenWidth-363,145+i*36,690);}context.textBaseline='alphabetic';
   }
   const intro=runtime.comboIntro;
@@ -217,8 +226,8 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   }
   if(intro?.combo&&intro.layout.age>=6&&!skipCombos){
    const {layout,combo}=intro;context.textAlign='center';context.textBaseline='top';
-   context.fillStyle='#fff';context.font='40px sans-serif';context.fillText(combo.name,layout.text_x,layout.text_y[0]);
-   context.fillStyle=layout.blink<2?'#ff0':'#f0f';context.font='26px sans-serif';context.fillText(combo.effect,layout.text_x,layout.text_y[1]);
+   context.fillStyle='#fff';context.font=nativeFont(40);context.fillText(combo.name,layout.text_x,layout.text_y[0]);
+   context.fillStyle=layout.blink<2?'#ff0':'#f0f';context.font=nativeFont(26);context.fillText(combo.effect,layout.text_x,layout.text_y[1]);
    if(combo.group!==-1){context.fillStyle='#fff';context.fillText(combo.groupName,layout.text_x,layout.text_y[2]);}context.textBaseline='alphabetic';
    sprite('img004_ja',8,...layout.skip);
   }
@@ -229,7 +238,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(view.info_box[2]){
    nineSlice('img002_ja',48,49,...view.info_box);
    if(state.info_mode||state.hold_frames>=16){
-    const slot=state.info_mode?state.info_slot:state.holding,form=resources.forms[slot];context.fillStyle='#fff';context.textAlign='center';context.textBaseline='top';context.font='30px sans-serif';context.fillText(form?.name||'',screenWidth/2,106,920);
+    const slot=state.info_mode?state.info_slot:state.holding,form=resources.forms[slot];context.fillStyle='#fff';context.textAlign='center';context.textBaseline='top';context.font=nativeFont(30);context.fillText(form?.name||'',screenWidth/2,106,920);
     for(const [i,line]of unitDescription(form).entries())context.fillText(line,screenWidth/2,263+i*39,920);context.textBaseline='alphabetic';
     drawBattleInfo(context,resources,snapshot.formation.slots[slot],slot,screenWidth/2,sprite,tinted);
    }
@@ -242,11 +251,12 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  }
  function coordinates(event){const box=canvas.getBoundingClientRect();return {x:Math.trunc((event.clientX-box.left)*screenWidth/box.width),y:Math.trunc((event.clientY-box.top)*640/box.height)};}
  const cameraPointers=new Set();
+ const cameraMotion=createSceneMotion();
  function comboArea(event){const intro=runtime.comboIntro;if(!intro?.combo||intro.layout.age<6||skipCombos)return false;const {x,y}=coordinates(event),[left,top]=intro.layout.skip,[,,w,h]=resources.atlas.atlases.img004_ja.rects[8];return x>=left&&x<=left+w&&y>=top&&y<=top+h;}
  function cameraArea(event){if(comboArea(event))return false;const {x,y}=coordinates(event);return y>=134&&y<(state.rows===2?449:543)&&!view?.slots.some(([sx,sy,w,h])=>x>=sx&&x<=sx+w&&y>=sy-1&&y<=sy+h+2);}
  const cameraView=()=>state.intro>=24&&!state.paused&&(!runtime.endCamera?.width||!runtime.endCamera.moving&&runtime.endCamera.zoom>=(state.rows===2?8803:10000))?{...camera,viewport_width:screenWidth,maximum:1}:null;
- const gestures=initializeSceneGestures(canvas,cameraView,value=>{camera={...camera,...value};++cameraVersion;},{acceptPointer:event=>{if(!cameraArea(event))return false;pointer={...pointer,phase:3};cameraPointers.add(event.pointerId);return true;},acceptWheel:cameraArea});
- function input(event){if(!state.paused&&comboArea(event)){event.preventDefault();if(event.type==='pointerdown')pointer.phase=3;if(event.type==='pointerup'){pointer.phase=3;skipCombos=true;++settingsVersion;}return;}if(runtime.result?.mode&&!runtime.receipt)return;if(cameraPointers.has(event.pointerId)){if(event.type==='pointerup'||event.type==='pointercancel')cameraPointers.delete(event.pointerId);return;}if(state.intro<24||playbackPaused&&!state.paused&&!(cheats&4))return;event.preventDefault();const phase={pointerdown:1,pointerup:2,pointercancel:3,pointermove:4}[event.type];if(phase===4&&!state.pointer_down&&pointer.phase!==1)return;pointer={...coordinates(event),phase};if(phase===1)canvas.setPointerCapture(event.pointerId);}
+ const gestures=initializeSceneGestures(canvas,cameraView,value=>{cameraMotion.clear();camera={...camera,...value};++cameraVersion;},{acceptPointer:event=>{if(!cameraArea(event))return false;pointer={...pointer,phase:3};cameraPointers.add(event.pointerId);return true;},acceptWheel:cameraArea,wheelTarget:(...args)=>cameraMotion.zoom(...args)});
+ function input(event){if(!state.paused&&comboArea(event)){event.preventDefault();if(event.type==='pointerdown')pointer.phase=3;if(event.type==='pointerup'){pointer.phase=3;skipCombos=true;++settingsVersion;}return;}if(runtime.result?.mode&&!runtime.receipt)return;if(cameraPointers.has(event.pointerId)){if(event.type==='pointerup'||event.type==='pointercancel')cameraPointers.delete(event.pointerId);return;}if(state.intro<24||playbackPaused&&!state.paused&&!(cheats&4))return;event.preventDefault();const phase={pointerdown:1,pointerup:2,pointercancel:3,pointermove:4}[event.type];if(phase===4&&!state.pointer_down&&pointer.phase!==1)return;const point=coordinates(event);pointer={...point,phase:phase===4?4:0};if(phase===1)canvas.setPointerCapture(event.pointerId);if(phase!==4)sendInput({control:11,phase,...point});}
  for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.addEventListener(type,input);
  function wheel(event){if(runtime.result?.mode||state.paused||state.rows!==1||state.intro<24||!event.deltaY)return;const point=coordinates(event);if(point.y<543||point.x<159+(screenWidth-960)/2||point.x>801+(screenWidth-960)/2)return;event.preventDefault();control=event.deltaY>0?9:8;}
  canvas.addEventListener('wheel',wheel,{passive:false});
@@ -271,30 +281,39 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  controls.addEventListener('click',command);
  root.addEventListener('click',command);
  function fail(e){if(!stopped){error=true;failure={frame:state.frame,message:e.message};message.textContent='戦闘停止: '+e.message;message.title=message.textContent;message.setAttribute('role','alert');if(audio)audio.pause();for(const button of controls.querySelectorAll('button'))button.disabled=!['report','return'].includes(button.dataset.debug);}}
+ function sendInput(input){
+  const serial=++keySerial;
+  return readBattleJson('/api/battle-session/input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session,cheats,...input}),signal:requestController.signal}).then(next=>{
+   if(stopped)return;
+   if(state.battle_mode&&!next.state.battle_mode)return;
+   sounds.update(next.sounds,state.se_level,state.speed_mode+1,playbackPaused,!!runtime.result?.mode);
+   if(serial===keySerial&&next.state.ui_frame>=state.ui_frame&&next.state.frame>=state.frame){state=next.state;view=next.layout;++cameraVersion;persistOptions();menu.hidden=!state.paused;paint();}
+  }).catch(fail);
+ }
  function key(event){
   if(event.isComposing||event.ctrlKey||event.altKey||event.metaKey||editableKeyTarget(event.target))return;
   // 2段で切替操作が無効でも、Spaceでフォーカス中の段数ボタンを押さない。
   if(event.code===keyBindings.page)event.preventDefault();
   const action=battleKeyAction(event.code,keyBindings,state);
-  if(action?.camera){const view=cameraView();if(!view||error||stopped)return;event.preventDefault();camera={...camera,...(action.camera==='cameraReset'?{center:snapshot.stage.width,zoom:1}:sceneKeyboardView(view,action.camera))};++cameraVersion;return;}
-  if(event.repeat||state.intro<24||runtime.result?.mode||error||stopped||state.guard||state.page_frame)return;
+  if(action?.camera){const view=cameraView();if(!view||error||stopped)return;event.preventDefault();if(action.camera==='cameraReset'){cameraMotion.clear();camera={...camera,center:snapshot.stage.width,zoom:1};++cameraVersion;}else cameraMotion.key(action.camera,true);return;}
+  if(event.repeat||state.intro<24||runtime.result?.mode||error||stopped||state.page_frame)return;
   if(state.paused&&event.code!==keyBindings.options)return;
   if(!action)return;
   if(playbackPaused&&!state.paused&&action.target!==100&&(!(cheats&4)||!Number.isInteger(action.target)||action.target>=10))return;
-  event.preventDefault();const serial=++keySerial;
+  event.preventDefault();
   const input=playbackPaused&&action.target===100?2:action.control??1000+action.target;
-  readBattleJson('/api/battle-session/input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session,control:input,cheats}),signal:requestController.signal}).then(next=>{
-   if(stopped)return;
-   sounds.update(next.sounds,state.se_level,state.speed_mode+1,playbackPaused,!!runtime.result?.mode);
-   if(serial===keySerial&&next.state.ui_frame>=state.ui_frame&&next.state.frame>=state.frame){state=next.state;view=next.layout;++cameraVersion;persistOptions();menu.hidden=!state.paused;paint();}
-  }).catch(fail);
+  sendInput({control:input});
  }
  window.addEventListener('keydown',key);
- function visibility(){if(document.hidden){control=2;}}
+ function keyup(event){const action=battleKeyAction(event.code,keyBindings,state);if(action?.camera)cameraMotion.key(action.camera,false);}
+ const blur=()=>cameraMotion.clear();
+ window.addEventListener('keyup',keyup);window.addEventListener('blur',blur);
+ function visibility(){if(document.hidden){cameraMotion.clear();control=2;}}
  document.addEventListener('visibilitychange',visibility);
  async function animate(now){
   if(stopped)return;
   if(lastTime&&!document.hidden){
+   const moved=cameraMotion.step(cameraView(),(now-lastTime)/1000);if(moved){camera={...camera,...moved};++cameraVersion;}
    const elapsed=now-lastTime;if(!playbackPaused&&!state.paused&&state.intro>=24)activeMs+=elapsed;
    if(!playbackPaused||state.paused)accumulator+=elapsed*30/1000*(state.intro>=24&&!state.paused&&!state.battle_mode?battlePlaybackRate(Number(speed.value),state.speed_mode):1);
   }lastTime=now;
@@ -305,7 +324,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(!error&&!stopped)raf=requestAnimationFrame(animate);
  }
  window.addEventListener('pagehide',stop);
- function stop(){if(stopped)return;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);document.removeEventListener('visibilitychange',visibility);}
+ function stop(){if(stopped)return;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cameraMotion.clear();document.removeEventListener('visibilitychange',visibility);}
  try{resize();observer.observe(canvas.parentElement);
   const sceneInput={...stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session}),viewportWidth:screenWidth};
   const started=await readBattleJson('/api/battle-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot,config:resources.config,state,scene:sceneInput}),signal:requestController.signal});sessionCreated=true;

@@ -250,6 +250,50 @@ fn native_screen_witnesses() {
     let menu = &closing.layout.menu_sprites[..closing.layout.menu_count as usize];
     assert!(menu.iter().any(|p| p[0] == 0 && p[1] == 21));
     assert!(menu.iter().any(|p| p[0] == 0 && p[1] == 22));
+    // 同じ描画F内の押下/解放を失わず、原本の待機だけを進める。
+    let direct = |state, phase| {
+        call(
+            keyboard_config.clone(),
+            state,
+            Input {
+                control: 11,
+                phase,
+                x: layout.slots[0][0] + 10,
+                y: layout.slots[0][1] + 10,
+                ..Input::default()
+            },
+        )
+        .state
+    };
+    let pressed = direct(base.clone(), 1);
+    assert_eq!((pressed.frame, pressed.pointer_down), (base.frame, 1));
+    let mut tapped = direct(pressed, 2);
+    assert_eq!(
+        (tapped.frame, tapped.guard, tapped.pending_control),
+        (base.frame, 1, 0)
+    );
+    let ignored = call(
+        keyboard_config.clone(),
+        tapped.clone(),
+        Input {
+            control: 1001,
+            ..Input::default()
+        },
+    )
+    .state;
+    assert_eq!((ignored.pending_control, ignored.guard), (0, 1));
+    for _ in 0..5 {
+        tapped = call(
+            keyboard_config.clone(),
+            tapped,
+            Input {
+                ticks: 1,
+                ..Input::default()
+            },
+        )
+        .state;
+    }
+    assert_eq!(tapped.request_slot, 0);
     let mut keyboard = call(
         keyboard_config.clone(),
         base.clone(),

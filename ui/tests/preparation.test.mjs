@@ -151,3 +151,15 @@ const comboDatabase={units:[unit],combos:[{id:0,members:[{id:45,form:2}]}]};
 const applied=applyComboPlan(comboDatabase,[comboMember,...Array(9).fill(null)],{slots:[-1,45,...Array(8).fill(-1)]});
 assert.deepEqual(applied[1],comboMember);assert.notEqual(applied[1],comboMember);assert.equal(activeFormationCombos(comboDatabase,applied).length,1);
 console.log('fixed money, camera keys and preserved combo member settings passed');
+
+// OSのリピート回数ではなく経過秒で等速移動し、ホイールの連続入力も合算する。
+const {createSceneMotion}=await import('../src/features/stages/scene-controls.js');
+function pan(steps){const motion=createSceneMotion();motion.key('cameraRight',true);let view={...camera,width:8000};for(let i=0;i<steps;++i)view={...view,...motion.step(view,1/steps)};motion.key('cameraRight',false);assert.equal(motion.step(view,1/60),null);return view;}
+assert.ok(Math.abs(pan(60).center-pan(30).center)<1e-8);assert.ok(Math.abs(pan(60).center-3600)<1e-8);
+const motion=createSceneMotion(),rect={left:0,width:1000};let smooth={...camera,zoom:.5,maximum:2,width:8000};
+motion.zoom(smooth,{zoom:.6},750,rect);motion.zoom(smooth,{zoom:.6},750,rect);
+const anchor=smooth.center+250/smooth.zoom;
+for(let i=0;i<12;++i)smooth={...smooth,...motion.step(smooth,.01)};
+assert.ok(Math.abs(smooth.zoom-.72)<1e-8);assert.ok(Math.abs(smooth.center+250/smooth.zoom-anchor)<1e-8);
+motion.key('cameraLeft',true);motion.clear();assert.equal(motion.step(smooth,.05),null);
+console.log('constant camera speed, accumulated wheel zoom and cursor anchor passed');

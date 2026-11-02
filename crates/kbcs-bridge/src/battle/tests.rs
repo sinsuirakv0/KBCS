@@ -201,6 +201,7 @@ fn production_delay_reaches_owned_wait_and_red_hud() {
     let enemy: Vec<i32> = serde_json::from_value(fixture()["breakerEnemy"].clone()).unwrap();
     let mut c = config();
     c.screen.present[0] = 1;
+    c.unit_max = 1;
     c.hit.effects.target_count = 1;
     c.hit.effects.scenario_level = 1;
     c.effect_clocks[0] = [0x16560, 30, 30];
@@ -223,6 +224,18 @@ fn production_delay_reaches_owned_wait_and_red_hud() {
     for _ in 0..10 {
         tick(&mut battle, 10);
     }
+    assert_eq!(
+        battle.warning().unwrap(),
+        [
+            1,
+            if c.screen.viewport_width > 0 {
+                c.screen.viewport_width / 2
+            } else {
+                480
+            },
+            220
+        ]
+    );
     let x = battle.actors().unwrap().0[0][1].words[3];
     edit(&mut battle, 1, 1, |w| {
         w[1] = 0;

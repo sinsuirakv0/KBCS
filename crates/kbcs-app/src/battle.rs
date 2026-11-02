@@ -1592,7 +1592,7 @@ impl Session {
             count,
         ))
     }
-    pub fn hud(&self, layout: &render::Layout) -> Result<battle::Hud> {
+    pub fn hud(&self, layout: &render::Layout) -> Result<Value> {
         let (actors, profiles) = native(self.core.actors())?;
         let point = usize::try_from(self.castle_slot)
             .ok()
@@ -1612,7 +1612,9 @@ impl Session {
             .transpose()?
             .flatten()
             .unwrap_or([0; 2]);
-        native(self.core.hud(layout, point))
+        let mut value = serde_json::to_value(native(self.core.hud(layout, point))?)?;
+        value["warning"] = json!(native(self.core.warning())?);
+        Ok(value)
     }
 }
 

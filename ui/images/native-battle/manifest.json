@@ -7772,5 +7772,17 @@
   "soundSource": {
     "path": "Data/Sound_setting.tsv",
     "sha256": "8a507363d7fcc3f5c46dde60f725c26e5c34c81dda068bffbe11b03bcc73ebe8"
+  },
+  "deploymentWarnings": [
+    "これ以上出撃できません！",
+    "このキャラクターは出撃できません！",
+    "このキャラクターはまだ出撃できません！"
+  ],
+  "warningSource": {
+    "path": "jp/Local/jp-1507021-2c1ac20b9c424404/resLocal/Warning1_ja.csv",
+    "priority": 0,
+    "sha256": "f66e606e4a70f7e32d3a430cffa7b158fb44549cab07255f80b05b7e5de58818",
+    "size": 904,
+    "sourceKind": "local"
   }
 }

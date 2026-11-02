@@ -295,7 +295,7 @@ impl Service {
                 method == "POST" && self.desktop && (body.is_empty() || body == b"{}"),
                 "デスクトップ版から操作してください"
             );
-            return Reply::serialized(&crate::shortcut::create()?);
+            return Reply::serialized(&crate::shortcut::create(&self.root)?);
         }
         if path == "/api/system" {
             ensure!(method == "GET", "GETが必要です");
@@ -439,6 +439,12 @@ impl Service {
                 session: String,
                 control: i32,
                 cheats: u32,
+                #[serde(default)]
+                phase: i32,
+                #[serde(default)]
+                x: i32,
+                #[serde(default)]
+                y: i32,
             }
             ensure!(
                 method == "POST" && body.len() <= 1024,
@@ -446,7 +452,10 @@ impl Service {
             );
             let request: KeyInput = serde_json::from_slice(body)?;
             ensure!(
-                request.control == 2 || request.control == 4 || request.control >= 1000,
+                request.control == 2
+                    || request.control == 4
+                    || request.control == 11
+                    || request.control >= 1000,
                 "戦闘キー操作が不正です"
             );
             let session = self
@@ -468,6 +477,9 @@ impl Service {
                 .core
                 .advance(&kbcs_bridge::battle_screen::Input {
                     control: request.control,
+                    phase: request.phase,
+                    x: request.x,
+                    y: request.y,
                     ..Default::default()
                 })
                 .map_err(|code| anyhow::anyhow!("戦闘キー操作: {code}"))?;
@@ -1229,6 +1241,7 @@ impl Service {
                 "js" => "text/javascript; charset=utf-8",
                 "css" => "text/css; charset=utf-8",
                 "png" => "image/png",
+                "woff2" => "font/woff2",
                 "json" => "application/json; charset=utf-8",
                 _ => "application/octet-stream",
             };

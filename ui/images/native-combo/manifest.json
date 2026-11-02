@@ -5269,6 +5269,17 @@
       "size": 154755,
       "sourceKind": "local"
     },
+    "Data/Gatyaitembuy.csv": {
+      "path": "jp/Local/jp-1507021-2c1ac20b9c424404/DataLocal/Gatyaitembuy.csv",
+      "priority": 0,
+      "sha256": "a40fe4f91d1f1769d0039be279501c281b4ca26b385176df9722587600d8cc3e",
+      "size": 17261,
+      "sourceKind": "local"
+    },
+    "assets/cancel.png": {
+      "apkSha256": "7ba6f7d45fa60566936f90b46b7cc789c8f806661b4869f0213101a442a97a04",
+      "sha256": "8ed6fdf0ab3168d7bad1e4540d2150b2cbd17bec0edecbd0ebba10911ac11e29"
+    },
     "Data/nyankoPictureBookData_Attribute.csv": {
       "path": "jp/Local/jp-1507021-2c1ac20b9c424404/DataLocal/nyankoPictureBookData_Attribute.csv",
       "priority": 0,
@@ -5385,6 +5396,10 @@
     "nyancombo_error1": "<color=255,255,0>ピン留め中のキャラクターがいるため<br>にゃんコンボの発動に必要な<br>キャラクターをセットできません</color>",
     "nyancombo_overwrite_popup_title": "にゃんコンボをセットしますか？",
     "nyancombo_overwrite_popup_description": "にゃんコンボ名をタップで能力を表示"
+  },
+  "currencies": {
+    "xp": 6,
+    "catfood": 13
   },
   "attributes": [
     [

@@ -103,6 +103,7 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
  if(!config||!state||!input||!out||!view||immediate<0||immediate>1)return 1;
  const auto &c=*config;auto s=*state;auto in=*input;
  // PCのキー入力も、同じrelease分岐・5表示tickの待機・生産判定を使う。
+ const bool direct=in.control==11;if(direct){if(in.ticks)return 1;in.control=0;}
  const int key=in.control>=1000?in.control-1000:-1;
  if(key>=0){
   if(!((key>=0&&key<10)||(key>=100&&key<=102)||key==200||key==203||key==205||key==300||key==308))return 1;
@@ -154,12 +155,20 @@ extern "C" uint32_t kbcs_core_battle_screen_advance_custom(const KbcsBattleScree
    s.pointer_down=0;if(s.holding<0||s.hold_frames<14){s.holding=-1;s.hold_frames=0;s.hold_wait=0;}
   return 0;
  };
+ // PCのポインター通知も描画待ちを挟まず受ける。原本の5表示更新は省略しない。
+ if(direct&&s.intro>=24&&!s.battle_mode&&!s.guard){
+  s.pointer_x=in.x;s.pointer_y=in.y;
+  if(in.phase==1){s.pointer_down=1;s.start_x=in.x;s.start_y=in.y;s.gesture=0;
+   const int target=inputTarget(in.x,in.y);if((target>=0&&target<10)||(target>=100&&target<=102)||(target>=300&&target<=308&&target!=306)){const auto code=sound(10);if(code)return code;}
+  }else if(in.phase==2){const auto code=release(inputTarget(in.x,in.y));if(code)return code;}
+  else if(in.phase==3){s.pointer_down=0;s.holding=-1;s.hold_frames=s.hold_wait=0;}
+ }
  // PCキーは入力だけを直ちに処理し、論理Fや待機中のキー列を増やさない。
  if(key>=0&&!in.ticks&&!s.guard&&s.intro>=24&&!s.battle_mode){
   const int target=inputTarget(in.x,in.y);if(target>=0){const auto pressed=sound(10);if(pressed)return pressed;const auto code=release(target);if(code)return code;}
  }
  // ホスト側で止めた同一Fでは、即生産チートだけを入力として処理する。
- if(key<0&&!in.ticks&&immediate&&in.phase==2&&!s.paused&&!s.battle_mode&&s.intro>=24){
+ if(!direct&&key<0&&!in.ticks&&immediate&&in.phase==2&&!s.paused&&!s.battle_mode&&s.intro>=24){
   const int target=inputTarget(in.x,in.y);
   if(target>=0&&target<10&&c.present[target]&&!c.blocked[target]){s.request_slot=target;if(hook){const auto code=hook(user,1,&s);if(code)return code;}}
   s.pointer_down=0;s.holding=-1;s.hold_frames=0;s.hold_wait=0;

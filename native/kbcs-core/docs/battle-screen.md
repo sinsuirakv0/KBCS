@@ -79,3 +79,19 @@ JP15.7.2 ARM64/SHA6122e248…の006ddfb8を追跡。`actor_top.inc`の`kbcs_core
 control=1000+対象番号はPCの独立したタップであり、以前のpointer_down/gesture/holding/hold_framesを引き継がない。1段の切替後にgesture=1が残り、次のキーのreleaseまで通常スワイプとして拒否していた。既存Windows確認版のAPIでも、page1/gesture1へ1005を送るとrequest_slot=-1を確認した。キー用入口だけを初期化し、control0の本家pointer releaseではgestureによる拒否を維持する。Rustの同じテスト内で、キーはスロット6（index5）の要求を返す一方、スワイプreleaseは要求しないことを検査する。PC用拡張の条件であり、ARMのタップ経路へ新しい状態消去を追加したものではない。
 
 速度の通常/3倍対応はconfig.speed=2/3の既存分岐を共用する。準備側が選んだ上限を渡す。両方の切替列をbridgeで検査する。
+
+
+## 2026-11-02: 即時入力・SE・出撃警告
+
+`control=11, ticks=0`はPCポインターの押下/解放/取消を同じrelease分岐へ渡す。論理時計・表示時計は進めない。JavaScriptが次の描画RPCまで一つのphaseだけを保持し、短い押下/解放を上書きしていた経路を解消する。キーの待ち行列は作らず、受信時に所有側がguardを判定する。`006d6d04`の全スロットカウンタ探索（0x32fc3c、5表示更新）は原本にも存在するため短縮しない。描画応答と入力応答の世代を確認し、古い応答で押下状態を戻さない。
+
+`battle-audio.js`は未取得の別音源による全体待ちをやめ、音源ID別に再生順を保持する。原本`00459170`の音源別プレイヤーに合わせ、同じIDの停止・再開始、終了/ミュート/破棄の世代検査は維持する。ボタン音10が読込済みなら、未解決の20を待たない回帰を追加した。
+
+`Battle::warning`は既存の表示更新で生成/解除し、独立した`kbcs_core_battle_warning`が表示対象kindと中心x/y220を返す。`006ddfb8`の状態1、状態2/3のwait!=29、終了mode0の条件を使用。Rustは既存HudのJSONへwarningだけを加え、Canvasは30pxの黒い5×5縁と黄色文字を描く。既存HudのC ABIレイアウトは変更せず、新規関数だけを追加する。
+
+警告1の文字は`00abf464`でWarning1_ja.csvを53行×24byteのstring配列へ読む。配列先頭はgame+0x2972e8（Ghidra表示はwt%03d_o.png+6）、行5はgame+0x297360（God3_%@.csv+2）。`009eadc8`でこの行をb8f0の文字textureへ変換する。警告2/3はlocalizableのstage_restriction_warning/stage_SPChara_warning。文言を新しく作らず、同期スクリプトとmanifestへ原本SHAを残す。表示3の発生経路全体、Androidの文字ラスタライズ画素は未照合。
+
+PCカメラは`createSceneMotion`がキーの保持時間・ホイールの合算を管理し、既存sceneGestureViewとC++のカメラ制限へ渡す。キーリピート/RPC回数では移動しない。ホイールの目的倍率へ0.12秒で線形移動し、操作点の世界座標を保つ。失焦/非表示/終了で保持状態を消す。PC用入力補間であり、戦闘時計・攻撃座標・RNGは変更しない。
+
+
+今回の最小回帰: native_screen_witnessesで0tickの押下/解放と待機中の非蓄積、owned Battleの既存遅延試験で上限警告kind/中心座標への接続を検査した。SEの別音源待ち・同一音源の反復・終了/ミュートはbattle-audio.test.mjs、カメラの30/60分割での同じ移動量・ホイール合算・操作点維持はpreparation.test.mjsで確認。画面操作の確認とMac実機でのGUI確認は行っていない。

@@ -645,12 +645,21 @@ extern "C" uint32_t kbcs_core_battle_error(const KbcsBattle *battle,int32_t out[
  if(!battle||!out)return 1;std::copy_n(battle->diagnostic,4,out);return 0;
 }
 
+// 006ddfb8: 上限は常時、個別制限は待機29を除く。勝敗後は表示しない。
+extern "C" uint32_t kbcs_core_battle_warning(const KbcsBattle *battle,int32_t out[3]){
+ if(!battle||!out)return 1;
+ int32_t value[3]{};const int kind=battle->warning[1];
+ if(!battle->result.mode&&(kind==1||((kind==2||kind==3)&&battle->warning[0]!=29))){value[0]=kind;value[1]=(battle->config.screen.viewport_width?battle->config.screen.viewport_width:960)/2;value[2]=220;}
+ std::copy_n(value,3,out);return 0;
+}
+
 extern "C" uint32_t kbcs_core_battle_hud(const KbcsBattle *battle,const KbcsSceneLayout *scene,const int32_t point[2],KbcsBattleHud *out){
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!scene||!point||!out||!std::isfinite(scene->zoom)||scene->zoom<=0)return 1;
  KbcsBattleScreenInput input{};KbcsBattleScreenState state{};KbcsBattleScreenLayout slots{};
  const auto code=kbcs_core_battle_screen_step(&battle->config.screen,&battle->config.state,&input,&state,&slots);if(code)return code;
  KbcsBattleHud value{};value.title[0]=62;value.title[1]=10;value.scale=scene->zoom;
+
  for(int i=0;i<10;++i){auto &s=value.summons[i];s[0]=battle->summonActive(i);s[2]=battle->summons.wait[i];s[3]=battle->summons.used[i];
   s[4]=int(float(std::cos(double(s[2]*10)*3.141592653589793/180.))*31.f+224.f);if(!s[0]||s[3]||s[2]>0)continue;for(const auto &p:battle->definitions)if(p.deployment_slot==i)for(int j=1;j<actorEnd();++j)if(actorAt(battle->actors,0,j).words[0]==p.spawn.raw&&actorAt(battle->actors,0,j).words[1]!=4)s[1]=1;
  }

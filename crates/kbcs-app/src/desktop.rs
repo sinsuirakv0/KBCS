@@ -119,7 +119,9 @@ fn start(root: PathBuf, region: String, source: String, check: bool) -> Result<(
         })
         .with_navigation_handler(|url| {
             open_battle_help(&url);
-            url.starts_with("http://kbcs.localhost/") || url.starts_with("kbcs://localhost/")
+            url.starts_with("http://kbcs.localhost/")
+                || url.starts_with("kbcs://localhost/")
+                || url == "https://ponosgames.com/information/appli/battlecats/combo/index.html"
         })
         .with_on_page_load_handler(|event, url| {
             if matches!(event, wry::PageLoadEvent::Finished) {

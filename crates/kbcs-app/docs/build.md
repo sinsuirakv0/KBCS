@@ -63,3 +63,12 @@ WKWebViewの初期化スクリプトのdynamic importはdocumentのURLを明示�
 GitHubのdraftはreleases/tags/TAGで404になる。公開前のSHA検証ではgh release view --json apiUrlから解決したrelease IDのAPIを使う。0.1.36は三環境のタグビルドが成功した同一成果物を維持し、この取得経路だけを修正して公開処理へ引き継ぐ。タグは書き換えない。
 
 2026-10-30: 提供された正方形画像をアプリアイコンへ採用。build.rsはWindowsのllvm-rcでassets/app.icoをexeへ埋め、taoは同じ図柄のRGBAを使う。Macはpackage.pyがapp.icnsをResourcesへ置き、CFBundleIconFileを設定してから署名する。原画とサイズ変換はscripts/prepare-brand.ps1、UIのロゴ遷移はui/docs/settings.md。
+
+
+## 2026-11-02: Windowsデスクトップリンク
+
+`desktop::start`→shortcut::ensure_once、設定の明示操作→shortcut::createを共用する。既存実装はmarkerが存在すると再確認せず、同じ対象のリンクが存在してもArguments/WorkingDirectoryを修復しなかった。KBCS管理リンク（Description=KBCS）は現在のexeとdata-dirへ更新する。同名の別アプリのリンクは置換しない。利用者が削除したリンクは自動で復活させない。
+
+WScript.Shellへ渡すWin32パスは拡張接頭辞をShell用に正規化する。引数のdata-dirはWindows argv規則で引用し、スペース・日本語・末尾の区切り文字を保持する。Macの.appリンクの経路は変更していない。WindowsのGUI開始が失敗した場合は、コンソールがない状態でも原因をMessageBoxへ表示する。
+
+隔離フォルダで実際のCOMリンクを作成し、旧対象→新対象の修復、作業ディレクトリとdata-dir引数を確認する。これだけで報告環境の全起動障害を再現したという意味ではない。

@@ -44,6 +44,36 @@ fn default_data_dir() -> PathBuf {
 }
 
 fn main() -> Result<()> {
+    let result = run();
+    #[cfg(windows)]
+    if let Err(error) = &result
+        && std::env::args()
+            .nth(1)
+            .is_none_or(|value| value.starts_with("--") && value != "--help")
+    {
+        // GUIの起動失敗はコンソールがないため、原因を消さずに表示する。
+        #[link(name = "user32")]
+        unsafe extern "system" {
+            fn MessageBoxW(
+                window: *mut std::ffi::c_void,
+                text: *const u16,
+                title: *const u16,
+                kind: u32,
+            ) -> i32;
+        }
+        let message: Vec<u16> = format!("KBCSを起動できませんでした。\n\n{error:#}")
+            .encode_utf16()
+            .chain([0])
+            .collect();
+        let title: Vec<u16> = "KBCS".encode_utf16().chain([0]).collect();
+        unsafe {
+            MessageBoxW(std::ptr::null_mut(), message.as_ptr(), title.as_ptr(), 0x10);
+        }
+    }
+    result
+}
+
+fn run() -> Result<()> {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     #[cfg(windows)]
     if !arguments.is_empty() {

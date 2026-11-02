@@ -120,6 +120,7 @@ uint32_t kbcs_core_battle_computer_state(const KbcsBattle*,KbcsComputerState*);
 uint32_t kbcs_core_battle_result(const KbcsBattle*,KbcsBattleResult*);
 uint32_t kbcs_core_battle_deployment(const KbcsBattle*,KbcsBattleDeployment*);
 uint32_t kbcs_core_battle_visuals(KbcsBattle*,const KbcsBattleVisual**,int32_t*);
+uint32_t kbcs_core_battle_warning(const KbcsBattle*,int32_t out[3]);
 uint32_t kbcs_core_battle_hud(const KbcsBattle*,const KbcsSceneLayout*,const int32_t point[2],KbcsBattleHud*);
 uint32_t kbcs_core_battle_create(const KbcsBattleConfig*,const KbcsBattleProfile*,int32_t,
     const KbcsStageRow*,int32_t,KbcsBattle**);

@@ -1,4 +1,5 @@
-﻿import {readBattleJson} from './battle-support.js';
+﻿import {nativeFont} from './native-font.js';
+import {readBattleJson} from './battle-support.js';
 
 // 005e53dcの原本文面を、00884eccと同じ文字runへ分ける。HTMLとして実行しない。
 function lines(markup){
@@ -14,7 +15,7 @@ function lines(markup){
  return rows;
 }
 export function createResultPopup(reportError){
- const measure=document.createElement('canvas').getContext('2d');measure.font='30px sans-serif';
+ const measure=document.createElement('canvas').getContext('2d');measure.font=nativeFont(30);
  function texture(run,flashColor){
   const metrics=measure.measureText(run.text),w=Math.ceil(metrics.width),ascent=Math.ceil(metrics.fontBoundingBoxAscent),h=Math.ceil(metrics.fontBoundingBoxAscent+metrics.fontBoundingBoxDescent);
   const canvas=document.createElement('canvas');canvas.width=Math.max(1,w);canvas.height=Math.max(1,h);const ink=canvas.getContext('2d');ink.font=measure.font;ink.textBaseline='alphabetic';ink.fillStyle=run.flash?flashColor:run.color;ink.fillText(run.text,0,ascent);return {canvas,w,h};
@@ -44,7 +45,7 @@ export function createResultPopup(reportError){
     if(w&&h)context.drawImage(image,sx,sy,Math.max(1,sw),Math.max(1,sh),x,y,w,h);
    }
    if(popup.phase!==1&&popup.phase!==2)return;
-   context.save();context.font='30px sans-serif';context.textBaseline='top';
+   context.save();context.font=nativeFont(30);context.textBaseline='top';
    for(let index=0;index<entry.rows.length;++index){
     const scale=layout.textScale[index],textures=entry.textures[popup.flash%4<2?0:1][index];let offset=0;
     for(const texture of textures){context.drawImage(texture.canvas,Math.trunc(layout.textX[index]+offset*scale),layout.textY+index*36-Math.trunc(texture.h/2),Math.trunc(texture.w*scale),texture.h);offset+=texture.w;}
