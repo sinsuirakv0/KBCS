@@ -78,3 +78,10 @@ Windowsのリンクは`ComApartment`→`IShellLinkW`→`IPersistFile`で作成�
 隔離フォルダで日本語・空白・絵文字を含む起動先へ実際の.lnkを作成し、IShellLinkWで読み戻す。同じ試験内で旧対象→新対象の修復、作業ディレクトリとdata-dir引数も確認する。ユーザーの実際のデスクトップへは試験用リンクを作成しない。
 
 APIの契約: [IShellLinkW](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-ishelllinkw)、[Shell Links / COM初期化と保存](https://learn.microsoft.com/en-us/windows/win32/shell/links)。windowsクレートは既存Cargo.lockの0.62.2を共用し、新たな版を同時導入しない。
+
+
+### 短縮パスと実体の照合
+
+[続くWindows CIの失敗](https://github.com/sinsuirakv0/KBCS/actions/runs/41447795035/job/125285228866)では、リンク自体の作成は成功していたが、TEMPの`RUNNER~1`とShellが返した`runneradmin`を文字列で比較して試験が停止した。日本語の文字コード問題とは別の原因。存在するexe・Desktop・data-dirはcanonicalizeで実体のパスへ揃え、Shell用の拡張接頭辞の変換は保存直前に行う。まだ存在しない.lnkの保存先はcanonicalizeしない。既存リンクの所有判定も大文字小文字を無視する文字列比較ではなく、起動先をcanonicalizeして照合する。Description=KBCSの管理リンクは旧exeが削除済みでも更新できる。
+
+回帰試験はGetShortPathNameWで得た保存先と元のUnicode保存先を両方使い、実際の.lnkを作成・読込・修復する。短縮名を生成しないボリュームでもUnicodeの試験は省略しない。Shellが返す起動先と作業ディレクトリはファイルシステム上の保存先を照合し、data-dir引数は引用を含め完全一致を確認する。Descriptionなしの同一実行先も更新する。ローカル成功だけでCI完了とはせず、GitHub上のWindows試験・ビルド・配布物検査・公開を確認する。

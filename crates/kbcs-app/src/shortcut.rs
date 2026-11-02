@@ -118,18 +118,24 @@ fn windows_shortcut(executable: &Path, root: &Path, directory: Option<&Path>) ->
         PathBuf::from(text?)
     };
     ensure!(desktop.is_dir(), "デスクトップがありません");
+    // 8.3短縮名・拡張接頭辞をShellへ渡す前に実在する保存先へ揃える。
+    let desktop = desktop.canonicalize()?;
+    let executable = executable.canonicalize()?;
     let path = desktop.join("KBCS.lnk");
     let exists = path.try_exists()?;
     let link =
         shell_link(exists.then_some(path.as_path())).context("ショートカットを開けません")?;
-    let target = shell_path(executable);
+    let target = shell_path(&executable);
     if exists {
         let previous = link_text(|text| unsafe {
             link.GetPath(text, std::ptr::null_mut(), SLGP_RAWPATH.0 as u32)
         })?;
         let description = link_text(|text| unsafe { link.GetDescription(text) })?;
         ensure!(
-            previous.eq_ignore_ascii_case(&target) || description == "KBCS",
+            Path::new(&previous)
+                .canonicalize()
+                .is_ok_and(|previous| previous == executable)
+                || description == "KBCS",
             "同名の別のショートカットが存在します"
         );
     }
@@ -230,44 +236,74 @@ fn platform(_: &Path, _: &Path) -> Result<Shortcut> {
 #[cfg(all(test, windows))]
 #[test]
 fn managed_shortcut_refreshes_target_and_preserves_data_directory() {
+    use windows::{
+        Win32::{
+            Storage::FileSystem::GetShortPathNameW, System::Com::IPersistFile,
+            UI::Shell::SLGP_RAWPATH,
+        },
+        core::{HSTRING, Interface},
+    };
     let root = std::env::temp_dir()
         .join(format!("kbcs-shortcut-{}", std::process::id()))
         .join("日本語 space 🐱");
     std::fs::create_dir_all(&root).unwrap();
     let old = root.join("old.exe");
     std::fs::write(&old, b"test").unwrap();
-    assert!(windows_shortcut(&old, &root, Some(&root)).unwrap().created);
+    // CIのTEMPはRUNNER~1を含む。短縮名の有無に依存せず両表記で同じ保存先を使う。
+    let mut buffer = vec![0; 32768];
+    let length = unsafe { GetShortPathNameW(&HSTRING::from(shell_path(&root)), Some(&mut buffer)) };
+    assert!(length > 0 && (length as usize) < buffer.len());
+    let short_root = PathBuf::from(String::from_utf16(&buffer[..length as usize]).unwrap());
+    assert!(
+        windows_shortcut(&short_root.join("old.exe"), &short_root, Some(&short_root))
+            .unwrap()
+            .created
+    );
     {
         let _apartment = ComApartment::new().unwrap();
         let link = shell_link(Some(&root.join("KBCS.lnk"))).unwrap();
         assert_eq!(
-            link_text(|text| unsafe {
-                link.GetPath(
-                    text,
-                    std::ptr::null_mut(),
-                    windows::Win32::UI::Shell::SLGP_RAWPATH.0 as u32,
-                )
-            })
+            Path::new(
+                &link_text(|text| unsafe {
+                    link.GetPath(text, std::ptr::null_mut(), SLGP_RAWPATH.0 as u32)
+                })
+                .unwrap()
+            )
+            .canonicalize()
             .unwrap(),
-            shell_path(&old)
+            old.canonicalize().unwrap()
         );
+        // 説明による管理判定がなくても同じ実行先のリンクを更新できる。
+        unsafe {
+            link.SetDescription(&HSTRING::from("")).unwrap();
+            link.cast::<IPersistFile>()
+                .unwrap()
+                .Save(&HSTRING::from(shell_path(&root.join("KBCS.lnk"))), true)
+                .unwrap();
+        }
     }
+    assert!(!windows_shortcut(&old, &root, Some(&root)).unwrap().created);
     let executable = std::env::current_exe().unwrap();
-    let repaired = windows_shortcut(&executable, &root, Some(&root)).unwrap();
+    let repaired = windows_shortcut(&executable, &short_root, Some(&short_root)).unwrap();
     assert!(!repaired.created);
     let _apartment = ComApartment::new().unwrap();
     let link = shell_link(Some(&repaired.path)).unwrap();
-    use windows::Win32::UI::Shell::SLGP_RAWPATH;
     assert_eq!(
-        link_text(|text| unsafe {
-            link.GetPath(text, std::ptr::null_mut(), SLGP_RAWPATH.0 as u32)
-        })
+        Path::new(
+            &link_text(|text| unsafe {
+                link.GetPath(text, std::ptr::null_mut(), SLGP_RAWPATH.0 as u32)
+            })
+            .unwrap()
+        )
+        .canonicalize()
         .unwrap(),
-        shell_path(&executable)
+        executable.canonicalize().unwrap()
     );
     assert_eq!(
-        link_text(|text| unsafe { link.GetWorkingDirectory(text) }).unwrap(),
-        shell_path(executable.parent().unwrap())
+        Path::new(&link_text(|text| unsafe { link.GetWorkingDirectory(text) }).unwrap())
+            .canonicalize()
+            .unwrap(),
+        executable.parent().unwrap().canonicalize().unwrap()
     );
     assert_eq!(
         link_text(|text| unsafe { link.GetArguments(text) }).unwrap(),
