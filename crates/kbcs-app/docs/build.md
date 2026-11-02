@@ -69,6 +69,12 @@ GitHubのdraftはreleases/tags/TAGで404になる。公開前のSHA検証ではg
 
 `desktop::start`→shortcut::ensure_once、設定の明示操作→shortcut::createを共用する。既存実装はmarkerが存在すると再確認せず、同じ対象のリンクが存在してもArguments/WorkingDirectoryを修復しなかった。KBCS管理リンク（Description=KBCS）は現在のexeとdata-dirへ更新する。同名の別アプリのリンクは置換しない。利用者が削除したリンクは自動で復活させない。
 
-WScript.Shellへ渡すWin32パスは拡張接頭辞をShell用に正規化する。引数のdata-dirはWindows argv規則で引用し、スペース・日本語・末尾の区切り文字を保持する。Macの.appリンクの経路は変更していない。WindowsのGUI開始が失敗した場合は、コンソールがない状態でも原因をMessageBoxへ表示する。
+Windowsのリンクは`ComApartment`→`IShellLinkW`→`IPersistFile`で作成・読込・更新する。Desktopは`SHGetKnownFolderPath(FOLDERID_Desktop)`で解決し、OneDrive等への移動もOSの設定に従う。パス・引数・作業ディレクトリ・アイコン・説明を全てUTF-16で渡す。COMインターフェイスを先に解放し、この呼出で初期化した分だけCoUninitializeする。既に別方式でCOMが初期化済みの場合は、既存の初期化を解放しない。
 
-隔離フォルダで実際のCOMリンクを作成し、旧対象→新対象の修復、作業ディレクトリとdata-dir引数を確認する。これだけで報告環境の全起動障害を再現したという意味ではない。
+[Windows CIの失敗](https://github.com/sinsuirakv0/KBCS/actions/runs/41442051767/job/125266161116)は、コンパイル後のショートカット試験がWScript.ShellのTargetPath設定でArgumentExceptionになったもの。従来のWSH経路へシステム文字コード外の文字を含むパスを渡し、ローカルでも絵文字入りの起動先で同じエラーを再現した。Windowsのシステムロケールに依存するこの経路を廃止した。テストの日本語パスをASCIIへ変えて回避しない。
+
+拡張接頭辞はShell用に正規化する。data-dirの引数はWindows argv規則で引用し、スペース・日本語・末尾の区切り文字を保持する。Macの.appリンクの経路は変更していない。WindowsのGUI開始が失敗した場合は、コンソールがない状態でも原因をMessageBoxへ表示する。
+
+隔離フォルダで日本語・空白・絵文字を含む起動先へ実際の.lnkを作成し、IShellLinkWで読み戻す。同じ試験内で旧対象→新対象の修復、作業ディレクトリとdata-dir引数も確認する。ユーザーの実際のデスクトップへは試験用リンクを作成しない。
+
+APIの契約: [IShellLinkW](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-ishelllinkw)、[Shell Links / COM初期化と保存](https://learn.microsoft.com/en-us/windows/win32/shell/links)。windowsクレートは既存Cargo.lockの0.62.2を共用し、新たな版を同時導入しない。

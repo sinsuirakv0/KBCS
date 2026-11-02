@@ -41,60 +41,120 @@ fn platform(executable: &Path, root: &Path) -> Result<Shortcut> {
     windows_shortcut(executable, root, None)
 }
 
+// COMのインターフェイスより長く保持し、この呼出で初期化した分だけを解放する。
+#[cfg(windows)]
+struct ComApartment(bool);
+#[cfg(windows)]
+impl ComApartment {
+    fn new() -> Result<Self> {
+        use windows::Win32::{
+            Foundation::RPC_E_CHANGED_MODE,
+            System::Com::{COINIT_APARTMENTTHREADED, CoInitializeEx},
+        };
+        let status = unsafe { CoInitializeEx(None, COINIT_APARTMENTTHREADED) };
+        if status != RPC_E_CHANGED_MODE {
+            status
+                .ok()
+                .context("ショートカット用COMを初期化できません")?;
+        }
+        Ok(Self(status.is_ok()))
+    }
+}
+#[cfg(windows)]
+impl Drop for ComApartment {
+    fn drop(&mut self) {
+        if self.0 {
+            unsafe { windows::Win32::System::Com::CoUninitialize() };
+        }
+    }
+}
+
+#[cfg(windows)]
+fn shell_link(path: Option<&Path>) -> Result<windows::Win32::UI::Shell::IShellLinkW> {
+    use windows::{
+        Win32::{
+            System::Com::{CLSCTX_INPROC_SERVER, CoCreateInstance, IPersistFile, STGM_READ},
+            UI::Shell::{IShellLinkW, ShellLink},
+        },
+        core::{HSTRING, Interface},
+    };
+    let link: IShellLinkW = unsafe { CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER) }?;
+    if let Some(path) = path {
+        unsafe {
+            link.cast::<IPersistFile>()?
+                .Load(&HSTRING::from(shell_path(path)), STGM_READ)
+        }?;
+    }
+    Ok(link)
+}
+
+#[cfg(windows)]
+fn link_text(read: impl FnOnce(&mut [u16]) -> windows::core::Result<()>) -> Result<String> {
+    let mut text = vec![0; 32768];
+    read(&mut text)?;
+    let length = text
+        .iter()
+        .position(|&ch| ch == 0)
+        .context("ショートカットの文字列が長すぎます")?;
+    Ok(String::from_utf16(&text[..length])?)
+}
+
 #[cfg(windows)]
 fn windows_shortcut(executable: &Path, root: &Path, directory: Option<&Path>) -> Result<Shortcut> {
-    use std::os::windows::process::CommandExt;
-    // パスは環境変数で渡す。ユーザーのパスをPowerShellコードへ埋め込まない。
-    let script = r#"
-$ErrorActionPreference='Stop'
-[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false)
-$target=[Environment]::GetEnvironmentVariable('KBCS_SHORTCUT_TARGET')
-$arguments=[Environment]::GetEnvironmentVariable('KBCS_SHORTCUT_ARGUMENTS')
-$desktop=[Environment]::GetEnvironmentVariable('KBCS_SHORTCUT_DIRECTORY')
-if(-not $desktop){$desktop=[Environment]::GetFolderPath('DesktopDirectory')}
-$path=[IO.Path]::Combine($desktop,'KBCS.lnk')
-$shell=New-Object -ComObject WScript.Shell
-$shortcut=$shell.CreateShortcut($path)
-$exists=Test-Path -LiteralPath $path
-if($exists -and $shortcut.TargetPath -ne $target -and $shortcut.Description -ne 'KBCS'){throw '同名の別のショートカットが存在します。'}
- $shortcut.TargetPath=$target
- $shortcut.Arguments=$arguments
- $shortcut.WorkingDirectory=[IO.Path]::GetDirectoryName($target)
- $shortcut.IconLocation=$target+',0'
- $shortcut.Description='KBCS'
- $shortcut.Save()
-@{path=$path;created=(-not $exists)}|ConvertTo-Json -Compress
-"#;
-    let output = std::process::Command::new("powershell.exe")
-        .args(["-NoProfile", "-NonInteractive", "-Command", script])
-        .env("KBCS_SHORTCUT_TARGET", shell_path(executable))
-        .env(
-            "KBCS_SHORTCUT_DIRECTORY",
-            directory.unwrap_or(Path::new("")),
-        )
-        .env(
-            "KBCS_SHORTCUT_ARGUMENTS",
-            format!(
-                "--data-dir {}",
-                quote_argument(&shell_path(&root.canonicalize()?))
-            ),
-        )
-        .creation_flags(0x08000000)
-        .output()
-        .context("ショートカット作成を開始できません")?;
-    ensure!(
-        output.status.success(),
-        "ショートカット作成に失敗しました: {}",
-        String::from_utf8_lossy(&output.stderr).trim()
+    use windows::{
+        Win32::{
+            System::Com::{CoTaskMemFree, IPersistFile},
+            UI::Shell::{FOLDERID_Desktop, KF_FLAG_DEFAULT, SHGetKnownFolderPath, SLGP_RAWPATH},
+        },
+        core::{HSTRING, Interface},
+    };
+    let _apartment = ComApartment::new()?;
+    let desktop = if let Some(directory) = directory {
+        directory.to_owned()
+    } else {
+        let path = unsafe { SHGetKnownFolderPath(&FOLDERID_Desktop, KF_FLAG_DEFAULT, None) }?;
+        let text = unsafe { path.to_string() };
+        unsafe { CoTaskMemFree(Some(path.0.cast())) };
+        PathBuf::from(text?)
+    };
+    ensure!(desktop.is_dir(), "デスクトップがありません");
+    let path = desktop.join("KBCS.lnk");
+    let exists = path.try_exists()?;
+    let link =
+        shell_link(exists.then_some(path.as_path())).context("ショートカットを開けません")?;
+    let target = shell_path(executable);
+    if exists {
+        let previous = link_text(|text| unsafe {
+            link.GetPath(text, std::ptr::null_mut(), SLGP_RAWPATH.0 as u32)
+        })?;
+        let description = link_text(|text| unsafe { link.GetDescription(text) })?;
+        ensure!(
+            previous.eq_ignore_ascii_case(&target) || description == "KBCS",
+            "同名の別のショートカットが存在します"
+        );
+    }
+    let arguments = format!(
+        "--data-dir {}",
+        quote_argument(&shell_path(&root.canonicalize()?))
     );
-    let value: serde_json::Value = serde_json::from_slice(&output.stdout)?;
+    let parent = executable
+        .parent()
+        .context("アプリの保存先に親フォルダがありません")?;
+    // WScript.Shellはシステムの文字コード外のパスを拒む。リンクの全項目をUTF-16で渡す。
+    unsafe {
+        link.SetPath(&HSTRING::from(target.clone()))
+            .context("リンクの起動先を設定できません")?;
+        link.SetArguments(&HSTRING::from(arguments))?;
+        link.SetWorkingDirectory(&HSTRING::from(shell_path(parent)))?;
+        link.SetIconLocation(&HSTRING::from(target), 0)?;
+        link.SetDescription(&HSTRING::from("KBCS"))?;
+        link.cast::<IPersistFile>()?
+            .Save(&HSTRING::from(shell_path(&path)), true)
+            .context("デスクトップに追加できません")?;
+    }
     Ok(Shortcut {
-        path: PathBuf::from(
-            value["path"]
-                .as_str()
-                .context("デスクトップ保存先がありません")?,
-        ),
-        created: value["created"] == true,
+        path,
+        created: !exists,
     })
 }
 
@@ -170,28 +230,47 @@ fn platform(_: &Path, _: &Path) -> Result<Shortcut> {
 #[cfg(all(test, windows))]
 #[test]
 fn managed_shortcut_refreshes_target_and_preserves_data_directory() {
-    use std::os::windows::process::CommandExt;
     let root = std::env::temp_dir()
         .join(format!("kbcs-shortcut-{}", std::process::id()))
-        .join("日本語 space");
+        .join("日本語 space 🐱");
     std::fs::create_dir_all(&root).unwrap();
     let old = root.join("old.exe");
     std::fs::write(&old, b"test").unwrap();
     assert!(windows_shortcut(&old, &root, Some(&root)).unwrap().created);
+    {
+        let _apartment = ComApartment::new().unwrap();
+        let link = shell_link(Some(&root.join("KBCS.lnk"))).unwrap();
+        assert_eq!(
+            link_text(|text| unsafe {
+                link.GetPath(
+                    text,
+                    std::ptr::null_mut(),
+                    windows::Win32::UI::Shell::SLGP_RAWPATH.0 as u32,
+                )
+            })
+            .unwrap(),
+            shell_path(&old)
+        );
+    }
     let executable = std::env::current_exe().unwrap();
     let repaired = windows_shortcut(&executable, &root, Some(&root)).unwrap();
     assert!(!repaired.created);
-    let output=std::process::Command::new("powershell.exe").args(["-NoProfile","-NonInteractive","-Command",r#"
-[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false)
-$s=(New-Object -ComObject WScript.Shell).CreateShortcut($env:KBCS_SHORTCUT_TEST)
-@{target=$s.TargetPath;arguments=$s.Arguments;directory=$s.WorkingDirectory}|ConvertTo-Json -Compress
-"#]).env("KBCS_SHORTCUT_TEST",&repaired.path).creation_flags(0x08000000).output().unwrap();
-    assert!(output.status.success());
-    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-    assert_eq!(value["target"], shell_path(&executable));
-    assert_eq!(value["directory"], shell_path(executable.parent().unwrap()));
+    let _apartment = ComApartment::new().unwrap();
+    let link = shell_link(Some(&repaired.path)).unwrap();
+    use windows::Win32::UI::Shell::SLGP_RAWPATH;
     assert_eq!(
-        value["arguments"],
+        link_text(|text| unsafe {
+            link.GetPath(text, std::ptr::null_mut(), SLGP_RAWPATH.0 as u32)
+        })
+        .unwrap(),
+        shell_path(&executable)
+    );
+    assert_eq!(
+        link_text(|text| unsafe { link.GetWorkingDirectory(text) }).unwrap(),
+        shell_path(executable.parent().unwrap())
+    );
+    assert_eq!(
+        link_text(|text| unsafe { link.GetArguments(text) }).unwrap(),
         format!(
             "--data-dir {}",
             quote_argument(&shell_path(&root.canonicalize().unwrap()))

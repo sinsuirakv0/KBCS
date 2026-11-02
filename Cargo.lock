@@ -1198,6 +1198,7 @@ dependencies = [
  "tao",
  "tiny_http",
  "url",
+ "windows",
  "windows-sys 0.61.2",
  "wry",
 ]
