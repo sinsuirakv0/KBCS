@@ -1,4 +1,25 @@
 ﻿// 終了演出の時計。オンライン・広告・課金コンティニューの状態を含めない。
+// 00701164/007013b8/0070195c: 専用指定に一致したら一般候補を消し、以後は専用だけを集める。
+extern "C" uint32_t kbcs_core_battle_hint_candidates(const KbcsBattleHintContext *context,const int32_t *groups,int32_t count,const int32_t *settings,int32_t rows,int32_t columns,int32_t *out,int32_t *out_count){
+ if(!context||!out_count||count<0||count>4096||rows<0||rows>4096||columns<28||columns>4096||(!groups&&count)||(!out&&count)||(!settings&&rows))return 1;
+ const auto &c=*context;if(c.mode<0||c.mode>99||c.map_id<0||c.map_id>99999||c.stage<0||c.stage>99||c.crown<0||c.crown>4||c.special<0||c.special>1||c.progress<0||c.progress>1||c.cosmos<0||c.cosmos>1)return 1;
+ try{
+ uint32_t active=0;const auto mark=[&](int column){active|=1u<<column;};
+ if(c.mode<=2)mark(c.mode*2+1+c.progress);
+ if(c.mode>=4&&c.mode<=9)mark(c.mode*2+c.progress);
+ if(c.mode==9&&c.cosmos)mark(20);
+ if(c.special)mark(7);else if(c.mode==3)mark(21+c.crown);else if(c.mode==99)mark(26);
+ std::vector<int32_t> values;bool exclusive=false;
+ for(int i=0;i<count;++i){
+  const int32_t *row=nullptr;for(int j=0;j<rows;++j)if(settings[j*columns]==groups[i]){row=settings+j*columns;break;}if(!row)return 1;
+  bool allowed=true;for(int j=1;j<=26;++j)if((active&(1u<<j))&&!row[j])allowed=false;
+  if(!exclusive&&allowed)values.push_back(i);
+  bool specified=false;if(row[27]==1||row[27]==2)for(int j=28;j<columns&&row[j]!=-1;++j)if(row[j]==(row[27]==1?c.map_id*100+c.stage:c.map_id)){specified=true;break;}
+  if(specified){if(!exclusive)values.clear();values.push_back(i);exclusive=true;}
+ }
+ std::copy(values.begin(),values.end(),out);*out_count=int32_t(values.size());return 0;
+ }catch(...){return 3;}
+}
 extern "C" uint32_t kbcs_core_battle_popup_step(int32_t release,KbcsBattlePopup *state){
  if(!state||release<0||release>1||state->phase<0||state->phase>3||state->scale_frame<0||state->scale_frame>4)return 1;
  auto &s=*state;
@@ -35,7 +56,13 @@ extern "C" uint32_t kbcs_core_battle_ending_step(int32_t mode,int32_t point,Kbcs
   if(e.guard&&++e.guard>5){e.guard=0;e.action=302;}
   // 005e1a5c / 005eb040 / 005edb40 / 005ef020。時計は表示更新単位。
   if(!e.phase){if(e.frame>19){e.phase=1;e.frame=0;}return 0;}
-  if(mode==2){if(e.phase==1&&e.frame>43){e.phase=2;e.frame=0;}else if(e.phase==2&&old>=79){e.phase=4;e.frame=0;}return 0;}
+  if(mode==2){
+   if(e.phase==1&&e.frame>43){e.phase=2;e.frame=0;}
+   // 005eb894..: 80更新の待機後、文字を10pxずつ-100まで移動する。
+   // コンティニュー画面は扱わず、その後のヒントを開く。panelは敗北時だけ文字のY差分。
+   else if(e.phase==2&&old>=80){e.panel=std::max(-100,e.panel-10);if(e.panel==-100){e.phase=4;e.frame=0;}}
+   return 0;
+  }
   if(e.phase<3){if(mode==1&&point&&e.phase==2&&old<=-2&&e.frame+100>45)e.frame=0;else if(old>=12){++e.phase;e.frame=(mode==1&&point&&e.phase==2)?-100:0;}return 0;}
   if(e.phase==3){if(mode==4){e.panel=std::min(96,e.panel+20);if(e.panel==96)e.phase=7;}else if(e.frame>=30){e.phase=6;e.frame=0;}}
   else if(e.phase==6){const int previous=e.panel;e.panel+=20;if(previous>61){e.panel=82;e.phase=7;}}

@@ -1,5 +1,6 @@
 ﻿// 005e97d8 / 005ecde0 / 005ee758 / 005efbac。時計と座標はC++が返す。
 import {createResultPopup} from './battle-result-popup.js';
+import {nativeFont} from './native-font.js';
 export function createBattleResults(controls){
  const panel=document.createElement('section');panel.className='battle-receipt';panel.hidden=true;panel.setAttribute('aria-label','戦闘結果');
  const host=document.querySelector('.workspace-right .workspace-panel-content');(host||controls).append(panel);
@@ -37,6 +38,11 @@ export function createBattleResults(controls){
    if(!runtime?.result.mode)return;
    const e=runtime.ending,r=runtime.result,dojo=r.mode===4,name=dojo?'img004_DOJO_ja':'img004_ja';
    if(e.title[2]>=0)sprite(name,e.title[2],e.title[0],e.title[1]);
+   const hint=runtime.defeatHint;
+   if(r.mode===2&&e.phase===4&&hint?.layout.id>=0){
+    sprite('img005',0,...hint.layout.panel);
+    if(hint.layout.ready){context.save();context.font=nativeFont(30);context.fillStyle='#fff';context.textAlign='center';context.textBaseline='top';for(const [i,line]of(hint.lines||[]).entries())context.fillText(line,width/2,hint.layout.textY+i*36);context.restore();}
+   }
    if(e.phase>1&&r.mode!==2){
     const xp=runtime.receipt?.rewards.filter(v=>v.source==='experience').reduce((n,v)=>n+v.amount,0)||0,points=(dojo||runtime.rules.scoreType===3||runtime.rules.nativeKind===-6)&&!(e.phase===2&&e.frame<0),value=points?r.score:xp;
     const rects=atlas.atlases[name].rects,base=atlas.atlases.img001_ja.rects;

@@ -117,7 +117,7 @@ async function depart(){
     const scene=await loadStageScene(stage,{frame:0,showEnemy:true,showPlayer:true,showEffects:true});
     if(scene.missing?.length)throw Error('ステージ素材が未収録です：'+scene.missing.join(', '));
     loadedAssets=await prepareBattleAssets(stage,formation,scene,report,active.signal);
-    const screen=await prepareBattleScreen(units,snapshot,loadedAssets,active.signal,report);active.signal.throwIfAborted();
+    const screen=await prepareBattleScreen(units,snapshot,loadedAssets,active.signal,report,enemies);active.signal.throwIfAborted();
     prepared=snapshot;node('initial').hidden=false;node('setup').hidden=true;stageMedia.clear();
     battle=await startBattleScreen(node('initial'),node('canvas'),scene,snapshot,screen,returnToPreparation);active.signal.throwIfAborted();status('');
   }catch(error){returnToPreparation();if(error.name!=='AbortError')status(error.message,true);}

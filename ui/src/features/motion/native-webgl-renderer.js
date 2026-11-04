@@ -51,7 +51,7 @@ export class NativeWebGLRenderer {
   constructor(canvas, options = {}) {
     this.canvas = canvas;
     this.gl = canvas.getContext("webgl", {
-      alpha: false,
+      alpha: options.alpha ?? false,
       antialias: true,
       premultipliedAlpha: true,
       preserveDrawingBuffer: options.preserveDrawingBuffer ?? true,

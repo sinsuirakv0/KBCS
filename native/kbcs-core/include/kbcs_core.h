@@ -198,6 +198,7 @@ typedef struct {
  int32_t menu_count,menu_sprites[24][6];
 } KbcsBattleScreenLayout;
 uint32_t kbcs_core_battle_screen_step(const KbcsBattleScreenConfig*,const KbcsBattleScreenState*,const KbcsBattleScreenInput*,KbcsBattleScreenState*,KbcsBattleScreenLayout*);
+uint32_t kbcs_core_battle_screen_fade(int32_t width,int32_t frame,KbcsBattleScreenLayout*);
 
 #ifdef __cplusplus
 }

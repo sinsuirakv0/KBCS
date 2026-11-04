@@ -419,6 +419,7 @@ impl Service {
             let stats = session.stats()?;
             let textures = session.scene.textures().to_vec();
             let title = session.title.clone();
+            let inspection_assets = session.inspection_assets()?;
             let mut battles = self
                 .battles
                 .lock()
@@ -429,7 +430,7 @@ impl Service {
             );
             battles.insert(id.clone(), Arc::new(Mutex::new(session)));
             return Ok(Reply::json(
-                json!({"session":id,"runtime":stats,"textures":textures,"title":title}),
+                json!({"session":id,"runtime":stats,"textures":textures,"title":title,"inspectionAssets":inspection_assets}),
             ));
         }
         if path == "/api/battle-session/input" {
@@ -535,6 +536,9 @@ impl Service {
             let core_ms = started.elapsed().as_secs_f64() * 1000.;
             session.settle()?;
             let mut runtime = session.stats()?;
+            if let Some(query) = &request.inspection {
+                runtime["inspection"] = session.inspection(query)?;
+            }
             if request.debug {
                 let (actors, _) = session
                     .core

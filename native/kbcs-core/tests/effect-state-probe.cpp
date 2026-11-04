@@ -1,6 +1,19 @@
 ﻿// 解析専用DLL。所有者の非公開プールを検査し、配布バイナリには含めない。
 #include "../src/actor.cpp"
 
+extern "C" uint32_t kbcs_audit_cannon_action(KbcsActorCannon *state,KbcsActor actors[2][51],const KbcsCannonRules *rules,int side,int mode,KbcsBattleSound *out,int *count){
+ if(!out||!count)return 1;std::vector<KbcsBattleSound> sounds;const int frame=0;
+ BattleSoundScope scope(sounds,frame);KbcsBattleRules battle_rules{};BattleRulesScope rules_scope(battle_rules,mode);
+ const auto code=kbcs_core_actor_cannon_action(state,actors,rules,side);*count=int(sounds.size());std::copy(sounds.begin(),sounds.end(),out);return code;
+}
+
+extern "C" uint32_t kbcs_audit_defeat(int ticks,KbcsBattleEnding *out,KbcsBattleHint *hint){
+ if(ticks<0||ticks>200||!out||!hint)return 1;KbcsBattleConfig config{};config.seed=1;config.screen.viewport_width=960;
+ KbcsBattle battle(config);battle.result.mode=2;battle.hint_fallback_lines=3;
+ for(int i=0;i<ticks;++i)battle.advanceEnding();
+ const auto code=kbcs_core_battle_ending(&battle,out);return code?code:kbcs_core_battle_hint(&battle,hint);
+}
+
 extern "C" uint32_t kbcs_audit_effect_pool(int kind,const int32_t lengths[2],const KbcsBattleVisual *before,int count,int ticks,KbcsBattleVisual *after){
  if(!lengths||!before||!after||kind<0||kind>3||count!=(kind?30:200)||ticks<0)return 1;
  KbcsBattleConfig config{};config.seed=1;
@@ -38,6 +51,17 @@ extern "C" uint32_t kbcs_audit_actor_visuals(int side,const KbcsActor *actor,Kbc
  KbcsBattle battle(config);battle.actors[side][1]=*actor;
  const KbcsBattleVisual *values=nullptr;const auto code=kbcs_core_battle_visuals(&battle,&values,count);
  if(code)return code;if(*count>32)return 1;std::copy_n(values,*count,after);return 0;
+}
+
+extern "C" uint32_t kbcs_audit_return_wipe(int mode,int ticks,int *action,int *fade,int *frame){
+ if((mode!=1&&mode!=2&&mode!=4&&mode!=7)||ticks<1||ticks>30||!action||!fade||!frame)return 1;
+ KbcsBattleConfig config{};config.seed=1;config.environment.stage_width=16000;config.environment.unit_modes[0]=1;
+ config.screen.speed=2;config.screen.fixed_money=-1;config.screen.viewport_width=1280;config.state.rows=2;config.state.intro=24;
+ config.state.holding=config.state.pending_control=config.state.description_item=-1;config.state.battle_mode=mode;
+ KbcsBattle battle(config);battle.result.mode=mode;battle.ending.phase=mode==2?4:7;battle.ending.guard=5;
+ KbcsBattleScreenInput input{ticks,0,0,0,0};KbcsBattleScreenState state{};KbcsBattleScreenLayout layout{};
+ const auto code=kbcs_core_battle_advance(&battle,&input,&state,&layout);if(code)return code;
+ *action=state.request_action;*frame=battle.return_frame;*fade=layout.fade_count==1&&layout.fade_sizes[0]==4&&layout.fade[0][0]==0&&layout.fade[0][4]==1280;return 0;
 }
 
 // 全251語を受け渡し、原本のフレーム境界と同じ所有側の入口を検証する。

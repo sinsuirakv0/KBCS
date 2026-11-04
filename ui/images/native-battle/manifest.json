@@ -6718,6 +6718,46 @@
           "sourceKind": "local"
         }
       }
+    },
+    "img005": {
+      "image": "Image/img005.png",
+      "url": "/images/native-battle/img005.png",
+      "rects": [
+        [
+          1,
+          1,
+          238,
+          62
+        ],
+        [
+          1,
+          1,
+          220,
+          62
+        ],
+        [
+          19,
+          1,
+          220,
+          62
+        ]
+      ],
+      "sources": {
+        "ImageData/img005.imgcut": {
+          "path": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageDataLocal/img005.imgcut",
+          "priority": 0,
+          "sha256": "fc600b72687e4d103b1af08bc64961a18a623d6e0d0ff8dee92d77497d9ce610",
+          "size": 131,
+          "sourceKind": "local"
+        },
+        "Image/img005.png": {
+          "path": "jp/Local/jp-1507021-2c1ac20b9c424404/ImageLocal/img005.png",
+          "priority": 0,
+          "sha256": "8a1d3b68ebe7aaefd5591568a9e44b4f93f64edfdbe8c8689361cde34839921b",
+          "size": 400,
+          "sourceKind": "local"
+        }
+      }
     }
   },
   "items": [

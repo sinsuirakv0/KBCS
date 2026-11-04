@@ -1,15 +1,16 @@
 ﻿// actor.cpp内で同版getter/Contextを共有する。原本の履歴木を対象1..50の配列へ正規化する。
 static_assert(sizeof(KbcsActorReflection)==36&&sizeof(KbcsActorSecondaryHit)==80&&sizeof(KbcsActorAreaRules)==56);
 struct KbcsActorAreas {
- struct Surge {KbcsActorSurge record;KbcsActorAreaHistory history{};std::map<int,std::pair<int32_t,uint8_t>> extra;
+ struct Surge {KbcsActorSurge record;KbcsActorAreaHistory history{};std::map<int,std::pair<int32_t,uint8_t>> extra;KbcsBattleInspectionSource source{};
  int32_t &cycle(int slot){return slot<51?history.cycles[slot]:extra[slot].first;}
  uint8_t &present(int slot){return slot<51?history.present[slot]:extra[slot].second;}
  };
- struct Explosion {KbcsActorExplosion record;KbcsActorExplosionHistory history{};std::map<int,std::array<uint8_t,5>> extra;
+ struct Explosion {KbcsActorExplosion record;KbcsActorExplosionHistory history{};std::map<int,std::array<uint8_t,5>> extra;KbcsBattleInspectionSource source{};
  uint8_t &hit(int slot,int part){return slot<51?history.hits[slot][part]:extra[slot][part];}
  };
  std::vector<Surge> surges;
- std::vector<KbcsActorReflection> reflections;
+ struct Reflection : KbcsActorReflection {KbcsBattleInspectionSource source{};};
+ std::vector<Reflection> reflections;
  std::vector<Explosion> explosions;
  std::vector<KbcsActorAreaEvent> events;
  bool busy=false,failed=false;
@@ -32,6 +33,7 @@ bool secondaryHit(Context &context,KbcsActorSecondarySink sink,void *user,int ty
  return applied!=0;
 }
 void surgeHit(KbcsActorAreas &areas,Context &context,KbcsActorAreas::Surge &state,int target,KbcsActorSecondarySink sink,void *user){
+ InspectorSourceScope source_scope(state.source);
  const auto &value=state.record;const int side=value.side,slot=value.slot;
  const int rate=side?100:value.kind==1?int32_t(n_00a98e50(context,side,slot)):value.kind==2?int32_t(n_00a98ca4(context,side,slot)):100;
  if(!secondaryHit(context,sink,user,2,side,slot,target,value.hit,int(value.mini)<<1,side?0:value.parameter,rate,value.flags))return;
@@ -46,7 +48,7 @@ void surgeHit(KbcsActorAreas &areas,Context &context,KbcsActorAreas::Surge &stat
   reflection.level=n_00a989dc(context,side,slot);reflection.offset=n_00a988c4(context,side,slot);
   reflection.span=n_00a98950(context,side,slot);reflection.mini=n_00a987f8(context,side,slot)!=0;
  }
- areas.reflections.push_back(reflection);
+ areas.reflections.push_back({reflection,activeInspector?activeInspector->source(1,other,target,0):KbcsBattleInspectionSource{}});
  if(n_00a98edc(context,other,target)){n_00a98e04(context,other,target,0);n_00a98f24(context,other,target,0);}
 }
 void stepSurges(KbcsActorAreas &areas,Context &context,KbcsActorSecondarySink sink,void *user){
@@ -90,7 +92,7 @@ void stepReflections(KbcsActorAreas &areas,Context &context,const KbcsActorAreaR
    surge.x=n_00a9482c(context,value.side,value.slot)+(value.side==1?delta:-delta);
    for(int j=0;j<12;++j)surge.flags[j]=context.procs[storedProcOrder[j]]!=0;
    surge.parameter=n_00a9adf0(context,value.side,value.slot);surge.mini=value.mini;surge.kind=1;
-   areas.surges.push_back({surge,{},{}});
+   areas.surges.push_back({surge,{},{},value.source});
    // 生成したFは、演出寿命の判定を飛ばして次の待機へ進む。
    ++i;continue;
   }
@@ -101,7 +103,7 @@ void stepReflections(KbcsActorAreas &areas,Context &context,const KbcsActorAreaR
 void stepExplosions(KbcsActorAreas &areas,Context &context,const KbcsActorAreaRules &rules,KbcsActorSecondarySink sink,void *user){
  const int wait=rules.explosion_frames[0],active=rules.explosion_frames[1],tail=rules.explosion_frames[2],interval=rules.explosion_frames[3];
  for(size_t i=0;i<areas.explosions.size();){
-  auto &state=areas.explosions[i];auto &value=state.record;++value.frame;
+  auto &state=areas.explosions[i];auto &value=state.record;++value.frame;InspectorSourceScope source_scope(state.source);
   const int phases=std::min(Context::divide(value.frame,interval)+1,3);
   for(int phase=0;phase<phases;++phase){
    const int distance=phase==0?0:phase==1?rules.explosion_widths[0]+rules.explosion_widths[1]:rules.explosion_widths[0]+rules.explosion_widths[1]*2+rules.explosion_widths[2];
@@ -132,7 +134,7 @@ extern "C" uint32_t kbcs_core_actor_areas_append(KbcsActorAreas *areas,const Kbc
  if(!areas||!value||areas->busy||areas->failed||value->surge_present<0||value->surge_present>1||value->explosion_present<0||value->explosion_present>1)return 1;
  if(value->surge_present&&(!validAreaActor(value->surge.side,value->surge.slot)||value->surge.hit<0||value->surge.hit>2))return 1;
  if(value->explosion_present&&(!validAreaActor(value->explosion.side,value->explosion.slot)||value->explosion.hit<0||value->explosion.hit>2))return 1;
- try{if(value->surge_present)areas->surges.push_back({value->surge,{},{}});if(value->explosion_present)areas->explosions.push_back({value->explosion,{},{}});return 0;}
+ try{if(value->surge_present)areas->surges.push_back({value->surge,{},{},activeInspector?activeInspector->source(1,value->surge.side,value->surge.slot,0):KbcsBattleInspectionSource{}});if(value->explosion_present)areas->explosions.push_back({value->explosion,{},{},activeInspector?activeInspector->source(1,value->explosion.side,value->explosion.slot,0):KbcsBattleInspectionSource{}});return 0;}
  catch(...){areas->failed=true;return 3;}
 }
 extern "C" uint32_t kbcs_core_actor_areas_counts(const KbcsActorAreas *areas,KbcsActorAreaCounts *out){

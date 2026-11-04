@@ -275,6 +275,8 @@ fn cannon_cheat_recharges_without_interrupting_the_shot() {
     let mut c = config();
     c.state.cannon = 500;
     c.cannon.encoded = [30; 4];
+    c.castle.words[6] = 12;
+    c.castle.words[29] = 1;
     let mut battle = Battle::new(&c, &[], &[]).unwrap();
     battle.cheats(16).unwrap();
     assert_eq!(
@@ -305,6 +307,45 @@ fn cannon_cheat_recharges_without_interrupting_the_shot() {
         .unwrap();
     assert_eq!(battle.actors().unwrap().0[0][0].words[13], shots);
     assert!(battle.cheats(32).is_err());
+    battle
+        .advance(&battle_screen::Input {
+            ticks: 12,
+            ..Default::default()
+        })
+        .unwrap();
+    let sounds: Vec<_> = battle.sounds().unwrap().iter().map(|v| v.id).collect();
+    let stop = sounds.iter().position(|&id| id == !25).unwrap();
+    let wave = sounds.iter().position(|&id| id == 26).unwrap();
+    assert!(stop < wave);
+}
+
+#[test]
+fn defeat_title_finishes_moving_before_the_hint_opens() {
+    let mut battle = Battle::new(&config(), &[], &[]).unwrap();
+    battle.hints(&[7], &[3], 3).unwrap();
+    edit(&mut battle, 0, 0, |w| w[8] = 0);
+    for _ in 0..300 {
+        tick(&mut battle, 1);
+        let e = battle.ending().unwrap();
+        if e.phase == 2 && e.frame == 80 {
+            break;
+        }
+    }
+    let e = battle.ending().unwrap();
+    assert_eq!((e.phase, e.frame, e.title[1]), (2, 80, 242));
+    for step in 1..=10 {
+        tick(&mut battle, 1);
+        let e = battle.ending().unwrap();
+        assert_eq!(e.title[1], 242 - step * 10);
+        assert_eq!(battle.hint().unwrap().id, if step == 10 { 7 } else { -1 });
+    }
+    assert_eq!(battle.hint().unwrap().panel[2], 0);
+    tick(&mut battle, 1);
+    assert!(battle.sounds().unwrap().iter().any(|v| v.id == 42));
+    tick(&mut battle, 3);
+    assert_eq!(battle.ending().unwrap().title[1], 142);
+    assert_eq!(battle.hint().unwrap().panel[2], 690);
+    assert_eq!(battle.hint().unwrap().ready, 1);
 }
 
 #[test]
@@ -347,5 +388,196 @@ fn warp_visuals_follow_actor_phase_and_layer() {
                 .iter()
                 .any(|v| v.kind == 11 && v.side == side as i32)
         );
+    }
+}
+
+#[test]
+fn inspector_tracks_revival_retirement_and_reused_slots_without_rng() {
+    let raw: Vec<i32> = serde_json::from_value(fixture()["breakerEnemy"].clone()).unwrap();
+    let mut c = config();
+    c.enemy_max = 1;
+    let mut battle = Battle::new(
+        &c,
+        &[profile(&raw, 1, 37)],
+        &[stage::Row([
+            37, 0, 0, 1, 1, 100, 0, 0, 0, 100, 0, 100, 0, 0,
+        ])],
+    )
+    .unwrap();
+    tick(&mut battle, 1);
+    let first = battle.inspection().unwrap()[0];
+    assert_eq!(
+        (first.id, first.side, first.slot, first.retired_frame),
+        (1, 1, 1, -1)
+    );
+    let seed = battle.production().unwrap().1;
+    for _ in 0..3 {
+        assert_eq!(battle.inspection().unwrap()[0].serial, first.serial);
+    }
+    assert_eq!(battle.production().unwrap().1, seed);
+    edit(&mut battle, 1, 1, |w| {
+        w[1] = 14;
+        w[2] = 0;
+        w[205] = 1;
+    });
+    tick(&mut battle, 1);
+    assert_eq!(
+        (
+            battle.inspection().unwrap()[0].action,
+            battle.inspection().unwrap()[0].revivals
+        ),
+        (15, 1)
+    );
+    edit(&mut battle, 1, 1, |w| {
+        w[1] = 4;
+        w[2] = 1000;
+        w[205] = 0;
+    });
+    tick(&mut battle, 1);
+    assert!(battle.inspection().unwrap()[0].retired_frame >= 0);
+    assert_eq!(
+        battle.inspection().unwrap()[0].last_frame,
+        battle.inspection().unwrap()[0].retired_frame
+    );
+    let retired = battle.inspection().unwrap()[0];
+    tick(&mut battle, 1);
+    let records = battle.inspection().unwrap();
+    assert_eq!(records.len(), 2);
+    assert_eq!((records[0].id, records[1].id, records[1].slot), (1, 2, 1));
+    assert_ne!(records[1].serial, first.serial);
+    assert_eq!(records[0].revivals, 1);
+    assert_eq!(
+        (records[0].last_frame, records[0].animation),
+        (retired.last_frame, retired.animation)
+    );
+}
+
+#[test]
+fn inspector_keeps_both_damage_sources_and_discards_barrier_absorption() {
+    // 既存の原本照合済みネコ定義から、攻撃元を2体に制御する。
+    let data: Value = serde_json::from_str(
+        include_str!("../../../../native/kbcs-core/tests/actor-vectors.json")
+            .trim_start_matches('\u{feff}'),
+    )
+    .unwrap();
+    let cat: Vec<i32> =
+        serde_json::from_value(data["cases"][0]["definition"]["cells"].clone()).unwrap();
+    for protected in [false, true] {
+        let mut first = profile(&cat, 0, 2);
+        first.definition.cells = cat.clone().try_into().unwrap();
+        let mut second = profile(&cat, 0, 3);
+        second.definition.cells = cat.clone().try_into().unwrap();
+        second.deployment_slot = 1;
+        let raw: Vec<i32> = serde_json::from_value(fixture()["breakerEnemy"].clone()).unwrap();
+        let mut enemy = profile(&raw, 1, 37);
+        enemy.definition.cells[3] = 0;
+        enemy.definition.cells[15] = 1;
+        let mut c = config();
+        c.screen.present[0] = 1;
+        c.screen.present[1] = 1;
+        c.enemy_max = 1;
+        c.hit.effects.target_count = 1;
+        c.hit.effects.scenario_level = 1;
+        for (index, phase) in [0x2328, 0x2360, 0x2398].into_iter().enumerate() {
+            c.effect_clocks[index] = [phase, 30, 30];
+        }
+        let mut battle = Battle::new(
+            &c,
+            &[first, second, enemy],
+            &[stage::Row([
+                37, 1, 0, 1000, 1000, 100, 0, 0, 0, 100, 0, 100, 0, 0,
+            ])],
+        )
+        .unwrap();
+        battle.cheats(5).unwrap();
+        for control in [1000, 1001] {
+            battle
+                .advance(&battle_screen::Input {
+                    control,
+                    ticks: 6,
+                    ..Default::default()
+                })
+                .unwrap();
+        }
+        let allies: Vec<_> = battle
+            .inspection()
+            .unwrap()
+            .iter()
+            .filter(|actor| actor.side == 0)
+            .copied()
+            .collect();
+        assert_eq!(allies.len(), 2);
+        for slot in [1, 2] {
+            edit(&mut battle, 0, slot, |w| {
+                w[3] = 8100;
+                w[1] = 0;
+                w[2] = 0;
+            });
+        }
+        edit(&mut battle, 1, 1, |w| {
+            w[3] = 8000;
+            w[1] = 0;
+            w[2] = 0;
+            w[7] = 2;
+            w[8] = 2;
+            w[130] = if protected { 1000 } else { 0 };
+        });
+        let victim = battle
+            .inspection()
+            .unwrap()
+            .iter()
+            .find(|actor| actor.side == 1)
+            .unwrap()
+            .id;
+        if protected {
+            tick(&mut battle, 30);
+            assert_eq!(battle.actors().unwrap().0[1][1].words[8], 2);
+            assert!(battle.inspection_sources(victim).unwrap().is_empty());
+            edit(&mut battle, 0, 1, |w| {
+                w[1] = 0;
+                w[61] = 10000;
+            });
+            edit(&mut battle, 0, 2, |w| {
+                w[1] = 0;
+                w[2] = 0;
+            });
+            edit(&mut battle, 1, 1, |w| {
+                w[130] = 0;
+                w[7] = 1;
+                w[8] = 1;
+            });
+        }
+        for _ in 0..90 {
+            tick(&mut battle, 1);
+            if battle
+                .inspection()
+                .unwrap()
+                .iter()
+                .any(|actor| actor.id == victim && actor.deaths > 0)
+            {
+                break;
+            }
+        }
+        let sources = battle.inspection_sources(victim).unwrap();
+        let ids: Vec<_> = sources.iter().map(|source| source.actor_id).collect();
+        assert_eq!(
+            ids,
+            if protected {
+                vec![allies[1].id]
+            } else {
+                vec![allies[0].id, allies[1].id]
+            }
+        );
+        assert!(
+            sources
+                .iter()
+                .all(|source| source.kind == 1 && source.side == 0 && source.reserved > 0)
+        );
+        assert!(sources.iter().all(|source| source.profile
+            == if source.actor_id == allies[0].id {
+                0
+            } else {
+                1
+            }));
     }
 }

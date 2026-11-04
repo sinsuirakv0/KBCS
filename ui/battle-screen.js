@@ -13,6 +13,7 @@ import {createBattleFrameClient} from './battle-frame.js';
 import {initializeSceneGestures,createSceneMotion} from './src/features/stages/scene-controls.js';
 import {sortieFixedMoney} from './sortie-view.js';
 import {prepareBattleInfo,drawBattleInfo,unitDescription} from './battle-info.js';
+import {prepareInspectorAssets,createBattleInspector} from './battle-inspector.js';
 
 export function battleScreenConfiguration(database,snapshot){
  const {formation,map,items,deployment}=snapshot,profile=formation.profile;
@@ -23,7 +24,7 @@ export function battleScreenConfiguration(database,snapshot){
  const rule=(map.rules||[]).find(v=>v.id===0),fixed=sortieFixedMoney(map,snapshot.fixedMoney),mask=battleItems.reduce((bits,v,index)=>bits|(items[v.key]?1<<index:0),0);
  return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:snapshot.speed===3?3:2,fixed_money:rule?fixed*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?fixed*100:combo(5)*100};
 }
-export async function prepareBattleScreen(database,snapshot,assets,signal,report){
+export async function prepareBattleScreen(database,snapshot,assets,signal,report,enemies){
  await loadNativeFonts();
  const [atlas,options]=await Promise.all([readBattleJson('/images/native-battle/manifest.json',{signal}),readBattleJson('/api/battle-options',{signal})]);
  if(atlas.buildId!==snapshot.buildId||atlas.version!==snapshot.version){
@@ -39,6 +40,8 @@ export async function prepareBattleScreen(database,snapshot,assets,signal,report
  for(const path of paths){signal.throwIfAborted();const image=assets.images.get(path)||new Image();if(!image.src)image.src=atlasUrls.get(path)||'/api/asset/'+path;try{await image.decode();}catch{throw Error('戦闘UI画像を読み込めません：'+path);}signal.throwIfAborted();images.set(path,image);report('戦闘UI',++count,paths.length);}
  const values=battleScreenConfiguration(database,snapshot);values.config.description_lines=forms.map(form=>unitDescription(form).length);
  const info=await prepareBattleInfo(database,snapshot,signal);
+ // 一覧の状態アイコンも幕が開く前にデコードする。
+ const statusImages=await Promise.all([...new Set([database.imageBase+database.propertyAtlas.path,enemies.imageBase+enemies.propertyAtlas.path,'/icons/enemies/revive.png','/icons/enemies/burrow.png'])].map(async url=>{const image=new Image();image.src=url;await image.decode();signal.throwIfAborted();return image;}));
  const audioUrls=new Map(),audioErrors=new Map(),audioController=new AbortController();
  const dispose=()=>{audioController.abort();for(const url of audioUrls.values())URL.revokeObjectURL(url);audioUrls.clear();};
  signal.addEventListener('abort',dispose,{once:true});
@@ -51,7 +54,7 @@ export async function prepareBattleScreen(database,snapshot,assets,signal,report
  catch(error){dispose();signal.removeEventListener('abort',dispose);throw error;}
  // 後の曲の取得は開始を待たせない。将来の切替入口は読込完了を確認する。
  Promise.all(tracks.slice(1).map(async track=>{try{await loadAudio(track);}catch(error){if(error.name!=='AbortError')audioErrors.set(track.id,error.message);}}));
- return {atlas,options,forms,info,images,sceneImages:assets.images,audioUrls,audioErrors,dispose:()=>{signal.removeEventListener('abort',dispose);dispose();},...values};
+ return {database,enemies,statusImages,atlas,options,forms,info,images,sceneImages:assets.images,audioUrls,audioErrors,dispose:()=>{signal.removeEventListener('abort',dispose);dispose();},...values};
 }
 export async function startBattleScreen(root,canvas,scene,snapshot,resources,onReturn){
  let screenWidth=960,camera=scene.layout,cameraVersion=0,drawnVersion=-1,drawnRows=0;
@@ -73,7 +76,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  message.textContent='';
  const keyBindings=readBattleKeys();
  let state={frame:0,intro:12,rows:2,page:0,page_frame:0,page_direction:1,paused:0,money:resources.money,worker:resources.worker,cannon:0,holding:-1,hold_frames:0,hold_wait:0,pointer_down:0,pointer_x:0,pointer_y:0,guard:0,pending_control:-1,items_on:resources.config.items,request_slot:-1,request_cannon:0,ui_frame:0,speed_mode:(resources.config.items&1)?(snapshot.speed===3?2:1):0,wallet_flash:0,description_item:-1,description_wait:0,start_x:0,start_y:0,gesture:0,page_step:1,request_action:0,bgm_level:3,se_level:3,vibration_on:0,info_mode:0,info_slot:0,saved_rows:2,hud_frame:0};
- let runtime={wait:Array(10).fill(0),maximum:Array(10).fill(0)},sessionCreated=false,skipCombos=false;
+ let runtime={wait:Array(10).fill(0),maximum:Array(10).fill(0)},sessionCreated=false,skipCombos=false,returnPending=false,inspector,inspectionDirty=false;
  Object.assign(state,{rows:resources.options.rows,saved_rows:resources.options.rows,bgm_level:resources.options.bgmLevel,se_level:resources.options.seLevel});
  let savedOptions=JSON.stringify(resources.options),saveOptions=Promise.resolve();
  function persistOptions(){
@@ -98,7 +101,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  }
  const sounds=createBattleSounds(resources.audioErrors,resources.atlas.sounds),tints=new Map();
  const results=createBattleResults(controls);
- sounds.preload([8,9,10,11,15,19,20,21,22,23,24,25,26,27,28,29,37,44,45,50,57,59,60,61,65,70,71,72,73,74,84,85,86,90,105,106,110,111,112,124,137,138,139,159,162,167,168,169,188,189,194]);
+ sounds.preload([8,9,10,11,15,19,20,21,22,23,24,25,26,27,28,29,36,37,42,44,45,50,57,59,60,61,65,70,71,72,73,74,83,84,85,86,90,105,106,110,111,112,124,137,138,139,159,162,167,168,169,188,189,194]);
  function tinted(image,cut,color,key){
   if(!tints.has(key)){const surface=document.createElement('canvas');surface.width=cut[2];surface.height=cut[3];const paint=surface.getContext('2d');paint.drawImage(image,...cut,0,0,cut[2],cut[3]);paint.globalCompositeOperation='multiply';paint.fillStyle='rgb('+color.join(',')+')';paint.fillRect(0,0,surface.width,surface.height);paint.globalCompositeOperation='destination-in';paint.drawImage(image,...cut,0,0,cut[2],cut[3]);tints.set(key,surface);}return tints.get(key);
  }
@@ -116,18 +119,20 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(version===cameraVersion)camera=next.layout;
  }
  async function update(ticks,stepping=false){
+  inspectionDirty=false;
   const immediate=playbackPaused&&!state.paused&&!!(cheats&4);
   const input=stepping?{ticks,phase:0,x:0,y:0,control:10}:{ticks,...pointer,control};
   if(ticks||immediate)pointer.phase=0;control=0;
   const version=cameraVersion,sentSettings=settingsVersion,sentKeys=keySerial;
   const sceneInput=stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session});
-  const {value:next,timing:measured}=await frames.load({session,input,cheats,skipCombos,scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
+  const {value:next,timing:measured}=await frames.load({session,input,cheats,skipCombos,inspection:inspector?.query(performance.now(),stepping||immediate),scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
   Object.assign(timing,measured);timing.coreMs=next.coreMs;
   if(stopped)return;appliedSettings=sentSettings;
   // 0tickキーの後に届いた同一Fの古い描画応答で、押下状態を巻き戻さない。
   if(sentKeys===keySerial||next.state.ui_frame>state.ui_frame||next.state.frame>state.frame){state=next.state;view=next.layout;}runtime=next.runtime;
   persistOptions();
   results.update(runtime,screenWidth,resources.atlas);
+  inspector?.update(runtime.inspection,state.frame);
   sounds.update(runtime.sounds||[],state.se_level,state.speed_mode+1,playbackPaused&&!stepping,!!runtime.result.mode);
   actorsInfo.textContent='味方 '+runtime.units+' / 敵 '+runtime.enemies+'　城 '+runtime.castleHp.map(value=>value.toLocaleString()).join(' / ');
   const result=runtime.result,rules=runtime.rules,finished=!!result.mode;
@@ -138,7 +143,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   menu.hidden=!state.paused;
   music();
   if(state.request_action===301)window.open('https://kbc-rakv0.pages.dev/information/appli/battlecats/help/index.html','_blank','noopener');
-  if(state.request_action===302){stop();onReturn();return;}
+  if(state.request_action===302){if(runtime.result?.mode)returnPending=true;else{stop();onReturn();return;}}
   for(const button of controls.querySelectorAll('button'))button.disabled=false;
   controls.querySelector('[data-battle-clock]').textContent=state.frame+'F / '+(state.frame/30).toFixed(2)+'秒';
   controls.querySelector('[data-debug=toggle]').textContent=playbackPaused||state.paused?'再開':'一時停止';
@@ -170,7 +175,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  function paint(){
   if(!view)return;
   ++paints;if(!playbackPaused&&!state.paused&&!document.hidden&&state.intro>=24)++activePaints;context.clearRect(0,0,screenWidth,640);
-  if(runtime.result?.mode&&runtime.ending.phase){results.paint(context,screenWidth,sprite,number,resources.atlas,resources.images);return;}
+  if(runtime.result?.mode&&runtime.ending.phase){results.paint(context,screenWidth,sprite,number,resources.atlas,resources.images);paintFade();return;}
   const moneyBase=view.money_base,moneyRight=screenWidth-34,capX=number(view.wallet_max/100,moneyBase,moneyRight,10),slashX=capX-29;
   sprite('img001_ja',moneyBase+10,slashX,10);number(state.money/100,moneyBase,slashX-1,10);sprite('img001_ja',moneyBase+11,moneyRight,10);
   // 005d0508は後ろのページを先に描き、選択ページを重ねる。
@@ -247,8 +252,9 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    const [x,y,w,h]=view.slots[state.info_slot],blink=Math.floor(state.ui_frame/2)%2;nineSlice('img015',345+blink*2,346+blink*2,x-1,y-1,112,87);
    nineSlice('img015',341,342,screenWidth/2-461,566,128,63);sprite('img015',344,screenWidth/2-453,580,112,34);
   }
-  context.fillStyle='#000';for(let i=0;i<view.fade_count;++i){const points=view.fade[i];context.beginPath();for(let p=0;p<view.fade_sizes[i];++p){if(!p)context.moveTo(points[0],points[1]);else context.lineTo(points[p*2],points[p*2+1]);}context.closePath();context.fill();}
+  paintFade();
  }
+ function paintFade(){context.fillStyle='#000';for(let i=0;i<view.fade_count;++i){const points=view.fade[i];context.beginPath();for(let p=0;p<view.fade_sizes[i];++p){if(!p)context.moveTo(points[0],points[1]);else context.lineTo(points[p*2],points[p*2+1]);}context.closePath();context.fill();}}
  function coordinates(event){const box=canvas.getBoundingClientRect();return {x:Math.trunc((event.clientX-box.left)*screenWidth/box.width),y:Math.trunc((event.clientY-box.top)*640/box.height)};}
  const cameraPointers=new Set();
  const cameraMotion=createSceneMotion();
@@ -287,7 +293,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    if(stopped)return;
    if(state.battle_mode&&!next.state.battle_mode)return;
    sounds.update(next.sounds,state.se_level,state.speed_mode+1,playbackPaused,!!runtime.result?.mode);
-   if(serial===keySerial&&next.state.ui_frame>=state.ui_frame&&next.state.frame>=state.frame){state=next.state;view=next.layout;++cameraVersion;persistOptions();menu.hidden=!state.paused;paint();}
+   if(serial===keySerial&&next.state.ui_frame>=state.ui_frame&&next.state.frame>=state.frame){state=next.state;view=next.layout;++cameraVersion;inspector?.refresh();persistOptions();menu.hidden=!state.paused;paint();}
   }).catch(fail);
  }
  function key(event){
@@ -317,18 +323,22 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    const elapsed=now-lastTime;if(!playbackPaused&&!state.paused&&state.intro>=24)activeMs+=elapsed;
    if(!playbackPaused||state.paused)accumulator+=elapsed*30/1000*(state.intro>=24&&!state.paused&&!state.battle_mode?battlePlaybackRate(Number(speed.value),state.speed_mode):1);
   }lastTime=now;
-  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion||playbackPaused&&(cheats&4)&&pointer.phase===2)){
+  if(!busy&&(Math.floor(accumulator)>0||control||stepQueue||inspectionDirty||drawnVersion!==cameraVersion||appliedSettings!==settingsVersion||playbackPaused&&(cheats&4)&&pointer.phase===2)){
    busy=true;const stepping=!control&&stepQueue>0,ticks=control?0:stepping?Math.min(30,stepQueue):Math.min(playbackPaused?1:30,Math.floor(accumulator));if(stepping)stepQueue-=ticks;else accumulator-=ticks;
    try{await update(ticks,stepping);paint();}catch(e){fail(e);}finally{busy=false;}
   }
+  // 全面暗転を一度画面へ提示した後、次の表示更新で準備画面へ戻る。
+  if(returnPending&&!stopped){raf=requestAnimationFrame(()=>{stop();onReturn();});return;}
   if(!error&&!stopped)raf=requestAnimationFrame(animate);
  }
  window.addEventListener('pagehide',stop);
- function stop(){if(stopped)return;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cameraMotion.clear();document.removeEventListener('visibilitychange',visibility);}
+ function stop(){if(stopped)return;inspector?.stop();inspector=null;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cameraMotion.clear();document.removeEventListener('visibilitychange',visibility);}
  try{resize();observer.observe(canvas.parentElement);
   const sceneInput={...stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session}),viewportWidth:screenWidth};
   const started=await readBattleJson('/api/battle-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot,config:resources.config,state,scene:sceneInput}),signal:requestController.signal});sessionCreated=true;
   await Promise.all([...new Set(started.textures)].filter(path=>path&&!resources.sceneImages.has(path)).map(async path=>{const image=new Image();image.src='/api/asset/'+path;try{await image.decode();}catch{throw Error('戦闘画像を読み込めません: '+path);}requestController.signal.throwIfAborted();resources.sceneImages.set(path,image);}));
+  const prepared=await prepareInspectorAssets(started.inspectionAssets,started.textures,resources.sceneImages,resources.database,requestController.signal);
+  inspector=createBattleInspector(document.getElementById('battle-actor-list'),document.getElementById('battle-actor-detail'),prepared,resources.database,resources.enemies,()=>{inspectionDirty=true;});
   await update(0);paint();raf=requestAnimationFrame(animate);}catch(error){stop();throw error;}
  return {stop};
 }

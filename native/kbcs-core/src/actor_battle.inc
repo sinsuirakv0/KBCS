@@ -33,8 +33,9 @@ extern "C" uint32_t kbcs_core_actor_summon(const KbcsSummonInput *input,KbcsSumm
  }catch(...){return 3;}
 }
 struct KbcsBattle {
+ BattleInspector inspector;
  KbcsBattleRewardRules reward_rules=[]{KbcsBattleRewardRules r{};r.music[0]=-1;r.music[1]=-1;r.start_sound=-1;return r;}();KbcsBattleRewards rewards{};KbcsBattleEnding ending{};bool popup_release=false,ending_clicked=false;
- bool end_sound=false;KbcsScoreDisplay score_display{0,0,0,0,100};
+ bool end_sound=false;int return_frame=-1,hint_id=-1,hint_fallback_lines=0;std::vector<int32_t> hint_ids,hint_lines;KbcsScoreDisplay score_display{0,0,0,0,100};
  KbcsBattleMusic music{-1,0,0,0,0,0};
  KbcsBattleEndCamera end_camera{};KbcsExTransitionOutput ex{};
  KbcsBattleConfig config;
@@ -66,7 +67,7 @@ struct KbcsBattle {
  int32_t warning[2]{};
  KbcsStageContext stage{};
  int32_t impacts[2][56][4]{};
- int32_t notice[2]{},kills=0,current_frame=0,preserve_castle=0;
+ int32_t notice[2]{},kills=0,current_frame=0,preserve_castle=0,marker_frame=0;
  bool bonus_slots[51]{};
  uint32_t seed;
  bool failed=false;
@@ -129,6 +130,8 @@ struct KbcsBattle {
   if(result.mode){if(end_camera.width)check(kbcs_core_battle_end_camera_step(&end_camera));advanceEnding();}
   if(config.rules.score_type==3)check(kbcs_core_battle_point_display(&config.rules.point,&points));
   if(result.mode)return;
+  // 006db884: 射程矢印の時計は論理速度でなく、停止していない表示更新ごとに進む。
+  marker_frame=int32_t(uint32_t(marker_frame)+1);
   // 006d6d04の表示更新。全体数/総生産数の上限は警告30Fを(0,1)へ上書きする。
   if((!(cheats&KBCS_BATTLE_NO_LIMIT)&&occupied(0)>=50)||unitLimit()||(!(cheats&KBCS_BATTLE_NO_LIMIT)&&config.rules.total_limit>=0&&production.total>=config.rules.total_limit)){warning[0]=0;warning[1]=1;}
   else if((warning[1]&~1)!=2)warning[1]=0;
@@ -170,6 +173,8 @@ struct KbcsBattle {
   else if(!type){int32_t index=0;check(kbcs_core_random_bounded(&seed,count,&index));sound(current_frame,ids[index]);}
  }
  void advanceEnding(){
+  // 結果のrelease待ちを終えたら、006994e8の前半で覆い切ってから画面を戻す。
+  if(return_frame>=0){return_frame=std::min(11,return_frame+1);if(return_frame==11)ending.action=302;return;}
   if(ending.phase==8){
    auto &p=ending.popup;const bool release=popup_release&&p.phase==1;popup_release=false;
    check(kbcs_core_battle_popup_step(release,&p));++ending.frame;if(release)sound(current_frame,11);
@@ -179,11 +184,12 @@ struct KbcsBattle {
   if(ending.phase==3&&ending.frame+1>=30&&ending.popup.index<ending.popup.count){ending.phase=8;ending.frame=0;sound(current_frame,29);return;}
   // 005bc00cが終了カメラの完了を返すまで、phase0を進めない。
   if(!ending.phase&&ending.frame>=19&&end_camera.moving){++ending.frame;return;}
-  const int previous=ending.phase;check(kbcs_core_battle_ending_step(result.mode,config.rules.score_type==3,&ending));if(ending_clicked){ending.guard=1;ending_clicked=false;}if(previous==6&&ending.phase==7&&result.mode==1)check(kbcs_core_stage_ex(&reward_rules.ex,reward_rules.ex_choices,reward_rules.ex_count,&seed,&ex));
+   const int previous=ending.phase;check(kbcs_core_battle_ending_step(result.mode,config.rules.score_type==3,&ending));if(result.mode==2&&previous==4&&ending.frame==1)sound(current_frame,42);if(ending_clicked){ending.guard=1;ending_clicked=false;}if(ending.action==302){return_frame=0;ending.action=0;}if(previous==6&&ending.phase==7&&result.mode==1)check(kbcs_core_stage_ex(&reward_rules.ex,reward_rules.ex_choices,reward_rules.ex_count,&seed,&ex));
+   if(result.mode==2&&previous!=4&&ending.phase==4){int32_t pick=0;if(!hint_ids.empty())check(kbcs_core_random_bounded(&seed,int32_t(hint_ids.size()),&pick));hint_id=hint_ids.empty()?0:hint_ids[pick];}
  }
  void endingInput(const KbcsBattleScreenInput &input){
   if(ending.phase==8){if(input.phase==2&&ending.popup.phase==1)popup_release=true;return;}
-  if(ending.guard||ending.action)return;KbcsBattleEnding view{};check(kbcs_core_battle_ending(this,&view));
+  if(ending.guard||ending.action||return_frame>=0)return;KbcsBattleEnding view{};check(kbcs_core_battle_ending(this,&view));
   const auto *b=view.button;const bool inside=input.x>=b[0]&&input.x<=b[0]+b[2]&&input.y>=b[1]&&input.y<=b[1]+b[3];
   if(input.phase==1){ending.pressed=view.ready&&inside;if(ending.pressed)sound(current_frame,10);}
   else if(input.phase==2){if(ending.pressed&&inside&&view.ready){ending_clicked=true;sound(current_frame,11);}ending.pressed=0;}
@@ -233,6 +239,7 @@ struct KbcsBattle {
    battle.profileIndex(request->side,slot)=index;
    if(slot<51)battle.config.clock.forms[request->side][slot]=request->form;else battle.pool.extra[slot-51].forms[request->side]=request->form;
    if(!request->side){if(slot<51)battle.config.clock.kill_orb[slot]=p.definition.orb_present[18];else battle.pool.extra[slot-51].kill_orb=p.definition.orb_present[18];}
+   battle.inspector.spawn(request->side,slot,index,battle.current_frame,actorAt(battle.actors,request->side,slot));
   }
   return slot;
  }
@@ -298,6 +305,11 @@ struct KbcsBattle {
   screen.cannon=result.cannon_remaining;
  }
  void action(int side,int slot,KbcsBattleScreenState &screen){
+  const int previous=actorAt(actors,side,slot).words[1];act(side,slot,screen);
+  const auto &actor=actorAt(actors,side,slot);if(previous==14&&actor.words[1]==15&&actor.words[0])inspector.revival(side,slot);
+  inspector.sample(side,slot,screen.frame,actor);
+ }
+ void act(int side,int slot,KbcsBattleScreenState &screen){
   auto &words=actorAt(actors,side,slot).words;check(kbcs_core_actor_begin(actors,&config.environment,side,slot));
   if(!words[0])return;
   if(!slot){if(!side||(config.environment.unit_modes[side]&1))check(kbcs_core_actor_cannon_action(&cannon,actors,&config.cannon,side));return;}
@@ -341,6 +353,7 @@ struct KbcsBattle {
   check(kbcs_core_actor_frame_marks(actors,&config.environment));
  }
  void logical(KbcsBattleScreenState &screen){
+  inspector.begin();
   current_frame=screen.frame;diagnostic[0]=screen.frame;diagnostic[1]=1;sniper_phase+=6.f;
   if(!result.mode&&config.rules.score_type==3){int32_t changed=0;check(kbcs_core_battle_point_fever(&config.rules.point,&points,&changed));if(changed>0)sound(screen.frame,194);}
   // 追加生産は制限時間より先。通常の可否/費用/回数/再生産/SEを通さない。
@@ -382,7 +395,8 @@ struct KbcsBattle {
    if(!words[0])continue;
    if(side){
     const auto metal=hits.metal.find(slot);if(metal!=hits.metal.end()){
-     int basis=words[8];for(int rate:metal->second){const int damage=std::max(1,(rate*basis)/100);KbcsActorDamageContext context{config.guard_enabled,{notice[0],notice[1]},rows.data(),states.data(),int32_t(rows.size())};check(kbcs_core_actor_damage(actors,&config.environment,&context,side,slot,damage));std::copy_n(context.notice,2,notice);basis=std::max(0,basis-damage);}
+     int basis=words[8];size_t index=0;const auto *sources=size_t(slot)<inspector.metal.size()?&inspector.metal[slot]:nullptr;
+     for(int rate:metal->second){InspectorSourceScope source_scope(sources&&index<sources->size()?(*sources)[index]:KbcsBattleInspectionSource{});++index;const int damage=std::max(1,(rate*basis)/100);KbcsActorDamageContext context{config.guard_enabled,{notice[0],notice[1]},rows.data(),states.data(),int32_t(rows.size())};check(kbcs_core_actor_damage(actors,&config.environment,&context,side,slot,damage));std::copy_n(context.notice,2,notice);basis=std::max(0,basis-damage);}
     }
    }
    KbcsActorProtection protection{};check(kbcs_core_actor_protect(actors,side,slot,&protection));shieldHit(side,slot)=protection.shield_hit;
@@ -411,11 +425,13 @@ struct KbcsBattle {
    if(critical){const auto point=hitPoint();auto &v=critical_entry?*critical_entry:critical_visuals[0];v.x=point[0]/10+68;v.y=point[1]/10+77;}
    const auto impact=hitPoint();auto &visual=impactAt(side,slot);visual[0]=12;visual[1]=impact[0];visual[2]=impact[1];visual[3]=slot?words[96]:int(words[96]==1);
    int deployment= -1,cooldown=0;if(!side&&slot){deployment=profile(side,slot).deployment_slot;if(deployment>=0&&deployment<10)cooldown=production.wait[deployment];}
+   const int reserved=words[19];
    diagnostic[1]=14;diagnostic[2]=side;diagnostic[3]=slot;KbcsActorHealth health{deployment,cooldown,preserve_castle};KbcsActorHealthResult result{};check(kbcs_core_actor_health(actors,side,slot,&health,&seed,&result));
    if(result.delay_slot>=0&&result.delay_slot<10){auto &rate=delay_rates[result.delay_slot];rate=int32_t(uint32_t(rate)+uint32_t(result.delay_frames));transient.push_back(effect(0x16560,result.delay_x/10+68,result.delay_y/10+77));}
    const int previous=result.previous_hp;if(words[8]<1){words[8]=0;if(!side)++kills;}
    diagnostic[1]=15;auto *free=freeEffect(killer_visuals);
    KbcsActorReaction reaction{previous,free!=nullptr};KbcsActorReactionResult output{};check(kbcs_core_actor_react(actors,&config.environment,side,slot,&reaction,&seed,&output));
+   inspector.death(side,slot,previous,words[8],reserved,screen.frame);
    if(output.death_visual&&free)*free=effect(0x2248,output.death_x/10,output.death_y/10-40);
    // 006db1c0..006db340: 敵城HPが閾値を跨いだFで停止し、45論理F後に後半曲へ。
    if(side&&slot==std::max(0,config.environment.castle_slot))check(kbcs_core_battle_music_cross(&reward_rules,previous,words[8],words[7],&music));
@@ -508,12 +524,21 @@ struct KbcsBattle {
    else if(event>=KBCS_BATTLE_SCREEN_SOUND)battle.sound(screen->frame,event-KBCS_BATTLE_SCREEN_SOUND);
 
    if(event==0||event==1||event==3||event==5)battle.refill(*screen);
+   if(event==0||event==1||event==2||event==3)for(int side=0;side<2;++side)for(int slot=1;slot<actorEnd();++slot)battle.inspector.sample(side,slot,screen->frame,actorAt(battle.actors,side,slot));
    if((battle.cheats&KBCS_BATTLE_INSTANT)&&event==0){std::fill_n(battle.production.wait,10,0);std::fill_n(battle.production.maximum,10,0);}
    return 0;
   }
   catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
  }
 };
+
+extern "C" uint32_t kbcs_core_battle_inspection(const KbcsBattle *battle,const KbcsBattleInspection **out,int32_t *count){
+ if(!battle||!out||!count)return 1;*out=battle->inspector.records.data();*count=int32_t(battle->inspector.records.size());return 0;
+}
+extern "C" uint32_t kbcs_core_battle_inspection_sources(const KbcsBattle *battle,int32_t id,const KbcsBattleInspectionSource **out,int32_t *count){
+ if(!battle||!out||!count||id<1||size_t(id)>battle->inspector.records.size())return 1;
+ const auto found=battle->inspector.attackers.find(id);*count=found==battle->inspector.attackers.end()?0:int32_t(found->second.size());*out=*count?found->second.data():nullptr;return 0;
+}
 
 extern "C" uint32_t kbcs_core_battle_create(const KbcsBattleConfig *config,const KbcsBattleProfile *profiles,int32_t count,const KbcsStageRow *rows,int32_t row_count,KbcsBattle **out){
  if(!config||!out||!config->seed||count<0||count>4096||row_count<0||row_count>4096||(!profiles&&count)||(!rows&&row_count)||config->environment.stage_width<2800||config->unit_max<0||config->enemy_max<1||config->enemy_max>50)return 1;
@@ -553,6 +578,7 @@ extern "C" uint32_t kbcs_core_battle_cheats(KbcsBattle *battle,uint32_t flags){
 extern "C" uint32_t kbcs_core_battle_advance(KbcsBattle *battle,const KbcsBattleScreenInput *input,KbcsBattleScreenState *out,KbcsBattleScreenLayout *view){
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||battle->failed||!input||!out||!view)return 1;
+ InspectorScope inspector_scope(battle->inspector);
  battle->sounds.clear();battle->current_frame=battle->config.state.frame;BattleSoundScope sound_scope(battle->sounds,battle->current_frame);BattleRulesScope rules_scope(battle->config.rules,battle->result.mode);auto screen=battle->config.screen;
  auto resolved_input=*input;
  try{if(battle->result.mode){battle->endingInput(*input);resolved_input.phase=0;resolved_input.control=input->control==10?10:0;battle->config.state.paused=0;input=&resolved_input;}}catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
@@ -560,7 +586,9 @@ extern "C" uint32_t kbcs_core_battle_advance(KbcsBattle *battle,const KbcsBattle
  for(int i=0;i<10;++i)if(battle->summonActive(i))screen.costs[i]=0;
  try{battle->refill(battle->config.state);}catch(const AttackFailure &error){return error.code;}catch(...){return 3;}
  const auto code=kbcs_core_battle_screen_advance_custom(&screen,&battle->config.state,input,out,view,KbcsBattle::hook,battle,(battle->cheats&KBCS_BATTLE_INSTANT)!=0);
- if(code){battle->failed=true;return code;}battle->config.state=*out;return 0;
+ if(code){battle->failed=true;return code;}
+ if(battle->return_frame>=0){const auto fade=kbcs_core_battle_screen_fade(screen.viewport_width,battle->return_frame,view);if(fade)return fade;}
+ battle->config.state=*out;return 0;
 }
 extern "C" uint32_t kbcs_core_battle_actors(const KbcsBattle *battle,const KbcsActor **actors,const int32_t **profiles){
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
@@ -604,6 +632,21 @@ extern "C" uint32_t kbcs_core_battle_ex(const KbcsBattle *battle,KbcsExTransitio
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->ex;return 0;}
 extern "C" uint32_t kbcs_core_battle_end_camera(const KbcsBattle *battle,KbcsBattleEndCamera *out){
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);if(!battle||!out)return 1;*out=battle->end_camera;return 0;}
+extern "C" uint32_t kbcs_core_battle_hints(KbcsBattle *battle,const int32_t *ids,const int32_t *lines,int32_t count,int32_t fallback_lines){
+ if(!battle||battle->config.state.frame||battle->result.mode||count<0||count>4096||fallback_lines<0||fallback_lines>5||(!ids&&count)||(!lines&&count))return 1;
+ for(int i=0;i<count;++i)if(ids[i]<0||ids[i]>=4096||lines[i]<0||lines[i]>5)return 1;
+ try{std::vector<int32_t> candidates,counts;if(count){candidates.assign(ids,ids+count);counts.assign(lines,lines+count);}
+  battle->hint_ids.swap(candidates);battle->hint_lines.swap(counts);battle->hint_fallback_lines=fallback_lines;return 0;
+ }catch(...){return 3;}
+}
+extern "C" uint32_t kbcs_core_battle_hint(const KbcsBattle *battle,KbcsBattleHint *out){
+ if(!battle||!out)return 1;KbcsBattleHint value{};value.id=battle->hint_id;
+ if(value.id>=0){const auto found=std::find(battle->hint_ids.begin(),battle->hint_ids.end(),value.id);const int lines=found==battle->hint_ids.end()?battle->hint_fallback_lines:battle->hint_lines[found-battle->hint_ids.begin()];
+  static constexpr int scales[]={0,50,80,90,100};const int scale=scales[std::clamp(battle->ending.frame,0,4)],width=690*scale/100,height=229*scale/100;
+  value.panel[0]=(battle->config.screen.viewport_width?battle->config.screen.viewport_width:960)/2-width/2;value.panel[1]=440-height/2;value.panel[2]=width;value.panel[3]=height;value.text_y=440-lines*18;value.ready=battle->ending.frame>=4;
+ }
+ *out=value;return 0;
+}
 extern "C" uint32_t kbcs_core_battle_ending(const KbcsBattle *battle,KbcsBattleEnding *out){
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||!out)return 1;auto e=battle->ending;const auto &r=battle->result;const int width=battle->config.screen.viewport_width;
@@ -612,12 +655,12 @@ extern "C" uint32_t kbcs_core_battle_ending(const KbcsBattle *battle,KbcsBattleE
  e.title[2]=-1;
  if(r.mode&&e.phase){
   const int x=slide[e.phase==1?std::clamp(e.frame,0,12):12];
-  if(r.mode==2){e.title[0]=width/2-152;e.title[1]=fall[e.phase==1?std::clamp(e.frame,0,43):43];e.title[2]=3;e.shade=e.phase==2?std::clamp(e.frame,0,80)*255/80:0;if(e.phase>=4)e.shade=255;}
+  if(r.mode==2){e.title[0]=width/2-152;e.title[1]=e.panel+fall[e.phase==1?std::clamp(e.frame,0,43):43];e.title[2]=3;e.shade=e.phase==2?std::clamp(e.frame,0,80)*255/80:0;if(e.phase>=4)e.shade=255;}
   else {e.title[0]=width/2-x-239;e.title[1]=190;e.title[2]=(r.mode==7||battle->config.rules.score_type==3)?12:0;e.bar_x=e.phase>1?-slide[e.phase==2?std::clamp(e.frame,0,12):12]:-width;}
  }
  e.number_x=e.bar_x;
  if(r.mode==1&&battle->config.rules.score_type==3&&e.phase==2&&e.frame<0){const int progress=e.frame+100;e.bar_x=-slide[std::clamp(progress,0,12)];e.number_x=progress>32?slide[std::clamp(45-progress,0,12)]:e.bar_x;}
- e.ready=(r.mode==2?e.phase==4:e.phase==7);e.button[0]=width/2-190;e.button[1]=632-(r.mode==2?82:e.panel);e.button[2]=381;e.button[3]=88;
+ e.ready=(r.mode==2?e.phase==4&&e.frame>=4:e.phase==7);e.button[0]=width/2-190;e.button[1]=632-(r.mode==2?82:e.panel);e.button[2]=381;e.button[3]=88;
  // 006e296c..2a7c: img101部品3とimg006部品1。安全領域/画面のY余白はPCでは0。
  static constexpr int pressed[]={0,0,6,-10,0,0};const int delta=pressed[std::clamp(e.guard,0,5)];
  e.visual_button[0]=width/2-190-delta/2;e.visual_button[1]=e.button[1]+8-delta/2;e.visual_button[2]=381+delta;e.visual_button[3]=72+delta;
@@ -729,6 +772,9 @@ extern "C" uint32_t kbcs_core_battle_visuals(KbcsBattle *battle,const KbcsBattle
    // 006ddfb8の死亡列。21は専用悪魔魂のみで、4/21の状態異常表示は出さない。
    if(w[1]==21)list.push_back({10,side,slot,0x27f8+side*0x38,w[2],x,y-97,w[5],{}});
    if(w[1]==4||w[1]==21)continue;
+   // 006df35c/006df5ec: 骨の本体置換と、15/16の復活演出は独立した描画。
+   if(w[1]!=15&&w[1]!=19&&int(n_00a9441c(context,side,slot))>0)list.push_back({12,side,slot,(w[1]==3||w[1]==6)?0x12c8:0x1258,w[2],x,y,w[5],{}});
+   if(w[1]==15||w[1]==16)list.push_back({13,side,slot,0x1290,w[2],x,y,w[5],{}});
    const auto draw=[&](int phase,int at,int px,int py){list.push_back({7,side,slot,phase,at,px,py,w[5],{}});};
    // 006df1b0 / 006df3d8: ワープ待機19では本体も入口/出口も描かない。
    if(w[1]==18||w[1]==20)list.push_back({11,side,slot,w[1]==18?0x2b98:0x2bd0,w[2],x,y-350,w[5],{}});

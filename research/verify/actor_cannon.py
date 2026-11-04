@@ -108,14 +108,21 @@ for condition,frame,attack in itertools.product(['plain','barrier','barrier-visi
  code=lib.kbcs_core_actor_cannon_step(c.byref(state),c.byref(actors),c.byref(env),c.byref(context),c.byref(clock),c.byref(damage),c.byref(rules),0,c.byref(seed),c.byref(events));assert code==0,('lightning step',condition,frame,attack,code)
  compare(actors,state,('lightning',condition,frame,attack));assert seed.value==native_seed
  lightning_steps+=1
-for side,pair,frame,pool_full in itertools.product([0,1],[(kind,action) for kind,actions in enumerate([[0,1,2],[3],[6],[4,5],[7,8],[9,10],[11],[12]]) for action in actions],[0,3,4,5,10,16,17,22,27,31,32,33,48],[0,1]):
+class Sound(c.Structure):_fields_=[('frame',c.c_int32),('id',c.c_int32)]
+audit=getattr(lib,'kbcs_audit_cannon_action',None)
+if audit:audit.argtypes=[c.POINTER(State),c.POINTER(Actors),c.POINTER(Rules),c.c_int32,c.c_int32,c.POINTER(Sound),c.POINTER(c.c_int32)]
+for game_mode,side,pair,frame,pool_full in itertools.product([0,2] if audit else [0],[0,1],[(kind,action) for kind,actions in enumerate([[0,1,2],[3],[6],[4,5],[7,8],[9,10],[11],[12]]) for action in actions],[0,3,4,5,10,16,17,22,27,31,32,33,48],[0,1]):
  kind,action=pair
  actors=Actors();state=State();w=actors[side][0].words
  for k,v in {0:1,3:16800 if side==0 else 3200,4:4400,6:12,7:236000,8:236000,9:action,10:frame,13:7,17:kind}.items():w[k]=v
  if pool_full:
   for segment in state.segments[side]:segment[0]=20
- reset(actors,state);n.call(0x6eb464,game,0,side)
- code=lib.kbcs_core_actor_cannon_action(c.byref(state),c.byref(actors),c.byref(rules),side);assert code==0
+ reset(actors,state);sounds=[];n.helpers.update({0x5bc058:game_mode,0x459efc:lambda:sounds.append(reg(1)) or 0,0x459bb4:lambda:sounds.append(~reg(1)) or 0});n.call(0x6eb464,game,0,side)
+ if audit:
+  actual=(Sound*16)();count=c.c_int32();code=audit(c.byref(state),c.byref(actors),c.byref(rules),side,game_mode,actual,c.byref(count))
+  assert sounds==[v.id for v in actual[:count.value]],('sound',game_mode,side,kind,action,frame,pool_full,sounds,[v.id for v in actual[:count.value]])
+ else:code=lib.kbcs_core_actor_cannon_action(c.byref(state),c.byref(actors),c.byref(rules),side)
+ assert code==0
  compare(actors,state,('action',side,kind,action,frame,pool_full));updates+=1
 class Spawn(c.Structure):_fields_=[(k,c.c_int32) for k in ['side','raw','level_index','layer_min','layer_max','form','row']]
 class Fire(c.Structure):_fields_=[(k,c.c_int32) for k in ['fired','slot','sound']]

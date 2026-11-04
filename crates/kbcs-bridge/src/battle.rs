@@ -17,6 +17,58 @@ pub struct ActorRef<'a> {
 }
 
 #[repr(C)]
+#[derive(Default, Clone, Copy, serde::Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Inspection {
+    pub id: i32,
+    pub side: i32,
+    pub slot: i32,
+    pub profile: i32,
+    pub serial: i32,
+    pub born_frame: i32,
+    pub last_frame: i32,
+    pub retired_frame: i32,
+    pub action: i32,
+    pub animation: i32,
+    pub hp: i32,
+    pub maximum: i32,
+    pub x: i32,
+    pub y: i32,
+    pub layer: i32,
+    pub barrier: i32,
+    pub barrier_max: i32,
+    pub shield: i32,
+    pub shield_max: i32,
+    pub revives: i32,
+    pub revive_wait: i32,
+    pub burrows: i32,
+    pub stop: i32,
+    pub slow: i32,
+    pub weaken: i32,
+    pub weaken_rate: i32,
+    pub curse: i32,
+    pub survive: i32,
+    pub kills: i32,
+    pub deaths: i32,
+    pub revivals: i32,
+    pub revives_max: i32,
+    pub burrows_max: i32,
+    pub death_frame: i32,
+}
+
+#[repr(C)]
+#[derive(Default, Clone, Copy, serde::Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct InspectionSource {
+    pub kind: i32,
+    pub actor_id: i32,
+    pub side: i32,
+    pub profile: i32,
+    pub detail: i32,
+    pub reserved: i64,
+}
+
+#[repr(C)]
 pub struct RewardRules {
     pub enabled: i32,
     pub mode: i32,
@@ -159,6 +211,91 @@ pub struct Ending {
     pub guard: i32,
     pub action: i32,
     pub popup: Popup,
+}
+
+#[repr(C)]
+pub struct HintContext {
+    pub mode: i32,
+    pub map_id: i32,
+    pub stage: i32,
+    pub crown: i32,
+    pub special: i32,
+    pub progress: i32,
+    pub cosmos: i32,
+}
+#[repr(C)]
+#[derive(Default, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Hint {
+    pub id: i32,
+    pub panel: [i32; 4],
+    pub text_y: i32,
+    pub ready: i32,
+}
+pub fn hint_candidates(
+    context: &HintContext,
+    groups: &[i32],
+    settings: &[Vec<i32>],
+) -> Result<Vec<i32>, u32> {
+    let columns = settings.iter().map(Vec::len).max().unwrap_or(28);
+    if groups.len() > 4096
+        || settings.len() > 4096
+        || columns > 4096
+        || settings.iter().any(|r| r.len() < 28)
+    {
+        return Err(1);
+    }
+    let cells: Vec<i32> = settings
+        .iter()
+        .flat_map(|row| (0..columns).map(|i| row.get(i).copied().unwrap_or(-1)))
+        .collect();
+    let mut output = vec![0; groups.len()];
+    let mut count = 0;
+    let code = unsafe {
+        kbcs_core_battle_hint_candidates(
+            context,
+            groups.as_ptr(),
+            groups.len() as i32,
+            cells.as_ptr(),
+            settings.len() as i32,
+            columns as i32,
+            output.as_mut_ptr(),
+            &mut count,
+        )
+    };
+    if code != 0 {
+        return Err(code);
+    }
+    output.truncate(count as usize);
+    Ok(output)
+}
+
+#[test]
+fn native_hint_priority_witnesses() {
+    let data: serde_json::Value = serde_json::from_str(
+        include_str!("../../../native/kbcs-core/tests/battle-hint-vectors.json")
+            .trim_start_matches('\u{feff}'),
+    )
+    .unwrap();
+    let groups: Vec<i32> = serde_json::from_value(data["groups"].clone()).unwrap();
+    let settings: Vec<Vec<i32>> = serde_json::from_value(data["settings"].clone()).unwrap();
+    for case in data["cases"].as_array().unwrap() {
+        let v: [i32; 7] = serde_json::from_value(case["context"].clone()).unwrap();
+        let context = HintContext {
+            mode: v[0],
+            map_id: v[1],
+            stage: v[2],
+            crown: v[3],
+            special: v[4],
+            progress: v[5],
+            cosmos: v[6],
+        };
+        let expected: Vec<i32> = serde_json::from_value(case["indices"].clone()).unwrap();
+        assert_eq!(
+            hint_candidates(&context, &groups, &settings).unwrap(),
+            expected
+        );
+    }
 }
 
 #[repr(C)]
@@ -330,6 +467,7 @@ pub struct Hud {
 #[derive(Clone, Copy, serde::Serialize)]
 pub struct Sound {
     pub frame: i32,
+    // 負の値は ~id の音源停止。C ABIを保ち、再生と停止の順序をそのまま返す。
     pub id: i32,
 }
 #[repr(C)]
@@ -359,6 +497,26 @@ struct Atlases {
     textures: [i32; 2],
 }
 impl Battle {
+    pub fn hints(&mut self, ids: &[i32], lines: &[i32], fallback_lines: i32) -> Result<(), u32> {
+        if ids.len() != lines.len() || ids.len() > 4096 {
+            return Err(1);
+        }
+        let code = unsafe {
+            kbcs_core_battle_hints(
+                self.0.as_ptr(),
+                ids.as_ptr(),
+                lines.as_ptr(),
+                ids.len() as i32,
+                fallback_lines,
+            )
+        };
+        if code == 0 { Ok(()) } else { Err(code) }
+    }
+    pub fn hint(&self) -> Result<Hint, u32> {
+        let mut out = Hint::default();
+        let code = unsafe { kbcs_core_battle_hint(self.0.as_ptr(), &mut out) };
+        if code == 0 { Ok(out) } else { Err(code) }
+    }
     pub fn points(&self) -> Result<Points, u32> {
         let mut out = Points::default();
         let code = unsafe { kbcs_core_battle_points(self.0.as_ptr(), &mut out) };
@@ -459,6 +617,35 @@ impl Battle {
                 &paint,
                 out.as_mut_ptr(),
                 out.len() as i32,
+                &mut count,
+            )
+        };
+        if code != 0 {
+            return Err(code);
+        }
+        out.truncate(count as usize);
+        Ok(out)
+    }
+    pub fn cannon_range_draw(
+        &self,
+        layout: &render::Layout,
+        cuts: &[render::Cut],
+        texture: i32,
+    ) -> Result<Vec<render::Command>, u32> {
+        let paint = Atlases {
+            cuts: [cuts.as_ptr(), std::ptr::null()],
+            counts: [cuts.len() as i32, 0],
+            textures: [texture, -1],
+        };
+        let mut out = vec![render::Command::default(); 4];
+        let mut count = 0;
+        let code = unsafe {
+            kbcs_core_battle_cannon_range_draw(
+                self.0.as_ptr(),
+                layout,
+                &paint,
+                out.as_mut_ptr(),
+                4,
                 &mut count,
             )
         };
@@ -644,6 +831,38 @@ impl Battle {
             })
             .collect()
     }
+    pub fn inspection(&self) -> Result<&[Inspection], u32> {
+        let mut values = std::ptr::null();
+        let mut count = 0;
+        let code = unsafe { kbcs_core_battle_inspection(self.0.as_ptr(), &mut values, &mut count) };
+        if code != 0 {
+            return Err(code);
+        }
+        if count == 0 {
+            return Ok(&[]);
+        }
+        if values.is_null() || count < 0 {
+            return Err(3);
+        }
+        Ok(unsafe { std::slice::from_raw_parts(values, count as usize) })
+    }
+    pub fn inspection_sources(&self, id: i32) -> Result<&[InspectionSource], u32> {
+        let mut values = std::ptr::null();
+        let mut count = 0;
+        let code = unsafe {
+            kbcs_core_battle_inspection_sources(self.0.as_ptr(), id, &mut values, &mut count)
+        };
+        if code != 0 {
+            return Err(code);
+        }
+        if count == 0 {
+            return Ok(&[]);
+        }
+        if values.is_null() || count < 0 {
+            return Err(3);
+        }
+        Ok(unsafe { std::slice::from_raw_parts(values, count as usize) })
+    }
     pub fn advance(&mut self, input: &battle_screen::Input) -> Result<battle_screen::Frame, u32> {
         let mut state = battle_screen::State::default();
         let mut layout = battle_screen::Layout::default();
@@ -721,6 +940,17 @@ impl Drop for Battle {
     }
 }
 unsafe extern "C" {
+    fn kbcs_core_battle_inspection_sources(
+        battle: *const RawBattle,
+        id: i32,
+        values: *mut *const InspectionSource,
+        count: *mut i32,
+    ) -> u32;
+    fn kbcs_core_battle_inspection(
+        battle: *const RawBattle,
+        values: *mut *const Inspection,
+        count: *mut i32,
+    ) -> u32;
     fn kbcs_core_battle_notifications(battle: *mut RawBattle, count: i32) -> u32;
     fn kbcs_core_battle_popup_layout(input: *const PopupInput, out: *mut PopupLayout) -> u32;
     fn kbcs_core_battle_points(battle: *const RawBattle, out: *mut Points) -> u32;
@@ -736,6 +966,24 @@ unsafe extern "C" {
     fn kbcs_core_battle_end_camera(battle: *const RawBattle, out: *mut EndCamera) -> u32;
     fn kbcs_core_battle_ex(battle: *const RawBattle, out: *mut crate::transition::Output) -> u32;
     fn kbcs_core_battle_ending(battle: *const RawBattle, out: *mut Ending) -> u32;
+    fn kbcs_core_battle_hint_candidates(
+        context: *const HintContext,
+        groups: *const i32,
+        count: i32,
+        settings: *const i32,
+        rows: i32,
+        columns: i32,
+        out: *mut i32,
+        out_count: *mut i32,
+    ) -> u32;
+    fn kbcs_core_battle_hints(
+        battle: *mut RawBattle,
+        ids: *const i32,
+        lines: *const i32,
+        count: i32,
+        fallback_lines: i32,
+    ) -> u32;
+    fn kbcs_core_battle_hint(battle: *const RawBattle, out: *mut Hint) -> u32;
     fn kbcs_core_battle_deployment(battle: *const RawBattle, out: *mut Deployment) -> u32;
     fn kbcs_core_battle_prices(battle: *const RawBattle, out: *mut i32) -> u32;
     fn kbcs_core_battle_computer_state(battle: *const RawBattle, out: *mut Computer) -> u32;
@@ -753,6 +1001,14 @@ unsafe extern "C" {
         count: *mut i32,
     ) -> u32;
     fn kbcs_core_battle_cannon_draw(
+        battle: *const RawBattle,
+        layout: *const render::Layout,
+        paint: *const Atlases,
+        out: *mut render::Command,
+        capacity: i32,
+        count: *mut i32,
+    ) -> u32;
+    fn kbcs_core_battle_cannon_range_draw(
         battle: *const RawBattle,
         layout: *const render::Layout,
         paint: *const Atlases,

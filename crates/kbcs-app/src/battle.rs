@@ -4,6 +4,8 @@ use kbcs_data::{formations::Document, store::Database};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
+#[path = "battle_inspector.rs"]
+mod inspector;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -29,6 +31,8 @@ pub struct Request {
     pub cheats: u32,
     #[serde(default)]
     pub skip_combos: bool,
+    #[serde(default)]
+    pub inspection: Option<Vec<inspector::Query>>,
 }
 pub struct Clip {
     pub model: render::Model,
@@ -38,6 +42,7 @@ pub struct MotionSet {
     pub death_frames: i32,
     pub clips: BTreeMap<i32, Clip>,
     pub name: String,
+    pub character: Value,
 }
 pub struct Session {
     pub database: Database,
@@ -50,10 +55,13 @@ pub struct Session {
     combos: Vec<kbcs_data::combos::Combo>,
     pub combo_skipped: bool,
     receipt: crate::battle_rewards::Receipt,
+    defeat_hints: Vec<Vec<String>>,
     ending_camera_applied: bool,
     cannon_clips: BTreeMap<i32, Clip>,
     cannon_cuts: Vec<render::Cut>,
     cannon_texture: i32,
+    range_cuts: Vec<render::Cut>,
+    range_texture: i32,
     castle_slot: i32,
     sniper_cuts: [Vec<render::Cut>; 2],
     sniper_textures: [i32; 2],
@@ -238,6 +246,7 @@ fn motion(
             death_frames,
             clips,
             name: manifest["character"]["name"].as_str().unwrap_or("").into(),
+            character: manifest["character"].clone(),
         },
     ))
 }
@@ -1155,6 +1164,55 @@ impl Session {
             effects.insert((6, 0, phase), Clip { model, texture });
         }
         let mut core = native(battle::Battle::new(&config, &profiles, &rows))?;
+        let hints = kbcs_data::model::csv_rows(&database.source("res/Lose_ja.csv")?.3)?;
+        let groups: Vec<i32> = hints
+            .iter()
+            .map(|row| row[0].parse().context("敗北ヒントの分類が不正です"))
+            .collect::<Result<_>>()?;
+        let settings =
+            kbcs_data::model::numeric_rows(&database.source("Data/LoseTextSetting.csv")?.3)?
+                .into_iter()
+                .map(|row| {
+                    row.1
+                        .into_iter()
+                        .map(|cell| {
+                            i32::try_from(cell.context("敗北ヒントの条件がありません")?)
+                                .context("敗北ヒントの条件範囲が不正です")
+                        })
+                        .collect::<Result<Vec<_>>>()
+                })
+                .collect::<Result<Vec<_>>>()?;
+        let context = battle::HintContext {
+            mode: integer(&map["nativeMode"])?,
+            map_id: integer(&map["nativeId"])?,
+            stage: integer(&stage["index"])?,
+            crown: crown - 1,
+            special: i32::from(
+                map["nativeKind"] == -19 || map["nativeKind"] == -8 && map["number"] == 42,
+            ),
+            progress: 1,
+            cosmos: 1,
+        };
+        // ユーザー指定の全章解放・進行済み状態。選択とRNGは所有C++へ渡す。
+        let candidates = native(battle::hint_candidates(&context, &groups, &settings))?;
+        let defeat_hints: Vec<Vec<String>> = hints
+            .into_iter()
+            .map(|row| {
+                row.into_iter()
+                    .skip(1)
+                    .take_while(|cell| cell != "＠")
+                    .collect()
+            })
+            .collect();
+        let lengths: Vec<i32> = candidates
+            .iter()
+            .map(|&id| defeat_hints[id as usize].len() as i32)
+            .collect();
+        native(core.hints(
+            &candidates,
+            &lengths,
+            defeat_hints.first().map_or(0, |lines| lines.len() as i32),
+        ))?;
         let (receipt, reward_rules) = crate::battle_rewards::Receipt::new(
             root,
             region,
@@ -1185,6 +1243,17 @@ impl Session {
                 ))
             })
             .transpose()?;
+        let range_cuts = kbcs_data::stage_media::cuts(&database, "ImageData/img002_ja.imgcut")?
+            .into_iter()
+            .take(2)
+            .map(|[x, y, width, height]| render::Cut {
+                x,
+                y,
+                width,
+                height,
+            })
+            .collect();
+        let range_texture = scene.texture("Image/img002_ja.png");
         let mut top_cuts = [Vec::new(), Vec::new()];
         let mut top_textures = [-1; 2];
         for (i, stem) in ["img001_ja", "FeverEffect"].iter().enumerate() {
@@ -1215,10 +1284,13 @@ impl Session {
             combos: active_combos,
             combo_skipped: false,
             receipt,
+            defeat_hints,
             ending_camera_applied: false,
             cannon_clips,
             cannon_cuts,
             cannon_texture,
+            range_cuts,
+            range_texture,
             castle_slot: config.environment.castle_slot,
             sniper_cuts,
             sniper_textures,
@@ -1255,6 +1327,11 @@ impl Session {
             order.swap(i, first);
         }
         let mut commands = Vec::new();
+        commands.extend(native(self.core.cannon_range_draw(
+            &frame.layout,
+            &self.range_cuts,
+            self.range_texture,
+        ))?);
         for value in order {
             let (side, slot) = (value.side, value.slot);
             let words = &value.actor.words;
@@ -1275,43 +1352,60 @@ impl Session {
                 4 => Some(8),
                 _ => None,
             };
-            // 006ddfb8は本体を描かない蘇生待ち14でも、後続の所有演出を描く。
-            if let Some(clip) = clip {
-                if let Some(asset) = model.clips.get(&clip) {
-                    if matches!(action, 18 | 20) {
-                        let warp = self
-                            .effects
-                            .get(&(6, 0, if action == 18 { 0x2c08 } else { 0x2c40 }))
-                            .context("ワープ制御モデルなし")?;
-                        paint_warp(
-                            &mut commands,
-                            asset,
-                            warp,
-                            &frame.layout,
-                            words[2],
-                            [words[3] / 10, words[4] / 10 + words[5] * 4],
-                            side == 0,
-                        )?;
-                    } else {
-                        paint_clip(
-                            &mut commands,
-                            asset,
-                            &frame.layout,
-                            if action == 7 { 0 } else { words[2] },
-                            f64::from(words[3] / 10),
-                            f64::from(words[4] / 10 + words[5] * 4),
-                            true,
+            let bone = visuals
+                .iter()
+                .find(|v| v.kind == 12 && v.side == side as i32 && v.slot == slot as i32);
+            let asset = if let Some(bone) = bone {
+                Some(
+                    self.effects
+                        .get(&(6, 0, bone.phase))
+                        .context("蘇生待ちの骨モデルなし")?,
+                )
+            } else {
+                clip.and_then(|clip| model.clips.get(&clip))
+            };
+            // 蘇生待ち14も共通の骨を描き、所有する二次演出の走査を継続する。
+            if let Some(asset) = asset {
+                if matches!(action, 18 | 20) {
+                    let warp = self
+                        .effects
+                        .get(&(6, 0, if action == 18 { 0x2c08 } else { 0x2c40 }))
+                        .context("ワープ制御モデルなし")?;
+                    paint_warp(
+                        &mut commands,
+                        asset,
+                        warp,
+                        &frame.layout,
+                        words[2],
+                        [words[3] / 10, words[4] / 10 + words[5] * 4],
+                        side == 0,
+                    )?;
+                } else {
+                    paint_clip(
+                        &mut commands,
+                        asset,
+                        &frame.layout,
+                        if action == 7 && bone.is_none() {
+                            0
+                        } else {
+                            words[2]
+                        },
+                        f64::from(words[3] / 10),
+                        f64::from(words[4] / 10 + words[5] * 4),
+                        bone.is_none(),
+                    )
+                    .with_context(|| {
+                        format!(
+                            "{}: side={side}, slot={slot}, action={action}, frame={}",
+                            model.name, words[2]
                         )
-                        .with_context(|| {
-                            format!(
-                                "{}: side={side}, slot={slot}, action={action}, frame={}",
-                                model.name, words[2]
-                            )
-                        })?;
-                    }
-                } else if action != 4 && action != 10 {
-                    anyhow::bail!("{}: 行動{action}のモーション{clip}がありません", model.name)
+                    })?;
                 }
+            } else if let Some(clip) = clip
+                && action != 4
+                && action != 10
+            {
+                anyhow::bail!("{}: 行動{action}のモーション{clip}がありません", model.name)
             }
             if action == 10
                 && let Some(entry) = model.clips.get(&10)
@@ -1349,7 +1443,8 @@ impl Session {
             for value in visuals
                 .iter()
                 .filter(belonging)
-                .filter(|v| v.kind == 11)
+                .filter(|v| v.kind == 13)
+                .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 11))
                 .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 10))
                 .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 7))
                 .chain(
@@ -1364,12 +1459,12 @@ impl Session {
                 let asset = self
                     .effects
                     .get(&(
-                        if matches!(value.kind, 7 | 9 | 10 | 11) {
+                        if matches!(value.kind, 7 | 9 | 10 | 11 | 13) {
                             6
                         } else {
                             value.kind
                         },
-                        if matches!(value.kind, 7 | 9 | 10 | 11) {
+                        if matches!(value.kind, 7 | 9 | 10 | 11 | 13) {
                             0
                         } else {
                             value.side
@@ -1548,12 +1643,14 @@ impl Session {
                 .filter(|value| value.side == side && value.slot > 0)
                 .count()
         };
+        let hint = native(self.core.hint())?;
+        let hint_lines = self.defeat_hints.get(hint.id as usize);
         let units: Vec<_> = references.iter().filter(|value|value.slot > 0).map(|value| {
             let a = &value.actor.words;
             json!({"side":value.side,"slot":value.slot,"profile":value.profile,"raw":a[0],"layer":a[5],"frame":a[2],"action":a[1],"hp":a[8],"maximum":a[7],"x":a[3],"y":a[4],"serial":a[240]})
         }).collect();
         Ok(
-            json!({"ex":native(self.core.ex())?,"endCamera":native(self.core.end_camera())?,"music":native(self.core.music())?,"ending":native(self.core.ending())?,"receipt":self.receipt.saved,"receiptError":self.receipt.error,"rewardRolls":native(self.core.rewards())?,"units":count(0),"enemies":count(1),"castleHp":[actors[0][0].words[8],actors[1][0].words[8]],"wait":production.wait,"maximum":production.maximum,"costs":native(self.core.prices())?,"produced":production.produced,"extras":native(self.core.extras())?,"points":native(self.core.points())?,"lastCosts":production.last_cost,"seed":seed,"actors":units,"cannon":[actors[0][0].words[9],actors[0][0].words[10],actors[0][0].words[13]],"sniper":native(self.core.sniper_status())?,"computer":native(self.core.computer())?,"sounds":native(self.core.sounds())?,"result":native(self.core.outcome())?,"deployment":native(self.core.deployment())?,"rules":self.rules}),
+            json!({"defeatHint":{"layout":hint,"lines":hint_lines},"ex":native(self.core.ex())?,"endCamera":native(self.core.end_camera())?,"music":native(self.core.music())?,"ending":native(self.core.ending())?,"receipt":self.receipt.saved,"receiptError":self.receipt.error,"rewardRolls":native(self.core.rewards())?,"units":count(0),"enemies":count(1),"castleHp":[actors[0][0].words[8],actors[1][0].words[8]],"wait":production.wait,"maximum":production.maximum,"costs":native(self.core.prices())?,"produced":production.produced,"extras":native(self.core.extras())?,"points":native(self.core.points())?,"lastCosts":production.last_cost,"seed":seed,"actors":units,"cannon":[actors[0][0].words[9],actors[0][0].words[10],actors[0][0].words[13]],"sniper":native(self.core.sniper_status())?,"computer":native(self.core.computer())?,"sounds":native(self.core.sounds())?,"result":native(self.core.outcome())?,"deployment":native(self.core.deployment())?,"rules":self.rules}),
         )
     }
     pub fn layout(&self, input: &crate::scene::Input) -> Result<render::Layout> {

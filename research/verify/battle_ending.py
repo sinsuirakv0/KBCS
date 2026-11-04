@@ -6,11 +6,11 @@ p.add_argument('--python-libs',type=Path,required=True);p.add_argument('--librar
 a=p.parse_args();sys.path.insert(0,str(a.python_libs))
 from stages import Native,ROOT,SHA,digest
 n=Native();g=0x40000000;n.cpu.mem_map(g,0x800000)
-controllers={1:0x5e1a5c,2:0x5eb040,4:0x5edb40,7:0x5ef020}
+controllers={1:0x5e1a5c,4:0x5edb40,7:0x5ef020}
 with sqlite3.connect((n.cache/'cache.sqlite').as_uri()+'?mode=ro',uri=True) as db:
  for address in [*controllers.values(),0x5cb0e0]:n.ends[address]=address+db.execute('SELECT size FROM functions WHERE address=?',(f'{address:08x}',)).fetchone()[0]
 runtime=os.add_dll_directory('D:/KBC/KBC-LINEbot-v2/.tools/llvm-mingw-20260922-ucrt-x86_64/bin') if os.name=='nt' else None
-lib=c.CDLL(str(a.library.resolve()));assert lib.kbcs_core_abi_version()==4
+lib=c.CDLL(str(a.library.resolve()));assert lib.kbcs_core_abi_version()==5
 class Popup(c.Structure):
  _fields_=[(k,c.c_int32) for k in ['index','count','phase','scale_frame','flash','wait']]
 class Ending(c.Structure):
@@ -28,11 +28,11 @@ def run(address):
  n.cpu.emu_start(address,n.stop+4,count=10000)
  assert n.cpu.reg_read(n.reg.UC_ARM64_REG_PC) in {n.stop,*n.terminals}
 counts={}
-for mode,point in [(1,0),(1,1),(2,0),(4,0),(7,1)]:
+# 敗北の文字移動とヒント接続はcannon_presentation.pyで連続比較する。
+for mode,point in [(1,0),(1,1),(4,0),(7,1)]:
  n.cpu.mem_write(g,bytes(0x800000));put(0x83e48,-1);state=Ending()
  n.helpers={0x9f4228:0,0x5bc00c:0,0xa0b03c:point,0x5e0048:0,0x9bd60c:0,0x5bc058:mode,0x449aec:960,0x449d9c:0,0x7cf950:0,0x7cfaa0:0,0x6562ac:-1,0x44a8d8:0,0xbdaf00:0}
- # 敗北の最終遷移では文字テクスチャ構築の直前で止める。状態書込は実命令。
- n.terminals={0x45ba04} if mode==2 else set()
+ n.terminals=set()
  for frame in range(200):
   run(controllers[mode]);assert lib.kbcs_core_battle_ending_step(mode,point,c.byref(state))==0
   assert (state.phase,state.frame,state.panel)==(get(0x83e38),get(0x83e3c),get(0x32f808)),(mode,point,frame,list((state.phase,state.frame,state.panel)),[get(0x83e38),get(0x83e3c),get(0x32f808)])
@@ -125,5 +125,5 @@ for tick in range(18):
  expected=struct.unpack('<4i',n.cpu.mem_read(popup+0x60,16));assert (state.phase,state.scale_frame,state.flash,state.wait)==expected,(tick,expected,state.phase,state.scale_frame,state.flash,state.wait)
  if state.phase==3:break
 counts['popup_continuous']=tick+1
-report={'version':'15.7.2','nativeSha256':SHA,'librarySha256':digest(a.library.read_bytes()),'cases':counts,'result':'equal','controlled':['popup queue is empty','point-stage expiry popup absent','EX selection result and entropy are stubbed here; ex_transition.py verifies its kernel','input/window/network getters','camera Y getters resolved to normal 1/2-row values'],'actual':['005e1a5c/005eb040/005edb40/005ef020 continuous controller writes','005cb0e0 scale cap arithmetic']}
+report={'version':'15.7.2','nativeSha256':SHA,'librarySha256':digest(a.library.read_bytes()),'cases':counts,'result':'equal','controlled':['popup queue is empty','point-stage expiry popup absent','EX selection result and entropy are stubbed here; ex_transition.py verifies its kernel','input/window/network getters','camera Y getters resolved to normal 1/2-row values'],'actual':['005e1a5c/005edb40/005ef020 continuous controller writes','005cb0e0 scale cap arithmetic']}
 (ROOT/'research/.local/battle-ending-1572.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8-sig');print(json.dumps(report,ensure_ascii=True))

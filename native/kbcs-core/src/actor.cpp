@@ -12,6 +12,7 @@
 #include <deque>
 
 #include "actor_pool.inc"
+#include "actor_inspector.inc"
 
 struct KbcsActorHits {
  std::map<int32_t,std::vector<int32_t>> metal,credits;
@@ -28,6 +29,8 @@ struct BattleSoundScope {
  ~BattleSoundScope(){activeSounds=previous;activeSoundFrame=frame;}
 };
 void notifySound(int id){if(activeSounds)activeSounds->push_back({*activeSoundFrame,id});}
+// 00459bb4の音源別停止。負の値は音源IDのビット反転で、再生通知と同じ順序で渡す。
+void stopSound(int id){notifySound(~id);}
 // 同期する所有戦闘だけが原本のScoreBonusMapを解決する。単体APIは捕捉イベント契約を保持する。
 thread_local const KbcsBattleRules *activeRules=nullptr;
 thread_local const int32_t *activeMode=nullptr;
@@ -55,7 +58,7 @@ struct Context {
  KbcsActorEffectEvents *events=nullptr;
  const KbcsActorHitContext *hit=nullptr;
  KbcsActorHits *hits=nullptr;
- void reserveMetal(int slot,int rate){if(!hits)throw std::out_of_range("hit owner");hits->metal[slot].push_back(rate);}
+ void reserveMetal(int slot,int rate){if(!hits)throw std::out_of_range("hit owner");hits->metal[slot].push_back(rate);if(activeInspector)activeInspector->reserveMetal(slot,activeInspectorSource);}
  void creditHit(int source,int target){
   if(!hits)throw std::out_of_range("hit owner");
   auto &credits=hits->credits[actorAt(actors,1,target).words[240]];const int serial=actorAt(actors,0,source).words[240];
@@ -400,6 +403,13 @@ void Context::write(int64_t address,int width,uint64_t value){
   const int side=int((address-actorBase)/actorStride),offset=int((address-actorBase)%actorStride);
   if(offset%0x3ec+width>0x3ec){failureAddress=address;throw std::out_of_range("actor address");}
   auto &record=actorAt(actors,side,offset/0x3ec).words;const int word=(offset%0x3ec)/4;
+  if(word==19&&width==4&&activeInspector){
+   // 既知の命中入口は32bit加算の差を使い、予約の桁あふれでも攻撃元を落とさない。
+   const int32_t added=int32_t(uint32_t(value)-uint32_t(record[word]));
+   if(!int32_t(value)&&!activeInspectorSource.kind)activeInspector->reset(side,offset/0x3ec);
+   else if(added>0)activeInspector->reserve(side,offset/0x3ec,activeInspectorSource,added);
+   else if(!int32_t(value))activeInspector->reset(side,offset/0x3ec);
+  }
   record[word]=int32_t(value);if(width==8)record[word+1]=int32_t(value>>32);return;
  }
  if(enemyDeathResult&&address==0x32ec&&width==4){enemyDeathResult->score=int32_t(value);return;}
@@ -457,6 +467,7 @@ extern "C" uint32_t kbcs_core_actor_hit(KbcsActorHits *owner,KbcsActor actors[2]
  if(input.side<0||input.side>1||input.slot<1||input.slot>=actorEnd()||input.target<0||input.target>=actorEnd()||input.hit<0||input.hit>2||input.kind<0||input.kind>2||call->attack_type<0||call->attack_type>3||damage->count<0||(!damage->rows&&damage->count)||(!damage->states&&damage->count))return 1;
  for(auto flag:input.flags)if(flag<0||flag>1)return 1;
  if(hit->form<0||hit->form>3||hit->effects.target_count<1||hit->effects.target_count>12)return 1;
+ InspectorSourceScope source_scope(activeInspectorSource.kind?activeInspectorSource:activeInspector?activeInspector->source(1,input.side,input.slot,0):KbcsBattleInspectionSource{});
  try{
   const KbcsActorDefinition definition{};KbcsSpawnRequest request{};auto copy=*environment;KbcsActorEffectEvents events{};
   Context context{definition,copy,actors,request,*seed};context.hit=hit;context.hits=owner;context.effects=&hit->effects;context.events=&events;context.clock=clock;context.damage=damage;

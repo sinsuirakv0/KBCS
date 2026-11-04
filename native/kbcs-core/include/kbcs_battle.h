@@ -27,6 +27,14 @@ typedef struct {int32_t mode,timer,elapsed,score,finished_frame,reason;} KbcsBat
 typedef struct {int32_t phase,frame,origin,value,scale;} KbcsScoreDisplay;
 uint32_t kbcs_core_battle_score_display(int32_t,KbcsScoreDisplay*);
 typedef struct {int32_t blocked[10],active[6],total,warning[2];} KbcsBattleDeployment;
+/* KBCSの観測用。idはセッション内通番、serialは本家word240。retired_frame=-1は枠を保持中。 */
+typedef struct {
+ int32_t id,side,slot,profile,serial,born_frame,last_frame,retired_frame;
+ int32_t action,animation,hp,maximum,x,y,layer,barrier,barrier_max,shield,shield_max;
+ int32_t revives,revive_wait,burrows,stop,slow,weaken,weaken_rate,curse,survive,kills,deaths,revivals,revives_max,burrows_max,death_frame;
+} KbcsBattleInspection;
+/* 観測用の攻撃元。kind=1個体/2砲/3スニャイパー/4その他。reservedはHP確定前の正の予約量。 */
+typedef struct {int32_t kind,actor_id,side,profile,detail;int64_t reserved;} KbcsBattleInspectionSource;
 typedef struct {int32_t fixed_money,money,cost,rarity_limit,active,total_limit,total;} KbcsBattleLimit;
 uint32_t kbcs_core_battle_limit(const KbcsBattleLimit*,int32_t*);
 uint32_t kbcs_core_battle_bonus(const KbcsBattleRules*,int32_t type,int32_t count,int32_t*);
@@ -59,6 +67,7 @@ typedef struct {
 /* kind: 0..4=二次攻撃、5=砲、6=独立演出、7=状態、8=衝撃波、9=反射待ち、10=死亡時烈波の魂。 */
 typedef struct {int32_t kind,side,slot,phase,frame,x,y,layer,root[2];} KbcsBattleVisual;
 typedef struct { int32_t gauges[10][5],health[2][3];double anchors[2][2],scale;int32_t title[2],summons[10][5]; } KbcsBattleHud;
+// id >= 0: 再生、id < 0: ~idの音源を停止（00459bb4）。負の値は音源番号ではない。
 typedef struct {int32_t frame,id;} KbcsBattleSound;
 
 /* 006ee6c8。候補選択は表示更新ごと。可否と価格は呼出時の値を渡す。 */
@@ -74,6 +83,9 @@ typedef struct {
 typedef struct {int32_t deploy,upgrade,fire,page_start,page_step;} KbcsComputerOutput;
 uint32_t kbcs_core_battle_computer(const KbcsComputerInput*,KbcsComputerState*,const KbcsActor opponents[51],uint32_t*,KbcsComputerOutput*);
 typedef struct KbcsBattle KbcsBattle;
+/* 次の変更操作まで借用可能。空記録ではcount=0。読み取りはRNGを消費しない。 */
+uint32_t kbcs_core_battle_inspection(const KbcsBattle*,const KbcsBattleInspection**,int32_t*);
+uint32_t kbcs_core_battle_inspection_sources(const KbcsBattle*,int32_t,const KbcsBattleInspectionSource**,int32_t*);
 /* KBCS専用。原本ルールは保持し、明示した戦闘のみに上書きを適用する。 */
 enum {KBCS_BATTLE_MONEY=1,KBCS_BATTLE_NO_LIMIT=2,KBCS_BATTLE_INSTANT=4,KBCS_BATTLE_HIDE_SUMMON=8,KBCS_BATTLE_CANNON_READY=16};
 uint32_t kbcs_core_battle_cheats(KbcsBattle*,uint32_t flags);
@@ -93,6 +105,11 @@ typedef struct {int32_t index,count,phase,scale_frame,flash,wait;} KbcsBattlePop
 typedef struct {int32_t viewport,count,widths[8],scale_frame,cut[4],padding[2];} KbcsBattlePopupInput;
 typedef struct {int32_t body[4],text_y,text_x[8],parts[9][8];float text_scale[8];} KbcsBattlePopupLayout;
 typedef struct {int32_t phase,frame,panel,title[3],bar_x,number_x,shade,ready,button[4],visual_button[4],label[4],pressed,guard,action;KbcsBattlePopup popup;} KbcsBattleEnding;
+typedef struct {int32_t mode,map_id,stage,crown,special,progress,cosmos;} KbcsBattleHintContext;
+typedef struct {int32_t id,panel[4],text_y,ready;} KbcsBattleHint;
+uint32_t kbcs_core_battle_hint_candidates(const KbcsBattleHintContext*,const int32_t *groups,int32_t count,const int32_t *settings,int32_t rows,int32_t columns,int32_t *out,int32_t *out_count);
+uint32_t kbcs_core_battle_hints(KbcsBattle*,const int32_t *ids,const int32_t *lines,int32_t count,int32_t fallback_lines);
+uint32_t kbcs_core_battle_hint(const KbcsBattle*,KbcsBattleHint*);
 uint32_t kbcs_core_battle_notifications(KbcsBattle*,int32_t count);
 uint32_t kbcs_core_battle_popup_step(int32_t release,KbcsBattlePopup*);
 uint32_t kbcs_core_battle_popup_layout(const KbcsBattlePopupInput*,KbcsBattlePopupLayout*);
@@ -112,6 +129,8 @@ uint32_t kbcs_core_battle_sniper_draw(const KbcsBattle*,const KbcsSceneLayout*,c
 uint32_t kbcs_core_actor_cannon_draw(const KbcsActor*,int32_t,const KbcsSceneLayout*,const KbcsBattleAtlases*,KbcsDrawCommand*,int32_t,int32_t*);
 uint32_t kbcs_core_battle_hit_draw(const KbcsBattle*,const KbcsSceneLayout*,const KbcsBattleAtlases*,KbcsDrawCommand*,int32_t,int32_t*);
 uint32_t kbcs_core_battle_cannon_draw(const KbcsBattle*,const KbcsSceneLayout*,const KbcsBattleAtlases*,KbcsDrawCommand*,int32_t,int32_t*);
+uint32_t kbcs_core_actor_cannon_range_draw(const KbcsActor*,int32_t side,int32_t camera,int32_t frame,const KbcsSceneLayout*,const KbcsBattleAtlases*,KbcsDrawCommand*,int32_t,int32_t*);
+uint32_t kbcs_core_battle_cannon_range_draw(const KbcsBattle*,const KbcsSceneLayout*,const KbcsBattleAtlases*,KbcsDrawCommand*,int32_t,int32_t*);
 uint32_t kbcs_core_battle_sniper_status(const KbcsBattle*,int32_t out[5]);
 uint32_t kbcs_core_battle_viewport(KbcsBattle*,int32_t);
 uint32_t kbcs_core_battle_error(const KbcsBattle*,int32_t out[4]);

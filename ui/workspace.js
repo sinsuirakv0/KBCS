@@ -98,6 +98,7 @@ export function initializeWorkspace(){
     right.content.classList.add('formation-options');
   }else if(page==='stage-sortie'){
     move('#sortie-stage-navigation',left.content);move('#sortie-details',right.content);move('#battle-controls',viewbar);
+    move('#battle-actor-list',left.content);move('#battle-actor-detail',right.content);
     right.panel.querySelector('h2').textContent='ステージ詳細';
     let previousBottom,aspectRatio=1422/640;
     function fitBattleView(){
@@ -113,8 +114,9 @@ export function initializeWorkspace(){
       const active=event.detail;body.classList.toggle('workspace-battle',active);
       if(active){previousBottom=bottom.open;bottom.open=true;}
       else if(previousBottom!==undefined){bottom.open=previousBottom;previousBottom=undefined;}
-      left.panel.querySelector('h2').textContent=active?'シミュレーター':'このページ';
-      right.panel.querySelector('h2').textContent=active?'シミュレーター':'ステージ詳細';
+      element('battle-actor-list').hidden=!active;element('battle-actor-detail').hidden=!active;
+      left.panel.querySelector('h2').textContent=active?'敵':'このページ';
+      right.panel.querySelector('h2').textContent=active?'味方':'ステージ詳細';
       for(const panel of [left.panel,right.panel]){const label=panel.querySelector('h2').textContent;panel.setAttribute('aria-label',label);panel.querySelector('.workspace-close').setAttribute('aria-label',label+'を閉じる');}
       viewbar.querySelector('.workspace-tab').textContent=active?'戦闘':'出撃準備';element('battle-controls').hidden=!active;for(const button of element('battle-controls').querySelectorAll('button'))button.disabled=active;viewbar.classList.toggle('battle-viewbar',active);
       fitBattleView();apply();

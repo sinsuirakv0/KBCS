@@ -27,6 +27,16 @@ bool inside(int x,int y,int left,int top,int width,int height) {
  // 009a6f44の左上を含み右下も含む矩形判定。
  return left<=x&&x<=left+width&&top<=y&&y<=top+height;
 }
+void fade(int screen,int frame,KbcsBattleScreenLayout &o){
+ o.fade_count=0;
+ if(frame>=24)return;
+ auto triangle=[&](int x0,int y0,int x1,int y1,int x2,int y2){const int i=o.fade_count++;o.fade_sizes[i]=3;int *p=o.fade[i];p[0]=x0;p[1]=y0;p[2]=x1;p[3]=y1;p[4]=x2;p[5]=y2;};
+ auto rect=[&](int x,int width){const int i=o.fade_count++;o.fade_sizes[i]=4;int *p=o.fade[i];p[0]=x;p[1]=0;p[2]=x;p[3]=640;p[4]=x+width;p[5]=640;p[6]=x+width;p[7]=0;};
+ // 006994e8: 11/12Fで全面を覆い、13Fから右側を露出する。
+ if(frame==11||frame==12){rect(0,screen);return;}
+ if(frame<11){const int x=screen-screen*frame/10;for(int y=-384;y!=1196;y+=158)triangle(x-110,y+55,x,y,x,y+110);for(int y=-274;y!=1306;y+=158)triangle(x-55,y+24,x,y,x,y+48);rect(x,screen*2);}
+ else {const int delta=screen*(frame-1)/10,x=screen*2-delta;for(int y=-384;y!=1196;y+=158)triangle(x+220,y+55,x+110,y,x+110,y+110);for(int y=-274;y!=1306;y+=158)triangle(x+165,y+24,x+110,y,x+110,y+48);rect(screen-delta,screen+110);}
+}
 void layout(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,KbcsBattleScreenLayout &o) {
  const int xs[10]={159,289,419,549,679,171,301,431,561,691};
  const int screen=width(c),center=screen/2,shift=(screen-960)/2;
@@ -75,13 +85,7 @@ void layout(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,KbcsB
   const int percent=s.info_mode?100:sizes[s.hold_frames>=14?std::min(3,s.hold_frames-13):s.hold_wait],w=946*percent/100,h=180*percent/100;
   o.info_box[0]=center-w/2;o.info_box[1]=93+(180-h)/2;o.info_box[2]=w;o.info_box[3]=h+39*c.description_lines[slot];
  }
- if(s.intro>=24)return;
- auto triangle=[&](int x0,int y0,int x1,int y1,int x2,int y2){const int i=o.fade_count++;o.fade_sizes[i]=3;int *p=o.fade[i];p[0]=x0;p[1]=y0;p[2]=x1;p[3]=y1;p[4]=x2;p[5]=y2;};
- auto rect=[&](int x,int width){const int i=o.fade_count++;o.fade_sizes[i]=4;int *p=o.fade[i];p[0]=x;p[1]=0;p[2]=x;p[3]=640;p[4]=x+width;p[5]=640;p[6]=x+width;p[7]=0;};
- // 006994e8: 11/12Fで全面を覆い、13Fから右側を露出する。
- if(s.intro==11||s.intro==12){rect(0,screen);return;}
- if(s.intro<11){const int x=screen-screen*s.intro/10;for(int y=-384;y!=1196;y+=158)triangle(x-110,y+55,x,y,x,y+110);for(int y=-274;y!=1306;y+=158)triangle(x-55,y+24,x,y,x,y+48);rect(x,screen*2);}
- else {const int delta=screen*(s.intro-1)/10,x=screen*2-delta;for(int y=-384;y!=1196;y+=158)triangle(x+220,y+55,x+110,y,x+110,y+110);for(int y=-274;y!=1306;y+=158)triangle(x+165,y+24,x+110,y,x+110,y+48);rect(screen-delta,screen+110);}
+ fade(screen,s.intro,o);
 }
 int hit(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,int x,int y) {
  const int xs[10]={159,289,419,549,679,171,301,431,561,691};
@@ -95,6 +99,10 @@ int hit(const KbcsBattleScreenConfig &c,const KbcsBattleScreenState &s,int x,int
  for(int i=0;i<(s.rows==2?10:5);++i){int slot=s.rows==2?i:s.page*5+i,top=544-(s.rows==2&&i<5?95:0);if(inside(x,y,xs[s.rows==2?i%5:slot]+(width(c)-960)/2,top-1,110,88))return slot;}
  return -1;
 }
+}
+extern "C" uint32_t kbcs_core_battle_screen_fade(int32_t width,int32_t frame,KbcsBattleScreenLayout *out){
+ if(!out||frame<0||frame>24||(width!=0&&(width<960||width>3840)))return 1;
+ fade(width?width:960,frame,*out);return 0;
 }
 extern "C" void kbcs_core_battle_screen_economy(const KbcsBattleScreenConfig *config,KbcsBattleScreenState *state){
  if(!state->battle_mode){if(config->fixed_money<0)state->money=std::min(wallet(*config,state->worker),state->money+income(*config,state->worker));if(state->cannon>0)--state->cannon;}

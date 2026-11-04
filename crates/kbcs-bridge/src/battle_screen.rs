@@ -131,6 +131,8 @@ pub struct Frame {
     pub layout: Layout,
 }
 unsafe extern "C" {
+    #[cfg(test)]
+    fn kbcs_core_battle_screen_fade(width: i32, frame: i32, out: *mut Layout) -> u32;
     fn kbcs_core_battle_screen_step(
         config: *const Config,
         state: *const State,
@@ -495,9 +497,22 @@ fn native_screen_witnesses() {
         );
         let polygons = case["polygons"].as_array().unwrap();
         assert_eq!(value.layout.fade_count as usize, polygons.len());
+        let mut shared = Layout::default();
+        assert_eq!(
+            unsafe {
+                kbcs_core_battle_screen_fade(
+                    960,
+                    case["frame"].as_i64().unwrap() as i32,
+                    &mut shared,
+                )
+            },
+            0
+        );
+        assert_eq!(shared.fade_count as usize, polygons.len());
         for (i, p) in polygons.iter().enumerate() {
             let expected: Vec<i32> = serde_json::from_value(p.clone()).unwrap();
             assert_eq!(&value.layout.fade[i][..expected.len()], expected);
+            assert_eq!(&shared.fade[i][..expected.len()], expected);
         }
     }
     for case in data["economy"].as_array().unwrap() {

@@ -45,28 +45,29 @@ extern "C" uint32_t kbcs_core_actor_cannon_fire(KbcsActor actors[2][51],const Kb
 }
 extern "C" uint32_t kbcs_core_actor_cannon_action(KbcsActorCannon *state,KbcsActor actors[2][51],const KbcsCannonRules *rules,int32_t side){
  if(!state||!actors||!rules||side<0||side>1)return 1;auto &w=actorAt(actors,side,0).words;const int action=w[9];
- if(action==1||action==9){if(++w[10]>16){w[9]=action==1?2:10;w[10]=0;}}
+ if(action==1||action==9){if(++w[10]>16){w[9]=action==1?2:10;w[10]=0;stopSound(action==1?25:84);}}
  else if(action==2||action==10){++w[10];if(!(w[10]&3))for(auto &segment:state->segments[side])if(!segment[0]){
+   if(!activeMode||!*activeMode)notifySound(action==2?26:85);
    if(w[17]==0)segment[0]=rules->encoded[3]-1;else if(w[17]==5)segment[0]=rules->encoded[1];
    segment[1]=w[3]+(side?-270:270)+(side?-1850:0)+(side?1:-1)*160*(w[10]/4)*10;segment[2]=w[13];
    if(w[6]<=w[10]/4){w[9]=0;w[10]=0;}break;
   }}
  else if(action==3||action==12){if(++w[10]>32){actorAt(actors,0,0).words[9]=0;actorAt(actors,0,0).words[10]=0;}}
- else if(action==4||action==7){if(++w[10]>rules->encoded[1]){actorAt(actors,0,0).words[9]=action==4?5:8;actorAt(actors,0,0).words[10]=0;}}
- else if(action==5||action==8||action==6||action==11){++w[10];const int limit=action==6?rules->encoded[0]:action==11?rules->encoded[2]+10:rules->encoded[1];if(w[10]>limit){actorAt(actors,0,0).words[9]=0;actorAt(actors,0,0).words[10]=0;}}
+ else if(action==4||action==7){if(++w[10]>rules->encoded[1]){actorAt(actors,0,0).words[9]=action==4?5:8;actorAt(actors,0,0).words[10]=0;notifySound(action==4?36:83);}}
+ else if(action==5||action==8||action==6||action==11){++w[10];if(action==11&&w[10]==5)notifySound(86);const int limit=action==6?rules->encoded[0]:action==11?rules->encoded[2]+10:rules->encoded[1];if(w[10]>limit){actorAt(actors,0,0).words[9]=0;actorAt(actors,0,0).words[10]=0;}}
  return 0;
 }
 extern "C" uint32_t kbcs_core_actor_cannon_hit(KbcsActorCannon *state,KbcsActor actors[2][51],const KbcsActorEnvironment *environment,const KbcsActorHitContext *hit,const KbcsActorClock *clock,KbcsActorDamageContext *damage,const KbcsCannonRules *rules,int32_t side,int32_t target,int32_t id,uint32_t *seed,KbcsActorEffectEvents *events){
  if(!state||!actors||!environment||!hit||!clock||!damage||!rules||!seed||!*seed||!events||side<0||side>1||target<1||target>=actorEnd())return 1;
  try{KbcsActorDefinition definition{};auto env=*environment;KbcsSpawnRequest request{};Context context{definition,env,actors,request,*seed};
   context.cannon=state;context.cannonRules=rules;context.hit=hit;context.effects=&hit->effects;context.events=events;context.clock=clock;context.damage=damage;
-  n_005d6c3c(context,0,side,target,id);return 0;
+  InspectorSourceScope source_scope(2,side,0,actorAt(actors,side,0).words[17]);n_005d6c3c(context,0,side,target,id);return 0;
  }catch(...){return 3;}
 }
 extern "C" uint32_t kbcs_core_actor_cannon_step(KbcsActorCannon *state,KbcsActor actors[2][51],const KbcsActorEnvironment *environment,const KbcsActorHitContext *hit,const KbcsActorClock *clock,KbcsActorDamageContext *damage,const KbcsCannonRules *rules,int32_t side,uint32_t *seed,KbcsActorEffectEvents *events){
  if(!state||!actors||!environment||!hit||!clock||!damage||!rules||!seed||!*seed||!events||side<0||side>1)return 1;
  try{KbcsActorDefinition definition{};auto env=*environment;KbcsSpawnRequest request{};Context context{definition,env,actors,request,*seed};
   context.cannon=state;context.cannonRules=rules;context.hit=hit;context.effects=&hit->effects;context.events=events;context.clock=clock;context.damage=damage;
-  n_005d6740(context,0,side);return 0;
+  InspectorSourceScope source_scope(2,side,0,actorAt(actors,side,0).words[17]);n_005d6740(context,0,side);return 0;
  }catch(...){return 3;}
 }

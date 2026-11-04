@@ -1,4 +1,28 @@
 ﻿// 005d76a0の固定画像部分。モーション部品はbattle_visualsと共通poseへ渡す。
+// 006dffac..006e02ac: img002の0が地面、1が上下する矢印。左端制限も原本通り。
+extern "C" uint32_t kbcs_core_actor_cannon_range_draw(const KbcsActor *castle,int32_t side,int32_t camera,int32_t frame,const KbcsSceneLayout *scene,const KbcsBattleAtlases *paint,KbcsDrawCommand *out,int32_t capacity,int32_t *count){
+ if(!castle||!scene||!paint||!out||!count||side<0||side>1||capacity<2||!paint->cuts[0]||paint->counts[0]<2)return 1;*count=0;
+ const auto &w=castle->words;if(!w[29]||w[12])return 0;
+ const double shift=(scene->viewport_width-960.)*.5;
+ const int x=(w[3]-camera)/10+(side?-27:27),offset=side?160*w[6]-92:92-160*w[6];
+ const int left=(300-camera)/10+96,at=std::max(left,x+offset-4);
+ for(int cut=0;cut<2;++cut){
+  const auto &r=paint->cuts[0][cut];const int px=int(at-(cut?30:0)+shift),py=cut?int(std::fma(nativeSin(float(int32_t(uint32_t(frame)*60))),11.f,314.f)):410;
+  KbcsDrawCommand c{paint->textures[0],2,4,0,cut?216./255.:1.,{},{r.x,r.y,r.width,r.height},{}};
+  const int points[]={px,py,px,py+r.height,px+r.width,py+r.height,px+r.width,py};
+  for(int i=0;i<4;++i){const int index=cut&&side?3-i:i;c.points[i*2]=points[index*2]*scene->zoom+shift*(1.-scene->zoom);c.points[i*2+1]=scene->y_origin+(points[index*2+1]-scene->y_origin+scene->y_offset)*scene->zoom;}
+  out[(*count)++]=c;
+ }
+ return 0;
+}
+extern "C" uint32_t kbcs_core_battle_cannon_range_draw(const KbcsBattle *battle,const KbcsSceneLayout *scene,const KbcsBattleAtlases *paint,KbcsDrawCommand *out,int32_t capacity,int32_t *count){
+ ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
+ if(!battle||!scene||!paint||!out||!count||capacity<4)return 1;*count=0;if(battle->result.mode)return 0;
+ for(int side=0;side<2;++side)if(battle->config.environment.unit_modes[side]&1){int32_t added=0;const auto code=kbcs_core_actor_cannon_range_draw(&actorAt(battle->actors,side,0),side,battle->camera,battle->marker_frame,scene,paint,out+*count,capacity-*count,&added);if(code)return code;*count+=added;}
+ return 0;
+}
+
+// 005d76a0の固定画像部分。
 extern "C" uint32_t kbcs_core_actor_cannon_draw(const KbcsActor *castle,int32_t camera,const KbcsSceneLayout *scene,const KbcsBattleAtlases *paint,KbcsDrawCommand *out,int32_t capacity,int32_t *count){
  if(!castle||!scene||!paint||!out||!count||capacity<1||capacity>4096)return 1;*count=0;
  const auto &w=castle->words;const int action=w[9],frame=w[10];if(action!=1&&action!=3&&action!=9&&action!=12)return 0;

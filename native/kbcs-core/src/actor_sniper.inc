@@ -59,6 +59,7 @@ extern "C" uint32_t kbcs_core_actor_sniper_step(KbcsActorSniper *state,const Kbc
 }
 extern "C" uint32_t kbcs_core_actor_sniper_hit(KbcsActorSniper *state,KbcsActor actors[2][51],const KbcsActorEnvironment *environment,int32_t slot,uint32_t *seed,int32_t *hits){
  if(!state||!actors||!environment||slot<1||slot>=actorEnd()||!seed||!*seed||!hits)return 1;
+ InspectorSourceScope source_scope(3,0,0);
  try{
   KbcsActorDefinition definition{};auto env=*environment;KbcsSpawnRequest request{};Context context{definition,env,actors,request,*seed};*hits=0;
   auto &target=actorAt(actors,1,slot).words;

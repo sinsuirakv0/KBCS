@@ -31,6 +31,17 @@ sounds.update([],0,1,false,true);assert.equal(context.gain.gain.value,0);
 sounds.update([{frame:6,id:11}],1,1,false,true);requests.get(11)();await flush();
 assert.equal(context.gain.gain.value,.25);assert.equal(sources.at(-1).buffer.id,11);
 requests.get(21)();await flush();assert(!sources.some(source=>source.buffer.id===21));
+// 原本のビーム停止は、鳴っている音と取得待ちの音の両方に適用する。
+sounds.update([{frame:7,id:25}],3);requests.get(25)();await flush();const beam=sources.at(-1);
+sounds.update([{frame:8,id:~25}],0);assert.equal(beam.stopped,0);
+sounds.update([{frame:9,id:84}],3);sounds.update([{frame:10,id:~84}],3);requests.get(84)();await flush();
+assert(!sources.some(source=>source.buffer.id===84));
+// 高速実行で再生と停止が同じバッチに入っても、対応する時刻で終了する。
+sounds.update([{frame:11,id:25},{frame:28,id:~25}],3);await flush();
+assert.equal(sources.at(-1).buffer.id,25);assert.equal(sources.at(-1).stopped,17/30);
+const stoppedBeam=sources.at(-1);sounds.update([{frame:29,id:25}],3);await flush();assert.equal(stoppedBeam.stopped,0);
+sounds.update([{frame:30,id:25},{frame:47,id:~25},{frame:60,id:25}],3);await flush();
+assert.equal(sources.at(-2).stopped,17/30);
 sounds.update([{frame:7,id:9}],3,1,false,true);sounds.stop();requests.get(9)();await flush();
 assert(context.closed);assert(!sources.some(source=>source.buffer.id===9));assert.equal(errors.size,0);
 console.log('SE lifetime, finish, repeat and mute passed');
