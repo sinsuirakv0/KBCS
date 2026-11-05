@@ -81,3 +81,5 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 ローカルでunittest 6件、workflow YAMLと埋込みPythonの構文、Javaスクリプトのコンパイル、元APKアーカイブのGitHub digest一致を確認した。Linuxの実ジョブ・Private Secretの実接続・全関数デコンパイルの成否は、pushと初回workflow実行の承認後に確認する。
 
 KBCSのSecret名一覧を読取確認したところ、2026-11-06時点ではBATTLECATS_APK_READ_TOKENは未登録。値を作業ログへ出さず、利用者が専用の読取トークンを登録してから初回実行する。
+
+2026-11-06: 利用者の承認に基づき、battlecats-apkだけのContents/Metadata read・無期限トークンをKBCSのSecretへ登録済み。値は資料・ログへ保存しない。初回42077878968はsetup-javaの版解決で停止したため、配布元が提示した21.0.11+10.0.LTS表記へ修正して再実行する。
