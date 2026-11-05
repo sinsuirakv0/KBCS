@@ -55,6 +55,14 @@ class ReferenceTest(unittest.TestCase):
             self.assertIn('../external/EXTERNAL-00000001.md', entry)
             self.assertIn('関連文字列', entry)
             self.assertEqual(summary['pages'], len(list(root.rglob('*.md'))))
+            db = connect(cache / 'cache.sqlite')
+            with db:
+                db.execute('INSERT INTO metadata VALUES(?,?)', ('analysis_revision', json.dumps('b' * 16)))
+            db.close()
+            with contextlib.redirect_stdout(io.StringIO()):
+                revised, _ = export_cache(cache, Path(temporary) / 'export')
+            self.assertEqual(revised.name, 'b' * 16)
+            self.assertTrue((root / 'manifest.json').is_file())
 
 
 if __name__ == '__main__':

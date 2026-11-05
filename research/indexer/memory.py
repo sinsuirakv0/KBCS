@@ -44,10 +44,35 @@ def processes():
     return rows
 
 
+def linux_memory(java_pid, root, limit_mb, proc=Path('/proc')):
+    # 自分のJVMの子だけをRSSで監視し、実行機の残りメモリも保護する。
+    available = 0
+    for line in (proc / 'meminfo').read_text().splitlines():
+        if line.startswith('MemAvailable:'):
+            available = int(line.split()[1]) * 1024
+    peak = 0
+    for path in proc.glob('[0-9]*/status'):
+        try:
+            values = dict(line.split(':', 1) for line in path.read_text().splitlines() if ':' in line)
+            if int(values['PPid']) != java_pid or values['Name'].strip() != 'decompile':
+                continue
+            rss = int(values.get('VmRSS', '0 kB').split()[0]) * 1024
+            peak = max(peak, rss)
+            if (limit_mb and rss > limit_mb * 1024**2) or available < 768 * 1024**2:
+                os.kill(int(path.parent.name), 9)
+                event = {'unix': time.time(), 'pid': int(path.parent.name), 'rss_bytes': rss,
+                         'limit_mb': limit_mb, 'reason': 'native RSS budget or host available memory guard'}
+                with (root / 'memory-events.jsonl').open('a', encoding='utf-8') as stream:
+                    stream.write(json.dumps(event) + '\n')
+        except (OSError, KeyError, ValueError):
+            continue
+    return peak, (proc / str(java_pid)).exists()
+
+
 def enforce_memory(java_pid, root, limit_mb=1536):
     # 自分が起動したJVM直下のデコンパイラだけを対象にし、時間では停止しない。
     if os.name != 'nt':
-        return 0, True
+        return linux_memory(java_pid, root, limit_mb)
     rows = processes()
     alive = any(pid == java_pid and name.lower() == 'java.exe' for pid, _, name in rows)
     peak = 0

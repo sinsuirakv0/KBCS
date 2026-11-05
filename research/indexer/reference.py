@@ -77,6 +77,12 @@ def export_cache(cache, output):
         if not re.fullmatch(r'[0-9a-f]{64}', identity['sha256']):
             raise ValueError('Invalid library SHA-256')
         root = output / identity['version'] / identity['architecture'] / identity['sha256']
+        if metadata.get('analysis_revision'):
+            revision = metadata['analysis_revision']
+            if not re.fullmatch(r'[a-f0-9]{16}', revision):
+                raise ValueError('Invalid analysis revision')
+            identity['analysis_revision'] = revision
+            root /= revision
         if (root / 'manifest.json').exists() and read_json(root / 'manifest.json')['source_database_sha256'] != database_sha:
             raise ValueError('Source revision changed; use another output directory to preserve existing references')
         functions = [dict(row) for row in db.execute('SELECT * FROM functions ORDER BY address')]
@@ -183,7 +189,7 @@ GitHub連携の検索結果が不十分なら、既知のファイルパスを�
         raise ValueError('Source database changed during export; do not publish this output')
     summary = identity | inventory | {'source_database_sha256': database_sha, 'functions': len(functions), 'page_limit_bytes': PAGE_BYTES, 'format': 1}
     save(Path('manifest.json'), json.dumps(summary, ensure_ascii=False, indent=2) + '\n', count=False)
-    datasets = sorted(output.glob('*/*/*/manifest.json'))
+    datasets = sorted([*output.glob('*/*/*/manifest.json'), *output.glob('*/*/*/*/manifest.json')])
     links = ''.join(f'- [{path.parent.relative_to(output).as_posix()}]({path.parent.relative_to(output).as_posix()}/README.md)\n' for path in datasets)
     (output / 'README.md').write_text('# ChatGPT用ネイティブ解析資料\n\n' + links + '\n全件を一度に読み込まず、対象の版・ABI・SO SHA-256を確認して必要な関数だけ取得してください。\n', encoding='utf-8-sig')
     (output / '.gitattributes').write_text('*.md -text\n*.json -text\n', encoding='ascii')

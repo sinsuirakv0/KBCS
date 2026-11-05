@@ -1,8 +1,12 @@
-name: Build Windows and macOS
+﻿name: Build Windows and macOS
 
 on:
   push:
+    paths-ignore:
+      - 'research/reference/**'
   pull_request:
+    paths-ignore:
+      - 'research/reference/**'
   workflow_dispatch:
     inputs:
       version:

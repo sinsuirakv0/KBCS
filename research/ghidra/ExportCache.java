@@ -137,8 +137,13 @@ public class ExportCache extends HeadlessScript {
                 }
                 try(BufferedWriter writer=Files.newBufferedWriter(root.resolve("results.jsonl"),StandardCharsets.UTF_8,StandardOpenOption.CREATE,StandardOpenOption.APPEND)) {
                     int processed=0;
+                    int batchSeconds=args.length>4 ? Integer.parseInt(args[4]) : 0;
                     for(String address:Files.readAllLines(root.resolve("requests.txt"),StandardCharsets.UTF_8)) {
                         monitor.checkCancelled();
+                        if(batchSeconds>0 && (System.nanoTime()-started)/1e9>=batchSeconds) {
+                            println("Cache batch budget reached");
+                            break;
+                        }
                         Function function=manager.getFunctionAt(toAddr(address));
                         long tick=System.nanoTime();
                         String status="failed", error="function not found", filename="";

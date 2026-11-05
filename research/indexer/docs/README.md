@@ -17,3 +17,5 @@
 - `materials.selected_files/main`：保存対象を限定し、重複プロジェクト・一時物を除いたアーカイブとSHA-256一覧を作る。アップロードは行わない。
 
 - `reference.export_cache`：完成済みSQLiteを読み取り専用で開き、GitHub連携向けの関数・索引ページを生成する。`split_text/fenced/paginate`が欠落のない分割とページ上限を担い、`function_path/page_path`が相互リンクを共通化する。[手順と設計](../../docs/chatgpt-reference.md)。
+
+- `ci`：Publicの標準Actionsでの再生成、テキストだけのRelease checkpoint、解析リビジョンの追記を制御する。[処理・無料条件・再開](../../docs/actions-analysis.md)。

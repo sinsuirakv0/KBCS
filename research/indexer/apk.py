@@ -48,9 +48,11 @@ def manifest(apk, output, apktool, java):
             'versionCode': int(root.attrib.get(namespace + 'versionCode', code.group(1)))}
 
 
-def acquire(apktool, java):
-    version = content(ASSETS, 'jp/version.json')
+def acquire(apktool, java, version=None):
+    version = version if version is not None else content(ASSETS, 'jp/version.json')
     compact = str(version['compactVersion'])
+    if not re.fullmatch(r'[a-f0-9]{64}', version['mergedApkSha256']):
+        raise ValueError('Invalid APK hash')
     if not re.fullmatch(r'\d{6}', compact) or version['packageName'] != 'jp.co.ponos.battlecats':
         raise ValueError('Unexpected version metadata')
     root = LOCAL / 'apk' / compact
@@ -81,6 +83,8 @@ def acquire(apktool, java):
         checksum = (asset.get('digest') or '').removeprefix('sha256:')
         if not re.fullmatch(r'[a-f0-9]{64}', checksum):
             raise ValueError('Release SHA-256 digest missing')
+        if version.get('archiveSha256') and checksum != version['archiveSha256']:
+            raise ValueError('Pinned archive SHA-256 mismatch')
         archive = root / name
         if not archive.exists():
             staging = root / 'download'
@@ -139,6 +143,7 @@ def acquire(apktool, java):
               'reused_apk': reused, 'libraries': libraries, 'source_repository': REPOSITORY}
     write_json(root / 'verified.json', report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    return report
 
 
 def main():

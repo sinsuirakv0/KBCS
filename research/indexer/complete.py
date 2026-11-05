@@ -65,6 +65,7 @@ def build_reference(root):
     if report['code_files'] != counts.get('cached', 0):
         raise ValueError('Pseudocode file count does not match the index')
     write_json(root / 'reference-summary.json', report)
+    snapshot_note = '- `backup-project.zip`: 自動解析完了後のGhidraプロジェクト。' if (root / 'backup-project.zip').exists() else '- Ghidraプロジェクトは実行機だけに保持し、この配布物には含めません。'
     guide = f'''# ネイティブコード参考資料
 
 対象: {identity['version']} / {identity['architecture']} / {identity.get('library', 'libnative-lib.so')}
@@ -78,7 +79,7 @@ SO SHA-256: `{identity['sha256']}`
 - [外部関数](external-functions.tsv): 実装が対象SOに含まれない関数。
 - [集計と未解決一覧](reference-summary.json): 失敗理由とアセンブリのパス。
 - `cache.sqlite`: 関数・文字列・参照・呼出関係の検索索引。
-- `backup-project.zip`: 自動解析完了後のGhidraプロジェクト。
+{snapshot_note}
 
 リポジトリのルートから `python research/cli/cache.py stats`、`find <名前>`、`strings <文字列>`、`code <アドレス>`、`callers <アドレス>`、`callees <アドレス>` を実行できます。Ghidraの起動は不要です。
 失敗した関数は `failures` で調べ、`assembly <アドレス>` で命令一覧を参照できます。

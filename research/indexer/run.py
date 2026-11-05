@@ -53,7 +53,11 @@ def mcp(config, endpoint, body):
 
 def peak_memory(process):
     if os.name != 'nt':
-        return None
+        try:
+            values = dict(line.split(':', 1) for line in Path(f'/proc/{process.pid}/status').read_text().splitlines() if ':' in line)
+            return int(values.get('VmHWM', '0 kB').split()[0]) * 1024
+        except (OSError, ValueError):
+            return None
     from ctypes import wintypes
 
     class Counters(ctypes.Structure):
@@ -74,7 +78,11 @@ def stop_process(process):
         subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20)
     else:
-        process.kill()
+        import signal
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
 
 
 def headless(config, root, snapshot, mode, timeout, initialize=False, analyze_existing=False):
@@ -112,7 +120,7 @@ def headless(config, root, snapshot, mode, timeout, initialize=False, analyze_ex
                'ghidra.Ghidra', 'ghidra.app.util.headless.AnalyzeHeadless',
                str(project), 'cache', *arguments, *analysis, '-max-cpu', '1',
                '-scriptPath', str(script), '-postScript', 'ExportCache.java', str(root), mode, str(timeout)]
-    command.append(config.get('decompiler_style', 'decompile'))
+    command.extend([config.get('decompiler_style', 'decompile'), str(config.get('script_batch_seconds', 0))])
     log = root / ('full-analysis.log' if analyze_existing else 'initial-analysis.log' if initialize else f'{mode}.log')
     tick = time.perf_counter()
     peak = 0
@@ -121,7 +129,7 @@ def headless(config, root, snapshot, mode, timeout, initialize=False, analyze_ex
     # JVMを直接起動して対象プロセスだけのメモリを測る。子孫デコンパイラは含まない。
     with log.open('w', encoding='utf-8') as output:
         priority = subprocess.BELOW_NORMAL_PRIORITY_CLASS if os.name == 'nt' else 0
-        process = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, creationflags=priority)
+        process = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, creationflags=priority, start_new_session=os.name != 'nt')
         try:
             batch_limit = config.get('batch_timeout_seconds', 900)
             deadline = tick + batch_limit if batch_limit else None
@@ -150,7 +158,8 @@ def headless(config, root, snapshot, mode, timeout, initialize=False, analyze_ex
             'heap_limit': heap, 'decompiler_child_memory_included': False,
             'native_observed_peak_private_bytes': native_peak,
             'native_memory_limit_mb': config.get('native_memory_limit_mb', 1536),
-            'decompiler_style': config.get('decompiler_style', 'decompile')}
+            'decompiler_style': config.get('decompiler_style', 'decompile'),
+            'native_memory_measurement': 'private_bytes' if os.name == 'nt' else 'rss'}
 
 
 def main():
