@@ -1,0 +1,123 @@
+﻿# 00b0aadc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00b0aadc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b0aadc",
+  "name": "_ZN11flatbuffers10IDLOptionsC2ERKS0_",
+  "size": 412,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "a2cb362fc9843e7c5ee3d6e91264b59b4ee1a053a159e27c025205c54adbab5c",
+  "source_text_sha256": "a2cb362fc9843e7c5ee3d6e91264b59b4ee1a053a159e27c025205c54adbab5c"
+}
+~~~
+## 呼び出し元
+
+- [00bde900](../00bde/00bde900.md)
+
+## 呼び出し先
+
+- [00bdaf40](../00bda/00bdaf40.md)
+- [00bde1c0](../00bde/00bde1c0.md)
+- [00bde630](../00bde/00bde630.md)
+
+## 疑似コード 1/1 / UTF-8 3480 bytes
+
+~~~c
+
+void _ZN11flatbuffers10IDLOptionsC2ERKS0_(undefined8 *param_1,undefined8 *param_2)
+
+{
+  long lVar1;
+  undefined4 uVar2;
+  undefined1 uVar3;
+  undefined2 uVar4;
+  long lVar5;
+  long lVar6;
+  undefined8 uVar7;
+  undefined8 uVar8;
+  undefined8 uVar9;
+  
+  uVar7 = *(undefined8 *)((long)param_2 + 9);
+  uVar9 = param_2[1];
+  uVar8 = *param_2;
+  *(undefined8 *)((long)param_1 + 0x11) = *(undefined8 *)((long)param_2 + 0x11);
+  *(undefined8 *)((long)param_1 + 9) = uVar7;
+  param_1[1] = uVar9;
+  *param_1 = uVar8;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 4,param_2 + 4);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 7,param_2 + 7);
+  *(undefined4 *)(param_1 + 10) = *(undefined4 *)(param_2 + 10);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0xb,param_2 + 0xb);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0xe,param_2 + 0xe);
+  uVar4 = *(undefined2 *)(param_2 + 0x11);
+  *(undefined1 *)((long)param_1 + 0x8a) = *(undefined1 *)((long)param_2 + 0x8a);
+  *(undefined2 *)(param_1 + 0x11) = uVar4;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x12,param_2 + 0x12);
+  uVar2 = *(undefined4 *)(param_2 + 0x15);
+  *(undefined1 *)((long)param_1 + 0xac) = *(undefined1 *)((long)param_2 + 0xac);
+  *(undefined4 *)(param_1 + 0x15) = uVar2;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x16,param_2 + 0x16);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x19,param_2 + 0x19);
+  *(undefined4 *)(param_1 + 0x1c) = *(undefined4 *)(param_2 + 0x1c);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x1d,param_2 + 0x1d);
+  uVar4 = *(undefined2 *)(param_2 + 0x20);
+  uVar3 = *(undefined1 *)((long)param_2 + 0x102);
+  param_1[0x22] = 0;
+  param_1[0x23] = 0;
+  param_1[0x21] = 0;
+  *(undefined2 *)(param_1 + 0x20) = uVar4;
+  *(undefined1 *)((long)param_1 + 0x102) = uVar3;
+  if (param_2[0x22] - param_2[0x21] != 0) {
+    lVar6 = (long)(param_2[0x22] - param_2[0x21]) >> 3;
+    if (0xaaaaaaaaaaaaaaa < (ulong)(lVar6 * -0x5555555555555555)) {
+                    /* WARNING: Subroutine does not return */
+      abort();
+    }
+    lVar5 = _Znwm();
+    param_1[0x21] = lVar5;
+    param_1[0x22] = lVar5;
+    param_1[0x23] = lVar5 + lVar6 * 8;
+    lVar1 = param_2[0x22];
+    for (lVar6 = param_2[0x21]; lVar6 != lVar1; lVar6 = lVar6 + 0x18) {
+      _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_(lVar5,lVar6);
+      lVar5 = lVar5 + 0x18;
+    }
+    param_1[0x22] = lVar5;
+  }
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x24,param_2 + 0x24);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x27,param_2 + 0x27);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x2a,param_2 + 0x2a);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x2d,param_2 + 0x2d);
+  uVar8 = param_2[0x31];
+  uVar7 = param_2[0x30];
+  *(undefined2 *)(param_1 + 0x32) = *(undefined2 *)(param_2 + 0x32);
+  param_1[0x31] = uVar8;
+  param_1[0x30] = uVar7;
+  return;
+}
+
+~~~

@@ -1,0 +1,126 @@
+﻿# 00b1ddcc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00b1ddcc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b1ddcc",
+  "name": "_ZN11flatbuffers11NumToStringIsEENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEET_",
+  "size": 364,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "c3939e43a52431355417c539f8eb930c58825d255132f7d304d46ce15549cca0",
+  "source_text_sha256": "c3939e43a52431355417c539f8eb930c58825d255132f7d304d46ce15549cca0"
+}
+~~~
+## 呼び出し元
+
+- [00bdf0e0](../00bdf/00bdf0e0.md)
+
+## 呼び出し先
+
+- [00bdaf60](../00bda/00bdaf60.md)
+- [00bdaf90](../00bda/00bdaf90.md)
+- [00bdb260](../00bdb/00bdb260.md)
+- [00bdb290](../00bdb/00bdb290.md)
+- [00bdb340](../00bdb/00bdb340.md)
+- [00bdd850](../00bdd/00bdd850.md)
+- [00bdfc00](../00bdf/00bdfc00.md)
+- [00be00e0](../00be0/00be00e0.md)
+
+## 疑似コード 1/1 / UTF-8 2753 bytes
+
+~~~c
+
+void _ZN11flatbuffers11NumToStringIsEENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEET_
+               (undefined8 param_1,undefined4 param_2)
+
+{
+  undefined *puVar1;
+  undefined *puVar2;
+  undefined *puVar3;
+  undefined *puVar4;
+  long lVar5;
+  undefined *local_180;
+  undefined *puStack_178;
+  undefined1 auStack_170 [8];
+  undefined8 local_168;
+  undefined8 uStack_160;
+  undefined8 local_158;
+  undefined8 uStack_150;
+  undefined8 local_148;
+  undefined8 uStack_140;
+  ulong local_138;
+  undefined8 uStack_130;
+  void *local_128;
+  undefined8 uStack_120;
+  undefined4 local_118;
+  undefined *local_110 [17];
+  undefined8 local_88;
+  undefined4 local_80;
+  long local_70;
+  
+  puVar2 = PTR__ZTVNSt6__ndk118basic_stringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1ad28;
+  lVar5 = tpidr_el0;
+                    /* try { // try from 00b1de00 to 00c1df17 has its CatchHandler @ 00b1de00
+                       catch() { ... } // from try @ 00b1de00 with catch @ 00b1de00
+                       catch() { ... } // from try @ 00b1df58 with catch @ 00b1de00 */
+  local_70 = *(long *)(lVar5 + 0x28);
+  puVar1 = PTR__ZTVNSt6__ndk118basic_stringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1ad28
+           + 0x40;
+  local_110[0] = PTR__ZTCNSt6__ndk118basic_stringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE0_NS_13basic_istreamIcS2_EE_00c1b948
+                 + 0x40;
+  local_180 = puVar1;
+  _ZNSt6__ndk18ios_base4initEPv(local_110,&puStack_178);
+  puVar2 = puVar2 + 0x68;
+  puVar3 = PTR__ZTVNSt6__ndk115basic_streambufIcNS_11char_traitsIcEEEE_00c1b950 + 0x10;
+  local_80 = 0xffffffff;
+  local_88 = 0;
+  local_180 = puVar1;
+  puStack_178 = puVar3;
+  local_110[0] = puVar2;
+  _ZNSt6__ndk16localeC1Ev(auStack_170);
+  uStack_140 = 0;
+  local_148 = 0;
+  uStack_150 = 0;
+  local_158 = 0;
+  uStack_160 = 0;
+  local_168 = 0;
+  puVar4 = PTR__ZTVNSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acd0 +
+           0x10;
+  uStack_130 = 0;
+  local_138 = 0;
+  uStack_120 = 0;
+  local_128 = (void *)0x0;
+  local_118 = 0x18;
+  puStack_178 = puVar4;
+  _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEElsEs(&local_180,param_2);
+  _ZNKSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEE3strEv(param_1,&puStack_178)
+  ;
+  local_180 = puVar1;
+  local_110[0] = puVar2;
+  if ((local_138 & 1) != 0) {
+    puStack_178 = puVar4;
+    _ZdlPv(local_128);
+  }
+  puStack_178 = puVar3;
+  _ZNSt6__ndk16localeD2Ev(auStack_170);
+  _ZNSt6__ndk18ios_baseD1Ev(local_110);
+  if (*(long *)(lVar5 + 0x28) == local_70) {
+                    /* try { // try from 00b1df18 to 00c1df23 has its CatchHandler @ 00b1e04c */
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

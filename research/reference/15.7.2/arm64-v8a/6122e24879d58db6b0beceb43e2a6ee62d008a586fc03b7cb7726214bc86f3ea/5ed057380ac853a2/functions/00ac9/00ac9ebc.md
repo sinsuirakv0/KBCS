@@ -1,0 +1,102 @@
+﻿# 00ac9ebc
+
+版: 15.7.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
+
+ページ 1/1。[入口](00ac9ebc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00ac9ebc",
+  "name": "FUN_00ac9ebc",
+  "size": 400,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "3fcf4cb2dea5f9371cc7db1c7b46c62613952176d55ddb653fb7110720a683a7",
+  "source_text_sha256": "3fcf4cb2dea5f9371cc7db1c7b46c62613952176d55ddb653fb7110720a683a7"
+}
+~~~
+## 呼び出し元
+
+- [00ab3338](../00ab3/00ab3338.md)
+
+## 呼び出し先
+
+- [0041e380](../0041e/0041e380.md)
+- [00aca04c](../00aca/00aca04c.md)
+- [00bdaf40](../00bda/00bdaf40.md)
+- [00bdaf60](../00bda/00bdaf60.md)
+- [00bdb0b0](../00bdb/00bdb0b0.md)
+- [00bdb140](../00bdb/00bdb140.md)
+
+## 疑似コード 1/1 / UTF-8 1618 bytes
+
+~~~c
+
+void FUN_00ac9ebc(undefined8 *param_1,ulong param_2)
+
+{
+  ulong uVar1;
+  long lVar2;
+  ulong uVar3;
+  void *__src;
+  size_t sVar4;
+  void *pvVar5;
+  size_t __n;
+  
+  pvVar5 = (void *)param_1[1];
+  if ((ulong)((param_1[2] - (long)pvVar5 >> 4) * -0x1111111111111111) < param_2) {
+    __src = (void *)*param_1;
+    sVar4 = (long)pvVar5 - (long)__src;
+    uVar1 = ((long)sVar4 >> 4) * -0x1111111111111111 + param_2;
+    if (0x111111111111111 < uVar1) {
+      FUN_00aca04c(param_1);
+LAB_00aca048:
+                    /* WARNING: Subroutine does not return */
+      FUN_0041e380();
+    }
+    lVar2 = param_1[2] - (long)__src >> 4;
+    uVar3 = lVar2 * -0x2222222222222222;
+    if (uVar3 < uVar1 || uVar3 - uVar1 == 0) {
+      uVar3 = uVar1;
+    }
+    if (0x88888888888887 < (ulong)(lVar2 * -0x1111111111111111)) {
+      uVar3 = 0x111111111111111;
+    }
+    if (uVar3 == 0) {
+      lVar2 = 0;
+    }
+    else {
+      if (0x111111111111111 < uVar3) goto LAB_00aca048;
+      lVar2 = _Znwm(uVar3 * 0xf0);
+    }
+    pvVar5 = (void *)(lVar2 + ((long)sVar4 >> 4) * 0x10);
+    __n = ((param_2 * 0xf0 - 0xf0) / 0xf0) * 0xf0 + 0xf0;
+    memset(pvVar5,0,__n);
+    memcpy((void *)((long)pvVar5 - sVar4),__src,sVar4);
+    *param_1 = (void *)((long)pvVar5 - sVar4);
+    param_1[1] = (long)pvVar5 + __n;
+    param_1[2] = lVar2 + uVar3 * 0xf0;
+    if (__src != (void *)0x0) {
+      _ZdlPv(__src);
+      return;
+    }
+  }
+  else {
+    if (param_2 != 0) {
+      sVar4 = ((param_2 * 0xf0 - 0xf0) / 0xf0) * 0xf0 + 0xf0;
+      memset(pvVar5,0,sVar4);
+      pvVar5 = (void *)((long)pvVar5 + sVar4);
+    }
+    param_1[1] = pvVar5;
+  }
+  return;
+}
+
+~~~
