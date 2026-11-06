@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "packageName": "jp.co.ponos.battlecats",
+  "versionCode": 1507040,
+  "versionName": "15.7.4",
+  "compactVersion": "150704",
+  "archiveTag": "source-jp-1507040-506df7ed44ddcc9e",
+  "archiveBytes": 173824000,
+  "archiveSha256": "1728369ea3304181769fbc8c55d1254844c2bf209423e0dab8ae87e790520158",
+  "baseApk": {
+    "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+    "bytes": 25889348,
+    "sha256": "7e828ca17e7ef3a8c37c21cfb3a19186608043fd1f1c80efec2beccbb69d4b7f"
+  },
+  "nativeApk": {
+    "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+    "bytes": 15385466,
+    "sha256": "d778543b63547ad67bd421a154ccc32cbdd9038cb908ffa4e7841bd50cea1ab2",
+    "split": "config.arm64_v8a"
+  },
+  "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+  "source": "google-play",
+  "architecture": "arm64-v8a",
+  "library": "libnative-lib.so",
+  "librarySha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
+  "provenance": "KBC-rakv0-assets metadata/jp/versions/1507040.proof.json (blob e2bea9a033ee2b025f9a88e73919241da0852df3)"
+}

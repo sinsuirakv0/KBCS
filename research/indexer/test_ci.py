@@ -2,13 +2,16 @@
 import io
 import json
 import os
+import shutil
+import subprocess
 import tarfile
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from indexer import ci, memory
+from indexer import ci, memory, network
+from indexer.store import connect
 
 
 class CiTests(unittest.TestCase):
@@ -27,40 +30,104 @@ class CiTests(unittest.TestCase):
         for name in ('project/cache.gpr', 'backup-project.zip', 'app.apk', 'libnative-lib.so', '../code/1.c', 'code/../identity.json'):
             self.assertFalse(ci.allowed(name), name)
 
-    def test_checkpoint_roundtrip_and_traversal_rejected(self):
-        # 実tarを使い、許可データの復元と境界外パスの拒否を確認する。
+    def test_restore_falls_back_without_exposing_unverified_files(self):
+        # 同じ秒に保存した場合も、数値で新しい方を先に試す。
         with tempfile.TemporaryDirectory() as directory:
             local = Path(directory)
-            staging = local / 'ci-download'
-            staging.mkdir()
-            name = 'checkpoint-1-1-0.tgz'
             revision = 'a' * 16
 
-            def prepare(unsafe=False):
-                entries = {'ci-plan.json': json.dumps({'revision': revision}).encode(),
-                           '../outside' if unsafe else 'code/00100000.c': b'void f() {}\n'}
-                archive = staging / name
+            def prepare(sequence, entries):
+                files = {name: b'{}' for name in ci.REQUIRED_STATE} | entries
+                files['ci-plan.json'] = json.dumps({'revision': revision}).encode()
+                archive = local / f'checkpoint-1-1-{sequence}.tgz'
                 with tarfile.open(archive, 'w:gz') as target:
-                    for path, data in entries.items():
+                    for path, data in files.items():
                         member = tarfile.TarInfo(path)
                         member.size = len(data)
                         target.addfile(member, io.BytesIO(data))
-                sidecar = staging / (name + '.json')
-                sidecar.write_text(json.dumps({'revision': revision, 'sha256': ci.digest(archive),
-                    'files': [{'path': path, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for path, data in entries.items()]}))
-                return {'assets': [{'name': path.name, 'state': 'uploaded', 'digest': 'sha256:' + ci.digest(path),
-                                    'created_at': '2026-11-06T00:00:00Z'} for path in (archive, sidecar)]}
+                sidecar = archive.with_name(archive.name + '.json')
+                ci.write_json(sidecar, {'revision': revision, 'sha256': ci.digest(archive),
+                    'files': [{'path': path, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for path, data in files.items()]})
+                return [{'name': path.name, 'state': 'uploaded', 'size': path.stat().st_size,
+                         'digest': 'sha256:' + ci.digest(path), 'created_at': '2026-11-06T00:00:00Z'} for path in (archive, sidecar)]
 
-            release = prepare()
+            valid = prepare(9, {'code/00100000.c': b'void f() {}\n'})
+            invalid = prepare(10, {'code/00100001.c': b'partial', '../outside': b'bad'})
+
+            def download(_repository, _tag, filename, target):
+                shutil.copyfile(local / filename, target / filename)
+
             root = local / 'cache'
-            with patch.object(ci, 'LOCAL', local), patch.object(ci, 'api', return_value=release), patch.object(ci.subprocess, 'run'):
+            with patch.object(ci, 'release_state', side_effect=[{'assets': valid + invalid}, {'assets': invalid}]), \
+                    patch.object(ci, 'download_asset', side_effect=download) as transfer:
                 ci.restore(root, 'test', revision)
-            self.assertEqual((root / 'code/00100000.c').read_bytes(), b'void f() {}\n')
-            release = prepare(True)
-            with patch.object(ci, 'LOCAL', local), patch.object(ci, 'api', return_value=release), patch.object(ci.subprocess, 'run'):
-                with self.assertRaises(ValueError):
+                self.assertEqual(transfer.call_args_list[0].args[2], 'checkpoint-1-1-10.tgz.json')
+                with self.assertRaisesRegex(RuntimeError, 'No valid checkpoint'):
                     ci.restore(local / 'bad-cache', 'test', revision)
+            self.assertEqual((root / 'code/00100000.c').read_bytes(), b'void f() {}\n')
+            self.assertFalse((root / 'code/00100001.c').exists())
+            self.assertFalse((local / 'bad-cache').exists())
             self.assertFalse((local / 'outside').exists())
+
+    def test_release_retry_and_ambiguous_upload(self):
+        temporary = subprocess.CalledProcessError(1, ['gh'], stderr=b'HTTP 503')
+        denied = subprocess.CalledProcessError(1, ['gh'], stderr=b'HTTP 403')
+        with patch.object(network, 'gh', side_effect=[temporary, b'{}', denied]) as call, \
+                patch.object(network.time, 'sleep'):
+            self.assertEqual(network.gh_json('test'), {})
+            with self.assertRaises(subprocess.CalledProcessError):
+                network.gh_json('test')
+            self.assertEqual(call.call_count, 3)
+
+        for uploaded_count, transfers in ((2, 1), (1, 2)):
+            with self.subTest(uploaded_count=uploaded_count), tempfile.TemporaryDirectory() as directory:
+                archive = Path(directory) / 'checkpoint-1-1-0.tgz'
+                sidecar = archive.with_name(archive.name + '.json')
+                for path in (archive, sidecar):
+                    path.write_bytes(b'fixture')
+                checksum = ci.digest(archive)
+                assets = []
+
+                def upload(_release, _upload, _tag, *args, **_kwargs):
+                    paths = list(map(Path, args[:2]))
+                    count = uploaded_count if not assets else 2
+                    assets.extend({'name': path.name, 'size': path.stat().st_size, 'digest': 'sha256:' + ci.digest(path),
+                                   'state': 'uploaded'} for path in paths[:count])
+                    if count == uploaded_count and len(assets) == count:
+                        raise temporary
+
+                with patch.object(ci, 'gh', side_effect=upload) as send, \
+                        patch.object(ci, 'release_state', return_value={'assets': assets}), patch.object(ci.time, 'sleep'):
+                    ci.upload_checkpoint('test', archive, sidecar, checksum)
+                self.assertEqual(send.call_count, transfers)
+                self.assertEqual(len({asset['name'] for asset in assets}), len(assets))
+                self.assertEqual(list(Path(directory).iterdir()), [])
+
+    def test_batch_keeps_journal_progress_and_stops_repeated_no_progress(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            db = connect(root / 'cache.sqlite')
+            with db:
+                db.executemany('INSERT INTO functions(address,name,size,external) VALUES (?, ?, 1, 0)', [('1', 'f'), ('2', 'g')])
+            db.close()
+
+            def interrupt(*_args):
+                record = {'address': '1', 'status': 'cached', 'error': '', 'file': 'code/1.c',
+                          'seconds': 1, 'style': 'decompile'}
+                (root / 'code').mkdir()
+                (root / record['file']).write_text('void f() {}')
+                (root / 'results.jsonl').write_text(json.dumps(record) + '\n{', encoding='utf-8')
+                raise TimeoutError()
+
+            with patch.object(ci, 'headless', side_effect=interrupt) as process:
+                pending, metrics = ci.decompile_batch({}, root, root / 'binary', 'decompile', ['1', '2'], 1, float('inf'))
+            process.assert_called_once()
+            self.assertEqual(pending, ['2'])
+            self.assertTrue(metrics['interrupted'])
+            with patch.object(ci, 'headless', side_effect=TimeoutError) as process:
+                with self.assertRaisesRegex(RuntimeError, 'no function progress'):
+                    ci.decompile_batch({}, root, root / 'binary', 'decompile', pending, 1, float('inf'))
+            self.assertEqual(process.call_count, 2)
 
     def test_linux_guard_only_stops_owned_native_child(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -69,6 +69,7 @@ jobs:
       - name: Install checksum-pinned analysis tools
         run: python -m indexer.ci setup
       - name: Analyze, checkpoint, generate and optionally publish
+        id: pipeline
         env:
           BATTLECATS_APK_READ_TOKEN: ${{ secrets.BATTLECATS_APK_READ_TOKEN }}
         shell: bash
@@ -81,17 +82,19 @@ jobs:
           PY
       - name: Report status
         if: always()
+        env:
+          PIPELINE_OUTCOME: ${{ steps.pipeline.outcome }}
         shell: bash
         run: |
           python - <<'PY'
           import os
-          from pathlib import Path
           from indexer.store import LOCAL, read_json
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as output:
               output.write('## Native analysis\n\nStandard public Ubuntu runner. No Actions artifacts/cache, paid API or larger runner.\n\n')
+              output.write(f"- Pipeline step: `{os.environ['PIPELINE_OUTCOME']}`\n")
               for path in (LOCAL / 'cache').glob('*/*/*-ci-*/ci-status.json'):
                   state = read_json(path)
-                  output.write(f"- Revision: `{path.parent.name}`; complete: `{state.get('complete', False)}`\n")
+                  output.write(f"- Revision: `{path.parent.name}`; function processing complete: `{state.get('complete', False)}`\n")
                   if state.get('report'):
                       output.write(f"- Internal: `{state['report']['internal']}`; external: `{state['report']['external']}`\n")
               output.write('\nSee the `native-analysis-*` prerelease for verified text checkpoints. Re-run the same inputs to resume.\n')
