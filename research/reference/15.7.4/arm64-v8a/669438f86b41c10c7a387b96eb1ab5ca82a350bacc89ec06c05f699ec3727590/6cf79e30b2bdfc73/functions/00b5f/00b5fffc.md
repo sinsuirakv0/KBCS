@@ -1,0 +1,86 @@
+﻿# 00b5fffc
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+ページ 1/1。[入口](00b5fffc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b5fffc",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl16CompleteInternalIvZNS0_16CompleteInternalINS_4auth4Auth20FetchProvidersResultEEEvRKNS_12FutureHandleEiPKcEUlPvE_EEvS8_iSA_RKT0_",
+  "size": 264,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "2d44d6f95d34f137046f121ca902e9135fb0e238e33b2d34e834d136ce578c56",
+  "source_text_sha256": "2d44d6f95d34f137046f121ca902e9135fb0e238e33b2d34e834d136ce578c56"
+}
+~~~
+## 呼び出し元
+
+- [00be0bd0](../00be0/00be0bd0.md)
+
+## 呼び出し先
+
+- [00bddc20](../00bdd/00bddc20.md)
+- [00bddc30](../00bdd/00bddc30.md)
+- [00bddfb0](../00bdd/00bddfb0.md)
+- [00bddfd0](../00bdd/00bddfd0.md)
+- [00bddfe0](../00bdd/00bddfe0.md)
+- [00bddff0](../00bdd/00bddff0.md)
+- [00bde000](../00bde/00bde000.md)
+- [00bde010](../00bde/00bde010.md)
+- [00bde180](../00bde/00bde180.md)
+- [00bde1f0](../00bde/00bde1f0.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"GetFutureStatus(handle) == kFutureStatusPending"
+~~~
+## 疑似コード 1/1 / UTF-8 1587 bytes
+
+~~~c
+
+void _ZN8firebase26ReferenceCountedFutureImpl16CompleteInternalIvZNS0_16CompleteInternalINS_4auth4Auth20FetchProvidersResultEEEvRKNS_12FutureHandleEiPKcEUlPvE_EEvS8_iSA_RKT0_
+               (long *param_1,undefined8 *param_2,undefined4 param_3,undefined8 param_4)
+
+{
+  int iVar1;
+  long lVar2;
+  ulong uVar3;
+  
+  _ZN8firebase5Mutex7AcquireEv(param_1 + 1);
+  lVar2 = _ZN8firebase26ReferenceCountedFutureImpl17BackingFromHandleEm(param_1,*param_2);
+  if (lVar2 == 0) {
+    _ZN8firebase5Mutex7ReleaseEv(param_1 + 1);
+    return;
+  }
+  iVar1 = (**(code **)(*param_1 + 0x20))(param_1,param_2);
+  if (iVar1 != 1) {
+    _ZN8firebase9LogAssertEPKcz("GetFutureStatus(handle) == kFutureStatusPending");
+  }
+  _ZN8firebase26ReferenceCountedFutureImpl15SetBackingErrorEPNS_17FutureBackingDataEiPKc
+            (param_1,lVar2,param_3,param_4);
+  _ZN8firebase26ReferenceCountedFutureImpl11BackingDataEPNS_17FutureBackingDataE(param_1,lVar2);
+  _ZN8firebase26ReferenceCountedFutureImpl14CompleteHandleERKNS_12FutureHandleE(param_1,param_2);
+  _ZN8firebase26ReferenceCountedFutureImpl13CompleteProxyEPNS_17FutureBackingDataE(param_1,lVar2);
+  _ZN8firebase26ReferenceCountedFutureImpl27ReleaseMutexAndRunCallbacksERKNS_12FutureHandleE
+            (param_1,param_2);
+  uVar3 = _ZNK8firebase26ReferenceCountedFutureImpl11is_orphanedEv(param_1);
+  if ((uVar3 & 1) != 0) {
+                    /* WARNING: Could not recover jumptable at 0x00b600d4. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+    (**(code **)(*param_1 + 8))(param_1);
+    return;
+  }
+  return;
+}
+
+~~~

@@ -1,0 +1,50 @@
+﻿# 00a8defc
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+ページ 1/1。[入口](00a8defc.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00a8defc",
+  "name": "FUN_00a8defc",
+  "size": 52,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "754a9fe99d0d94eb14c03fd4892e0cdad142df5ed46f23e4e16e66815d4d8c5e",
+  "source_text_sha256": "754a9fe99d0d94eb14c03fd4892e0cdad142df5ed46f23e4e16e66815d4d8c5e"
+}
+~~~
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bdb040](../00bdb/00bdb040.md)
+
+## 疑似コード 1/1 / UTF-8 224 bytes
+
+~~~c
+
+void FUN_00a8defc(long param_1)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  
+  puVar1 = (undefined8 *)_Znwm(0x10);
+  uVar2 = *(undefined8 *)(param_1 + 8);
+  *puVar1 = &PTR_FUN_00c0e158;
+  puVar1[1] = uVar2;
+  return;
+}
+
+~~~

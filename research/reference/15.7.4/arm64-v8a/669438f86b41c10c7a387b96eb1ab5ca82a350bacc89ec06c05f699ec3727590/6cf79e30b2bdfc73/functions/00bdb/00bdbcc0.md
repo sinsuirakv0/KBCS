@@ -1,0 +1,61 @@
+﻿# 00bdbcc0
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+ページ 1/1。[入口](00bdbcc0.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bdbcc0",
+  "name": "_ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4_",
+  "size": 16,
+  "external": 0,
+  "thunk": 1,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "a5822e1a2c8371cdf7035c25b2d9fea3467b2352c74f578a7ee138d441b1f051",
+  "source_text_sha256": "a5822e1a2c8371cdf7035c25b2d9fea3467b2352c74f578a7ee138d441b1f051"
+}
+~~~
+## 呼び出し元
+
+- [0048fe68](../0048f/0048fe68.md)
+- [0049025c](../00490/0049025c.md)
+- [00490480](../00490/00490480.md)
+- [0049f624](../0049f/0049f624.md)
+- [004bf57c](../004bf/004bf57c.md)
+- [004c73c4](../004c7/004c73c4.md)
+- [004ccf4c](../004cc/004ccf4c.md)
+- [004cf1d8](../004cf/004cf1d8.md)
+- [004cf634](../004cf/004cf634.md)
+- [004e0734](../004e0/004e0734.md)
+- [004e6aac](../004e6/004e6aac.md)
+- [004e9d4c](../004e9/004e9d4c.md)
+- [004ee7d8](../004ee/004ee7d8.md)
+- [004ef204](../004ef/004ef204.md)
+- [004f5078](../004f5/004f5078.md)
+- [004fa9b0](../004fa/004fa9b0.md)
+- [004faccc](../004fa/004faccc.md)
+- [0050b45c](../0050b/0050b45c.md)
+
+## 呼び出し先
+
+- [0048ff2c](../0048f/0048ff2c.md)
+
+## 疑似コード 1/1 / UTF-8 177 bytes
+
+~~~c
+
+void _ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4_(void)
+
+{
+  (*(code *)PTR__ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4__00c1c718)();
+  return;
+}
+
+~~~

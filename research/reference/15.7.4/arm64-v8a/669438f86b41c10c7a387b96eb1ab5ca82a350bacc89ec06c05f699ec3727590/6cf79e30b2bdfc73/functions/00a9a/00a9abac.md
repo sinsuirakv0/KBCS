@@ -1,0 +1,57 @@
+﻿# 00a9abac
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+ページ 1/1。[入口](00a9abac.md)
+
+## 関数情報
+
+~~~json
+{
+  "address": "00a9abac",
+  "name": "FUN_00a9abac",
+  "size": 104,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "388155e63b9b3529b9a511d54594e795eb806d86bd5ada6e64ed731ac76502d8",
+  "source_text_sha256": "388155e63b9b3529b9a511d54594e795eb806d86bd5ada6e64ed731ac76502d8"
+}
+~~~
+## 呼び出し元
+
+- [006e79bc](../006e7/006e79bc.md)
+
+## 呼び出し先
+
+- [005c2710](../005c2/005c2710.md)
+- [0081f580](../0081f/0081f580.md)
+
+## 疑似コード 1/1 / UTF-8 395 bytes
+
+~~~c
+
+undefined4 FUN_00a9abac(int param_1,int param_2)
+
+{
+  undefined4 uVar1;
+  long lVar2;
+  ulong uVar3;
+  
+  lVar2 = FUN_0081f580();
+  uVar3 = FUN_005c2710(lVar2 + (long)param_1 * 0x1f0 + 0x2678);
+  if ((uVar3 & 1) == 0) {
+    uVar1 = 0;
+  }
+  else {
+    lVar2 = FUN_0081f580();
+    uVar1 = *(undefined4 *)(lVar2 + (long)param_1 * 0xc804 + (long)param_2 * 0x3ec + 0x843c0);
+  }
+  return uVar1;
+}
+
+~~~
