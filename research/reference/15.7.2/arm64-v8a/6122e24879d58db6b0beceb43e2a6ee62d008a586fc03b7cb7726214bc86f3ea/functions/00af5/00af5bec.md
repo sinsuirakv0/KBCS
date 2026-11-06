@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00af5bec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00af5bec",
-  "name": "firebase::util::RegisterCallbackOnTask",
+  "name": "_ZN8firebase4util22RegisterCallbackOnTaskEP7_JNIEnvP8_jobjectPFvS2_S4_NS0_12FutureResultEPKcPvES8_S7_",
   "size": 520,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "07d5977578993757619abd63546a6d4150cd207c0047adbf8bf70728c28bf350",
-  "source_text_sha256": "07d5977578993757619abd63546a6d4150cd207c0047adbf8bf70728c28bf350"
+  "source_sha256": "afa9c1d15e8a8d8b7216e84dad9482c837aaa477259a8aafd19f3928f249dd0e",
+  "source_text_sha256": "afa9c1d15e8a8d8b7216e84dad9482c837aaa477259a8aafd19f3928f249dd0e"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bddfc0](../00bdd/00bddfc0.md)
@@ -35,28 +34,24 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bde720](../00bde/00bde720.md)
 - [00bde730](../00bde/00bde730.md)
 
-## 疑似コード 1/1 / UTF-8 5795 bytes
+## 疑似コード / UTF-8 5215 bytes
 
 ~~~c
 
-/* firebase::util::RegisterCallbackOnTask(_JNIEnv*, _jobject*, void (*)(_JNIEnv*, _jobject*,
-   firebase::util::FutureResult, char const*, void*), void*, char const*) */
-
-void firebase::util::RegisterCallbackOnTask
-               (_JNIEnv *param_1,_jobject *param_2,
-               _func_void__JNIEnv_ptr__jobject_ptr_FutureResult_char_ptr_void_ptr *param_3,
-               void *param_4,char *param_5)
+void _ZN8firebase4util22RegisterCallbackOnTaskEP7_JNIEnvP8_jobjectPFvS2_S4_NS0_12FutureResultEPKcPvES8_S7_
+               (long *param_1,undefined8 param_2,undefined8 param_3,long param_4,ulong param_5)
 
 {
   long lVar1;
   long *plVar2;
-  long *plVar3;
-  undefined8 uVar4;
-  __tree_node_base *p_Var5;
-  long lVar6;
-  __tree_node_base *p_Var7;
+  undefined8 uVar3;
+  undefined8 *puVar4;
+  long lVar5;
+  undefined8 *puVar6;
+  long *plVar7;
   long *plVar8;
   long *plVar9;
+  long *plVar10;
   
                     /* try { // try from 00af5bec to 00bf5bf3 has its CatchHandler @ 00affc2c */
                     /* try { // try from 00af5bf8 to 00bf5bff has its CatchHandler @ 00affc20 */
@@ -64,102 +59,102 @@ void firebase::util::RegisterCallbackOnTask
                     /* try { // try from 00af5c10 to 00bf5c17 has its CatchHandler @ 00affbfc */
                     /* try { // try from 00af5c1c to 00bf5c23 has its CatchHandler @ 00affbe4 */
   pthread_mutex_lock((pthread_mutex_t *)&DAT_010a09c8);
-  plVar2 = DAT_010a09c0;
-  plVar3 = DAT_010a09c0 + 1;
+  plVar7 = DAT_010a09c0;
+  plVar8 = DAT_010a09c0 + 1;
                     /* try { // try from 00af5c28 to 00bf5c2f has its CatchHandler @ 00affbd8 */
                     /* try { // try from 00af5c34 to 00bf5c3b has its CatchHandler @ 00affbc0 */
-  plVar8 = (long *)*plVar3;
-  plVar9 = plVar3;
-  if (plVar8 != (long *)0x0) {
-    plVar3 = DAT_010a09c0 + 1;
-    do {
-      while (plVar9 = plVar8, param_5 < (char *)plVar9[4]) {
-        plVar3 = plVar9;
-        plVar8 = (long *)*plVar9;
-        if ((long *)*plVar9 == (long *)0x0) {
-          p_Var7 = (__tree_node_base *)*plVar9;
-          goto joined_r0x00af5cc8;
-        }
-      }
-      if (param_5 <= (char *)plVar9[4]) break;
-      plVar3 = plVar9 + 1;
-      plVar8 = (long *)*plVar3;
-    } while ((long *)*plVar3 != (long *)0x0);
+  plVar9 = (long *)*plVar8;
+  plVar2 = plVar8;
+  if (plVar9 == (long *)0x0) {
+LAB_00af5c7c:
+    puVar6 = (undefined8 *)*plVar8;
+    plVar10 = plVar8;
   }
-  p_Var7 = (__tree_node_base *)*plVar3;
-                    /* try { // try from 00af5c80 to 00bf5c87 has its CatchHandler @ 00affbb4 */
-joined_r0x00af5cc8:
+  else {
+    plVar8 = DAT_010a09c0 + 1;
+    do {
+      while (plVar10 = plVar9, plVar2 = plVar10, (ulong)plVar10[4] <= param_5) {
+        if (param_5 <= (ulong)plVar10[4]) goto LAB_00af5c7c;
+        plVar8 = plVar10 + 1;
+        plVar9 = (long *)*plVar8;
+        if ((long *)*plVar8 == (long *)0x0) goto LAB_00af5c7c;
+      }
+      plVar8 = plVar10;
+      plVar9 = (long *)*plVar10;
+    } while ((long *)*plVar10 != (long *)0x0);
+    puVar6 = (undefined8 *)*plVar10;
                     /* try { // try from 00af5cc8 to 00bf5ccf has its CatchHandler @ 00affb6c */
-  if (p_Var7 == (__tree_node_base *)0x0) {
-    p_Var7 = operator_new(0x40);
+  }
+                    /* try { // try from 00af5c80 to 00bf5c87 has its CatchHandler @ 00affbb4 */
+  if (puVar6 == (undefined8 *)0x0) {
+    puVar6 = (undefined8 *)_Znwm(0x40);
                     /* try { // try from 00af5c8c to 00bf5c93 has its CatchHandler @ 00affba8 */
-    *(undefined8 *)p_Var7 = 0;
-    *(undefined8 *)(p_Var7 + 8) = 0;
-    *(long **)(p_Var7 + 0x10) = plVar9;
+    *puVar6 = 0;
+    puVar6[1] = 0;
+    puVar6[2] = plVar2;
                     /* try { // try from 00af5c98 to 00bf5c9f has its CatchHandler @ 00affb9c */
-    *(char **)(p_Var7 + 0x20) = param_5;
-    *(__tree_node_base **)(p_Var7 + 0x28) = p_Var7 + 0x28;
-    *(__tree_node_base **)(p_Var7 + 0x30) = p_Var7 + 0x28;
-    *(undefined8 *)(p_Var7 + 0x38) = 0;
-    *plVar3 = (long)p_Var7;
+    puVar6[4] = param_5;
+    puVar6[5] = puVar6 + 5;
+    puVar6[6] = puVar6 + 5;
+    puVar6[7] = 0;
+    *plVar10 = (long)puVar6;
                     /* try { // try from 00af5ca4 to 00bf5cab has its CatchHandler @ 00affb90 */
                     /* try { // try from 00af5cb0 to 00bf5cb7 has its CatchHandler @ 00affb84 */
-    p_Var5 = p_Var7;
-    if (*(long *)*plVar2 != 0) {
-      *plVar2 = *(long *)*plVar2;
-      p_Var5 = (__tree_node_base *)*plVar3;
+    puVar4 = puVar6;
+    if (*(long *)*plVar7 != 0) {
+      *plVar7 = *(long *)*plVar7;
+      puVar4 = (undefined8 *)*plVar10;
                     /* try { // try from 00af5cbc to 00bf5cc3 has its CatchHandler @ 00affb78 */
     }
                     /* try { // try from 00af5cd4 to 00bf5cdb has its CatchHandler @ 00affb54 */
-    std::__ndk1::__tree_balance_after_insert<std::__ndk1::__tree_node_base<void*>*>
-              ((__tree_node_base *)plVar2[1],p_Var5);
+    _ZNSt6__ndk127__tree_balance_after_insertIPNS_16__tree_node_baseIPvEEEEvT_S5_(plVar7[1],puVar4);
                     /* try { // try from 00af5ce0 to 00bf5ce7 has its CatchHandler @ 00affb48 */
-    plVar2[2] = plVar2[2] + 1;
+    plVar7[2] = plVar7[2] + 1;
   }
                     /* try { // try from 00af5cec to 00bf5cf3 has its CatchHandler @ 00affb30 */
-  plVar3 = operator_new(0x38);
-  plVar3[5] = 0;
-  plVar3[6] = 0;
+  plVar2 = (long *)_Znwm(0x38);
+  plVar2[5] = 0;
+  plVar2[6] = 0;
                     /* try { // try from 00af5cf8 to 00bf5cff has its CatchHandler @ 00affb28 */
-  plVar3[4] = 0;
-  plVar3[1] = (long)(p_Var7 + 0x28);
-  lVar6 = *(long *)(p_Var7 + 0x28);
+  plVar2[4] = 0;
+  plVar2[1] = (long)(puVar6 + 5);
+  lVar5 = puVar6[5];
                     /* try { // try from 00af5d04 to 00bf5d17 has its CatchHandler @ 00afffd8 */
-  *plVar3 = lVar6;
-  *(long **)(lVar6 + 8) = plVar3;
-  *(long **)(p_Var7 + 0x28) = plVar3;
+  *plVar2 = lVar5;
+  *(long **)(lVar5 + 8) = plVar2;
+  puVar6[5] = plVar2;
                     /* try { // try from 00af5d20 to 00bf5d27 has its CatchHandler @ 00affb20 */
-  *(long *)(p_Var7 + 0x38) = *(long *)(p_Var7 + 0x38) + 1;
-  plVar9 = plVar3 + 2;
-  *plVar9 = 0;
-  plVar3[3] = (long)param_4;
-  plVar3[4] = (long)plVar3;
+  puVar6[7] = puVar6[7] + 1;
+  plVar7 = plVar2 + 2;
+  *plVar7 = 0;
+  plVar2[3] = param_4;
+  plVar2[4] = (long)plVar2;
                     /* try { // try from 00af5d2c to 00bf5d3f has its CatchHandler @ 00afff94 */
-  plVar3[5] = (long)(p_Var7 + 0x28);
-  *(undefined1 *)(plVar3 + 6) = 0;
+  plVar2[5] = (long)(puVar6 + 5);
+  *(undefined1 *)(plVar2 + 6) = 0;
                     /* try { // try from 00af5d40 to 00bf5d5b has its CatchHandler @ 00af560c */
   pthread_mutex_unlock((pthread_mutex_t *)&DAT_010a09c8);
                     /* try { // try from 00af5d5c to 00bf5d63 has its CatchHandler @ 00affb18 */
                     /* try { // try from 00af5d64 to 00bf5ee7 has its CatchHandler @ 00af560c */
-  uVar4 = FUN_0056681c(param_1,DAT_010a0290,DAT_010a02a0,param_2,param_3,plVar9);
+  uVar3 = FUN_0056681c(param_1,DAT_010a0290,DAT_010a02a0,param_2,param_3,plVar7);
   pthread_mutex_lock((pthread_mutex_t *)&DAT_010a09c8);
-  if ((char)plVar3[6] == '\0') {
-    lVar6 = (**(code **)(*(long *)param_1 + 0xa8))(param_1,uVar4);
-    *plVar9 = lVar6;
+  if ((char)plVar2[6] == '\0') {
+    lVar5 = (**(code **)(*param_1 + 0xa8))(param_1,uVar3);
+    *plVar7 = lVar5;
   }
   else {
-    plVar9 = (long *)plVar3[4];
-    lVar1 = plVar3[5];
-    lVar6 = *plVar9;
-    *(long *)(lVar6 + 8) = plVar9[1];
-    *(long *)plVar9[1] = lVar6;
+    plVar7 = (long *)plVar2[4];
+    lVar1 = plVar2[5];
+    lVar5 = *plVar7;
+    *(long *)(lVar5 + 8) = plVar7[1];
+    *(long *)plVar7[1] = lVar5;
     *(long *)(lVar1 + 0x10) = *(long *)(lVar1 + 0x10) + -1;
-    operator_delete(plVar9);
+    _ZdlPv(plVar7);
   }
   pthread_mutex_unlock((pthread_mutex_t *)&DAT_010a09c8);
                     /* WARNING: Could not recover jumptable at 0x00af5df0. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-  (**(code **)(*(long *)param_1 + 0xb8))(param_1,uVar4);
+  (**(code **)(*param_1 + 0xb8))(param_1,uVar3);
   return;
 }
 

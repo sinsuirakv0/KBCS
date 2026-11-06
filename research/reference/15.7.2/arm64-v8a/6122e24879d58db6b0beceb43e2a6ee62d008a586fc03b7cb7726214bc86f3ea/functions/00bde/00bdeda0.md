@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdeda0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdeda0",
-  "name": "firebase::ModuleInitializer::Initialize",
+  "name": "_ZN8firebase17ModuleInitializer10InitializeEPNS_3AppEPvPKPFNS_10InitResultES2_S3_Em",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "30ed33fb531eb22b90e0b214397c079a191ef7e2c4b4d1b23d6f90e48ddf938b",
-  "source_text_sha256": "30ed33fb531eb22b90e0b214397c079a191ef7e2c4b4d1b23d6f90e48ddf938b"
+  "source_sha256": "59d7f7342c8ee6eee68eac511e1545a197701a0826093d56d6c09ead8bd6acea",
+  "source_text_sha256": "59d7f7342c8ee6eee68eac511e1545a197701a0826093d56d6c09ead8bd6acea"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b013a8](../00b01/00b013a8.md)
@@ -30,15 +29,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b01454](../00b01/00b01454.md)
 
-## 疑似コード 1/1 / UTF-8 212 bytes
+## 疑似コード / UTF-8 233 bytes
 
 ~~~c
 
-void firebase::ModuleInitializer::Initialize
-               (App *param_1,void *param_2,_func_InitResult_App_ptr_void_ptr *param_3,ulong param_4)
+void _ZN8firebase17ModuleInitializer10InitializeEPNS_3AppEPvPKPFNS_10InitResultES2_S3_Em(void)
 
 {
-  (*(code *)PTR_Initialize_00c1df08)();
+  (*(code *)
+    PTR__ZN8firebase17ModuleInitializer10InitializeEPNS_3AppEPvPKPFNS_10InitResultES2_S3_Em_00c1df08
+  )();
   return;
 }
 

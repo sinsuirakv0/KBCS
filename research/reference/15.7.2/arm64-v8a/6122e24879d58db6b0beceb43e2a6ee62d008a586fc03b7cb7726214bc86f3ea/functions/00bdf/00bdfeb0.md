@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdfeb0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdfeb0",
-  "name": "std::__ndk1::__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>>>::__find_equal<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>",
+  "name": "_ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers7RPCCallEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE12__find_equalIS7_EERPNS_16__tree_node_baseIPvEERPNS_15__tree_end_nodeISM_EERKT_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3511639aaa299d8fd63174595088626e7a3504e5cc80bfb2313c9f7ea85e6333",
-  "source_text_sha256": "3511639aaa299d8fd63174595088626e7a3504e5cc80bfb2313c9f7ea85e6333"
+  "source_sha256": "95ee6e4008cc52bfb047d63e6d78c8f40b8369b4d42410fbf58bc1f8b9c1f0c9",
+  "source_text_sha256": "95ee6e4008cc52bfb047d63e6d78c8f40b8369b4d42410fbf58bc1f8b9c1f0c9"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b22d68](../00b22/00b22d68.md)
@@ -30,26 +29,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b43eac](../00b43/00b43eac.md)
 
-## 疑似コード 1/1 / UTF-8 1909 bytes
+## 疑似コード / UTF-8 611 bytes
 
 ~~~c
 
-__tree_node_base ** __thiscall
-std::__ndk1::
-__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>>>
-::
-__find_equal<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>
-          (__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::RPCCall*>>>
-           *this,__tree_end_node **param_1,basic_string *param_2)
+void _ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers7RPCCallEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE12__find_equalIS7_EERPNS_16__tree_node_baseIPvEERPNS_15__tree_end_nodeISM_EERKT_
+               (void)
 
 {
-  __tree_node_base **pp_Var1;
-  
-  pp_Var1 = (__tree_node_base **)
-            (*(code *)
-              PTR___find_equal<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>_00c1e790
-            )();
-  return pp_Var1;
+  (*(code *)
+    PTR__ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers7RPCCallEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE12__find_equalIS7_EERPNS_16__tree_node_baseIPvEERPNS_15__tree_end_nodeISM_EERKT__00c1e790
+  )();
+  return;
 }
 
 ~~~

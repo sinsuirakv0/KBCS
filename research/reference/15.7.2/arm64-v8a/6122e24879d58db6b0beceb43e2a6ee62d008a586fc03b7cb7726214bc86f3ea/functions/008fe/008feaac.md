@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](008feaac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "da3c705aa34f9f0d2a0de3f0b4d35541597e6e9e9f5cd04685b85188b962c9a4",
-  "source_text_sha256": "da3c705aa34f9f0d2a0de3f0b4d35541597e6e9e9f5cd04685b85188b962c9a4"
+  "source_sha256": "f694f18758e4414fd84e06d8b54e17bdeaec23d76dcfe2cf4e775883486dbb2e",
+  "source_text_sha256": "f694f18758e4414fd84e06d8b54e17bdeaec23d76dcfe2cf4e775883486dbb2e"
 }
 ~~~
+
 ## 呼び出し元
 
 - [008f657c](../008f6/008f657c.md)
@@ -30,7 +29,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 48 bytes
+## 疑似コード / UTF-8 41 bytes
 
 ~~~c
 

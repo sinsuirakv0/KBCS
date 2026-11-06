@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b6dfac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b6dfac",
-  "name": "firebase::auth::metadata::CacheMethodIds",
+  "name": "_ZN8firebase4auth8metadata14CacheMethodIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8954392666d1ea75aee8347cbed71d42f2beac306d81923624b1555c15bae555",
-  "source_text_sha256": "8954392666d1ea75aee8347cbed71d42f2beac306d81923624b1555c15bae555"
+  "source_sha256": "25614b5a77c1835b443f0a8d391ec2f965933507ead2a3698fa1e918a2fdc74b",
+  "source_text_sha256": "25614b5a77c1835b443f0a8d391ec2f965933507ead2a3698fa1e918a2fdc74b"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,23 +35,22 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "%PG%com/google/firebase/auth/FirebaseUserMetadata"
 ~~~
-## 疑似コード 1/1 / UTF-8 616 bytes
+
+## 疑似コード / UTF-8 695 bytes
 
 ~~~c
 
-/* firebase::auth::metadata::CacheMethodIds(_JNIEnv*, _jobject*) */
-
-void firebase::auth::metadata::CacheMethodIds(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4auth8metadata14CacheMethodIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a19f8 == (_jclass *)0x0) {
-    DAT_010a19f8 = (_jclass *)
-                   util::FindClassGlobal
+  if (DAT_010a19f8 == 0) {
+    DAT_010a19f8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
                              (param_1,param_2,0,"com/google/firebase/auth/FirebaseUserMetadata",0);
   }
-  util::LookupMethodIds
-            (param_1,DAT_010a19f8,(MethodNameSignature *)&PTR_s_getLastSignInTimestamp_00c12960,2,
-             (_jmethodID **)&DAT_010a1a08,"com/google/firebase/auth/FirebaseUserMetadata");
+  _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+            (param_1,DAT_010a19f8,&PTR_s_getLastSignInTimestamp_00c12960,2,&DAT_010a1a08,
+             "com/google/firebase/auth/FirebaseUserMetadata");
   return;
 }
 

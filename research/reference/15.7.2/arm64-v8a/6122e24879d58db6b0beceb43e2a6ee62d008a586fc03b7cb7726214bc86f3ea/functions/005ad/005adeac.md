@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](005adeac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3744ffca2852f6fde98e3e548a3e892b0807f4d7fe665bd51fde8e2916f44358",
-  "source_text_sha256": "3744ffca2852f6fde98e3e548a3e892b0807f4d7fe665bd51fde8e2916f44358"
+  "source_sha256": "756a7827e220773d521f4fd07b40145174d7553963331fcdb7ee4ba897c3c51c",
+  "source_text_sha256": "756a7827e220773d521f4fd07b40145174d7553963331fcdb7ee4ba897c3c51c"
 }
 ~~~
+
 ## 呼び出し元
 
 - [005ab944](../005ab/005ab944.md)
@@ -35,19 +34,20 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdafc0](../00bda/00bdafc0.md)
 - [00bdd860](../00bdd/00bdd860.md)
 
-## 疑似コード 1/1 / UTF-8 311 bytes
+## 疑似コード / UTF-8 354 bytes
 
 ~~~c
 
 void FUN_005adeac(void)
 
 {
-  regex_error *prVar1;
+  undefined8 uVar1;
   
-  prVar1 = (regex_error *)__cxa_allocate_exception(0x18);
-  std::__ndk1::regex_error::regex_error(prVar1,5);
+  uVar1 = __cxa_allocate_exception(0x18);
+  _ZNSt6__ndk111regex_errorC2ENS_15regex_constants10error_typeE(uVar1,5);
                     /* WARNING: Subroutine does not return */
-  __cxa_throw(prVar1,PTR_typeinfo_00c1b4b8,PTR__regex_error_00c1b4c0);
+  __cxa_throw(uVar1,PTR__ZTINSt6__ndk111regex_errorE_00c1b4b8,
+              PTR__ZNSt6__ndk111regex_errorD1Ev_00c1b4c0);
 }
 
 ~~~

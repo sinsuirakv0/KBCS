@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ac9ebc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "fb15df68fb6564ac9cf6612a67b4dce158b46449dceddbcd2715981ebc8cd5dc",
-  "source_text_sha256": "fb15df68fb6564ac9cf6612a67b4dce158b46449dceddbcd2715981ebc8cd5dc"
+  "source_sha256": "3fcf4cb2dea5f9371cc7db1c7b46c62613952176d55ddb653fb7110720a683a7",
+  "source_text_sha256": "3fcf4cb2dea5f9371cc7db1c7b46c62613952176d55ddb653fb7110720a683a7"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ab3338](../00ab3/00ab3338.md)
@@ -35,7 +34,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdb0b0](../00bdb/00bdb0b0.md)
 - [00bdb140](../00bdb/00bdb140.md)
 
-## 疑似コード 1/1 / UTF-8 1730 bytes
+## 疑似コード / UTF-8 1618 bytes
 
 ~~~c
 
@@ -43,59 +42,58 @@ void FUN_00ac9ebc(undefined8 *param_1,ulong param_2)
 
 {
   ulong uVar1;
-  void *pvVar2;
-  long lVar3;
-  ulong uVar4;
+  long lVar2;
+  ulong uVar3;
   void *__src;
-  size_t sVar5;
-  void *__s;
+  size_t sVar4;
+  void *pvVar5;
   size_t __n;
   
-  pvVar2 = (void *)param_1[1];
-  if ((ulong)((param_1[2] - (long)pvVar2 >> 4) * -0x1111111111111111) < param_2) {
+  pvVar5 = (void *)param_1[1];
+  if ((ulong)((param_1[2] - (long)pvVar5 >> 4) * -0x1111111111111111) < param_2) {
     __src = (void *)*param_1;
-    sVar5 = (long)pvVar2 - (long)__src;
-    uVar1 = ((long)sVar5 >> 4) * -0x1111111111111111 + param_2;
+    sVar4 = (long)pvVar5 - (long)__src;
+    uVar1 = ((long)sVar4 >> 4) * -0x1111111111111111 + param_2;
     if (0x111111111111111 < uVar1) {
       FUN_00aca04c(param_1);
 LAB_00aca048:
                     /* WARNING: Subroutine does not return */
       FUN_0041e380();
     }
-    lVar3 = param_1[2] - (long)__src >> 4;
-    uVar4 = lVar3 * -0x2222222222222222;
-    if (uVar4 < uVar1 || uVar4 - uVar1 == 0) {
-      uVar4 = uVar1;
+    lVar2 = param_1[2] - (long)__src >> 4;
+    uVar3 = lVar2 * -0x2222222222222222;
+    if (uVar3 < uVar1 || uVar3 - uVar1 == 0) {
+      uVar3 = uVar1;
     }
-    if (0x88888888888887 < (ulong)(lVar3 * -0x1111111111111111)) {
-      uVar4 = 0x111111111111111;
+    if (0x88888888888887 < (ulong)(lVar2 * -0x1111111111111111)) {
+      uVar3 = 0x111111111111111;
     }
-    if (uVar4 == 0) {
-      pvVar2 = (void *)0x0;
+    if (uVar3 == 0) {
+      lVar2 = 0;
     }
     else {
-      if (0x111111111111111 < uVar4) goto LAB_00aca048;
-      pvVar2 = operator_new(uVar4 * 0xf0);
+      if (0x111111111111111 < uVar3) goto LAB_00aca048;
+      lVar2 = _Znwm(uVar3 * 0xf0);
     }
-    __s = (void *)((long)pvVar2 + ((long)sVar5 >> 4) * 0x10);
+    pvVar5 = (void *)(lVar2 + ((long)sVar4 >> 4) * 0x10);
     __n = ((param_2 * 0xf0 - 0xf0) / 0xf0) * 0xf0 + 0xf0;
-    memset(__s,0,__n);
-    memcpy((void *)((long)__s - sVar5),__src,sVar5);
-    *param_1 = (void *)((long)__s - sVar5);
-    param_1[1] = (long)__s + __n;
-    param_1[2] = (void *)((long)pvVar2 + uVar4 * 0xf0);
+    memset(pvVar5,0,__n);
+    memcpy((void *)((long)pvVar5 - sVar4),__src,sVar4);
+    *param_1 = (void *)((long)pvVar5 - sVar4);
+    param_1[1] = (long)pvVar5 + __n;
+    param_1[2] = lVar2 + uVar3 * 0xf0;
     if (__src != (void *)0x0) {
-      operator_delete(__src);
+      _ZdlPv(__src);
       return;
     }
   }
   else {
     if (param_2 != 0) {
-      sVar5 = ((param_2 * 0xf0 - 0xf0) / 0xf0) * 0xf0 + 0xf0;
-      memset(pvVar2,0,sVar5);
-      pvVar2 = (void *)((long)pvVar2 + sVar5);
+      sVar4 = ((param_2 * 0xf0 - 0xf0) / 0xf0) * 0xf0 + 0xf0;
+      memset(pvVar5,0,sVar4);
+      pvVar5 = (void *)((long)pvVar5 + sVar4);
     }
-    param_1[1] = pvVar2;
+    param_1[1] = pvVar5;
   }
   return;
 }

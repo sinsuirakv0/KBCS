@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b1cedc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b1cedc",
-  "name": "flatbuffers::Parser::ParseNestedFlatbuffer",
+  "name": "_ZN11flatbuffers6Parser21ParseNestedFlatbufferERNS_5ValueEPNS_8FieldDefEmPKNS_9StructDefE",
   "size": 1312,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "54a8fc1c7f227c0af8731d1a32b84121761da1f66d32251300b1616ee77268d5",
-  "source_text_sha256": "54a8fc1c7f227c0af8731d1a32b84121761da1f66d32251300b1616ee77268d5"
+  "source_sha256": "dadecdc388f8e8b2127509534af645a66b02a45c810ec41796a0c99c83faf239",
+  "source_text_sha256": "dadecdc388f8e8b2127509534af645a66b02a45c810ec41796a0c99c83faf239"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdf850](../00bdf/00bdf850.md)
@@ -57,45 +56,39 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "error: "
 "std::unique_ptr"
 ~~~
-## 疑似コード 1/1 / UTF-8 14791 bytes
+
+## 疑似コード / UTF-8 11544 bytes
 
 ~~~c
 
-/* flatbuffers::Parser::ParseNestedFlatbuffer(flatbuffers::Value&, flatbuffers::FieldDef*, unsigned
-   long, flatbuffers::StructDef const*) */
-
-void flatbuffers::Parser::ParseNestedFlatbuffer
-               (Value *param_1,FieldDef *param_2,ulong param_3,StructDef *param_4)
+void _ZN11flatbuffers6Parser21ParseNestedFlatbufferERNS_5ValueEPNS_8FieldDefEmPKNS_9StructDefE
+               (char *param_1,long *param_2,long param_3,long param_4,undefined8 param_5,
+               undefined8 param_6)
 
 {
-  vector_downward *this;
-  long lVar1;
-  undefined8 *puVar2;
-  bool bVar3;
-  undefined8 uVar4;
-  uint uVar5;
-  char **ppcVar6;
-  char **ppcVar7;
-  basic_string *pbVar8;
-  uint in_w4;
-  char *in_x8;
-  undefined1 *puVar9;
-  ulong uVar10;
+  long *plVar1;
+  long lVar2;
+  undefined8 *puVar3;
+  bool bVar4;
+  undefined1 *puVar5;
+  undefined1 *puVar6;
+  ulong uVar7;
+  ulong uVar8;
+  undefined8 *puVar9;
+  undefined8 *puVar10;
   ulong uVar11;
-  undefined8 *puVar12;
-  ulong uVar13;
-  FieldDef *pFVar14;
-  char **ppcVar15;
-  char **ppcVar16;
-  char **ppcVar17;
-  long lVar18;
-  long lVar19;
-  char *pcVar20;
-  char *pcVar21;
-  char *pcVar22;
+  byte *pbVar12;
+  undefined1 *puVar13;
+  undefined1 *puVar14;
+  undefined1 *puVar15;
+  long lVar16;
+  long lVar17;
+  undefined8 uVar18;
+  undefined8 uVar19;
+  undefined8 uVar20;
   ulong local_6d8;
   ulong local_6d0;
-  char **local_6c8;
+  undefined1 *local_6c8;
   uint local_6c0;
   undefined2 uStack_6bc;
   undefined2 uStack_6ba;
@@ -157,95 +150,95 @@ void flatbuffers::Parser::ParseNestedFlatbuffer
   undefined8 local_540;
   undefined8 local_538;
   undefined2 local_530;
-  Parser aPStack_528 [176];
-  __tree_node **local_478;
-  __tree_node *local_470;
+  long alStack_528 [22];
+  undefined8 *local_478;
+  undefined8 local_470;
   undefined8 local_468;
   undefined8 local_460;
   undefined8 local_458;
-  char acStack_3f0 [56];
+  undefined1 auStack_3f0 [56];
   uint local_3b8;
   uint local_3b0;
   int local_3a8;
   undefined4 uStack_3a4;
   ulong local_390;
   undefined8 local_2e8;
-  IDLOptions aIStack_250 [408];
-  Value local_b8;
+  undefined1 auStack_250 [408];
+  undefined1 local_b8;
   long local_70;
   
-  lVar1 = tpidr_el0;
-  local_70 = *(long *)(lVar1 + 0x28);
-  if (*(int *)(param_1 + 0x14) == 0x5b) {
-    ParseAnyValue(param_1,param_2,param_3,param_4,in_w4,false);
-    in_x8[1] = '\x01';
-    if (*in_x8 != '\0') goto LAB_00b1d3c4;
+  lVar2 = tpidr_el0;
+  local_70 = *(long *)(lVar2 + 0x28);
+  if (*(int *)((long)param_2 + 0x14) == 0x5b) {
+    _ZN11flatbuffers6Parser13ParseAnyValueERNS_5ValueEPNS_8FieldDefEmPKNS_9StructDefEjb
+              (param_1,param_2,param_3,param_4,param_5,param_6,0,0);
+    param_1[1] = '\x01';
+    if (*param_1 != '\0') goto LAB_00b1d3c4;
   }
   else {
-    lVar18 = *(long *)param_1;
-    SkipAnyJsonValue();
-    in_x8[1] = '\x01';
-    if (*in_x8 != '\0') goto LAB_00b1d3c4;
-    lVar19 = *(long *)param_1;
-    ppcVar15 = (char **)(lVar18 + -1);
+    lVar16 = *param_2;
+    _ZN11flatbuffers6Parser16SkipAnyJsonValueEv(param_1,param_2);
+    param_1[1] = '\x01';
+    if (*param_1 != '\0') goto LAB_00b1d3c4;
+    lVar17 = *param_2;
+    puVar13 = (undefined1 *)(lVar16 + -1);
     local_6d0 = 0;
-    local_6c8 = (char **)0x0;
+    local_6c8 = (undefined1 *)0x0;
     local_6d8 = 0;
-    ppcVar17 = (char **)(lVar19 + -1);
-    uVar13 = (long)ppcVar17 - (long)ppcVar15;
-    if (0xffffffffffffffef < uVar13) {
+    puVar15 = (undefined1 *)(lVar17 + -1);
+    uVar11 = (long)puVar15 - (long)puVar13;
+    if (0xffffffffffffffef < uVar11) {
                     /* WARNING: Subroutine does not return */
       abort();
     }
-    if (uVar13 < 0x17) {
-      local_6d8 = (ulong)(byte)((int)uVar13 << 1);
-      ppcVar6 = (char **)((ulong)&local_6d8 | 1);
+    if (uVar11 < 0x17) {
+      local_6d8 = (ulong)(byte)((int)uVar11 << 1);
+      puVar5 = (undefined1 *)((ulong)&local_6d8 | 1);
     }
     else {
-      uVar10 = uVar13 + 0x10 & 0xfffffffffffffff0;
-      ppcVar6 = operator_new(uVar10);
-      local_6d8 = uVar10 | 1;
-      local_6d0 = uVar13;
-      local_6c8 = ppcVar6;
+      uVar7 = uVar11 + 0x10 & 0xfffffffffffffff0;
+      puVar5 = (undefined1 *)_Znwm(uVar7);
+      local_6d8 = uVar7 | 1;
+      local_6d0 = uVar11;
+      local_6c8 = puVar5;
     }
-    if (lVar18 != lVar19) {
-      uVar13 = lVar19 - lVar18;
-      ppcVar7 = ppcVar6;
-      if ((0x1f < uVar13) &&
-         ((ppcVar17 <= ppcVar6 || ((char **)((long)ppcVar6 + uVar13) <= ppcVar15)))) {
-        uVar11 = uVar13 & 0xffffffffffffffe0;
-        ppcVar7 = ppcVar6 + 2;
-        ppcVar6 = (char **)((long)ppcVar6 + uVar11);
-        puVar12 = (undefined8 *)(lVar18 + 0xf);
-        uVar10 = uVar11;
+    if (lVar16 != lVar17) {
+      uVar11 = lVar17 - lVar16;
+      puVar6 = puVar5;
+      if ((0x1f < uVar11) && ((puVar15 <= puVar5 || (puVar5 + uVar11 <= puVar13)))) {
+        uVar8 = uVar11 & 0xffffffffffffffe0;
+        puVar9 = (undefined8 *)(puVar5 + 0x10);
+        puVar5 = puVar5 + uVar8;
+        puVar10 = (undefined8 *)(lVar16 + 0xf);
+        uVar7 = uVar8;
         do {
-          puVar2 = puVar12 + -1;
-          pcVar20 = (char *)puVar12[-2];
-          pcVar22 = (char *)puVar12[1];
-          pcVar21 = (char *)*puVar12;
-          uVar10 = uVar10 - 0x20;
-          puVar12 = puVar12 + 4;
-          ppcVar7[-1] = (char *)*puVar2;
-          ppcVar7[-2] = pcVar20;
-          ppcVar7[1] = pcVar22;
-          *ppcVar7 = pcVar21;
-          ppcVar7 = ppcVar7 + 4;
-        } while (uVar10 != 0);
-        ppcVar7 = ppcVar6;
-        ppcVar15 = (char **)((long)ppcVar15 + uVar11);
-        if (uVar13 == uVar11) goto LAB_00b1d044;
+          puVar3 = puVar10 + -1;
+          uVar18 = puVar10[-2];
+          uVar20 = puVar10[1];
+          uVar19 = *puVar10;
+          uVar7 = uVar7 - 0x20;
+          puVar10 = puVar10 + 4;
+          puVar9[-1] = *puVar3;
+          puVar9[-2] = uVar18;
+          puVar9[1] = uVar20;
+          *puVar9 = uVar19;
+          puVar9 = puVar9 + 4;
+        } while (uVar7 != 0);
+        puVar6 = puVar5;
+        puVar13 = puVar13 + uVar8;
+        if (uVar11 == uVar8) goto LAB_00b1d044;
       }
       do {
-        ppcVar16 = (char **)((long)ppcVar15 + 1);
-        ppcVar6 = (char **)((long)ppcVar7 + 1);
-        *(undefined1 *)ppcVar7 = *(undefined1 *)ppcVar15;
-        ppcVar7 = ppcVar6;
-        ppcVar15 = ppcVar16;
-      } while (ppcVar17 != ppcVar16);
+        puVar14 = puVar13 + 1;
+        puVar5 = puVar6 + 1;
+        *puVar6 = *puVar13;
+        puVar6 = puVar5;
+        puVar13 = puVar14;
+      } while (puVar15 != puVar14);
     }
 LAB_00b1d044:
     local_540 = DAT_002b2820;
-    uVar4 = s__generated_002ac2f1._0_8_;
+    uVar18 = s__generated_002ac2f1._0_8_;
     uStack_6b8 = 0x100010100000002;
     local_6b0 = (void *)0x0;
     local_6a0 = 0x1e;
@@ -309,127 +302,121 @@ LAB_00b1d044:
     uStack_5a8 = 0;
     uStack_570 = 0x14;
     local_567 = 0x6465;
-    *(undefined1 *)ppcVar6 = 0;
-    uStack_56f = (undefined7)uVar4;
-    cStack_568 = SUB81(uVar4,7);
+    *puVar5 = 0;
+    uStack_56f = (undefined7)uVar18;
+    cStack_568 = SUB81(uVar18,7);
     local_565 = 0;
     local_550 = 0;
     uStack_548 = 0;
     local_558 = 0;
     local_538 = 0;
     local_530 = 0x101;
-    Parser(aPStack_528,(IDLOptions *)&local_6c0);
-    IDLOptions::~IDLOptions((IDLOptions *)&local_6c0);
-    local_2e8 = *(undefined8 *)(param_3 + 0xe0);
-    if (aPStack_528 != (Parser *)param_1) {
-      std::__ndk1::
-      __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>>>
-      ::
-      __assign_multi<std::__ndk1::__tree_const_iterator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::__tree_node<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,void*>*,long>>
-                ((__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>>>
-                  *)&local_478,*(undefined8 *)(param_1 + 0xb0),param_1 + 0xb8);
-      std::__ndk1::vector<flatbuffers::EnumDef*,std::__ndk1::allocator<flatbuffers::EnumDef*>>::
-      assign<flatbuffers::EnumDef**>
-                ((vector<flatbuffers::EnumDef*,std::__ndk1::allocator<flatbuffers::EnumDef*>> *)
-                 &local_460,*(EnumDef ***)(param_1 + 200),*(EnumDef ***)(param_1 + 0xd0));
+    _ZN11flatbuffers6ParserC2ERKNS_10IDLOptionsE(alStack_528,&local_6c0);
+    _ZN11flatbuffers10IDLOptionsD2Ev(&local_6c0);
+    local_2e8 = *(undefined8 *)(param_4 + 0xe0);
+    if (alStack_528 != param_2) {
+      _ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers7EnumDefEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE14__assign_multiINS_21__tree_const_iteratorISB_PNS_11__tree_nodeISB_PvEElEEEEvT_SP_
+                (&local_478,param_2[0x16],param_2 + 0x17);
+      _ZNSt6__ndk16vectorIPN11flatbuffers7EnumDefENS_9allocatorIS3_EEE6assignIPS3_EENS_9enable_ifIXaasr21__is_forward_iteratorIT_EE5valuesr16is_constructibleIS3_NS_15iterator_traitsISA_E9referenceEEE5valueEvE4typeESA_SA_
+                (&local_460,param_2[0x19],param_2[0x1a]);
     }
-    IDLOptions::operator=(aIStack_250,(IDLOptions *)(param_1 + 0x2d8));
-    local_b8 = param_1[0x470];
-    ppcVar15 = (char **)((ulong)&local_6d8 | 1);
+    _ZN11flatbuffers10IDLOptionsaSERKS0_(auStack_250,param_2 + 0x5b);
+    local_b8 = (undefined1)param_2[0x8e];
+    puVar13 = (undefined1 *)((ulong)&local_6d8 | 1);
     if ((local_6d8 & 1) != 0) {
-      ppcVar15 = local_6c8;
+      puVar13 = local_6c8;
     }
-    pbVar8 = (basic_string *)0x0;
-    uVar13 = Parse((char *)aPStack_528,ppcVar15,(char *)0x0);
-    std::__ndk1::
-    __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>>>
-    ::destroy((__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,flatbuffers::EnumDef*>>>
-               *)&local_478,local_470);
-    local_470 = (__tree_node *)0x0;
+    uVar11 = _ZN11flatbuffers6Parser5ParseEPKcPS2_S2_(alStack_528,puVar13,0,0);
+    _ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers7EnumDefEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE7destroyEPNS_11__tree_nodeISB_PvEE
+              (&local_478,local_470);
+    local_470 = 0;
     local_468 = 0;
     local_458 = local_460;
     local_478 = &local_470;
-    if ((uVar13 & 1) == 0) {
-      std::__ndk1::operator+((__ndk1 *)"error: ",acStack_3f0,pbVar8);
-      Message((Parser *)param_1,(basic_string *)&local_6c0);
+    if ((uVar11 & 1) == 0) {
+      _ZNSt6__ndk1plIcNS_11char_traitsIcEENS_9allocatorIcEEEENS_12basic_stringIT_T0_T1_EEPKS6_RKS9_
+                (&local_6c0,"error: ",auStack_3f0);
+      _ZN11flatbuffers6Parser7MessageERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+                (param_2,&local_6c0);
       if ((local_6c0 & 1) != 0) {
-        operator_delete(local_6b0);
+        _ZdlPv(local_6b0);
       }
-      in_x8[0] = '\x01';
-      in_x8[1] = '\x01';
-      bVar3 = true;
+      param_1[0] = '\x01';
+      param_1[1] = '\x01';
+      bVar4 = true;
     }
     else {
-      this = (vector_downward *)(param_1 + 0x150);
-      if (*(ulong *)(param_1 + 0x198) < local_390) {
-        *(ulong *)(param_1 + 0x198) = local_390;
+      plVar1 = param_2 + 0x2a;
+      if ((ulong)param_2[0x33] < local_390) {
+        param_2[0x33] = local_390;
       }
-      lVar18 = *(long *)(param_1 + 0x180);
-      uVar13 = local_390 - 1 &
+      lVar16 = param_2[0x30];
+      uVar11 = local_390 - 1 &
                -((ulong)((local_3b8 - local_3a8) + local_3b0) +
-                (ulong)(uint)((*(int *)(param_1 + 0x170) - (int)lVar18) + *(int *)(param_1 + 0x178))
-                );
-      if ((ulong)(lVar18 - *(long *)(param_1 + 0x188)) < uVar13) {
-        vector_downward::reallocate(this,uVar13);
-        puVar9 = (undefined1 *)(*(long *)(param_1 + 0x180) - uVar13);
-        *(undefined1 **)(param_1 + 0x180) = puVar9;
+                (ulong)(uint)(((int)param_2[0x2e] - (int)lVar16) + (int)param_2[0x2f]));
+      if ((ulong)(lVar16 - param_2[0x31]) < uVar11) {
+        _ZN11flatbuffers15vector_downward10reallocateEm(plVar1,uVar11);
+        puVar13 = (undefined1 *)(param_2[0x30] - uVar11);
+        param_2[0x30] = (long)puVar13;
 LAB_00b1d2bc:
-        *puVar9 = 0;
-        if (uVar13 != 1) {
-          uVar10 = 1;
+        *puVar13 = 0;
+        if (uVar11 != 1) {
+          uVar7 = 1;
           do {
-            *(undefined1 *)(*(long *)(param_1 + 0x180) + uVar10) = 0;
-            uVar10 = uVar10 + 1;
-          } while (uVar13 != uVar10);
+            *(undefined1 *)(param_2[0x30] + uVar7) = 0;
+            uVar7 = uVar7 + 1;
+          } while (uVar11 != uVar7);
         }
       }
       else {
-        puVar9 = (undefined1 *)(lVar18 - uVar13);
-        *(undefined1 **)(param_1 + 0x180) = puVar9;
-        if (uVar13 != 0) goto LAB_00b1d2bc;
+        puVar13 = (undefined1 *)(lVar16 - uVar11);
+        param_2[0x30] = (long)puVar13;
+        if (uVar11 != 0) goto LAB_00b1d2bc;
       }
-      uVar13 = ((ulong)local_3b8 - (long)CONCAT44(uStack_3a4,local_3a8)) + (ulong)local_3b0;
-      uVar10 = uVar13 & 0xffffffff;
-      FlatBufferBuilder::StartVector((FlatBufferBuilder *)this,uVar10,1);
-      if (uVar10 != 0) {
-        lVar18 = *(long *)(param_1 + 0x180);
-        if ((ulong)(lVar18 - *(long *)(param_1 + 0x188)) < uVar10) {
-          vector_downward::reallocate(this,uVar10);
-          lVar18 = *(long *)(param_1 + 0x180);
+      uVar11 = ((ulong)local_3b8 - (long)CONCAT44(uStack_3a4,local_3a8)) + (ulong)local_3b0;
+      uVar7 = uVar11 & 0xffffffff;
+      _ZN11flatbuffers17FlatBufferBuilder11StartVectorEmm(plVar1,uVar7,1);
+      if (uVar7 != 0) {
+        lVar16 = param_2[0x30];
+        if ((ulong)(lVar16 - param_2[0x31]) < uVar7) {
+          _ZN11flatbuffers15vector_downward10reallocateEm(plVar1,uVar7);
+          lVar16 = param_2[0x30];
         }
-        *(void **)(param_1 + 0x180) = (void *)(lVar18 - uVar10);
-        memcpy((void *)(lVar18 - uVar10),(void *)CONCAT44(uStack_3a4,local_3a8),uVar10);
+        param_2[0x30] = (long)(lVar16 - uVar7);
+        memcpy((void *)(lVar16 - uVar7),(void *)CONCAT44(uStack_3a4,local_3a8),uVar7);
       }
-      param_1[0x196] = (Value)0x0;
-      uVar5 = FlatBufferBuilder::PushElement<unsigned_int>((FlatBufferBuilder *)this,(uint)uVar13);
-      NumToString<unsigned_int>(uVar5);
-      pFVar14 = param_2 + 0x20;
-      if (((byte)*pFVar14 & 1) == 0) {
-        *(undefined2 *)pFVar14 = 0;
+      *(undefined1 *)((long)param_2 + 0x196) = 0;
+      _ZN11flatbuffers17FlatBufferBuilder11PushElementIjEEjT_(plVar1,uVar11 & 0xffffffff);
+      _ZN11flatbuffers11NumToStringIjEENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEET_
+                (&local_6c0);
+      pbVar12 = (byte *)(param_3 + 0x20);
+      if ((*pbVar12 & 1) == 0) {
+        pbVar12[0] = 0;
+        pbVar12[1] = 0;
       }
       else {
-        **(undefined1 **)(param_2 + 0x30) = 0;
-        *(undefined8 *)(param_2 + 0x28) = 0;
-        if (((byte)param_2[0x20] & 1) != 0) {
-          operator_delete(*(void **)(param_2 + 0x30));
-          *(undefined8 *)(param_2 + 0x20) = 0;
+        **(undefined1 **)(param_3 + 0x30) = 0;
+        *(undefined8 *)(param_3 + 0x28) = 0;
+        if ((*(byte *)(param_3 + 0x20) & 1) != 0) {
+          _ZdlPv(*(void **)(param_3 + 0x30));
+          *(undefined8 *)(param_3 + 0x20) = 0;
         }
       }
-      bVar3 = false;
-      *(void **)(param_2 + 0x30) = local_6b0;
-      *(undefined8 *)(param_2 + 0x28) = uStack_6b8;
-      *(ulong *)pFVar14 = CONCAT26(uStack_6ba,CONCAT24(uStack_6bc,local_6c0));
+      bVar4 = false;
+      *(void **)(param_3 + 0x30) = local_6b0;
+      *(undefined8 *)(param_3 + 0x28) = uStack_6b8;
+      *(ulong *)pbVar12 = CONCAT26(uStack_6ba,CONCAT24(uStack_6bc,local_6c0));
     }
-    ~Parser(aPStack_528);
+    _ZN11flatbuffers6ParserD2Ev(alStack_528);
     if ((local_6d8 & 1) != 0) {
-      operator_delete(local_6c8);
+      _ZdlPv(local_6c8);
     }
-    if (bVar3) goto LAB_00b1d3c4;
+    if (bVar4) goto LAB_00b1d3c4;
   }
-  in_x8[0] = '\0';
-  in_x8[1] = '\0';
+  param_1[0] = '\0';
+  param_1[1] = '\0';
 LAB_00b1d3c4:
-  if (*(long *)(lVar1 + 0x28) != local_70) {
+  if (*(long *)(lVar2 + 0x28) != local_70) {
                     /* WARNING: Subroutine does not return */
     __stack_chk_fail();
   }

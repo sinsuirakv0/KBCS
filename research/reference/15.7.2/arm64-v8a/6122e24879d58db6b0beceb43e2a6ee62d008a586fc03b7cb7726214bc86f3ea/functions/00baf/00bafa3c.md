@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bafa3c.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bafa3c",
-  "name": "std::__ndk1::__num_put_base::__format_float",
+  "name": "_ZNSt6__ndk114__num_put_base14__format_floatEPcPKcj",
   "size": 184,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8def53d6a0b5f1e979349cbe210b0986347c2db80867384c362d8a7cd1c49b32",
-  "source_text_sha256": "8def53d6a0b5f1e979349cbe210b0986347c2db80867384c362d8a7cd1c49b32"
+  "source_sha256": "169168058cacee446172326b7a20d3d42789a0d6794898bce7bd35b9a90166f1",
+  "source_text_sha256": "169168058cacee446172326b7a20d3d42789a0d6794898bce7bd35b9a90166f1"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,13 +29,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 2006 bytes
+## 疑似コード / UTF-8 1857 bytes
 
 ~~~c
 
-/* std::__ndk1::__num_put_base::__format_float(char*, char const*, unsigned int) */
-
-bool std::__ndk1::__num_put_base::__format_float(char *param_1,char *param_2,uint param_3)
+bool _ZNSt6__ndk114__num_put_base14__format_floatEPcPKcj(char *param_1,char *param_2,uint param_3)
 
 {
   uint uVar1;

@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bb0aac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "830acac1c6917e7c7fd2aa46b6790c9c15ca56739ad558498f9eddfeb1341d74",
-  "source_text_sha256": "830acac1c6917e7c7fd2aa46b6790c9c15ca56739ad558498f9eddfeb1341d74"
+  "source_sha256": "497bcf393198010e09d2386e052e8436a266ae1d87ea8488fbcd1f6acac72ac3",
+  "source_text_sha256": "497bcf393198010e09d2386e052e8436a266ae1d87ea8488fbcd1f6acac72ac3"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bb0a2c](../00bb0/00bb0a2c.md)
@@ -46,7 +45,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "October"
 "September"
 ~~~
-## 疑似コード 1/1 / UTF-8 6497 bytes
+
+## 疑似コード / UTF-8 6290 bytes
 
 ~~~c
 

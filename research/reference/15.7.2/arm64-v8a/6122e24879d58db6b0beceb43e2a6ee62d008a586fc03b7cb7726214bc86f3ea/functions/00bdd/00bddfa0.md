@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddfa0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddfa0",
-  "name": "firebase::util::JStringToString",
+  "name": "_ZN8firebase4util15JStringToStringEP7_JNIEnvP8_jobject",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b5db001f078346654822f387e0c57e716e76747adc54381c0f8dd34081419296",
-  "source_text_sha256": "b5db001f078346654822f387e0c57e716e76747adc54381c0f8dd34081419296"
+  "source_sha256": "fafa19966ec4d882810b89d972a5ee9cdbed63e5445dd401db7086e9b6bd1cdd",
+  "source_text_sha256": "fafa19966ec4d882810b89d972a5ee9cdbed63e5445dd401db7086e9b6bd1cdd"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae3268](../00ae3/00ae3268.md)
@@ -48,14 +47,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00af22dc](../00af2/00af22dc.md)
 
-## 疑似コード 1/1 / UTF-8 165 bytes
+## 疑似コード / UTF-8 167 bytes
 
 ~~~c
 
-void __thiscall firebase::util::JStringToString(util *this,_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util15JStringToStringEP7_JNIEnvP8_jobject(void)
 
 {
-  (*(code *)PTR_JStringToString_00c1d808)();
+  (*(code *)PTR__ZN8firebase4util15JStringToStringEP7_JNIEnvP8_jobject_00c1d808)();
   return;
 }
 

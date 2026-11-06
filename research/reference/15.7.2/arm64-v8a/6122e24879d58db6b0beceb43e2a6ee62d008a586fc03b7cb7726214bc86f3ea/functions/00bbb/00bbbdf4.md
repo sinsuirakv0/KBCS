@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbbdf4.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8c220f841693fb7764444da0651e748f37b2bb7fb6fbed24e51de0578992f24e",
-  "source_text_sha256": "8c220f841693fb7764444da0651e748f37b2bb7fb6fbed24e51de0578992f24e"
+  "source_sha256": "df906d4277d9f9902da3146e7f277251c1d44a5e9dc305652ebfb6f1cc582ea7",
+  "source_text_sha256": "df906d4277d9f9902da3146e7f277251c1d44a5e9dc305652ebfb6f1cc582ea7"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bbba44](../00bbb/00bbba44.md)
@@ -31,7 +30,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdb6c0](../00bdb/00bdb6c0.md)
 
-## 疑似コード 1/1 / UTF-8 929 bytes
+## 疑似コード / UTF-8 999 bytes
 
 ~~~c
 
@@ -43,7 +42,8 @@ bool FUN_00bbbdf4(long param_1,long param_2)
   
   if (param_2 != 0) {
                     /* try { // try from 00bbbe2c to 00cbbe33 has its CatchHandler @ 00bbd2c4 */
-    lVar2 = __dynamic_cast(param_2,PTR_typeinfo_00c1bf48,PTR_typeinfo_00c1bf80,0);
+    lVar2 = __dynamic_cast(param_2,PTR__ZTIN10__cxxabiv116__shim_type_infoE_00c1bf48,
+                           PTR__ZTIN10__cxxabiv129__pointer_to_member_type_infoE_00c1bf80,0);
     bVar1 = false;
     if (lVar2 != 0) {
                     /* try { // try from 00bbbe38 to 00cbbe47 has its CatchHandler @ 00bbd2a8 */

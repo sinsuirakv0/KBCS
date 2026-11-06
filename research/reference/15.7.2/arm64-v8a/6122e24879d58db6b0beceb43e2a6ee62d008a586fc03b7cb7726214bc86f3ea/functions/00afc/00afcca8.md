@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afcca8.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afcca8",
-  "name": "firebase::CleanupNotifier::FindByOwner",
+  "name": "_ZN8firebase15CleanupNotifier11FindByOwnerEPv",
   "size": 144,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "beb4f684ddc0f581455e0af4a4d41a8fc32790d2d16506e2be485f27645e4c38",
-  "source_text_sha256": "beb4f684ddc0f581455e0af4a4d41a8fc32790d2d16506e2be485f27645e4c38"
+  "source_sha256": "945884a133c7c30a4f3a8d6f550d306e6c1e274b7de88ea4dc3a39679bbde19d",
+  "source_text_sha256": "945884a133c7c30a4f3a8d6f550d306e6c1e274b7de88ea4dc3a39679bbde19d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bddc90](../00bdd/00bddc90.md)
@@ -31,47 +30,48 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bddb20](../00bdd/00bddb20.md)
 - [00bddb30](../00bdd/00bddb30.md)
 
-## 疑似コード 1/1 / UTF-8 1246 bytes
+## 疑似コード / UTF-8 1334 bytes
 
 ~~~c
 
-/* firebase::CleanupNotifier::FindByOwner(void*) */
-
-long firebase::CleanupNotifier::FindByOwner(void *param_1)
+long _ZN8firebase15CleanupNotifier11FindByOwnerEPv(ulong param_1)
 
 {
   long *plVar1;
   long *plVar2;
   long *plVar3;
-  Mutex *this;
-  long lVar4;
+  undefined8 uVar4;
+  long lVar5;
   
                     /* try { // try from 00afccac to 00bfccb3 has its CatchHandler @ 00aff3cc */
-  this = *(Mutex **)PTR_cleanup_notifiers_by_owner_mutex__00c1b898;
-  Mutex::Acquire(this);
-  if (*(long *)PTR_cleanup_notifiers_by_owner__00c1b890 != 0) {
+  uVar4 = *(undefined8 *)
+           PTR__ZN8firebase15CleanupNotifier33cleanup_notifiers_by_owner_mutex_E_00c1b898;
+  _ZN8firebase5Mutex7AcquireEv(uVar4);
+  if (*(long *)PTR__ZN8firebase15CleanupNotifier27cleanup_notifiers_by_owner_E_00c1b890 != 0) {
                     /* try { // try from 00afccdc to 00bfccf3 has its CatchHandler @ 00aff3c8 */
-    plVar1 = (long *)(*(long *)PTR_cleanup_notifiers_by_owner__00c1b890 + 8);
+    plVar1 = (long *)(*(long *)
+                       PTR__ZN8firebase15CleanupNotifier27cleanup_notifiers_by_owner_E_00c1b890 + 8)
+    ;
     plVar3 = (long *)*plVar1;
     plVar2 = plVar1;
     if (plVar3 != (long *)0x0) {
       do {
                     /* try { // try from 00afccf4 to 00bfcd67 has its CatchHandler @ 00af560c */
-        if ((void *)plVar3[4] >= param_1) {
+        if ((ulong)plVar3[4] >= param_1) {
           plVar2 = plVar3;
         }
-        plVar3 = (long *)plVar3[(void *)plVar3[4] < param_1];
+        plVar3 = (long *)plVar3[(ulong)plVar3[4] < param_1];
       } while (plVar3 != (long *)0x0);
-      if ((plVar2 != plVar1) && ((void *)plVar2[4] <= param_1)) {
-        lVar4 = plVar2[5];
+      if ((plVar2 != plVar1) && ((ulong)plVar2[4] <= param_1)) {
+        lVar5 = plVar2[5];
         goto LAB_00afcd18;
       }
     }
   }
-  lVar4 = 0;
+  lVar5 = 0;
 LAB_00afcd18:
-  Mutex::Release(this);
-  return lVar4;
+  _ZN8firebase5Mutex7ReleaseEv(uVar4);
+  return lVar5;
 }
 
 ~~~

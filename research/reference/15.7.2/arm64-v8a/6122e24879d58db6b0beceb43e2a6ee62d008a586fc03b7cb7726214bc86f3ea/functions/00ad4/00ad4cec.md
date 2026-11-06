@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ad4cec.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "81a05aa239796f0134a72ab56000c9ec05db6ddad1680e8f8dbeb9dac6534ecc",
-  "source_text_sha256": "81a05aa239796f0134a72ab56000c9ec05db6ddad1680e8f8dbeb9dac6534ecc"
+  "source_sha256": "acdd189ea8a4bb98ff703b45a57ad3fa025af359354c7f1ecc51eb9559c2f9cc",
+  "source_text_sha256": "acdd189ea8a4bb98ff703b45a57ad3fa025af359354c7f1ecc51eb9559c2f9cc"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ad4424](../00ad4/00ad4424.md)
@@ -38,7 +37,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdb090](../00bdb/00bdb090.md)
 - [00bdb0b0](../00bdb/00bdb0b0.md)
 
-## 疑似コード 1/1 / UTF-8 2864 bytes
+## 疑似コード / UTF-8 2682 bytes
 
 ~~~c
 
@@ -47,89 +46,88 @@ ulong * FUN_00ad4cec(long *param_1,char *param_2)
 {
   ulong uVar1;
   long lVar2;
-  void *pvVar3;
-  size_t sVar4;
-  void *pvVar5;
+  size_t sVar3;
+  void *__ptr;
+  long lVar4;
+  long lVar5;
   long lVar6;
-  long lVar7;
-  long lVar8;
+  undefined1 *puVar7;
+  ulong *puVar8;
   undefined1 *puVar9;
-  ulong *puVar10;
-  undefined1 *puVar11;
   void *__dest;
   
   lVar2 = tpidr_el0;
-  lVar6 = *(long *)(lVar2 + 0x28);
-  lVar7 = param_1[1] - *param_1 >> 3;
-  puVar10 = (ulong *)(lVar7 * -0x5555555555555555);
-  puVar11 = (undefined1 *)((long)puVar10 + 1);
-  if (puVar11 < (undefined1 *)0xaaaaaaaaaaaaaab) {
-    lVar8 = param_1[2] - *param_1 >> 3;
-    puVar9 = (undefined1 *)(lVar8 * 0x5555555555555556);
-    if (puVar9 < puVar11 || (long)puVar9 - (long)puVar11 == 0) {
-      puVar9 = puVar11;
+  lVar4 = *(long *)(lVar2 + 0x28);
+  lVar5 = param_1[1] - *param_1 >> 3;
+  puVar8 = (ulong *)(lVar5 * -0x5555555555555555);
+  puVar9 = (undefined1 *)((long)puVar8 + 1);
+  if (puVar9 < (undefined1 *)0xaaaaaaaaaaaaaab) {
+    lVar6 = param_1[2] - *param_1 >> 3;
+    puVar7 = (undefined1 *)(lVar6 * 0x5555555555555556);
+    if (puVar7 < puVar9 || (long)puVar7 - (long)puVar9 == 0) {
+      puVar7 = puVar9;
     }
-    if (0x555555555555554 < (ulong)(lVar8 * -0x5555555555555555)) {
-      puVar9 = (undefined1 *)0xaaaaaaaaaaaaaaa;
+    if (0x555555555555554 < (ulong)(lVar6 * -0x5555555555555555)) {
+      puVar7 = (undefined1 *)0xaaaaaaaaaaaaaaa;
     }
-    if (puVar9 == (undefined1 *)0x0) {
-      pvVar3 = (void *)0x0;
+    if (puVar7 == (undefined1 *)0x0) {
+      lVar6 = 0;
     }
     else {
-      if ((undefined1 *)0xaaaaaaaaaaaaaaa < puVar9) {
-        if (*(long *)(lVar2 + 0x28) == lVar6) {
+      if ((undefined1 *)0xaaaaaaaaaaaaaaa < puVar7) {
+        if (*(long *)(lVar2 + 0x28) == lVar4) {
                     /* WARNING: Subroutine does not return */
           FUN_0041e380();
         }
         goto LAB_00ad4ee4;
       }
-      pvVar3 = operator_new((long)puVar9 * 0x18);
+      lVar6 = _Znwm((long)puVar7 * 0x18);
     }
-    puVar10 = (ulong *)((long)pvVar3 + lVar7 * 8);
-    sVar4 = strlen(param_2);
-    if (sVar4 < 0xfffffffffffffff8) {
-      if (sVar4 < 0x17) {
-        puVar11 = (undefined1 *)((long)puVar10 + 1);
-        *(char *)puVar10 = (char)((int)sVar4 << 1);
-        if (sVar4 != 0) goto LAB_00ad4e08;
+    puVar8 = (ulong *)(lVar6 + lVar5 * 8);
+    sVar3 = strlen(param_2);
+    if (sVar3 < 0xfffffffffffffff8) {
+      if (sVar3 < 0x17) {
+        puVar9 = (undefined1 *)((long)puVar8 + 1);
+        *(char *)puVar8 = (char)((int)sVar3 << 1);
+        if (sVar3 != 0) goto LAB_00ad4e08;
       }
       else {
-        uVar1 = (sVar4 & 0xfffffffffffffff8) + 8;
-        if ((sVar4 | 7) != 0x17) {
-          uVar1 = sVar4 | 7;
+        uVar1 = (sVar3 & 0xfffffffffffffff8) + 8;
+        if ((sVar3 | 7) != 0x17) {
+          uVar1 = sVar3 | 7;
         }
-        puVar11 = operator_new(uVar1 + 1);
-        puVar10[1] = sVar4;
-        puVar10[2] = (ulong)puVar11;
-        *puVar10 = uVar1 + 1 | 1;
+        puVar9 = (undefined1 *)_Znwm(uVar1 + 1);
+        puVar8[1] = sVar3;
+        puVar8[2] = (ulong)puVar9;
+        *puVar8 = uVar1 + 1 | 1;
 LAB_00ad4e08:
-        memmove(puVar11,param_2,sVar4);
+        memmove(puVar9,param_2,sVar3);
       }
-      puVar11[sVar4] = 0;
-      sVar4 = param_1[1] - *param_1;
-      __dest = (void *)((long)puVar10 - sVar4);
-      memcpy(__dest,(void *)*param_1,sVar4);
-      pvVar5 = (void *)*param_1;
+      puVar9[sVar3] = 0;
+      sVar3 = param_1[1] - *param_1;
+      __dest = (void *)((long)puVar8 - sVar3);
+      memcpy(__dest,(void *)*param_1,sVar3);
+      __ptr = (void *)*param_1;
       *param_1 = (long)__dest;
-      param_1[1] = (long)(puVar10 + 3);
-      param_1[2] = (long)((long)pvVar3 + (long)puVar9 * 0x18);
-      if (pvVar5 != (void *)0x0) {
-        operator_delete(pvVar5);
+      param_1[1] = (long)(puVar8 + 3);
+      param_1[2] = lVar6 + (long)puVar7 * 0x18;
+      if (__ptr != (void *)0x0) {
+        _ZdlPv(__ptr);
       }
-      if (*(long *)(lVar2 + 0x28) == lVar6) {
-        return puVar10 + 3;
+      if (*(long *)(lVar2 + 0x28) == lVar4) {
+        return puVar8 + 3;
       }
       goto LAB_00ad4ee4;
     }
   }
   else {
-    if (*(long *)(lVar2 + 0x28) != lVar6) goto LAB_00ad4ee4;
+    if (*(long *)(lVar2 + 0x28) != lVar4) goto LAB_00ad4ee4;
     FUN_0041e41c(param_1);
   }
                     /* catch() { ... } // from try @ 00ad5078 with catch @ 00ad4e9c */
-  if (*(long *)(lVar2 + 0x28) == lVar6) {
+  if (*(long *)(lVar2 + 0x28) == lVar4) {
                     /* WARNING: Subroutine does not return */
-    FUN_00418c24(puVar10);
+    FUN_00418c24(puVar8);
   }
 LAB_00ad4ee4:
                     /* WARNING: Subroutine does not return */

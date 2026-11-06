@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdeff0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdeff0",
-  "name": "reflection::CreateObject",
+  "name": "_ZN10reflection12CreateObjectERN11flatbuffers17FlatBufferBuilderENS0_6OffsetINS0_6StringEEENS3_INS0_6VectorINS3_INS_5FieldEEEEEEEbiiNS3_INS6_INS3_INS_8KeyValueEEEEEEENS3_INS6_IS5_EEEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "13f27aafe28cf44947d0a37ef12bcffb85e79938691659f1767b8cf3938215d4",
-  "source_text_sha256": "13f27aafe28cf44947d0a37ef12bcffb85e79938691659f1767b8cf3938215d4"
+  "source_sha256": "5788bd0440c6b10c697e8b41310011eaa651e9e845618746559f919fa3b16dd8",
+  "source_text_sha256": "5788bd0440c6b10c697e8b41310011eaa651e9e845618746559f919fa3b16dd8"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b290f4](../00b29/00b290f4.md)
@@ -30,14 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b29f9c](../00b29/00b29f9c.md)
 
-## 疑似コード 1/1 / UTF-8 103 bytes
+## 疑似コード / UTF-8 449 bytes
 
 ~~~c
 
-void reflection::CreateObject(void)
+void _ZN10reflection12CreateObjectERN11flatbuffers17FlatBufferBuilderENS0_6OffsetINS0_6StringEEENS3_INS0_6VectorINS3_INS_5FieldEEEEEEEbiiNS3_INS6_INS3_INS_8KeyValueEEEEEEENS3_INS6_IS5_EEEE
+               (void)
 
 {
-  (*(code *)PTR_CreateObject_00c1e030)();
+  (*(code *)
+    PTR__ZN10reflection12CreateObjectERN11flatbuffers17FlatBufferBuilderENS0_6OffsetINS0_6StringEEENS3_INS0_6VectorINS3_INS_5FieldEEEEEEEbiiNS3_INS6_INS3_INS_8KeyValueEEEEEEENS3_INS6_IS5_EEEE_00c1e030
+  )();
   return;
 }
 

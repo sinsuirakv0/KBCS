@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00baece0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00baece0",
-  "name": "std::__ndk1::__codecvt_utf8_utf16<char16_t>::do_max_length",
+  "name": "_ZNKSt6__ndk120__codecvt_utf8_utf16IDsE13do_max_lengthEv",
   "size": 28,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "cbf4ae43d069ff31684bccfb514e9c282d8f7db3744a379d03de9b77cd96f2d2",
-  "source_text_sha256": "cbf4ae43d069ff31684bccfb514e9c282d8f7db3744a379d03de9b77cd96f2d2"
+  "source_sha256": "da5a424c7b74816960d92f78e8c319b2b1b75a45fbe465f432da523cb6a7b040",
+  "source_text_sha256": "da5a424c7b74816960d92f78e8c319b2b1b75a45fbe465f432da523cb6a7b040"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,20 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 324 bytes
+## 疑似コード / UTF-8 206 bytes
 
 ~~~c
 
-/* std::__ndk1::__codecvt_utf8_utf16<char16_t>::do_max_length() const */
-
-undefined4 __thiscall
-std::__ndk1::__codecvt_utf8_utf16<char16_t>::do_max_length(__codecvt_utf8_utf16<char16_t> *this)
+undefined4 _ZNKSt6__ndk120__codecvt_utf8_utf16IDsE13do_max_lengthEv(long param_1)
 
 {
   undefined4 uVar1;
   
   uVar1 = 4;
-  if (((byte)this[0x18] & 4) != 0) {
+  if ((*(byte *)(param_1 + 0x18) & 4) != 0) {
     uVar1 = 7;
   }
   return uVar1;

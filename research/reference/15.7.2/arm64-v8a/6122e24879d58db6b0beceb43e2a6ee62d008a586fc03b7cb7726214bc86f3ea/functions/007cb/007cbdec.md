@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](007cbdec.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "2ddd754c6ac3339e2af45f5f6ac963d2d7151b11815bb8606e72fe1a1b93d032",
-  "source_text_sha256": "2ddd754c6ac3339e2af45f5f6ac963d2d7151b11815bb8606e72fe1a1b93d032"
+  "source_sha256": "43c11bcac56d229c7306f521ad7aa479cceb6fe5f1b5cd5266dd4b382b51d1c5",
+  "source_text_sha256": "43c11bcac56d229c7306f521ad7aa479cceb6fe5f1b5cd5266dd4b382b51d1c5"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -32,7 +31,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf40](../00bda/00bdaf40.md)
 - [00bdb0b0](../00bdb/00bdb0b0.md)
 
-## 疑似コード 1/1 / UTF-8 883 bytes
+## 疑似コード / UTF-8 856 bytes
 
 ~~~c
 
@@ -41,12 +40,12 @@ undefined8 * FUN_007cbdec(long param_1)
 {
   undefined8 uVar1;
   void *__src;
-  ulong __n;
+  size_t __n;
   undefined8 *puVar2;
   void *__dest;
   long lVar3;
   
-  puVar2 = operator_new(0x28);
+  puVar2 = (undefined8 *)_Znwm(0x28);
   uVar1 = *(undefined8 *)(param_1 + 8);
   __src = *(void **)(param_1 + 0x10);
   puVar2[3] = 0;
@@ -62,7 +61,7 @@ undefined8 * FUN_007cbdec(long param_1)
                     /* WARNING: Subroutine does not return */
       FUN_0044d968(puVar2 + 2);
     }
-    __dest = operator_new(__n);
+    __dest = (void *)_Znwm(__n);
     puVar2[2] = __dest;
     puVar2[4] = (long)__dest + __n;
     memcpy(__dest,__src,__n);

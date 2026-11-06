@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdfff0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdfff0",
-  "name": "std::__ndk1::__sort3<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Enum>&,flatbuffers::Offset<reflection::Enum>*>",
+  "name": "_ZNSt6__ndk17__sort3IRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection4EnumEEEPNS1_6OffsetIS5_EEEEjT0_SB_SB_T_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "df4c7b8c3d95c2b30e8a4bf04bbb83d2e994ba282701d807d6e603053b7ee9a9",
-  "source_text_sha256": "df4c7b8c3d95c2b30e8a4bf04bbb83d2e994ba282701d807d6e603053b7ee9a9"
+  "source_sha256": "98f6f14d518c3492c8f16cfd41c9fd612e33409308f05fba6633f9a19f85c8a8",
+  "source_text_sha256": "98f6f14d518c3492c8f16cfd41c9fd612e33409308f05fba6633f9a19f85c8a8"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b3c354](../00b3c/00b3c354.md)
@@ -33,21 +32,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b3ca98](../00b3c/00b3ca98.md)
 
-## 疑似コード 1/1 / UTF-8 480 bytes
+## 疑似コード / UTF-8 341 bytes
 
 ~~~c
 
-uint std::__ndk1::
-     __sort3<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Enum>&,flatbuffers::Offset<reflection::Enum>*>
-               (Offset *param_1,Offset *param_2,Offset *param_3,TableKeyComparator *param_4)
+void _ZNSt6__ndk17__sort3IRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection4EnumEEEPNS1_6OffsetIS5_EEEEjT0_SB_SB_T_
+               (void)
 
 {
-  uint uVar1;
-  
-  uVar1 = (*(code *)
-            PTR___sort3<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Enum>&,flatbuffers::Offset<reflection::Enum>*>_00c1e830
-          )((int)param_1);
-  return uVar1;
+  (*(code *)
+    PTR__ZNSt6__ndk17__sort3IRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection4EnumEEEPNS1_6OffsetIS5_EEEEjT0_SB_SB_T__00c1e830
+  )();
+  return;
 }
 
 ~~~

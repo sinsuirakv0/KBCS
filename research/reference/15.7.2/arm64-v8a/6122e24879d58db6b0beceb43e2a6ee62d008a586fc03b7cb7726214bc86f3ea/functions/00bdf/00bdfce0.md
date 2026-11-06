@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdfce0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdfce0",
-  "name": "std::__ndk1::__insertion_sort_incomplete<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Object>&,flatbuffers::Offset<reflection::Object>*>",
+  "name": "_ZNSt6__ndk127__insertion_sort_incompleteIRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection6ObjectEEEPNS1_6OffsetIS5_EEEEbT0_SB_T_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "fe350703c7720ed9e3ecea000e2c120ae8767f0f2fe95774d85aae0400a5172f",
-  "source_text_sha256": "fe350703c7720ed9e3ecea000e2c120ae8767f0f2fe95774d85aae0400a5172f"
+  "source_sha256": "217fe285794b6567e5157529e4c369e3d4b811abaa87d49b7a3f2daabe08efda",
+  "source_text_sha256": "217fe285794b6567e5157529e4c369e3d4b811abaa87d49b7a3f2daabe08efda"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b3b02c](../00b3b/00b3b02c.md)
@@ -30,21 +29,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b3bfb4](../00b3b/00b3bfb4.md)
 
-## 疑似コード 1/1 / UTF-8 531 bytes
+## 疑似コード / UTF-8 381 bytes
 
 ~~~c
 
-bool std::__ndk1::
-     __insertion_sort_incomplete<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Object>&,flatbuffers::Offset<reflection::Object>*>
-               (Offset *param_1,Offset *param_2,TableKeyComparator *param_3)
+void _ZNSt6__ndk127__insertion_sort_incompleteIRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection6ObjectEEEPNS1_6OffsetIS5_EEEEbT0_SB_T_
+               (void)
 
 {
-  bool bVar1;
-  
-  bVar1 = (bool)(*(code *)
-                  PTR___insertion_sort_incomplete<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Object>&,flatbuffers::Offset<reflection::Object>*>_00c1e6a8
-                )((char)param_1);
-  return bVar1;
+  (*(code *)
+    PTR__ZNSt6__ndk127__insertion_sort_incompleteIRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection6ObjectEEEPNS1_6OffsetIS5_EEEEbT0_SB_T__00c1e6a8
+  )();
+  return;
 }
 
 ~~~

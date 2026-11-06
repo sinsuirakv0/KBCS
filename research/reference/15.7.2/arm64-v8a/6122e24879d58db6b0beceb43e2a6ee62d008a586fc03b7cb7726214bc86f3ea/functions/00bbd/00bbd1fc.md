@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbd1fc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b4297530d908b2894a9a7a49af1529706f5f0132d0d928d73caec3582efa8a0f",
-  "source_text_sha256": "b4297530d908b2894a9a7a49af1529706f5f0132d0d928d73caec3582efa8a0f"
+  "source_sha256": "8f076acf1f4d6f7f56f617139716f600b5ae640f7550d4e021e7342895def71d",
+  "source_text_sha256": "8f076acf1f4d6f7f56f617139716f600b5ae640f7550d4e021e7342895def71d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bbcb04](../00bbc/00bbcb04.md)
@@ -74,7 +73,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "shrinkToSize() can't expand!"
 "thread-local wrapper routine for "
 ~~~
-## 疑似コード 1/2 / UTF-8 24572 bytes
+
+## 疑似コード / UTF-8 27420 bytes
 
 ~~~c
 
@@ -419,7 +419,7 @@ LAB_00bbd4d0:
           if (puVar24 == (void *)0x0) {
 LAB_00bbdbc4:
                     /* WARNING: Subroutine does not return */
-            std::terminate();
+            _ZSt9terminatev();
           }
           lVar16 = 0;
           *puVar24 = pvVar30;
@@ -630,10 +630,6 @@ LAB_00bbd76c:
           }
         }
       }
-~~~
-## 疑似コード 2/2 / UTF-8 3486 bytes
-
-~~~c
       else if (bVar23 < 0x56) {
         if (bVar23 == 0x53) {
           *param_1 = (long)(pcVar19 + 2);

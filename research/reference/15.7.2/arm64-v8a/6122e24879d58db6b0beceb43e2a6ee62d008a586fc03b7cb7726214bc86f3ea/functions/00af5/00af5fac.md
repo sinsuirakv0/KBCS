@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00af5fac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00af5fac",
-  "name": "firebase::util::JavaThreadContext::ReleaseExecuteCancelLock",
+  "name": "_ZN8firebase4util17JavaThreadContext24ReleaseExecuteCancelLockEv",
   "size": 120,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "099c974fe51079a029931546c7d61435700e8ffc1e3d5464f87b5005cc828eab",
-  "source_text_sha256": "099c974fe51079a029931546c7d61435700e8ffc1e3d5464f87b5005cc828eab"
+  "source_sha256": "02ac5efe381d4f01ce8780b12600580e01a0281f66e74f02418f33b1382cff1d",
+  "source_text_sha256": "02ac5efe381d4f01ce8780b12600580e01a0281f66e74f02418f33b1382cff1d"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -31,21 +30,19 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00551e14](../00551/00551e14.md)
 - [00bde260](../00bde/00bde260.md)
 
-## 疑似コード 1/1 / UTF-8 970 bytes
+## 疑似コード / UTF-8 855 bytes
 
 ~~~c
 
-/* firebase::util::JavaThreadContext::ReleaseExecuteCancelLock() */
-
-void __thiscall firebase::util::JavaThreadContext::ReleaseExecuteCancelLock(JavaThreadContext *this)
+void _ZN8firebase4util17JavaThreadContext24ReleaseExecuteCancelLockEv(long param_1)
 
 {
   char cVar1;
   long *plVar2;
   
-  plVar2 = (long *)internal::JObjectReference::GetJNIEnv((JObjectReference *)this);
-  if (*(long *)(this + 8) != 0) {
-    FUN_00551e14(plVar2,*(long *)(this + 8),DAT_010a02d8);
+  plVar2 = (long *)_ZNK8firebase8internal16JObjectReference9GetJNIEnvEv();
+  if (*(long *)(param_1 + 8) != 0) {
+    FUN_00551e14(plVar2,*(long *)(param_1 + 8),DAT_010a02d8);
     cVar1 = (**(code **)(*plVar2 + 0x720))(plVar2);
     if (cVar1 != '\0') {
                     /* try { // try from 00af5ff0 to 00bf5ff7 has its CatchHandler @ 00affb08 */

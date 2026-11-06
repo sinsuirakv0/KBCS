@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00adae8c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "e5309ecac10e4dca884c3a921486ff47845718f41e53b66c31011a79cc7fb195",
-  "source_text_sha256": "e5309ecac10e4dca884c3a921486ff47845718f41e53b66c31011a79cc7fb195"
+  "source_sha256": "c10e24787fadc87189ab7a213ba683ab6f8dbdbb813eb60389aa44816589bf22",
+  "source_text_sha256": "c10e24787fadc87189ab7a213ba683ab6f8dbdbb813eb60389aa44816589bf22"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -33,7 +32,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 911 bytes
+## 疑似コード / UTF-8 872 bytes
 
 ~~~c
 
@@ -57,7 +56,7 @@ void Java_jp_co_ponos_battlecats_TapjoyImplementation_onTapjoyPlacementShown
     (**(code **)(*plVar3 + 0x30))(plVar3,local_40);
   }
   if ((local_40[0] & 1) != 0) {
-    operator_delete(local_30);
+    _ZdlPv(local_30);
   }
   if (*(long *)(lVar1 + 0x28) == local_28) {
     return;

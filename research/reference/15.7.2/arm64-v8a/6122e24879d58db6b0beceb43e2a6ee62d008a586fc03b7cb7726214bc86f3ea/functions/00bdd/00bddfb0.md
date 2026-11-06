@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddfb0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddfb0",
-  "name": "firebase::util::LookupMethodIds",
+  "name": "_ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "abb74eb75faebd4a75842c4c74330129d185af09e025ee6e8137e853639526fc",
-  "source_text_sha256": "abb74eb75faebd4a75842c4c74330129d185af09e025ee6e8137e853639526fc"
+  "source_sha256": "1903677513068047a8602ec9a9f8ffe12e15495708264de8ffb91ac4145eb9c3",
+  "source_text_sha256": "1903677513068047a8602ec9a9f8ffe12e15495708264de8ffb91ac4145eb9c3"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae06c0](../00ae0/00ae06c0.md)
@@ -142,16 +141,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00ae4a8c](../00ae4/00ae4a8c.md)
 
-## 疑似コード 1/1 / UTF-8 254 bytes
+## 疑似コード / UTF-8 281 bytes
 
 ~~~c
 
-void firebase::util::LookupMethodIds
-               (_JNIEnv *param_1,_jclass *param_2,MethodNameSignature *param_3,ulong param_4,
-               _jmethodID **param_5,char *param_6)
+void _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+               (void)
 
 {
-  (*(code *)PTR_LookupMethodIds_00c1d810)();
+  (*(code *)
+    PTR__ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc_00c1d810
+  )();
   return;
 }
 

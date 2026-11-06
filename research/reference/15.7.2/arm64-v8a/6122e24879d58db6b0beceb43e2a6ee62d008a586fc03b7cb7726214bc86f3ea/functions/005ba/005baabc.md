@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](005baabc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "c63dc34102e85548b0e56d9d670c9da5879542fab32b17c441fe4da4b2a06a25",
-  "source_text_sha256": "c63dc34102e85548b0e56d9d670c9da5879542fab32b17c441fe4da4b2a06a25"
+  "source_sha256": "afcdd951f3cca5d01149a80cb50e4b45c8dbbd15a0e4948d7dded3a17e7dd05d",
+  "source_text_sha256": "afcdd951f3cca5d01149a80cb50e4b45c8dbbd15a0e4948d7dded3a17e7dd05d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [005b8d90](../005b8/005b8d90.md)
@@ -39,7 +38,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf90](../00bda/00bdaf90.md)
 - [00bdb6c0](../00bdb/00bdb6c0.md)
 
-## 疑似コード 1/1 / UTF-8 9835 bytes
+## 疑似コード / UTF-8 9798 bytes
 
 ~~~c
 
@@ -135,7 +134,8 @@ LAB_005bace4:
       lVar5 = 0;
     }
     else {
-      lVar5 = __dynamic_cast(DAT_00c249b8,&PTR_PTR_00be8d98,&PTR_PTR_00bf4450,0);
+      lVar5 = __dynamic_cast(DAT_00c249b8,&PTR__ZTVN10__cxxabiv117__class_type_infoE_16__00be8d98,
+                             &PTR__ZTVN10__cxxabiv120__si_class_type_infoE_16__00bf4450,0);
     }
     piVar9 = *(int **)(param_2 + 0x1c);
     piVar7 = param_2 + 0x1c;
@@ -153,7 +153,7 @@ LAB_005bace4:
     }
 LAB_005bae8c:
                     /* try { // try from 005bae8c to 006bae97 has its CatchHandler @ 005baf58 */
-    local_90 = operator_new(0x40);
+    local_90 = (int *)_Znwm(0x40);
     local_90[8] = param_3;
     local_90[0xc] = 0;
     local_90[0xd] = 0;
@@ -211,7 +211,8 @@ LAB_005baef0:
       lVar5 = 0;
     }
     else {
-      lVar5 = __dynamic_cast(DAT_00c249b8,&PTR_PTR_00be8d98,&PTR_PTR_00bf4450,0);
+      lVar5 = __dynamic_cast(DAT_00c249b8,&PTR__ZTVN10__cxxabiv117__class_type_infoE_16__00be8d98,
+                             &PTR__ZTVN10__cxxabiv120__si_class_type_infoE_16__00bf4450,0);
     }
     piVar9 = *(int **)(param_2 + 0x1c);
     piVar7 = param_2 + 0x1c;
@@ -229,7 +230,7 @@ LAB_005baef0:
       piVar9 = *(int **)local_90;
     }
 LAB_005bad60:
-    local_90 = operator_new(0x40);
+    local_90 = (int *)_Znwm(0x40);
     local_90[8] = param_3;
                     /* try { // try from 005bad80 to 006bad8b has its CatchHandler @ 005baf50 */
     local_90[0xc] = 0;

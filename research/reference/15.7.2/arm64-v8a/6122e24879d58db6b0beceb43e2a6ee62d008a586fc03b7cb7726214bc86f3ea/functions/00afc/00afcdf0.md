@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afcdf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afcdf0",
-  "name": "firebase::Path::Path",
+  "name": "_ZN8firebase4PathC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE",
   "size": 28,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "2d8b5a5602eea1991ab8f2ef06810729019ec8150191050d1df1a785878c260e",
-  "source_text_sha256": "2d8b5a5602eea1991ab8f2ef06810729019ec8150191050d1df1a785878c260e"
+  "source_sha256": "dffbf07de206deb066cd3559e468c066a4dc87dbf2505ee1d0b96eab8ac75137",
+  "source_text_sha256": "dffbf07de206deb066cd3559e468c066a4dc87dbf2505ee1d0b96eab8ac75137"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,17 +29,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdec30](../00bde/00bdec30.md)
 
-## 疑似コード 1/1 / UTF-8 278 bytes
+## 疑似コード / UTF-8 306 bytes
 
 ~~~c
 
-/* firebase::Path::Path(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>,
-   std::__ndk1::allocator<char> > const&) */
-
-void __thiscall firebase::Path::Path(Path *this,basic_string *param_1)
+void _ZN8firebase4PathC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  NormalizeSlashes((Path *)param_1,param_1);
+  _ZN8firebase4Path16NormalizeSlashesERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+            (param_1,param_2);
   return;
 }
 

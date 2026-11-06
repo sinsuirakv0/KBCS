@@ -1,0 +1,66 @@
+﻿# 00aa3aec
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00aa3aec",
+  "name": "FUN_00aa3aec",
+  "size": 184,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "7f6adfc34c6d3cb5e151327a4d0389f3adec4ce90739f31a21f983f0e5f6af67",
+  "source_text_sha256": "7f6adfc34c6d3cb5e151327a4d0389f3adec4ce90739f31a21f983f0e5f6af67"
+}
+~~~
+
+## 呼び出し元
+
+- [0065f258](../0065f/0065f258.md)
+- [006a0ab4](../006a0/006a0ab4.md)
+- [009f1ea8](../009f1/009f1ea8.md)
+- [00aa0f64](../00aa0/00aa0f64.md)
+
+## 呼び出し先
+
+- [005c2710](../005c2/005c2710.md)
+- [0081f580](../0081f/0081f580.md)
+- [00aa2c70](../00aa2/00aa2c70.md)
+
+## 疑似コード / UTF-8 764 bytes
+
+~~~c
+
+ulong FUN_00aa3aec(int param_1,int param_2,int param_3)
+
+{
+  long lVar1;
+  ulong uVar2;
+  
+  lVar1 = FUN_0081f580();
+  uVar2 = FUN_005c2710(lVar1 + (long)param_1 * 0x1f0 + 0x2678);
+  lVar1 = FUN_0081f580();
+  if ((uVar2 & 1) == 0) {
+                    /* try { // try from 00aa3b4c to 00ba3b63 has its CatchHandler @ 00aa5a14 */
+    uVar2 = (ulong)(*(int *)((long)__DT_JMPREL + lVar1 + ((long)param_2 + 2) * 0x1c4 + 0xa4c4) != 0)
+    ;
+  }
+  else {
+                    /* try { // try from 00aa3b64 to 00ba3b77 has its CatchHandler @ 00aa59fc */
+    if (*(int *)(lVar1 + ((long)param_2 + 2) * 0x770 + (long)param_3 * 0x1dc + 0x9eff4) == 0) {
+      uVar2 = FUN_00aa2c70(lVar1,param_2,param_3,0x37);
+      return uVar2;
+    }
+    uVar2 = 1;
+  }
+  return uVar2;
+}
+
+~~~

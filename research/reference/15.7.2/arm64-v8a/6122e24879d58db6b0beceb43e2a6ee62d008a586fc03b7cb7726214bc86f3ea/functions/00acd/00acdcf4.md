@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00acdcf4.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3535afd9e4dbc002c21a1591f3a9f18a58e2cf63587e7d1a0ddca20170e12dd1",
-  "source_text_sha256": "3535afd9e4dbc002c21a1591f3a9f18a58e2cf63587e7d1a0ddca20170e12dd1"
+  "source_sha256": "46054c17ec94e3e7d15e4b45483adf8b56349b4bad928e34376d5116e8f33e60",
+  "source_text_sha256": "46054c17ec94e3e7d15e4b45483adf8b56349b4bad928e34376d5116e8f33e60"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0092e43c](../0092e/0092e43c.md)
@@ -69,7 +68,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "img024.imgcut"
 "img024.png"
 ~~~
-## 疑似コード 1/1 / UTF-8 12721 bytes
+
+## 疑似コード / UTF-8 12190 bytes
 
 ~~~c
 
@@ -85,9 +85,9 @@ void FUN_00acdcf4(long param_1,uint param_2)
   undefined8 uVar5;
   int iVar6;
   long lVar7;
-  __shared_weak_count *p_Var8;
-  __shared_weak_count *this;
-  long lVar9;
+  long *plVar8;
+  long *plVar9;
+  long lVar10;
   byte local_88;
   undefined5 local_87;
   char acStack_82 [3];
@@ -102,14 +102,14 @@ void FUN_00acdcf4(long param_1,uint param_2)
   undefined4 uStack_64;
   void *local_60;
   undefined8 local_50;
-  __shared_weak_count *p_Stack_48;
+  long *plStack_48;
   long local_38;
   
   lVar3 = tpidr_el0;
   lVar1 = param_1 + 0xa8;
   local_38 = *(long *)(lVar3 + 0x28);
-  lVar9 = (long)(int)param_2 * 0x10;
-  if ((param_2 < 0x10) && (lVar7 = *(long *)(lVar1 + lVar9), lVar7 != 0)) goto LAB_00ace1c4;
+  lVar10 = (long)(int)param_2 * 0x10;
+  if ((param_2 < 0x10) && (lVar7 = *(long *)(lVar1 + lVar10), lVar7 != 0)) goto LAB_00ace1c4;
   if ((int)param_2 < 4) {
     if ((int)param_2 < 2) {
       if (param_2 == 0) {
@@ -186,20 +186,19 @@ void FUN_00acdcf4(long param_1,uint param_2)
       uStack_67 = 0;
       uStack_65 = 0;
       uStack_64 = 0;
-      p_Var8 = *(__shared_weak_count **)(param_1 + 0xd0);
+      plVar8 = *(long **)(param_1 + 0xd0);
       *(undefined8 *)(param_1 + 0xd0) = uVar5;
       *(undefined8 *)(param_1 + 200) = uVar4;
-      if ((p_Var8 != (__shared_weak_count *)0x0) &&
-         (lVar7 = FUN_00bd6d90(0xffffffffffffffff,p_Var8 + 8), lVar7 == 0)) {
-        (**(code **)(*(long *)p_Var8 + 0x10))(p_Var8);
-        std::__ndk1::__shared_weak_count::__release_weak(p_Var8);
+      if ((plVar8 != (long *)0x0) &&
+         (lVar7 = FUN_00bd6d90(0xffffffffffffffff,plVar8 + 1), lVar7 == 0)) {
+        (**(code **)(*plVar8 + 0x10))(plVar8);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar8);
       }
-      p_Var8 = (__shared_weak_count *)
-               CONCAT44(uStack_64,CONCAT13(uStack_65,CONCAT21(uStack_67,cStack_68)));
-      if ((p_Var8 != (__shared_weak_count *)0x0) &&
-         (lVar7 = FUN_00bd6d90(0xffffffffffffffff,p_Var8 + 8), lVar7 == 0)) {
-        (**(code **)(*(long *)p_Var8 + 0x10))(p_Var8);
-        std::__ndk1::__shared_weak_count::__release_weak(p_Var8);
+      plVar8 = (long *)CONCAT44(uStack_64,CONCAT13(uStack_65,CONCAT21(uStack_67,cStack_68)));
+      if ((plVar8 != (long *)0x0) &&
+         (lVar7 = FUN_00bd6d90(0xffffffffffffffff,plVar8 + 1), lVar7 == 0)) {
+        (**(code **)(*plVar8 + 0x10))(plVar8);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar8);
       }
     }
     else if (param_2 == 3) {
@@ -360,34 +359,34 @@ void FUN_00acdcf4(long param_1,uint param_2)
       FUN_0045b734(&local_50,&DAT_00c24f40,&local_70,&local_88,0x2601);
     }
 LAB_00ace148:
-    p_Var8 = p_Stack_48;
+    plVar8 = plStack_48;
     uVar4 = local_50;
     puVar2 = (undefined8 *)(lVar1 + (long)(int)param_2 * 0x10);
     local_50 = 0;
-    p_Stack_48 = (__shared_weak_count *)0x0;
-    this = (__shared_weak_count *)puVar2[1];
-    puVar2[1] = p_Var8;
+    plStack_48 = (long *)0x0;
+    plVar9 = (long *)puVar2[1];
+    puVar2[1] = plVar8;
     *puVar2 = uVar4;
-    if ((this != (__shared_weak_count *)0x0) &&
-       (lVar7 = FUN_00bd6d90(0xffffffffffffffff,this + 8), lVar7 == 0)) {
-      (**(code **)(*(long *)this + 0x10))(this);
-      std::__ndk1::__shared_weak_count::__release_weak(this);
+    if ((plVar9 != (long *)0x0) && (lVar7 = FUN_00bd6d90(0xffffffffffffffff,plVar9 + 1), lVar7 == 0)
+       ) {
+      (**(code **)(*plVar9 + 0x10))(plVar9);
+      _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar9);
     }
-    p_Var8 = p_Stack_48;
-    if ((p_Stack_48 != (__shared_weak_count *)0x0) &&
-       (lVar7 = FUN_00bd6d90(0xffffffffffffffff,p_Stack_48 + 8), lVar7 == 0)) {
-      (**(code **)(*(long *)p_Var8 + 0x10))(p_Var8);
-      std::__ndk1::__shared_weak_count::__release_weak(p_Var8);
+    plVar8 = plStack_48;
+    if ((plStack_48 != (long *)0x0) &&
+       (lVar7 = FUN_00bd6d90(0xffffffffffffffff,plStack_48 + 1), lVar7 == 0)) {
+      (**(code **)(*plVar8 + 0x10))(plVar8);
+      _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar8);
     }
     if ((local_88 & 1) != 0) {
-      operator_delete(local_78);
+      _ZdlPv(local_78);
     }
     if ((local_70 & 1) != 0) {
-      operator_delete(local_60);
+      _ZdlPv(local_60);
     }
   }
 LAB_00ace1c0:
-  lVar7 = *(long *)(lVar1 + lVar9);
+  lVar7 = *(long *)(lVar1 + lVar10);
 LAB_00ace1c4:
                     /* try { // try from 00ace1d0 to 00bcee2f has its CatchHandler @ 00ace1d0
                        catch() { ... } // from try @ 00ace1d0 with catch @ 00ace1d0

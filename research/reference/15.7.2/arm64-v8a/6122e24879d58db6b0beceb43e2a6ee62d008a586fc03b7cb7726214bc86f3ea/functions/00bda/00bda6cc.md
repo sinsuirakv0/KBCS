@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bda6cc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "0245f82b1bd69854ee866af1380dc8c63235fb86fe602907fe8b360b5fe1defb",
-  "source_text_sha256": "0245f82b1bd69854ee866af1380dc8c63235fb86fe602907fe8b360b5fe1defb"
+  "source_sha256": "6ddedb8f720a0af180b62e47abc9e8f248791171f59afc6422ff77f68effe923",
+  "source_text_sha256": "6ddedb8f720a0af180b62e47abc9e8f248791171f59afc6422ff77f68effe923"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bda59c](../00bda/00bda59c.md)
@@ -39,7 +38,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "libunwind: unsupported .eh_frame_hdr at %lx: need at least 4 bytes of data but only got %zd\n"
 "libunwind: unsupported .eh_frame_hdr version: %u at %lx\n"
 ~~~
-## 疑似コード 1/1 / UTF-8 1441 bytes
+
+## 疑似コード / UTF-8 1394 bytes
 
 ~~~c
 

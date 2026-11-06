@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](007ecdec.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b7cfd85e09eec818b9e367e635f5d143689c38adeab2c089ff1a5f9c73dc8582",
-  "source_text_sha256": "b7cfd85e09eec818b9e367e635f5d143689c38adeab2c089ff1a5f9c73dc8582"
+  "source_sha256": "d4988251fa489bd0d905c7e76869ed85affd989d2cf1c1da7d43afe781fa626a",
+  "source_text_sha256": "d4988251fa489bd0d905c7e76869ed85affd989d2cf1c1da7d43afe781fa626a"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0099a654](../0099a/0099a654.md)
@@ -37,7 +36,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "map::at:  key not found"
 ~~~
-## 疑似コード 1/1 / UTF-8 2073 bytes
+
+## 疑似コード / UTF-8 2007 bytes
 
 ~~~c
 

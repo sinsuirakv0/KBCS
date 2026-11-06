@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ada6ac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "9224bda61287450262989e57a3a9fe3e70d0314ba0dd9094134cf642d900b8f2",
-  "source_text_sha256": "9224bda61287450262989e57a3a9fe3e70d0314ba0dd9094134cf642d900b8f2"
+  "source_sha256": "80eb49b5d17c275969d0d2992a3bb018a2294e141494beca29c39e68fe207f56",
+  "source_text_sha256": "80eb49b5d17c275969d0d2992a3bb018a2294e141494beca29c39e68fe207f56"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0085f63c](../0085f/0085f63c.md)
@@ -45,7 +44,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "tapjoySpendCurrency"
 ~~~
-## 疑似コード 1/1 / UTF-8 2818 bytes
+
+## 疑似コード / UTF-8 2707 bytes
 
 ~~~c
 
@@ -94,10 +94,10 @@ void FUN_00ada6ac(undefined4 param_1,long *param_2)
   local_90[5] = 0;
   local_78 = FUN_00566448(uVar3,&local_70,local_90,uVar2);
   if ((local_90[0] & 1) != 0) {
-    operator_delete(local_80);
+    _ZdlPv(local_80);
   }
   if ((local_70 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_5c,uStack_60));
+    _ZdlPv((void *)CONCAT44(uStack_5c,uStack_60));
   }
                     /* try { // try from 00ada754 to 00bda8bb has its CatchHandler @ 00ada754
                        catch() { ... } // from try @ 00ada754 with catch @ 00ada754

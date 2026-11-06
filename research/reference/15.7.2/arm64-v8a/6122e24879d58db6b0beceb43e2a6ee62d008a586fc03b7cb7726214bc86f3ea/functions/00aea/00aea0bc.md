@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aea0bc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aea0bc",
-  "name": "firebase::util::enum_class::CacheClassFromFiles",
+  "name": "_ZN8firebase4util10enum_class19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "bd590f4f36543c2c78a2381f7e5f806afd37b0e80322a853cedf6b05124085a4",
-  "source_text_sha256": "bd590f4f36543c2c78a2381f7e5f806afd37b0e80322a853cedf6b05124085a4"
+  "source_sha256": "79d41006d5befa847fe70b9ae60beef9eea03d30da5af284e3e00448697cfc0d",
+  "source_text_sha256": "79d41006d5befa847fe70b9ae60beef9eea03d30da5af284e3e00448697cfc0d"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,20 +34,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/lang/Enum"
 ~~~
-## 疑似コード 1/1 / UTF-8 413 bytes
+
+## 疑似コード / UTF-8 453 bytes
 
 ~~~c
 
-/* firebase::util::enum_class::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*,
-   firebase::util::ClassRequirement) */
-
-long firebase::util::enum_class::CacheClassFromFiles(void)
+long _ZN8firebase4util10enum_class19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE
+               (void)
 
 {
   if (DAT_010a06a8 == 0) {
-    DAT_010a06a8 = FindClassGlobal();
+    DAT_010a06a8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
   return DAT_010a06a8;
 }

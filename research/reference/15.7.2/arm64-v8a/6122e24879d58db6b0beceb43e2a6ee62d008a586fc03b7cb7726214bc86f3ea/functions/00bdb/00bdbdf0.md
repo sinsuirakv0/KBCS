@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbdf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbdf0",
-  "name": "Botan::SCAN_Name::SCAN_Name",
+  "name": "_ZN5Botan9SCAN_NameC1ENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "187c6df2f2afdbed0bb9a8602ee49562ccb9a0fedec5588f922e7952c4946df4",
-  "source_text_sha256": "187c6df2f2afdbed0bb9a8602ee49562ccb9a0fedec5588f922e7952c4946df4"
+  "source_sha256": "9ccaf1df64a8142d47b66979321f854f48b0ea1cb2e0cc634fc01d4d00492867",
+  "source_text_sha256": "9ccaf1df64a8142d47b66979321f854f48b0ea1cb2e0cc634fc01d4d00492867"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00498d9c](../00498/00498d9c.md)
@@ -41,14 +40,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [0049100c](../00491/0049100c.md)
 
-## 疑似コード 1/1 / UTF-8 114 bytes
+## 疑似コード / UTF-8 245 bytes
 
 ~~~c
 
-void __thiscall Botan::SCAN_Name::SCAN_Name(void)
+void _ZN5Botan9SCAN_NameC1ENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE(void)
 
 {
-  (*(code *)PTR_SCAN_Name_00c1c730)();
+  (*(code *)
+    PTR__ZN5Botan9SCAN_NameC1ENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE_00c1c730
+  )();
   return;
 }
 

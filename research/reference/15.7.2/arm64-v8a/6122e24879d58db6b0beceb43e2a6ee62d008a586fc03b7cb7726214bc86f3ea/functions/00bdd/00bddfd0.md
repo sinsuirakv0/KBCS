@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddfd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddfd0",
-  "name": "firebase::util::GetMessageFromException",
+  "name": "_ZN8firebase4util23GetMessageFromExceptionEP7_JNIEnvP8_jobject",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "e889a670861af205c2aa04403a58bc8e4e163b55c8cd2642edd190d2c813bdf3",
-  "source_text_sha256": "e889a670861af205c2aa04403a58bc8e4e163b55c8cd2642edd190d2c813bdf3"
+  "source_sha256": "c75c68c4a8001d7496f3f9a2bfe594ffc4ca63714143f1d742daf6f18ed0cce8",
+  "source_text_sha256": "c75c68c4a8001d7496f3f9a2bfe594ffc4ca63714143f1d742daf6f18ed0cce8"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae3268](../00ae3/00ae3268.md)
@@ -35,15 +34,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00af7190](../00af7/00af7190.md)
 
-## 疑似コード 1/1 / UTF-8 182 bytes
+## 疑似コード / UTF-8 183 bytes
 
 ~~~c
 
-void __thiscall
-firebase::util::GetMessageFromException(util *this,_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util23GetMessageFromExceptionEP7_JNIEnvP8_jobject(void)
 
 {
-  (*(code *)PTR_GetMessageFromException_00c1d820)();
+  (*(code *)PTR__ZN8firebase4util23GetMessageFromExceptionEP7_JNIEnvP8_jobject_00c1d820)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbea0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbea0",
-  "name": "Botan::HashFunction::create",
+  "name": "_ZN5Botan12HashFunction6createERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "a41cb2000e823ea866a83669e86e2c21593ae99bb745463a4441872c74f2514e",
-  "source_text_sha256": "a41cb2000e823ea866a83669e86e2c21593ae99bb745463a4441872c74f2514e"
+  "source_sha256": "23d8834e5c77c0768c7bf27e1abf2b2629f95986edf8dc95df3553f2cd91554d",
+  "source_text_sha256": "23d8834e5c77c0768c7bf27e1abf2b2629f95986edf8dc95df3553f2cd91554d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0049e24c](../0049e/0049e24c.md)
@@ -40,15 +39,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [0049e3f4](../0049e/0049e3f4.md)
 
-## 疑似コード 1/1 / UTF-8 170 bytes
+## 疑似コード / UTF-8 289 bytes
 
 ~~~c
 
-void __thiscall
-Botan::HashFunction::create(HashFunction *this,basic_string *param_1,basic_string *param_2)
+void _ZN5Botan12HashFunction6createERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_
+               (void)
 
 {
-  (*(code *)PTR_create_00c1c788)();
+  (*(code *)
+    PTR__ZN5Botan12HashFunction6createERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9__00c1c788
+  )();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddbf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddbf0",
-  "name": "std::__ndk1::to_string",
+  "name": "_ZNSt6__ndk19to_stringEx",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "fc91d3e696d63d66c1ee3053090355352bcbe780b110309a64f346cd409f8127",
-  "source_text_sha256": "fc91d3e696d63d66c1ee3053090355352bcbe780b110309a64f346cd409f8127"
+  "source_sha256": "a5c9188ebcfc4dc5e3c4a88b92a6ab158f23cec3e8d100d53787f439a317a17c",
+  "source_text_sha256": "a5c9188ebcfc4dc5e3c4a88b92a6ab158f23cec3e8d100d53787f439a317a17c"
 }
 ~~~
+
 ## 呼び出し元
 
 - [008a2cac](../008a2/008a2cac.md)
@@ -31,14 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b79530](../00b79/00b79530.md)
 
-## 疑似コード 1/1 / UTF-8 134 bytes
+## 疑似コード / UTF-8 107 bytes
 
 ~~~c
 
-void __thiscall std::__ndk1::to_string(__ndk1 *this,longlong param_1)
+void _ZNSt6__ndk19to_stringEx(void)
 
 {
-  (*(code *)PTR_to_string_00c1d630)();
+  (*(code *)PTR__ZNSt6__ndk19to_stringEx_00c1d630)();
   return;
 }
 

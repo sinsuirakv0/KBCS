@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00acb0ac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "9ea47cc48d1ad468d19b6733280cd358879ecd6cebf1910159d3bea2c834d59e",
-  "source_text_sha256": "9ea47cc48d1ad468d19b6733280cd358879ecd6cebf1910159d3bea2c834d59e"
+  "source_sha256": "6b03d6619afa14ef4752ca5f72039c794a5b1ffe0f9f3c11ff22d5909cc791b4",
+  "source_text_sha256": "6b03d6619afa14ef4752ca5f72039c794a5b1ffe0f9f3c11ff22d5909cc791b4"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00abf464](../00abf/00abf464.md)
@@ -40,7 +39,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 3663 bytes
+## 疑似コード / UTF-8 3478 bytes
 
 ~~~c
 
@@ -49,120 +48,122 @@ long FUN_00acb0ac(long *param_1,long *param_2)
 {
   ulong uVar1;
   long lVar2;
-  undefined8 *puVar3;
-  void *pvVar4;
-  undefined8 uVar5;
+  long lVar3;
+  long *plVar4;
+  long lVar5;
   undefined8 *puVar6;
-  long lVar7;
-  undefined8 *puVar8;
-  long lVar9;
-  ulong uVar10;
-  undefined8 *puVar11;
-  undefined8 *puVar12;
-  undefined8 *puVar13;
+  void *__ptr;
+  undefined8 uVar7;
+  long lVar8;
+  undefined8 *puVar9;
+  long lVar10;
+  ulong uVar11;
+  long *plVar12;
+  long *plVar13;
+  undefined8 *puVar14;
   void *local_90;
-  undefined8 *local_88;
-  undefined8 *local_80;
+  long *local_88;
+  long *local_80;
   void *pvStack_78;
   long *local_70;
-  undefined8 *local_68;
+  long *local_68;
   undefined1 local_60;
   long local_58;
   
-  lVar2 = tpidr_el0;
-  local_58 = *(long *)(lVar2 + 0x28);
-  lVar7 = param_1[1] - *param_1 >> 3;
-  uVar1 = lVar7 * -0x5555555555555555 + 1;
+  lVar3 = tpidr_el0;
+  local_58 = *(long *)(lVar3 + 0x28);
+  lVar8 = param_1[1] - *param_1 >> 3;
+  uVar1 = lVar8 * -0x5555555555555555 + 1;
   if (uVar1 < 0xaaaaaaaaaaaaaab) {
     local_70 = param_1 + 2;
-    lVar9 = *local_70 - *param_1 >> 3;
-    uVar10 = lVar9 * 0x5555555555555556;
-    if (uVar10 < uVar1 || uVar10 - uVar1 == 0) {
-      uVar10 = uVar1;
+    lVar10 = *local_70 - *param_1 >> 3;
+    uVar11 = lVar10 * 0x5555555555555556;
+    if (uVar11 < uVar1 || uVar11 - uVar1 == 0) {
+      uVar11 = uVar1;
     }
-    if (0x555555555555554 < (ulong)(lVar9 * -0x5555555555555555)) {
-      uVar10 = 0xaaaaaaaaaaaaaaa;
+    if (0x555555555555554 < (ulong)(lVar10 * -0x5555555555555555)) {
+      uVar11 = 0xaaaaaaaaaaaaaaa;
     }
-    if (uVar10 == 0) {
+    if (uVar11 == 0) {
       local_90 = (void *)0x0;
     }
     else {
-      if (0xaaaaaaaaaaaaaaa < uVar10) goto LAB_00acb2c0;
-      local_90 = operator_new(uVar10 * 0x18);
+      if (0xaaaaaaaaaaaaaaa < uVar11) goto LAB_00acb2c0;
+      local_90 = (void *)_Znwm(uVar11 * 0x18);
     }
     local_60 = 0;
-    puVar11 = (undefined8 *)((long)local_90 + lVar7 * 8);
-    pvStack_78 = (void *)((long)local_90 + uVar10 * 0x18);
-    lVar7 = *param_2;
-    lVar9 = param_2[1];
-    uVar1 = lVar9 - lVar7;
-    *puVar11 = 0;
-    puVar11[1] = 0;
-    puVar11[2] = 0;
-    local_80 = puVar11;
-    local_88 = puVar11;
-    local_68 = puVar11;
-    if (uVar1 != 0) {
-      if (0xaaaaaaaaaaaaaaa < (ulong)(((long)uVar1 >> 3) * -0x5555555555555555)) {
-        if (*(long *)(lVar2 + 0x28) == local_58) {
-          uVar5 = FUN_005f064c(puVar11);
-          puVar11[1] = 0xaaaaaaaaaaaaaaa;
+    plVar12 = (long *)((long)local_90 + lVar8 * 8);
+    pvStack_78 = (void *)((long)local_90 + uVar11 * 0x18);
+    lVar8 = *param_2;
+    lVar10 = param_2[1];
+    lVar2 = lVar10 - lVar8;
+    *plVar12 = 0;
+    plVar12[1] = 0;
+    plVar12[2] = 0;
+    local_80 = plVar12;
+    local_88 = plVar12;
+    local_68 = plVar12;
+    if (lVar2 != 0) {
+      if (0xaaaaaaaaaaaaaaa < (ulong)((lVar2 >> 3) * -0x5555555555555555)) {
+        if (*(long *)(lVar3 + 0x28) == local_58) {
+          uVar7 = FUN_005f064c(plVar12);
+          plVar12[1] = 0xaaaaaaaaaaaaaaa;
           FUN_0062c99c(&local_68);
           FUN_00acb44c(&local_90);
-          if (*(long *)(lVar2 + 0x28) == local_58) {
+          if (*(long *)(lVar3 + 0x28) == local_58) {
                     /* WARNING: Subroutine does not return */
-            FUN_00bd6fec(uVar5);
+            FUN_00bd6fec(uVar7);
           }
         }
         goto LAB_00acb32c;
       }
-      pvVar4 = operator_new(uVar1);
-      *puVar11 = pvVar4;
-      puVar11[1] = pvVar4;
-      puVar11[2] = (long)pvVar4 + uVar1;
-      uVar5 = FUN_0062ca28(puVar11 + 2,lVar7,lVar9,pvVar4);
-      puVar11[1] = uVar5;
+      lVar5 = _Znwm(lVar2);
+      *plVar12 = lVar5;
+      plVar12[1] = lVar5;
+      plVar12[2] = lVar5 + lVar2;
+      lVar8 = FUN_0062ca28(plVar12 + 2,lVar8,lVar10,lVar5);
+      plVar12[1] = lVar8;
     }
     local_80 = local_80 + 3;
     FUN_00acb330(param_1,&local_90);
-    puVar11 = local_88;
-    lVar7 = param_1[1];
-    while (puVar3 = local_80, puVar3 != puVar11) {
-      puVar12 = puVar3 + -3;
-      puVar13 = (undefined8 *)*puVar12;
-      local_80 = puVar12;
-      if (puVar13 != (undefined8 *)0x0) {
-        puVar8 = (undefined8 *)puVar3[-2];
-        puVar6 = puVar13;
-        if (puVar8 != puVar13) {
+    plVar12 = local_88;
+    lVar8 = param_1[1];
+    while (plVar4 = local_80, plVar4 != plVar12) {
+      plVar13 = plVar4 + -3;
+      puVar14 = (undefined8 *)*plVar13;
+      local_80 = plVar13;
+      if (puVar14 != (undefined8 *)0x0) {
+        puVar9 = (undefined8 *)plVar4[-2];
+        puVar6 = puVar14;
+        if (puVar9 != puVar14) {
           do {
-            puVar6 = puVar8 + -3;
-            pvVar4 = (void *)*puVar6;
-            if (pvVar4 != (void *)0x0) {
-              puVar8[-2] = pvVar4;
-              operator_delete(pvVar4);
+            puVar6 = puVar9 + -3;
+            __ptr = (void *)*puVar6;
+            if (__ptr != (void *)0x0) {
+              puVar9[-2] = __ptr;
+              _ZdlPv(__ptr);
             }
-            puVar8 = puVar6;
-          } while (puVar6 != puVar13);
-          puVar6 = (undefined8 *)*puVar12;
+            puVar9 = puVar6;
+          } while (puVar6 != puVar14);
+          puVar6 = (undefined8 *)*plVar13;
         }
-        puVar3[-2] = puVar13;
-        operator_delete(puVar6);
+        plVar4[-2] = (long)puVar14;
+        _ZdlPv(puVar6);
       }
     }
-    local_80 = puVar3;
+    local_80 = plVar4;
     if (local_90 != (void *)0x0) {
-      operator_delete(local_90);
+      _ZdlPv(local_90);
     }
-    if (*(long *)(lVar2 + 0x28) == local_58) {
-      return lVar7;
+    if (*(long *)(lVar3 + 0x28) == local_58) {
+      return lVar8;
     }
   }
   else {
-    if (*(long *)(lVar2 + 0x28) != local_58) goto LAB_00acb32c;
+    if (*(long *)(lVar3 + 0x28) != local_58) goto LAB_00acb32c;
     FUN_00acb508(param_1);
 LAB_00acb2c0:
-    if (*(long *)(lVar2 + 0x28) == local_58) {
+    if (*(long *)(lVar3 + 0x28) == local_58) {
                     /* WARNING: Subroutine does not return */
       FUN_0041e380();
     }

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aecbf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aecbf0",
-  "name": "firebase::util::parcel_file_descriptor::CacheFieldIds",
+  "name": "_ZN8firebase4util22parcel_file_descriptor13CacheFieldIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "33aa0d46c2eeb5c09a56d0631eec9caedd564b75881212ee69f081db0465ec9b",
-  "source_text_sha256": "33aa0d46c2eeb5c09a56d0631eec9caedd564b75881212ee69f081db0465ec9b"
+  "source_sha256": "2a8d6c18995fbc6850ffa1fecead8c587fd0217b2ef9e24301ba43a054a19f5f",
+  "source_text_sha256": "2a8d6c18995fbc6850ffa1fecead8c587fd0217b2ef9e24301ba43a054a19f5f"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,21 +35,21 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "android/os/ParcelFileDescriptor"
 ~~~
-## 疑似コード 1/1 / UTF-8 515 bytes
+
+## 疑似コード / UTF-8 635 bytes
 
 ~~~c
 
-/* firebase::util::parcel_file_descriptor::CacheFieldIds(_JNIEnv*, _jobject*) */
-
-void firebase::util::parcel_file_descriptor::CacheFieldIds(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util22parcel_file_descriptor13CacheFieldIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a08a8 == (_jclass *)0x0) {
-    DAT_010a08a8 = (_jclass *)FindClassGlobal(param_1,param_2,0,"android/os/ParcelFileDescriptor",0)
-    ;
+  if (DAT_010a08a8 == 0) {
+    DAT_010a08a8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"android/os/ParcelFileDescriptor",0);
   }
-  LookupFieldIds(param_1,DAT_010a08a8,(FieldDescriptor *)&DAT_002f5d88,1,(_jfieldID **)&DAT_010a08c0
-                 ,"android/os/ParcelFileDescriptor");
+  _ZN8firebase4util14LookupFieldIdsEP7_JNIEnvP7_jclassPKNS0_15FieldDescriptorEmPP9_jfieldIDPKc
+            (param_1,DAT_010a08a8,&DAT_002f5d88,1,&DAT_010a08c0,"android/os/ParcelFileDescriptor");
   return;
 }
 

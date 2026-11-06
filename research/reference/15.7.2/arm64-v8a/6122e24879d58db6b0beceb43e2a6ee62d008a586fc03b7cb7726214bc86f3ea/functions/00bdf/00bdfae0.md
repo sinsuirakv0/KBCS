@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdfae0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdfae0",
-  "name": "reflection::Service::Verify",
+  "name": "_ZNK10reflection7Service6VerifyERN11flatbuffers8VerifierE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3e6ce314003036de9f6b82b538b4267c2e5df7a2c9bb75d0cf05699f6a8bd35f",
-  "source_text_sha256": "3e6ce314003036de9f6b82b538b4267c2e5df7a2c9bb75d0cf05699f6a8bd35f"
+  "source_sha256": "5f4719beeab3d45964a61166cffceaa10ae0d7f043e0def51f73b563af1860c0",
+  "source_text_sha256": "5f4719beeab3d45964a61166cffceaa10ae0d7f043e0def51f73b563af1860c0"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b352f8](../00b35/00b352f8.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b37648](../00b37/00b37648.md)
 
-## 疑似コード 1/1 / UTF-8 138 bytes
+## 疑似コード / UTF-8 173 bytes
 
 ~~~c
 
-void __thiscall reflection::Service::Verify(Service *this,Verifier *param_1)
+void _ZNK10reflection7Service6VerifyERN11flatbuffers8VerifierE(void)
 
 {
-  (*(code *)PTR_Verify_00c1e5a8)();
+  (*(code *)PTR__ZNK10reflection7Service6VerifyERN11flatbuffers8VerifierE_00c1e5a8)();
   return;
 }
 

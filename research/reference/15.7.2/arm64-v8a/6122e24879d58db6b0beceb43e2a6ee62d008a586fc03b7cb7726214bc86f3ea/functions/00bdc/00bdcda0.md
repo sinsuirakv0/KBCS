@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcda0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcda0",
-  "name": "Botan::PKCS10_Request::ex_constraints",
+  "name": "_ZNK5Botan14PKCS10_Request14ex_constraintsEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "786caa9f28e5b3fb3a3c2467da2b62a29a32736354a265758da16e667e78879b",
-  "source_text_sha256": "786caa9f28e5b3fb3a3c2467da2b62a29a32736354a265758da16e667e78879b"
+  "source_sha256": "78ccdb517ce057fbdd1893f65073f790ded05238e8e8db04319f0c98eb57d46f",
+  "source_text_sha256": "78ccdb517ce057fbdd1893f65073f790ded05238e8e8db04319f0c98eb57d46f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004ede80](../004ed/004ede80.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004ec514](../004ec/004ec514.md)
 
-## 疑似コード 1/1 / UTF-8 118 bytes
+## 疑似コード / UTF-8 147 bytes
 
 ~~~c
 
-void Botan::PKCS10_Request::ex_constraints(void)
+void _ZNK5Botan14PKCS10_Request14ex_constraintsEv(void)
 
 {
-  (*(code *)PTR_ex_constraints_00c1cf08)();
+  (*(code *)PTR__ZNK5Botan14PKCS10_Request14ex_constraintsEv_00c1cf08)();
   return;
 }
 

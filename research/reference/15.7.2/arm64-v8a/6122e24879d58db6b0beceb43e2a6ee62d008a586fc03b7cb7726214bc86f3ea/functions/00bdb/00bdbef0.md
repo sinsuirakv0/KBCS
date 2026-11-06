@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbef0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbef0",
-  "name": "Botan::Entropy_Sources::Entropy_Sources",
+  "name": "_ZN5Botan15Entropy_SourcesC2ERKNSt6__ndk16vectorINS1_12basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEENS6_IS8_EEEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8bd61657d6a0d25e56725d46502fd3ddccc5dffbaba8b0c6084af223ffe949a0",
-  "source_text_sha256": "8bd61657d6a0d25e56725d46502fd3ddccc5dffbaba8b0c6084af223ffe949a0"
+  "source_sha256": "2836f3d54b7a074e76f022f959d6ccd8cd15c3f6b53b7de96b11541629949694",
+  "source_text_sha256": "2836f3d54b7a074e76f022f959d6ccd8cd15c3f6b53b7de96b11541629949694"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004a0c64](../004a0/004a0c64.md)
@@ -30,14 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004a0a28](../004a0/004a0a28.md)
 
-## 疑似コード 1/1 / UTF-8 165 bytes
+## 疑似コード / UTF-8 327 bytes
 
 ~~~c
 
-void __thiscall Botan::Entropy_Sources::Entropy_Sources(Entropy_Sources *this,vector *param_1)
+void _ZN5Botan15Entropy_SourcesC2ERKNSt6__ndk16vectorINS1_12basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEENS6_IS8_EEEE
+               (void)
 
 {
-  (*(code *)PTR_Entropy_Sources_00c1c7b0)();
+  (*(code *)
+    PTR__ZN5Botan15Entropy_SourcesC2ERKNSt6__ndk16vectorINS1_12basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEENS6_IS8_EEEE_00c1c7b0
+  )();
   return;
 }
 

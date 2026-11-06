@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afbfa4.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afbfa4",
-  "name": "firebase::callback::CallbackDispatcher::~CallbackDispatcher",
+  "name": "_ZN8firebase8callback18CallbackDispatcherD2Ev",
   "size": 408,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "23f910a9abfe3970c95bdb86777637eec0aa1186130a26f71b9e8b296a911dd9",
-  "source_text_sha256": "23f910a9abfe3970c95bdb86777637eec0aa1186130a26f71b9e8b296a911dd9"
+  "source_sha256": "f6900d42fd4446b3377be9c13c416cf9386ecf8dc2e25e41b13e3e8165a932f0",
+  "source_text_sha256": "f6900d42fd4446b3377be9c13c416cf9386ecf8dc2e25e41b13e3e8165a932f0"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdeb80](../00bde/00bdeb80.md)
@@ -40,114 +39,110 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "Callback dispatcher shut down with %d pending callbacks"
 ~~~
-## 疑似コード 1/1 / UTF-8 3808 bytes
+
+## 疑似コード / UTF-8 3223 bytes
 
 ~~~c
 
-/* firebase::callback::CallbackDispatcher::~CallbackDispatcher() */
-
-void __thiscall
-firebase::callback::CallbackDispatcher::~CallbackDispatcher(CallbackDispatcher *this)
+void _ZN8firebase8callback18CallbackDispatcherD2Ev(long *param_1)
 
 {
-  Mutex *this_00;
-  __shared_weak_count *p_Var1;
-  CallbackDispatcher *pCVar2;
+  long *plVar1;
+  long *plVar2;
   char cVar3;
   bool bVar4;
   long lVar5;
   long lVar6;
   long *plVar7;
-  __shared_weak_count *p_Var8;
-  CallbackDispatcher *pCVar9;
+  long *plVar8;
   
-  this_00 = (Mutex *)(this + 0x18);
-  Mutex::Acquire(this_00);
-  if (*(long *)(this + 0x10) != 0) {
-    LogWarning("Callback dispatcher shut down with %d pending callbacks");
-    lVar5 = *(long *)(this + 0x10);
+  plVar2 = param_1 + 3;
+  _ZN8firebase5Mutex7AcquireEv(plVar2);
+  if (param_1[2] != 0) {
+    _ZN8firebase10LogWarningEPKcz("Callback dispatcher shut down with %d pending callbacks");
+    lVar5 = param_1[2];
     while (lVar5 != 0) {
-      lVar5 = *(long *)this;
-      p_Var8 = *(__shared_weak_count **)(lVar5 + 0x18);
+      lVar5 = *param_1;
+      plVar7 = *(long **)(lVar5 + 0x18);
       *(undefined8 *)(lVar5 + 0x10) = 0;
       *(undefined8 *)(lVar5 + 0x18) = 0;
-      if (p_Var8 != (__shared_weak_count *)0x0) {
-        p_Var1 = p_Var8 + 8;
+      if (plVar7 != (long *)0x0) {
+        plVar8 = plVar7 + 1;
         do {
-          lVar5 = *(long *)p_Var1;
+          lVar5 = *plVar8;
           cVar3 = '\x01';
-          bVar4 = (bool)ExclusiveMonitorPass(p_Var1,0x10);
+          bVar4 = (bool)ExclusiveMonitorPass(plVar8,0x10);
           if (bVar4) {
-            *(long *)p_Var1 = lVar5 + -1;
+            *plVar8 = lVar5 + -1;
             cVar3 = ExclusiveMonitorsStatus();
           }
         } while (cVar3 != '\0');
         if (lVar5 == 0) {
-          (**(code **)(*(long *)p_Var8 + 0x10))(p_Var8);
-          std::__ndk1::__shared_weak_count::__release_weak(p_Var8);
+          (**(code **)(*plVar7 + 0x10))(plVar7);
+          _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar7);
         }
       }
-      plVar7 = *(long **)this;
+      plVar7 = (long *)*param_1;
       lVar5 = *plVar7;
       *(long *)(lVar5 + 8) = plVar7[1];
       *(long *)plVar7[1] = lVar5;
-      *(long *)(this + 0x10) = *(long *)(this + 0x10) + -1;
-      p_Var8 = (__shared_weak_count *)plVar7[3];
-      if (p_Var8 != (__shared_weak_count *)0x0) {
-        p_Var1 = p_Var8 + 8;
+      param_1[2] = param_1[2] + -1;
+      plVar8 = (long *)plVar7[3];
+      if (plVar8 != (long *)0x0) {
+        plVar1 = plVar8 + 1;
         do {
-          lVar5 = *(long *)p_Var1;
+          lVar5 = *plVar1;
           cVar3 = '\x01';
-          bVar4 = (bool)ExclusiveMonitorPass(p_Var1,0x10);
+          bVar4 = (bool)ExclusiveMonitorPass(plVar1,0x10);
           if (bVar4) {
-            *(long *)p_Var1 = lVar5 + -1;
+            *plVar1 = lVar5 + -1;
             cVar3 = ExclusiveMonitorsStatus();
           }
         } while (cVar3 != '\0');
         if (lVar5 == 0) {
-          (**(code **)(*(long *)p_Var8 + 0x10))(p_Var8);
-          std::__ndk1::__shared_weak_count::__release_weak(p_Var8);
+          (**(code **)(*plVar8 + 0x10))(plVar8);
+          _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar8);
         }
       }
                     /* try { // try from 00afbfe8 to 00bfbfef has its CatchHandler @ 00b00380 */
-      operator_delete(plVar7);
-      lVar5 = *(long *)(this + 0x10);
+      _ZdlPv(plVar7);
+      lVar5 = param_1[2];
                     /* try { // try from 00afbff0 to 00bfc0eb has its CatchHandler @ 00af560c */
     }
   }
-  Mutex::Release(this_00);
-  Mutex::~Mutex((Mutex *)(this + 0x40));
-  Mutex::~Mutex(this_00);
-  if (*(long *)(this + 0x10) != 0) {
-    lVar5 = *(long *)this;
-    pCVar2 = *(CallbackDispatcher **)(this + 8);
-    lVar6 = *(long *)pCVar2;
+  _ZN8firebase5Mutex7ReleaseEv(plVar2);
+  _ZN8firebase5MutexD1Ev(param_1 + 8);
+  _ZN8firebase5MutexD1Ev(plVar2);
+  if (param_1[2] != 0) {
+    lVar5 = *param_1;
+    plVar2 = (long *)param_1[1];
+    lVar6 = *plVar2;
     *(undefined8 *)(lVar6 + 8) = *(undefined8 *)(lVar5 + 8);
     **(long **)(lVar5 + 8) = lVar6;
-    *(undefined8 *)(this + 0x10) = 0;
-    while (pCVar2 != this) {
+    param_1[2] = 0;
+    while (plVar2 != param_1) {
                     /* try { // try from 00afc0ec to 00bfc10f has its CatchHandler @ 00b00450 */
-      p_Var8 = *(__shared_weak_count **)(pCVar2 + 0x18);
-      pCVar9 = *(CallbackDispatcher **)(pCVar2 + 8);
-      if (p_Var8 != (__shared_weak_count *)0x0) {
-        p_Var1 = p_Var8 + 8;
+      plVar7 = (long *)plVar2[3];
+      plVar8 = (long *)plVar2[1];
+      if (plVar7 != (long *)0x0) {
+        plVar1 = plVar7 + 1;
         do {
-          lVar5 = *(long *)p_Var1;
+          lVar5 = *plVar1;
           cVar3 = '\x01';
-          bVar4 = (bool)ExclusiveMonitorPass(p_Var1,0x10);
+          bVar4 = (bool)ExclusiveMonitorPass(plVar1,0x10);
           if (bVar4) {
-            *(long *)p_Var1 = lVar5 + -1;
+            *plVar1 = lVar5 + -1;
             cVar3 = ExclusiveMonitorsStatus();
           }
         } while (cVar3 != '\0');
         if (lVar5 == 0) {
                     /* try { // try from 00afc110 to 00bfc11b has its CatchHandler @ 00b003a4 */
-          (**(code **)(*(long *)p_Var8 + 0x10))(p_Var8);
-          std::__ndk1::__shared_weak_count::__release_weak(p_Var8);
+          (**(code **)(*plVar7 + 0x10))(plVar7);
+          _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar7);
         }
       }
-      operator_delete(pCVar2);
-      pCVar2 = pCVar9;
+      _ZdlPv(plVar2);
+      plVar2 = plVar8;
     }
   }
   return;

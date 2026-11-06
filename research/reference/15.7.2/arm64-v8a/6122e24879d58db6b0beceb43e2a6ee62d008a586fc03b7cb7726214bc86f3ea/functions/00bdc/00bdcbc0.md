@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcbc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcbc0",
-  "name": "Botan::AlternativeName::AlternativeName",
+  "name": "_ZN5Botan15AlternativeNameC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_S9_S9_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b8f53121ee6e533a98c3945f8dad46b4e956950846ff612c1d2774a3957a2a1e",
-  "source_text_sha256": "b8f53121ee6e533a98c3945f8dad46b4e956950846ff612c1d2774a3957a2a1e"
+  "source_sha256": "542679bd0c9142346da44a44782740d1864b9f0a86160bcf7e9ae37e3416376b",
+  "source_text_sha256": "542679bd0c9142346da44a44782740d1864b9f0a86160bcf7e9ae37e3416376b"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004e21a8](../004e2/004e21a8.md)
@@ -38,14 +37,12 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004dbf98](../004db/004dbf98.md)
 
-## 疑似コード 1/1 / UTF-8 690 bytes
+## 疑似コード / UTF-8 720 bytes
 
 ~~~c
 
-void __thiscall
-Botan::AlternativeName::AlternativeName
-          (AlternativeName *this,basic_string *param_1,basic_string *param_2,basic_string *param_3,
-          basic_string *param_4)
+void _ZN5Botan15AlternativeNameC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_S9_S9_
+               (void)
 
 {
                     /* catch() { ... } // from try @ 00bdccc0 with catch @ 00bdcbcc
@@ -53,7 +50,9 @@ Botan::AlternativeName::AlternativeName
                        catch() { ... } // from try @ 00bdce58 with catch @ 00bdcbcc
                        catch() { ... } // from try @ 00bdcf2c with catch @ 00bdcbcc
                        catch() { ... } // from try @ 00bdcfb0 with catch @ 00bdcbcc */
-  (*(code *)PTR_AlternativeName_00c1ce18)();
+  (*(code *)
+    PTR__ZN5Botan15AlternativeNameC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_S9_S9__00c1ce18
+  )();
   return;
 }
 

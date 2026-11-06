@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00a0addc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "05a3d9b0ef9dcc2cfd255f2b8142e5679d2f6861fc153815644c86e4f86b8d2c",
-  "source_text_sha256": "05a3d9b0ef9dcc2cfd255f2b8142e5679d2f6861fc153815644c86e4f86b8d2c"
+  "source_sha256": "45c44d40e76d6c2e6a71388718e787e112b802f96d17071a5193f84e92d50935",
+  "source_text_sha256": "45c44d40e76d6c2e6a71388718e787e112b802f96d17071a5193f84e92d50935"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00a0bbd8](../00a0b/00a0bbd8.md)
@@ -37,7 +36,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "map::at:  key not found"
 ~~~
-## 疑似コード 1/1 / UTF-8 4802 bytes
+
+## 疑似コード / UTF-8 4655 bytes
 
 ~~~c
 
@@ -85,7 +85,7 @@ LAB_00a0af10:
       puVar5 = puVar7;
     } while ((undefined8 *)*puVar7 != (undefined8 *)0x0);
   }
-  puVar6 = operator_new(0x40);
+  puVar6 = (undefined8 *)_Znwm(0x40);
   puVar6[7] = 0;
   puVar6[6] = 0;
   puVar6[5] = puVar6 + 6;
@@ -110,7 +110,7 @@ LAB_00a0af94:
     puVar7 = puVar3;
     if (puVar5 == (undefined8 *)0x0) {
 LAB_00a0afd4:
-      puVar2 = operator_new(0x28);
+      puVar2 = (undefined8 *)_Znwm(0x28);
       *puVar2 = 0;
       puVar2[1] = 0;
       puVar2[2] = puVar3;

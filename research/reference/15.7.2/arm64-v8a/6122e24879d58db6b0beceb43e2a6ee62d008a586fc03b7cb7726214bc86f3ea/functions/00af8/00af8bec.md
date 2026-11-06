@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00af8bec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00af8bec",
-  "name": "firebase::internal::JObjectReference::Set",
+  "name": "_ZN8firebase8internal16JObjectReference3SetEP7_JNIEnvP8_jobject",
   "size": 176,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "449e5cf4d87a2ae268551d5927a4a270eec0af84584978deba5f9ffa9d9dbb43",
-  "source_text_sha256": "449e5cf4d87a2ae268551d5927a4a270eec0af84584978deba5f9ffa9d9dbb43"
+  "source_sha256": "5099c55f14fd35940836c12529c39ed06d32fa32b583df20577af1fbb0ac8a92",
+  "source_text_sha256": "5099c55f14fd35940836c12529c39ed06d32fa32b583df20577af1fbb0ac8a92"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,14 +29,12 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 1154 bytes
+## 疑似コード / UTF-8 959 bytes
 
 ~~~c
 
-/* firebase::internal::JObjectReference::Set(_JNIEnv*, _jobject*) */
-
-void __thiscall
-firebase::internal::JObjectReference::Set(JObjectReference *this,_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase8internal16JObjectReference3SetEP7_JNIEnvP8_jobject
+               (undefined8 *param_1,long *param_2,long param_3)
 
 {
   long lVar1;
@@ -47,19 +44,19 @@ firebase::internal::JObjectReference::Set(JObjectReference *this,_JNIEnv *param_
   
   lVar1 = tpidr_el0;
   local_38 = *(long *)(lVar1 + 0x28);
-  if ((param_1 != (_JNIEnv *)0x0) && (*(long *)(this + 8) != 0)) {
-    (**(code **)(*(long *)param_1 + 0xb0))(param_1);
+  if ((param_2 != (long *)0x0) && (param_1[1] != 0)) {
+    (**(code **)(*param_2 + 0xb0))(param_2);
   }
                     /* try { // try from 00af8c34 to 00bf8c3f has its CatchHandler @ 00aff768 */
-  *(undefined8 *)(this + 8) = 0;
+  param_1[1] = 0;
   local_40 = 0;
                     /* try { // try from 00af8c40 to 00bf8c53 has its CatchHandler @ 00aff764 */
-  (**(code **)(*(long *)param_1 + 0x6d8))(param_1,&local_40);
-  *(undefined8 *)this = local_40;
-  *(undefined8 *)(this + 8) = 0;
-  if (param_2 != (_jobject *)0x0) {
-    uVar2 = (**(code **)(*(long *)param_1 + 0xa8))(param_1,param_2);
-    *(undefined8 *)(this + 8) = uVar2;
+  (**(code **)(*param_2 + 0x6d8))(param_2,&local_40);
+  *param_1 = local_40;
+  param_1[1] = 0;
+  if (param_3 != 0) {
+    uVar2 = (**(code **)(*param_2 + 0xa8))(param_2,param_3);
+    param_1[1] = uVar2;
   }
   if (*(long *)(lVar1 + 0x28) == local_38) {
     return;

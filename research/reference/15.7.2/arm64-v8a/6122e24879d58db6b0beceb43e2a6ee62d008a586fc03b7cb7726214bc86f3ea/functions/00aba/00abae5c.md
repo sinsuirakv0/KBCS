@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00abae5c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "fad2bcbf2f4905600bda7487475b4ac480cef32dba9c513896b9a80b6933cb7d",
-  "source_text_sha256": "fad2bcbf2f4905600bda7487475b4ac480cef32dba9c513896b9a80b6933cb7d"
+  "source_sha256": "437b47b14bb1120f136519655957df441071c1b1833851809eb7fc4966b1abaf",
+  "source_text_sha256": "437b47b14bb1120f136519655957df441071c1b1833851809eb7fc4966b1abaf"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00abf464](../00abf/00abf464.md)
@@ -57,7 +56,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "OP_%@.csv"
 "receiptSignature"
 ~~~
-## 疑似コード 1/1 / UTF-8 14455 bytes
+
+## 疑似コード / UTF-8 13883 bytes
 
 ~~~c
 
@@ -67,9 +67,10 @@ void FUN_00abae5c(long param_1)
 
 {
   long lVar1;
-  ulong uVar2;
-  long lVar3;
-  byte *pbVar4;
+  undefined *puVar2;
+  ulong uVar3;
+  long lVar4;
+  byte *pbVar5;
   byte local_270 [16];
   void *local_260;
   byte local_258 [16];
@@ -106,7 +107,7 @@ void FUN_00abae5c(long param_1)
   undefined *local_160 [8];
   byte local_120;
   void *local_110;
-  basic_ios<char,std::__ndk1::char_traits<char>> abStack_f8 [160];
+  undefined1 auStack_f8 [160];
   long local_58;
   
   lVar1 = tpidr_el0;
@@ -128,25 +129,25 @@ void FUN_00abae5c(long param_1)
   FUN_00469f7c(local_1f8,&local_210);
   FUN_0046ff30(&local_1c8,&local_1e0,local_1f8);
                     /* try { // try from 00abaf04 to 00bbaf0f has its CatchHandler @ 00abd330 */
-  uVar2 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
+  uVar3 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
   if ((local_1c8 & 1) != 0) {
-    operator_delete(local_1b8);
+    _ZdlPv(local_1b8);
   }
   if ((local_1f8[0] & 1) != 0) {
-    operator_delete(local_1e8);
+    _ZdlPv(local_1e8);
   }
   if ((local_210 & 1) != 0) {
-    operator_delete(local_200);
+    _ZdlPv(local_200);
   }
   if ((local_1e0 & 1) != 0) {
-    operator_delete((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
+    _ZdlPv((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
   }
-  if ((uVar2 & 1) != 0) {
+  if ((uVar3 & 1) != 0) {
     FUN_00465394(&local_1b0,0x2c);
     FUN_00464b8c(&local_1c8,&local_1b0,0);
     if ((BYTE_ARRAY_0032b6a9[param_1 + 7] & 1) != 0) {
                     /* try { // try from 00abafac to 00bbafcf has its CatchHandler @ 00abd474 */
-      operator_delete(*(void **)(BYTE_ARRAY_0032b6a9 + param_1 + 0x17));
+      _ZdlPv(*(void **)(BYTE_ARRAY_0032b6a9 + param_1 + 0x17));
     }
     *(undefined8 *)(BYTE_ARRAY_0032b6a9 + param_1 + 0xf) = uStack_1c0;
     *(ulong *)(BYTE_ARRAY_0032b6a9 + param_1 + 7) = CONCAT71(uStack_1c7,local_1c8);
@@ -154,22 +155,22 @@ void FUN_00abae5c(long param_1)
     FUN_00464b8c(&local_1c8,&local_1b0,1);
     if ((BYTE_ARRAY_0032b6a9[param_1 + 0x1f] & 1) != 0) {
                     /* try { // try from 00abafdc to 00bbb027 has its CatchHandler @ 00abd4bc */
-      operator_delete(*(void **)((long)&DWORD_0032b6d8 + param_1));
+      _ZdlPv(*(void **)((long)&DWORD_0032b6d8 + param_1));
     }
     *(undefined8 *)((long)&fde_0032b6d0 + param_1) = uStack_1c0;
     *(ulong *)(BYTE_ARRAY_0032b6a9 + param_1 + 0x1f) = CONCAT71(uStack_1c7,local_1c8);
     *(void **)((long)&DWORD_0032b6d8 + param_1) = local_1b8;
     FUN_00464b8c(&local_1c8,&local_1b0,2);
-    pbVar4 = (byte *)((long)&QWORD_0032b6dc + param_1 + 4);
-    if ((*pbVar4 & 1) != 0) {
-      operator_delete(*(void **)((long)&QWORD_0032b6f0 + param_1));
+    pbVar5 = (byte *)((long)&QWORD_0032b6dc + param_1 + 4);
+    if ((*pbVar5 & 1) != 0) {
+      _ZdlPv(*(void **)((long)&QWORD_0032b6f0 + param_1));
     }
     *(undefined8 *)((long)&DWORD_0032b6e8 + param_1) = uStack_1c0;
-    *(ulong *)pbVar4 = CONCAT71(uStack_1c7,local_1c8);
+    *(ulong *)pbVar5 = CONCAT71(uStack_1c7,local_1c8);
     *(void **)((long)&QWORD_0032b6f0 + param_1) = local_1b8;
     FUN_00464b8c(&local_1c8,&local_1b0,3);
     if ((*(byte *)((long)&fde_0032b6f8 + param_1) & 1) != 0) {
-      operator_delete(*(void **)((long)&QWORD_0032b704 + param_1 + 4));
+      _ZdlPv(*(void **)((long)&QWORD_0032b704 + param_1 + 4));
     }
     *(undefined8 *)((long)&DWORD_0032b700 + param_1) = uStack_1c0;
     *(ulong *)((long)&fde_0032b6f8 + param_1) = CONCAT71(uStack_1c7,local_1c8);
@@ -178,7 +179,7 @@ void FUN_00abae5c(long param_1)
     FUN_00465394(&local_1b0,0x2c);
     FUN_00464b8c(&local_1c8,&local_1b0,0);
     if ((*(byte *)((long)&DWORD_0032b710 + param_1) & 1) != 0) {
-      operator_delete(*(void **)((long)&fde_0032b720 + param_1));
+      _ZdlPv(*(void **)((long)&fde_0032b720 + param_1));
     }
     *(undefined8 *)((long)&QWORD_0032b718 + param_1) = uStack_1c0;
     *(ulong *)((long)&DWORD_0032b710 + param_1) = CONCAT71(uStack_1c7,local_1c8);
@@ -186,14 +187,14 @@ void FUN_00abae5c(long param_1)
                     /* try { // try from 00abb0a8 to 00bbb0bb has its CatchHandler @ 00abd4e0 */
     FUN_00464b8c(&local_1c8,&local_1b0,1);
     if ((*(byte *)((long)&DWORD_0032b728 + param_1) & 1) != 0) {
-      operator_delete(*(void **)((long)&DWORD_0032b738 + param_1));
+      _ZdlPv(*(void **)((long)&DWORD_0032b738 + param_1));
     }
     *(undefined8 *)((long)&QWORD_0032b72c + param_1 + 4) = uStack_1c0;
     *(ulong *)((long)&DWORD_0032b728 + param_1) = CONCAT71(uStack_1c7,local_1c8);
     *(void **)((long)&DWORD_0032b738 + param_1) = local_1b8;
     FUN_00464b8c(&local_1c8,&local_1b0,2);
     if ((*(byte *)((long)&QWORD_0032b740 + param_1) & 1) != 0) {
-      operator_delete(*(void **)((long)&DWORD_0032b750 + param_1));
+      _ZdlPv(*(void **)((long)&DWORD_0032b750 + param_1));
     }
     *(undefined8 *)((long)&fde_0032b748 + param_1) = uStack_1c0;
     *(ulong *)((long)&QWORD_0032b740 + param_1) = CONCAT71(uStack_1c7,local_1c8);
@@ -201,7 +202,7 @@ void FUN_00abae5c(long param_1)
     FUN_00464b8c(&local_1c8,&local_1b0,3);
                     /* try { // try from 00abb114 to 00bbb127 has its CatchHandler @ 00abd40c */
     if (((&uleb128_0032b758)[param_1] & 1) != 0) {
-      operator_delete(*(void **)(BYTE_ARRAY_0032b759 + param_1 + 0xf));
+      _ZdlPv(*(void **)(BYTE_ARRAY_0032b759 + param_1 + 0xf));
     }
     *(undefined8 *)(BYTE_ARRAY_0032b759 + param_1 + 7) = uStack_1c0;
     *(ulong *)(&uleb128_0032b758 + param_1) = CONCAT71(uStack_1c7,local_1c8);
@@ -218,36 +219,36 @@ void FUN_00abae5c(long param_1)
   local_20b = 0;
   FUN_00469f7c(local_228,&local_210);
   FUN_0046ff30(&local_1c8,&local_1e0,local_228);
-  uVar2 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
+  uVar3 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
   if ((local_1c8 & 1) != 0) {
                     /* try { // try from 00abb2c8 to 00bbb2db has its CatchHandler @ 00abd3fc */
-    operator_delete(local_1b8);
+    _ZdlPv(local_1b8);
   }
   if ((local_228[0] & 1) != 0) {
-    operator_delete(local_218);
+    _ZdlPv(local_218);
   }
   if ((local_210 & 1) != 0) {
-    operator_delete(local_200);
+    _ZdlPv(local_200);
   }
   if ((local_1e0 & 1) != 0) {
-    operator_delete((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
+    _ZdlPv((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
   }
-  pbVar4 = (byte *)("receiptSignature" + param_1 + 3);
-  if ((uVar2 & 1) != 0) {
-    lVar3 = 0x49;
+  pbVar5 = (byte *)("receiptSignature" + param_1 + 3);
+  if ((uVar3 & 1) != 0) {
+    lVar4 = 0x49;
     do {
       FUN_00465394(&local_1b0,0x2c);
                     /* try { // try from 00abb210 to 00bbb223 has its CatchHandler @ 00abd400 */
       FUN_00464b8c(&local_1c8,&local_1b0,0);
-      if ((*pbVar4 & 1) != 0) {
-        operator_delete(*(void **)(pbVar4 + 0x10));
+      if ((*pbVar5 & 1) != 0) {
+        _ZdlPv(*(void **)(pbVar5 + 0x10));
       }
-      lVar3 = lVar3 + -1;
-      *(undefined8 *)(pbVar4 + 8) = uStack_1c0;
-      *(ulong *)pbVar4 = CONCAT71(uStack_1c7,local_1c8);
-      *(void **)(pbVar4 + 0x10) = local_1b8;
-      pbVar4 = pbVar4 + 0x18;
-    } while (lVar3 != 0);
+      lVar4 = lVar4 + -1;
+      *(undefined8 *)(pbVar5 + 8) = uStack_1c0;
+      *(ulong *)pbVar5 = CONCAT71(uStack_1c7,local_1c8);
+      *(void **)(pbVar5 + 0x10) = local_1b8;
+      pbVar5 = pbVar5 + 0x18;
+    } while (lVar4 != 0);
   }
   FUN_00465780(&local_1b0);
   local_1e0 = 0x1e;
@@ -269,38 +270,38 @@ void FUN_00abae5c(long param_1)
   local_20b = 0;
   FUN_00469f7c(local_240,&local_210);
   FUN_0046ff30(&local_1c8,&local_1e0,local_240);
-  uVar2 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
+  uVar3 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
   if ((local_1c8 & 1) != 0) {
-    operator_delete(local_1b8);
+    _ZdlPv(local_1b8);
   }
   if ((local_240[0] & 1) != 0) {
-    operator_delete(local_230);
+    _ZdlPv(local_230);
   }
   if ((local_210 & 1) != 0) {
                     /* try { // try from 00abb31c to 00bbb337 has its CatchHandler @ 00abd3f8 */
-    operator_delete(local_200);
+    _ZdlPv(local_200);
   }
   if ((local_1e0 & 1) != 0) {
-    operator_delete((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
+    _ZdlPv((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
   }
-  if ((uVar2 & 1) != 0) {
-    pbVar4 = (byte *)(
+  if ((uVar3 & 1) != 0) {
+    pbVar5 = (byte *)(
                      "%s/v1/notices?platform=%s&clientVersion=%d&clearedStageJapan=%d&clearedStageFuture=%d&clearedStageUniverse=%d&clearedStages=%d&clientTime=%d&timeDifference=%d&countryCode=%s"
                      + param_1 + 0x7b);
-    lVar3 = 0x49;
+    lVar4 = 0x49;
     do {
       FUN_00465394(&local_1b0,0x2c);
       FUN_00464b8c(&local_1c8,&local_1b0,0);
-      if ((*pbVar4 & 1) != 0) {
-        operator_delete(*(void **)(pbVar4 + 0x10));
+      if ((*pbVar5 & 1) != 0) {
+        _ZdlPv(*(void **)(pbVar5 + 0x10));
       }
-      lVar3 = lVar3 + -1;
-      *(undefined8 *)(pbVar4 + 8) = uStack_1c0;
-      *(ulong *)pbVar4 = CONCAT71(uStack_1c7,local_1c8);
+      lVar4 = lVar4 + -1;
+      *(undefined8 *)(pbVar5 + 8) = uStack_1c0;
+      *(ulong *)pbVar5 = CONCAT71(uStack_1c7,local_1c8);
                     /* try { // try from 00abb354 to 00bbb35b has its CatchHandler @ 00abd4cc */
-      *(void **)(pbVar4 + 0x10) = local_1b8;
-      pbVar4 = pbVar4 + 0x18;
-    } while (lVar3 != 0);
+      *(void **)(pbVar5 + 0x10) = local_1b8;
+      pbVar5 = pbVar5 + 0x18;
+    } while (lVar4 != 0);
   }
   FUN_00465780(&local_1b0);
   local_1e0 = 0x14;
@@ -315,37 +316,37 @@ void FUN_00abae5c(long param_1)
   FUN_00469f7c(local_258,&local_210);
                     /* try { // try from 00abb3e0 to 00bbb3eb has its CatchHandler @ 00abd4c8 */
   FUN_0046ff30(&local_1c8,&local_1e0,local_258);
-  uVar2 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
+  uVar3 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
   if ((local_1c8 & 1) != 0) {
-    operator_delete(local_1b8);
+    _ZdlPv(local_1b8);
                     /* try { // try from 00abb430 to 00bbb47f has its CatchHandler @ 00abd4bc */
   }
   if ((local_258[0] & 1) != 0) {
-    operator_delete(local_248);
+    _ZdlPv(local_248);
   }
   if ((local_210 & 1) != 0) {
-    operator_delete(local_200);
+    _ZdlPv(local_200);
   }
   if ((local_1e0 & 1) != 0) {
-    operator_delete((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
+    _ZdlPv((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
   }
-  if ((uVar2 & 1) != 0) {
-    pbVar4 = (byte *)("(Ljava/lang/String;Ljava/lang/String;)Lcom/google/android/gms/tasks/Task;" +
+  if ((uVar3 & 1) != 0) {
+    pbVar5 = (byte *)("(Ljava/lang/String;Ljava/lang/String;)Lcom/google/android/gms/tasks/Task;" +
                      param_1 + 0x10);
-    lVar3 = 0x4d;
+    lVar4 = 0x4d;
     do {
       FUN_00465394(&local_1b0,0x2c);
                     /* try { // try from 00abb4a4 to 00bbb4e7 has its CatchHandler @ 00abd46c */
       FUN_00464b8c(&local_1c8,&local_1b0,0);
-      if ((*pbVar4 & 1) != 0) {
-        operator_delete(*(void **)(pbVar4 + 0x10));
+      if ((*pbVar5 & 1) != 0) {
+        _ZdlPv(*(void **)(pbVar5 + 0x10));
       }
-      lVar3 = lVar3 + -1;
-      *(undefined8 *)(pbVar4 + 8) = uStack_1c0;
-      *(ulong *)pbVar4 = CONCAT71(uStack_1c7,local_1c8);
-      *(void **)(pbVar4 + 0x10) = local_1b8;
-      pbVar4 = pbVar4 + 0x18;
-    } while (lVar3 != 0);
+      lVar4 = lVar4 + -1;
+      *(undefined8 *)(pbVar5 + 8) = uStack_1c0;
+      *(ulong *)pbVar5 = CONCAT71(uStack_1c7,local_1c8);
+      *(void **)(pbVar5 + 0x10) = local_1b8;
+      pbVar5 = pbVar5 + 0x18;
+    } while (lVar4 != 0);
   }
   FUN_00465780(&local_1b0);
   local_1e0 = 0x14;
@@ -359,59 +360,63 @@ void FUN_00abae5c(long param_1)
   FUN_00469f7c(local_270,&local_210);
                     /* try { // try from 00abb50c to 00bbb51f has its CatchHandler @ 00abd4bc */
   FUN_0046ff30(&local_1c8,&local_1e0,local_270);
-  uVar2 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
+  uVar3 = FUN_00ab1128(&local_1b0,&local_1c8,0,0);
   if ((local_1c8 & 1) != 0) {
-    operator_delete(local_1b8);
+    _ZdlPv(local_1b8);
   }
   if ((local_270[0] & 1) != 0) {
-    operator_delete(local_260);
+    _ZdlPv(local_260);
   }
   if ((local_210 & 1) != 0) {
-    operator_delete(local_200);
+    _ZdlPv(local_200);
   }
   if ((local_1e0 & 1) != 0) {
-    operator_delete((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
+    _ZdlPv((void *)CONCAT53(uStack_1cd,CONCAT21(uStack_1cf,cStack_1d0)));
   }
-  if ((uVar2 & 1) != 0) {
-    lVar3 = 0x4d;
-    pbVar4 = (byte *)("(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;" +
+  if ((uVar3 & 1) != 0) {
+    lVar4 = 0x4d;
+    pbVar5 = (byte *)("(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;" +
                      param_1 + 0x37);
     do {
       FUN_00465394(&local_1b0,0x2c);
       FUN_00464b8c(&local_1c8,&local_1b0,0);
-      if ((*pbVar4 & 1) != 0) {
-        operator_delete(*(void **)(pbVar4 + 0x10));
+      if ((*pbVar5 & 1) != 0) {
+        _ZdlPv(*(void **)(pbVar5 + 0x10));
       }
-      lVar3 = lVar3 + -1;
-      *(undefined8 *)(pbVar4 + 8) = uStack_1c0;
-      *(ulong *)pbVar4 = CONCAT71(uStack_1c7,local_1c8);
+      lVar4 = lVar4 + -1;
+      *(undefined8 *)(pbVar5 + 8) = uStack_1c0;
+      *(ulong *)pbVar5 = CONCAT71(uStack_1c7,local_1c8);
                     /* try { // try from 00abb5b0 to 00bbb5cf has its CatchHandler @ 00abd4bc */
-      *(void **)(pbVar4 + 0x10) = local_1b8;
-      pbVar4 = pbVar4 + 0x18;
-    } while (lVar3 != 0);
+      *(void **)(pbVar5 + 0x10) = local_1b8;
+      pbVar5 = pbVar5 + 0x18;
+    } while (lVar4 != 0);
   }
   FUN_00465780(&local_1b0);
+  puVar2 = PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acc8
+  ;
                     /* try { // try from 00abb604 to 00bbb64f has its CatchHandler @ 00abd518 */
-  local_168 = *(long *)PTR_VTT_00c1acc8;
+  local_168 = *(long *)
+               PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acc8
+  ;
   local_1b0 = (undefined **)(PTR_DAT_00c1acc0 + 0x10);
-  *(undefined8 *)
-   ((basic_ostream<char,std::__ndk1::char_traits<char>> *)&local_168 + *(long *)(local_168 + -0x18))
-       = *(undefined8 *)(PTR_VTT_00c1acc8 + 0x18);
-  local_160[0] = PTR_vtable_00c1acd0 + 0x10;
+  *(undefined8 *)((long)&local_168 + *(long *)(local_168 + -0x18)) =
+       *(undefined8 *)
+        (PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acc8 +
+        0x18);
+  local_160[0] = PTR__ZTVNSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acd0
+                 + 0x10;
   if ((local_120 & 1) != 0) {
-    operator_delete(local_110);
+    _ZdlPv(local_110);
   }
-  std::__ndk1::basic_streambuf<char,std::__ndk1::char_traits<char>>::~basic_streambuf
-            ((basic_streambuf<char,std::__ndk1::char_traits<char>> *)local_160);
-  std::__ndk1::basic_ostream<char,std::__ndk1::char_traits<char>>::~basic_ostream
-            ((basic_ostream<char,std::__ndk1::char_traits<char>> *)&local_168);
-  std::__ndk1::basic_ios<char,std::__ndk1::char_traits<char>>::~basic_ios(abStack_f8);
+  _ZNSt6__ndk115basic_streambufIcNS_11char_traitsIcEEED2Ev(local_160);
+  _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEED2Ev(&local_168,puVar2 + 8);
+  _ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEED1Ev(auStack_f8);
   if ((local_190 & 1) != 0) {
-    operator_delete(local_180);
+    _ZdlPv(local_180);
   }
   if (local_1a8 != (void *)0x0) {
     local_1a0 = local_1a8;
-    operator_delete(local_1a8);
+    _ZdlPv(local_1a8);
   }
                     /* try { // try from 00abb68c to 00bbb69f has its CatchHandler @ 00abd4bc */
   if (*(long *)(lVar1 + 0x28) != local_58) {

@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ba2eac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "440f770d5296d6c25bf3e7dc9be4035bb875d173bf1b6f4f8922c63514784e9c",
-  "source_text_sha256": "440f770d5296d6c25bf3e7dc9be4035bb875d173bf1b6f4f8922c63514784e9c"
+  "source_sha256": "ac9baa97a4c2a525c0ecf350946a5cd087d3aef723b8492644a48531ea4e403d",
+  "source_text_sha256": "ac9baa97a4c2a525c0ecf350946a5cd087d3aef723b8492644a48531ea4e403d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ba2510](../00ba2/00ba2510.md)
@@ -34,7 +33,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bd6d90](../00bd6/00bd6d90.md)
 - [00be0de0](../00be0/00be0de0.md)
 
-## 疑似コード 1/1 / UTF-8 1218 bytes
+## 疑似コード / UTF-8 1282 bytes
 
 ~~~c
 
@@ -52,12 +51,13 @@ void FUN_00ba2eac(long param_1,long param_2)
   undefined8 **local_40;
   undefined **local_38;
   
-  puVar1 = PTR_id_00c1ad40;
-  local_48 = PTR_id_00c1ad40;
-  if (*(long *)PTR_id_00c1ad40 != -1) {
+  puVar1 = PTR__ZNSt6__ndk15ctypeIcE2idE_00c1ad40;
+  local_48 = PTR__ZNSt6__ndk15ctypeIcE2idE_00c1ad40;
+  if (*(long *)PTR__ZNSt6__ndk15ctypeIcE2idE_00c1ad40 != -1) {
     local_38 = &local_48;
     local_40 = &local_38;
-    std::__ndk1::__call_once((ulong *)PTR_id_00c1ad40,&local_40,FUN_00bb903c);
+    _ZNSt6__ndk111__call_onceERVmPvPFvS2_E
+              (PTR__ZNSt6__ndk15ctypeIcE2idE_00c1ad40,&local_40,FUN_00bb903c);
   }
   uVar2 = (ulong)*(int *)(puVar1 + 8);
   uVar7 = uVar2 - 1;

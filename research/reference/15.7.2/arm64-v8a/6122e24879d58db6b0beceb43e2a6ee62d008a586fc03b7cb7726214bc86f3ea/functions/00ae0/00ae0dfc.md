@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae0dfc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae0dfc",
-  "name": "firebase::analytics::analytics_consent_status::CacheFieldIds",
+  "name": "_ZN8firebase9analytics24analytics_consent_status13CacheFieldIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "58eba5ecc597c5b33e203b9d34d2740b3f35f169c4ca01eb04e95670152d73dd",
-  "source_text_sha256": "58eba5ecc597c5b33e203b9d34d2740b3f35f169c4ca01eb04e95670152d73dd"
+  "source_sha256": "48c951c547067a61feafd73071db8dbb74ceb4b16cbc8d48ef29b36bf60e7a65",
+  "source_text_sha256": "48c951c547067a61feafd73071db8dbb74ceb4b16cbc8d48ef29b36bf60e7a65"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,25 +35,22 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "%PG%com/google/firebase/analytics/FirebaseAnalytics$ConsentStatus"
 ~~~
-## 疑似コード 1/1 / UTF-8 731 bytes
+
+## 疑似コード / UTF-8 757 bytes
 
 ~~~c
 
-/* firebase::analytics::analytics_consent_status::CacheFieldIds(_JNIEnv*, _jobject*) */
-
-void firebase::analytics::analytics_consent_status::CacheFieldIds
-               (_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase9analytics24analytics_consent_status13CacheFieldIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a0018 == (_jclass *)0x0) {
-    DAT_010a0018 = (_jclass *)
-                   util::FindClassGlobal
+  if (DAT_010a0018 == 0) {
+    DAT_010a0018 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
                              (param_1,param_2,0,
                               "com/google/firebase/analytics/FirebaseAnalytics$ConsentStatus",0);
   }
-  util::LookupFieldIds
-            (param_1,DAT_010a0018,(FieldDescriptor *)&PTR_s_GRANTED_00c0fb20,2,
-             (_jfieldID **)&DAT_010a0030,
+  _ZN8firebase4util14LookupFieldIdsEP7_JNIEnvP7_jclassPKNS0_15FieldDescriptorEmPP9_jfieldIDPKc
+            (param_1,DAT_010a0018,&PTR_s_GRANTED_00c0fb20,2,&DAT_010a0030,
              "com/google/firebase/analytics/FirebaseAnalytics$ConsentStatus");
   return;
 }

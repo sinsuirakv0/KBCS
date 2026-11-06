@@ -1,0 +1,42 @@
+﻿# 00bc0eac
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bc0eac",
+  "name": "FUN_00bc0eac",
+  "size": 12,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "7076988ac107512212c4bb4e0687aca69c1bf6d14e3d8b2fcbaef8da78e9637d",
+  "source_text_sha256": "7076988ac107512212c4bb4e0687aca69c1bf6d14e3d8b2fcbaef8da78e9637d"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 49 bytes
+
+~~~c
+
+undefined8 FUN_00bc0eac(void)
+
+{
+  return 0;
+}
+
+~~~

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00baa5cc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00baa5cc",
-  "name": "std::__ndk1::ctype_byname<char>::do_tolower",
+  "name": "_ZNKSt6__ndk112ctype_bynameIcE10do_tolowerEc",
   "size": 28,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3366b9d78a84ebea99af5f9f7809ce165e061a9b2f6e599fc9b6433206669b24",
-  "source_text_sha256": "3366b9d78a84ebea99af5f9f7809ce165e061a9b2f6e599fc9b6433206669b24"
+  "source_sha256": "6abe2d79e77477c07583e790e8d814fea40c15477b5500538b8c384a327298c6",
+  "source_text_sha256": "6abe2d79e77477c07583e790e8d814fea40c15477b5500538b8c384a327298c6"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,22 +29,20 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 305 bytes
+## 疑似コード / UTF-8 214 bytes
 
 ~~~c
 
-/* std::__ndk1::ctype_byname<char>::do_tolower(char) const */
-
-byte __thiscall std::__ndk1::ctype_byname<char>::do_tolower(ctype_byname<char> *this,char param_1)
+uint _ZNKSt6__ndk112ctype_bynameIcE10do_tolowerEc(undefined8 param_1,uint param_2)
 
 {
-  byte bVar1;
+  uint uVar1;
   
-  bVar1 = param_1 | 0x20;
-  if (0x19 < (byte)param_1 - 0x41) {
-    bVar1 = param_1;
+  uVar1 = param_2 | 0x20;
+  if (0x19 < (param_2 & 0xff) - 0x41) {
+    uVar1 = param_2;
   }
-  return bVar1;
+  return uVar1;
 }
 
 ~~~

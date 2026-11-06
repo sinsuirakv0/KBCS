@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b7ebcc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b7ebcc",
-  "name": "std::__ndk1::basic_ios<char,std::__ndk1::char_traits<char>>::~basic_ios",
+  "name": "_ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEED1Ev",
   "size": 8,
   "external": 0,
-  "thunk": 0,
+  "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "2af47fa7ac09e73f370c5d056edd3270c38175d3a2a57da650855b0d1561681c",
-  "source_text_sha256": "2af47fa7ac09e73f370c5d056edd3270c38175d3a2a57da650855b0d1561681c"
+  "source_sha256": "7aad78d5ee02cd9a543a3b578a4fbc03a1974e4f9f0c76a3d883e486885d4b06",
+  "source_text_sha256": "7aad78d5ee02cd9a543a3b578a4fbc03a1974e4f9f0c76a3d883e486885d4b06"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdb070](../00bdb/00bdb070.md)
@@ -31,18 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00be00e0](../00be0/00be00e0.md)
 
-## 疑似コード 1/1 / UTF-8 306 bytes
+## 疑似コード / UTF-8 109 bytes
 
 ~~~c
 
-/* std::__ndk1::basic_ios<char, std::__ndk1::char_traits<char> >::~basic_ios() */
-
-void __thiscall
-std::__ndk1::basic_ios<char,std::__ndk1::char_traits<char>>::~basic_ios
-          (basic_ios<char,std::__ndk1::char_traits<char>> *this)
+void _ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEED1Ev(void)
 
 {
-  ios_base::~ios_base((ios_base *)this);
+  _ZNSt6__ndk18ios_baseD1Ev();
   return;
 }
 

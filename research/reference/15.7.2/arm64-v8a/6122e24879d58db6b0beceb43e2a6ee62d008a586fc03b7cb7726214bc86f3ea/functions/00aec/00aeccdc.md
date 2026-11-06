@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeccdc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeccdc",
-  "name": "firebase::util::set::CacheClassFromFiles",
+  "name": "_ZN8firebase4util3set19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "418b976fcf4b3e39598584413187a51242e4c2feef38d9988b6c22904feb3b05",
-  "source_text_sha256": "418b976fcf4b3e39598584413187a51242e4c2feef38d9988b6c22904feb3b05"
+  "source_sha256": "97fddd63b995ef48894ee8cc37e685a6343e044a4d722a92ce59136381473cf7",
+  "source_text_sha256": "97fddd63b995ef48894ee8cc37e685a6343e044a4d722a92ce59136381473cf7"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,19 +34,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/util/Set"
 ~~~
-## 疑似コード 1/1 / UTF-8 407 bytes
+
+## 疑似コード / UTF-8 422 bytes
 
 ~~~c
 
-/* firebase::util::set::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*) */
-
-long firebase::util::set::CacheClassFromFiles(_JNIEnv *param_1,_jobject *param_2,vector *param_3)
+long _ZN8firebase4util3set19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEE
+               (void)
 
 {
   if (DAT_010a08c8 == 0) {
-    DAT_010a08c8 = FindClassGlobal();
+    DAT_010a08c8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
   return DAT_010a08c8;
 }

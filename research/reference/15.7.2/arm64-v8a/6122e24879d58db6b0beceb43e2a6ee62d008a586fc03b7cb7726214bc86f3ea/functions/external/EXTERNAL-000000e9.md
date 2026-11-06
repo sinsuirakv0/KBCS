@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](EXTERNAL-000000e9.md)
-
 ## 関数情報
 
 ~~~json
@@ -20,6 +18,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "error": null
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -27,4 +26,3 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ## 呼び出し先
 
 解決済みの記録なし。
-

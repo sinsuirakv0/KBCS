@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbbc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbbc0",
-  "name": "Botan::DER_Encoder::encode",
+  "name": "_ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "e24a4a10a6f39a6f6e8b7a36a875440ce6d6b6756c676b88d3dd7202b8ae7d1b",
-  "source_text_sha256": "e24a4a10a6f39a6f6e8b7a36a875440ce6d6b6756c676b88d3dd7202b8ae7d1b"
+  "source_sha256": "25eedfb0cac24fe1adaae3a9cfa9adca384e16b686938468d9dfed8700b13c43",
+  "source_text_sha256": "25eedfb0cac24fe1adaae3a9cfa9adca384e16b686938468d9dfed8700b13c43"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0048fe68](../0048f/0048fe68.md)
@@ -47,14 +46,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [0048ff2c](../0048f/0048ff2c.md)
 
-## 疑似コード 1/1 / UTF-8 110 bytes
+## 疑似コード / UTF-8 177 bytes
 
 ~~~c
 
-void __thiscall Botan::DER_Encoder::encode(void)
+void _ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4_(void)
 
 {
-  (*(code *)PTR_encode_00c1c618)();
+  (*(code *)PTR__ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4__00c1c618)();
   return;
 }
 

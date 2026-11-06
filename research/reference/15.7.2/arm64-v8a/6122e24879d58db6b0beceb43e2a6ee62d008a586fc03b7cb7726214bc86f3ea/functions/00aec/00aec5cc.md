@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aec5cc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aec5cc",
-  "name": "firebase::util::map::CacheClass",
+  "name": "_ZN8firebase4util3map10CacheClassEP7_JNIEnvP8_jobjectNS0_16ClassRequirementE",
   "size": 68,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "754173cff32f4f66a2d6f631f302686fb9fd86d73c14d15027b1dcd540557773",
-  "source_text_sha256": "754173cff32f4f66a2d6f631f302686fb9fd86d73c14d15027b1dcd540557773"
+  "source_sha256": "1b1c14d1b0eb8f3f74778d94c46d9089c7aaf3cae1f5896e859644d8b1d3cf5c",
+  "source_text_sha256": "1b1c14d1b0eb8f3f74778d94c46d9089c7aaf3cae1f5896e859644d8b1d3cf5c"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,17 +34,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/util/Map"
 ~~~
-## 疑似コード 1/1 / UTF-8 341 bytes
+
+## 疑似コード / UTF-8 460 bytes
 
 ~~~c
 
-/* firebase::util::map::CacheClass(_JNIEnv*, _jobject*, firebase::util::ClassRequirement) */
-
-long firebase::util::map::CacheClass(undefined8 param_1,undefined8 param_2,undefined4 param_3)
+long _ZN8firebase4util3map10CacheClassEP7_JNIEnvP8_jobjectNS0_16ClassRequirementE
+               (undefined8 param_1,undefined8 param_2,undefined4 param_3)
 
 {
   if (DAT_010a0878 == 0) {
-    DAT_010a0878 = FindClassGlobal(param_1,param_2,0,"java/util/Map",param_3);
+    DAT_010a0878 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/util/Map",param_3);
   }
   return DAT_010a0878;
 }

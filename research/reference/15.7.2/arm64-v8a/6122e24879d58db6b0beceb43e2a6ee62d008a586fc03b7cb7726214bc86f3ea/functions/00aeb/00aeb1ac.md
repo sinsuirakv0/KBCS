@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeb1ac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeb1ac",
-  "name": "firebase::util::integer_class::CacheMethodIds",
+  "name": "_ZN8firebase4util13integer_class14CacheMethodIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "9c723cf57c1ecdc5d3dadc9c215d6b0f333deb6d756d5b45fd78c5d0c0c63a2d",
-  "source_text_sha256": "9c723cf57c1ecdc5d3dadc9c215d6b0f333deb6d756d5b45fd78c5d0c0c63a2d"
+  "source_sha256": "26a601e3a61544d234144c63e30e6582f863f1c6848a879b0051b3a7555304a6",
+  "source_text_sha256": "26a601e3a61544d234144c63e30e6582f863f1c6848a879b0051b3a7555304a6"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,22 +35,23 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/lang/Integer"
 ~~~
-## 疑似コード 1/1 / UTF-8 677 bytes
+
+## 疑似コード / UTF-8 809 bytes
 
 ~~~c
 
-/* firebase::util::integer_class::CacheMethodIds(_JNIEnv*, _jobject*) */
-
-void firebase::util::integer_class::CacheMethodIds(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util13integer_class14CacheMethodIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a0770 == (_jclass *)0x0) {
+  if (DAT_010a0770 == 0) {
                     /* try { // try from 00aeb1cc to 00beb207 has its CatchHandler @ 00af1a20 */
-    DAT_010a0770 = (_jclass *)FindClassGlobal(param_1,param_2,0,"java/lang/Integer",0);
+    DAT_010a0770 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/lang/Integer",0);
   }
                     /* try { // try from 00aeb208 to 00beb21b has its CatchHandler @ 00af18c0 */
-  LookupMethodIds(param_1,DAT_010a0770,(MethodNameSignature *)&PTR_s_<init>_00c102d0,2,
-                  (_jmethodID **)&DAT_010a0780,"java/lang/Integer");
+  _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+            (param_1,DAT_010a0770,&PTR_s_<init>_00c102d0,2,&DAT_010a0780,"java/lang/Integer");
   return;
 }
 

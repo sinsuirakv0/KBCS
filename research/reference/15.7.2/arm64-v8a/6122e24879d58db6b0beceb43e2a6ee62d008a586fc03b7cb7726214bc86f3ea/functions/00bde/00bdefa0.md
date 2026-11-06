@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdefa0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdefa0",
-  "name": "reflection::CreateType",
+  "name": "_ZN10reflection10CreateTypeERN11flatbuffers17FlatBufferBuilderENS_8BaseTypeES3_it",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "7345d61dd17e7fde4c893af8124511d3fe25125b5dbc93526cdc57da6eb3ddd7",
-  "source_text_sha256": "7345d61dd17e7fde4c893af8124511d3fe25125b5dbc93526cdc57da6eb3ddd7"
+  "source_sha256": "72e8b5126cb585c2e07e1e6dfea925ec988c4df002a18ef2f567de3551270c95",
+  "source_text_sha256": "72e8b5126cb585c2e07e1e6dfea925ec988c4df002a18ef2f567de3551270c95"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b29390](../00b29/00b29390.md)
@@ -33,14 +32,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b2c5c0](../00b2c/00b2c5c0.md)
 
-## 疑似コード 1/1 / UTF-8 99 bytes
+## 疑似コード / UTF-8 239 bytes
 
 ~~~c
 
-void reflection::CreateType(void)
+void _ZN10reflection10CreateTypeERN11flatbuffers17FlatBufferBuilderENS_8BaseTypeES3_it(void)
 
 {
-  (*(code *)PTR_CreateType_00c1e008)();
+  (*(code *)
+    PTR__ZN10reflection10CreateTypeERN11flatbuffers17FlatBufferBuilderENS_8BaseTypeES3_it_00c1e008)
+            ();
   return;
 }
 

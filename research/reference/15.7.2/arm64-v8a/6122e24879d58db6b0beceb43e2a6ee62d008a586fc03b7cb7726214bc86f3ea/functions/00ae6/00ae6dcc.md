@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae6dcc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae6dcc",
-  "name": "firebase::util::resources::CacheClassFromFiles",
+  "name": "_ZN8firebase4util9resources19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "48c21bb43f0d5b6c6966e5dfc8ac4cab57d95797de59813d51eedfd618cb3069",
-  "source_text_sha256": "48c21bb43f0d5b6c6966e5dfc8ac4cab57d95797de59813d51eedfd618cb3069"
+  "source_sha256": "178ca6a66401fad57ff14d9d14fa1c3508e3231944214c27e445c441a521a41d",
+  "source_text_sha256": "178ca6a66401fad57ff14d9d14fa1c3508e3231944214c27e445c441a521a41d"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,20 +34,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "android/content/res/Resources"
 ~~~
-## 疑似コード 1/1 / UTF-8 436 bytes
+
+## 疑似コード / UTF-8 428 bytes
 
 ~~~c
 
-/* firebase::util::resources::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*) */
-
-long firebase::util::resources::CacheClassFromFiles
-               (_JNIEnv *param_1,_jobject *param_2,vector *param_3)
+long _ZN8firebase4util9resources19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEE
+               (void)
 
 {
   if (DAT_010a03e8 == 0) {
-    DAT_010a03e8 = FindClassGlobal();
+    DAT_010a03e8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
   return DAT_010a03e8;
 }

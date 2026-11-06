@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdddd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdddd0",
-  "name": "std::__ndk1::__tree<std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>,std::__ndk1::__map_value_compare<unsigned_long,std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>,std::__ndk1::less<unsigned_long>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>>>::destroy",
+  "name": "_ZNSt6__ndk16__treeINS_12__value_typeImPN8firebase17FutureBackingDataEEENS_19__map_value_compareImS5_NS_4lessImEELb1EEENS_9allocatorIS5_EEE7destroyEPNS_11__tree_nodeIS5_PvEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "10a383481a37fd40102a697c222de20fad86bf5c79cdbea02c91484157709333",
-  "source_text_sha256": "10a383481a37fd40102a697c222de20fad86bf5c79cdbea02c91484157709333"
+  "source_sha256": "21961279a8604efe678f69c92065489633b8d74946f4328c119f557e185c4778",
+  "source_text_sha256": "21961279a8604efe678f69c92065489633b8d74946f4328c119f557e185c4778"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae0434](../00ae0/00ae0434.md)
@@ -31,18 +30,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00ae0434](../00ae0/00ae0434.md)
 
-## 疑似コード 1/1 / UTF-8 800 bytes
+## 疑似コード / UTF-8 429 bytes
 
 ~~~c
 
-void __thiscall
-std::__ndk1::
-__tree<std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>,std::__ndk1::__map_value_compare<unsigned_long,std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>,std::__ndk1::less<unsigned_long>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>>>
-::destroy(__tree<std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>,std::__ndk1::__map_value_compare<unsigned_long,std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>,std::__ndk1::less<unsigned_long>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<unsigned_long,firebase::FutureBackingData*>>>
-          *this,__tree_node *param_1)
+void _ZNSt6__ndk16__treeINS_12__value_typeImPN8firebase17FutureBackingDataEEENS_19__map_value_compareImS5_NS_4lessImEELb1EEENS_9allocatorIS5_EEE7destroyEPNS_11__tree_nodeIS5_PvEE
+               (void)
 
 {
-  (*(code *)PTR_destroy_00c1d720)();
+  (*(code *)
+    PTR__ZNSt6__ndk16__treeINS_12__value_typeImPN8firebase17FutureBackingDataEEENS_19__map_value_compareImS5_NS_4lessImEELb1EEENS_9allocatorIS5_EEE7destroyEPNS_11__tree_nodeIS5_PvEE_00c1d720
+  )();
   return;
 }
 

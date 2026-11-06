@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddfc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddfc0",
-  "name": "firebase::util::RegisterCallbackOnTask",
+  "name": "_ZN8firebase4util22RegisterCallbackOnTaskEP7_JNIEnvP8_jobjectPFvS2_S4_NS0_12FutureResultEPKcPvES8_S7_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "d4a957f0fecc122b1f2d6b43e36c1e4c60cc1d571a4b77a4622840a00db2e6a9",
-  "source_text_sha256": "d4a957f0fecc122b1f2d6b43e36c1e4c60cc1d571a4b77a4622840a00db2e6a9"
+  "source_sha256": "136985cc0a24462147817563c8f6a8c0e0664998b92359c9c5eb7bc55db38684",
+  "source_text_sha256": "136985cc0a24462147817563c8f6a8c0e0664998b92359c9c5eb7bc55db38684"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae2b00](../00ae2/00ae2b00.md)
@@ -66,17 +65,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00af5bec](../00af5/00af5bec.md)
 
-## 疑似コード 1/1 / UTF-8 312 bytes
+## 疑似コード / UTF-8 285 bytes
 
 ~~~c
 
-void firebase::util::RegisterCallbackOnTask
-               (_JNIEnv *param_1,_jobject *param_2,
-               _func_void__JNIEnv_ptr__jobject_ptr_FutureResult_char_ptr_void_ptr *param_3,
-               void *param_4,char *param_5)
+void _ZN8firebase4util22RegisterCallbackOnTaskEP7_JNIEnvP8_jobjectPFvS2_S4_NS0_12FutureResultEPKcPvES8_S7_
+               (void)
 
 {
-  (*(code *)PTR_RegisterCallbackOnTask_00c1d818)();
+  (*(code *)
+    PTR__ZN8firebase4util22RegisterCallbackOnTaskEP7_JNIEnvP8_jobjectPFvS2_S4_NS0_12FutureResultEPKcPvES8_S7__00c1d818
+  )();
   return;
 }
 

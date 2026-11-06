@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00adfbc8.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "0cc416dc46d6a168ab0b457ae76d518c52a5cb6f921658770a3a8ba70314bfe3",
-  "source_text_sha256": "0cc416dc46d6a168ab0b457ae76d518c52a5cb6f921658770a3a8ba70314bfe3"
+  "source_sha256": "d9bd8303cd72d93b41d4138009f8fd7bbf6cbc0ab58c6db52af421643d77202d",
+  "source_text_sha256": "d9bd8303cd72d93b41d4138009f8fd7bbf6cbc0ab58c6db52af421643d77202d"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 90 bytes
+## 疑似コード / UTF-8 121 bytes
 
 ~~~c
 
 pointer_____offset_0x10___ * FUN_00adfbc8(void)
 
 {
-  return &PTR_PTR_00c0f9a8;
+  return &PTR__ZTVN10__cxxabiv117__class_type_infoE_16__00c0f9a8;
 }
 
 ~~~

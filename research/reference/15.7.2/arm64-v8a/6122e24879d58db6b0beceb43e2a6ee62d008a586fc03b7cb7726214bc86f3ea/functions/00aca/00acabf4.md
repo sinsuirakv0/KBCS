@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00acabf4.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b35152a44ae7755ecfc9045180d26ce6c853e6022bfd21cea016601d395d3de0",
-  "source_text_sha256": "b35152a44ae7755ecfc9045180d26ce6c853e6022bfd21cea016601d395d3de0"
+  "source_sha256": "455acfb0f79ce1f5d087e43088bfae330ddd56bbe06070a685144f9e315e4e98",
+  "source_text_sha256": "455acfb0f79ce1f5d087e43088bfae330ddd56bbe06070a685144f9e315e4e98"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00abf464](../00abf/00abf464.md)
@@ -35,7 +34,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "vector"
 ~~~
-## 疑似コード 1/1 / UTF-8 127 bytes
+
+## 疑似コード / UTF-8 119 bytes
 
 ~~~c
 

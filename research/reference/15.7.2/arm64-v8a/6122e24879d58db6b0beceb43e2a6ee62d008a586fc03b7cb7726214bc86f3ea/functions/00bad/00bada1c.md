@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bada1c.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bada1c",
-  "name": "std::__ndk1::__codecvt_utf16<wchar_t,true>::do_out",
+  "name": "_ZNKSt6__ndk115__codecvt_utf16IwLb1EE6do_outER9mbstate_tPKwS5_RS5_PcS7_RS7_",
   "size": 212,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "12ccfa90bd229dd632131b02cbd544afb4b33c25f2412aa8c0cbc6f05c18b40c",
-  "source_text_sha256": "12ccfa90bd229dd632131b02cbd544afb4b33c25f2412aa8c0cbc6f05c18b40c"
+  "source_sha256": "56e37d97520430703b4a2a4e86975cef5c4932a49ee7a31d69e3ac0b528d76d9",
+  "source_text_sha256": "56e37d97520430703b4a2a4e86975cef5c4932a49ee7a31d69e3ac0b528d76d9"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,62 +29,59 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 1668 bytes
+## 疑似コード / UTF-8 1388 bytes
 
 ~~~c
 
-/* std::__ndk1::__codecvt_utf16<wchar_t, true>::do_out(mbstate_t&, wchar_t const*, wchar_t const*,
-   wchar_t const*&, char*, char*, char*&) const */
-
-undefined8 __thiscall
-std::__ndk1::__codecvt_utf16<wchar_t,true>::do_out
-          (__codecvt_utf16<wchar_t,true> *this,mbstate_t *param_1,wchar_t *param_2,wchar_t *param_3,
-          wchar_t **param_4,char *param_5,char *param_6,char **param_7)
+undefined8
+_ZNKSt6__ndk115__codecvt_utf16IwLb1EE6do_outER9mbstate_tPKwS5_RS5_PcS7_RS7_
+          (long param_1,undefined8 param_2,uint *param_3,uint *param_4,undefined8 *param_5,
+          byte *param_6,long param_7,undefined8 *param_8)
 
 {
   int iVar1;
-  wchar_t wVar2;
+  uint uVar2;
   undefined8 uVar3;
   byte *pbVar4;
   ulong uVar5;
   
-  uVar5 = *(ulong *)(this + 0x18);
-  if (((byte)this[0x20] >> 1 & 1) != 0) {
-    if ((long)param_6 - (long)param_5 < 2) {
+  uVar5 = *(ulong *)(param_1 + 0x18);
+  if ((*(byte *)(param_1 + 0x20) >> 1 & 1) != 0) {
+    if (param_7 - (long)param_6 < 2) {
 LAB_00bada38:
       uVar3 = 1;
       goto LAB_00badae4;
     }
-    param_5[0] = -1;
-    param_5[1] = -2;
-    param_5 = param_5 + 2;
+    param_6[0] = 0xff;
+    param_6[1] = 0xfe;
+    param_6 = param_6 + 2;
   }
-  for (; param_2 < param_3; param_2 = param_2 + 1) {
-    wVar2 = *param_2;
-    if ((uint)wVar2 >> 0xb == 0x1b || uVar5 < (uint)wVar2) {
+  for (; param_3 < param_4; param_3 = param_3 + 1) {
+    uVar2 = *param_3;
+    if (uVar2 >> 0xb == 0x1b || uVar5 < uVar2) {
       uVar3 = 2;
       goto LAB_00badae4;
     }
-    if ((wVar2 & 0xffff0000U) == 0) {
-      if ((long)param_6 - (long)param_5 < 2) goto LAB_00bada38;
-      pbVar4 = (byte *)(param_5 + 2);
-      *(short *)param_5 = (short)wVar2;
+    if ((uVar2 & 0xffff0000) == 0) {
+      if (param_7 - (long)param_6 < 2) goto LAB_00bada38;
+      pbVar4 = param_6 + 2;
+      *(short *)param_6 = (short)uVar2;
     }
     else {
-      if ((long)param_6 - (long)param_5 < 4) goto LAB_00bada38;
-      param_5[2] = (byte)wVar2;
-      iVar1 = ((uint)wVar2 >> 10 & 0x7c0) + 0x3fc0;
-      param_5[3] = (byte)((uint)wVar2 >> 8) & 3 | 0xdc;
-      pbVar4 = (byte *)(param_5 + 4);
-      *param_5 = (byte)iVar1 | (byte)((uint)wVar2 >> 10) & 0x3f;
-      param_5[1] = (byte)((uint)iVar1 >> 8) | 0xd8;
+      if (param_7 - (long)param_6 < 4) goto LAB_00bada38;
+      param_6[2] = (byte)uVar2;
+      iVar1 = (uVar2 >> 10 & 0x7c0) + 0x3fc0;
+      param_6[3] = (byte)(uVar2 >> 8) & 3 | 0xdc;
+      pbVar4 = param_6 + 4;
+      *param_6 = (byte)iVar1 | (byte)(uVar2 >> 10) & 0x3f;
+      param_6[1] = (byte)((uint)iVar1 >> 8) | 0xd8;
     }
-    param_5 = (char *)pbVar4;
+    param_6 = pbVar4;
   }
   uVar3 = 0;
 LAB_00badae4:
-  *param_4 = param_2;
-  *param_7 = param_5;
+  *param_5 = param_3;
+  *param_8 = param_6;
   return uVar3;
 }
 

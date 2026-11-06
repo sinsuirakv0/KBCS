@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](006afcec.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b753e0fcf7e39fff66b567b39ac65c6eac152d49897b6160b682418e336b220d",
-  "source_text_sha256": "b753e0fcf7e39fff66b567b39ac65c6eac152d49897b6160b682418e336b220d"
+  "source_sha256": "de98d859345bbf58a955d0b8cf882bf2205db4e7eb3a5c8defb302c42f90ac9e",
+  "source_text_sha256": "de98d859345bbf58a955d0b8cf882bf2205db4e7eb3a5c8defb302c42f90ac9e"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -38,7 +37,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf30](../00bda/00bdaf30.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 1670 bytes
+## 疑似コード / UTF-8 1537 bytes
 
 ~~~c
 
@@ -47,52 +46,52 @@ void FUN_006afcec(long param_1,undefined8 param_2,int *param_3)
 {
   int iVar1;
   long lVar2;
-  __shared_weak_count *this;
-  undefined8 uVar3;
-  long lVar4;
-  undefined8 uVar5;
-  long lVar6;
+  long *plVar3;
+  undefined8 uVar4;
+  long lVar5;
+  undefined8 uVar6;
+  long lVar7;
   undefined8 local_48;
-  __shared_weak_count *local_40;
+  long *local_40;
   long local_38;
   
   lVar2 = tpidr_el0;
   local_38 = *(long *)(lVar2 + 0x28);
   iVar1 = *param_3;
   if (iVar1 == 4) {
-    lVar6 = *(long *)(param_1 + 8);
-    FUN_006abb50(lVar6);
-    lVar4 = FUN_0081f580();
-    local_48 = *(undefined8 *)(lVar6 + 0x100);
-    local_40 = *(__shared_weak_count **)(lVar6 + 0x108);
-    if (local_40 != (__shared_weak_count *)0x0) {
-      FUN_00bd6d60(1,local_40 + 8);
+    lVar7 = *(long *)(param_1 + 8);
+    FUN_006abb50(lVar7);
+    lVar5 = FUN_0081f580();
+    local_48 = *(undefined8 *)(lVar7 + 0x100);
+    local_40 = *(long **)(lVar7 + 0x108);
+    if (local_40 != (long *)0x0) {
+      FUN_00bd6d60(1,local_40 + 1);
     }
-    FUN_00666298(lVar4 + 0x16f0,&local_48);
-    this = local_40;
-    if ((local_40 != (__shared_weak_count *)0x0) &&
-       (lVar4 = FUN_00bd6d90(0xffffffffffffffff,local_40 + 8), lVar4 == 0)) {
-      (**(code **)(*(long *)this + 0x10))(this);
-      std::__ndk1::__shared_weak_count::__release_weak(this);
+    FUN_00666298(lVar5 + 0x16f0,&local_48);
+    plVar3 = local_40;
+    if ((local_40 != (long *)0x0) &&
+       (lVar5 = FUN_00bd6d90(0xffffffffffffffff,local_40 + 1), lVar5 == 0)) {
+      (**(code **)(*plVar3 + 0x10))(plVar3);
+      _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar3);
     }
-    lVar4 = FUN_0081f580();
-    *(undefined4 *)(lVar4 + 0x472b28) = 1;
+    lVar5 = FUN_0081f580();
+    *(undefined4 *)(lVar5 + 0x472b28) = 1;
   }
   else {
     if (iVar1 == 3) {
-      uVar3 = FUN_00457e1c();
+      uVar4 = FUN_00457e1c();
       if (*(long *)(lVar2 + 0x28) == local_38) {
-        uVar5 = 0xb;
+        uVar6 = 0xb;
         goto LAB_006afd58;
       }
       goto LAB_006afe38;
     }
     if (iVar1 == 0) {
-      uVar3 = FUN_00457e1c();
+      uVar4 = FUN_00457e1c();
       if (*(long *)(lVar2 + 0x28) != local_38) goto LAB_006afe38;
-      uVar5 = 10;
+      uVar6 = 10;
 LAB_006afd58:
-      FUN_00459efc(uVar3,uVar5,0);
+      FUN_00459efc(uVar4,uVar6,0);
       return;
     }
   }

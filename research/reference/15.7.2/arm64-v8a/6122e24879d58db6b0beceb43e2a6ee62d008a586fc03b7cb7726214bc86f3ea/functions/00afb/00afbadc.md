@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afbadc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afbadc",
-  "name": "firebase::callback::AddCallbackWithThreadCheck",
+  "name": "_ZN8firebase8callback26AddCallbackWithThreadCheckEPNS0_8CallbackE",
   "size": 136,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "58514ce418d3979e458bd6ad704bfa89db019792a69481c793b9d5c5678fdc14",
-  "source_text_sha256": "58514ce418d3979e458bd6ad704bfa89db019792a69481c793b9d5c5678fdc14"
+  "source_sha256": "3ba0cdb4831309a5362a50af0c188d6a2bbdf7fe91a6e96776a8e7ecddee8356",
+  "source_text_sha256": "3ba0cdb4831309a5362a50af0c188d6a2bbdf7fe91a6e96776a8e7ecddee8356"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -32,13 +31,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdeb30](../00bde/00bdeb30.md)
 - [00bdeb90](../00bde/00bdeb90.md)
 
-## 疑似コード 1/1 / UTF-8 1079 bytes
+## 疑似コード / UTF-8 995 bytes
 
 ~~~c
 
-/* firebase::callback::AddCallbackWithThreadCheck(firebase::callback::Callback*) */
-
-undefined8 firebase::callback::AddCallbackWithThreadCheck(Callback *param_1)
+undefined8 _ZN8firebase8callback26AddCallbackWithThreadCheckEPNS0_8CallbackE(long *param_1)
 
 {
   int iVar1;
@@ -55,16 +52,16 @@ undefined8 firebase::callback::AddCallbackWithThreadCheck(Callback *param_1)
       iVar1 = pthread_equal(__thread1,DAT_010a0c40);
       if (iVar1 == 0) goto LAB_00afbb54;
     }
-    (**(code **)(*(long *)param_1 + 0x10))(param_1);
-    if (param_1 != (Callback *)0x0) {
+    (**(code **)(*param_1 + 0x10))(param_1);
+    if (param_1 != (long *)0x0) {
                     /* try { // try from 00afbb30 to 00bfbb47 has its CatchHandler @ 00aff424 */
-      (**(code **)(*(long *)param_1 + 8))(param_1);
+      (**(code **)(*param_1 + 8))(param_1);
     }
     return 0;
   }
 LAB_00afbb54:
                     /* try { // try from 00afbb58 to 00bfbb6f has its CatchHandler @ 00b0037c */
-  uVar2 = AddCallback(param_1);
+  uVar2 = _ZN8firebase8callback11AddCallbackEPNS0_8CallbackE(param_1);
   return uVar2;
 }
 

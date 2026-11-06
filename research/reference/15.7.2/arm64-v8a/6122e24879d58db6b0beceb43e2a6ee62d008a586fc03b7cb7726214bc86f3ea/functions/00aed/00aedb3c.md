@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aedb3c.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aedb3c",
-  "name": "firebase::util::uri::CacheClassFromFiles",
+  "name": "_ZN8firebase4util3uri19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "cc0b1ba9e392c84ff6f7403129f676c84b10b9819ea2cdba18e401bab548f44e",
-  "source_text_sha256": "cc0b1ba9e392c84ff6f7403129f676c84b10b9819ea2cdba18e401bab548f44e"
+  "source_sha256": "f3037e0cf391bf23bf807ffaeab9c01c35a1dc155c385973e6d4766e7258529f",
+  "source_text_sha256": "f3037e0cf391bf23bf807ffaeab9c01c35a1dc155c385973e6d4766e7258529f"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,20 +34,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "android/net/Uri"
 ~~~
-## 疑似コード 1/1 / UTF-8 399 bytes
+
+## 疑似コード / UTF-8 445 bytes
 
 ~~~c
 
-/* firebase::util::uri::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*,
-   firebase::util::ClassRequirement) */
-
-long firebase::util::uri::CacheClassFromFiles(void)
+long _ZN8firebase4util3uri19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE
+               (void)
 
 {
   if (DAT_010a0960 == 0) {
-    DAT_010a0960 = FindClassGlobal();
+    DAT_010a0960 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
   return DAT_010a0960;
 }

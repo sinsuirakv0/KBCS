@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](005dfdec.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "4335960973e81ebaa8c02f65a5597dfcb653e7d0ece2f9c6c6d1825f183d0478",
-  "source_text_sha256": "4335960973e81ebaa8c02f65a5597dfcb653e7d0ece2f9c6c6d1825f183d0478"
+  "source_sha256": "2fe0e202d96459d874a9cfbf5a68e09cba4926ccdbd719bb12a2716c1511ad29",
+  "source_text_sha256": "2fe0e202d96459d874a9cfbf5a68e09cba4926ccdbd719bb12a2716c1511ad29"
 }
 ~~~
+
 ## 呼び出し元
 
 - [005e1a5c](../005e1/005e1a5c.md)
@@ -40,7 +39,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00419064](../00419/00419064.md)
 - [00bdaf40](../00bda/00bdaf40.md)
 
-## 疑似コード 1/1 / UTF-8 1547 bytes
+## 疑似コード / UTF-8 1498 bytes
 
 ~~~c
 
@@ -73,7 +72,7 @@ long * FUN_005dfdec(long *param_1,int *param_2)
   }
 LAB_005dfe4c:
                     /* try { // try from 005dfe54 to 006dfe5f has its CatchHandler @ 005dfed4 */
-  plVar2 = operator_new(0x28);
+  plVar2 = (long *)_Znwm(0x28);
   *plVar2 = 0;
   plVar2[1] = 0;
                     /* try { // try from 005dfe60 to 006dff23 has its CatchHandler @ 005dfd64 */

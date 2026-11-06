@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdece0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdece0",
-  "name": "firebase::ReferenceCountedFutureImpl::SetContextData",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl14SetContextDataERKNS_12FutureHandleEPvPFvS4_E",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "56abff88beabd785a8925dcacad493775c99b859035b5cceb9e558e55cdaaa39",
-  "source_text_sha256": "56abff88beabd785a8925dcacad493775c99b859035b5cceb9e558e55cdaaa39"
+  "source_sha256": "cf9cbf947ab696a42897754ad85439ee10704bff56884d1c81047b40392e0565",
+  "source_text_sha256": "cf9cbf947ab696a42897754ad85439ee10704bff56884d1c81047b40392e0565"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b00570](../00b00/00b00570.md)
@@ -30,17 +29,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b004b0](../00b00/00b004b0.md)
 
-## 疑似コード 1/1 / UTF-8 262 bytes
+## 疑似コード / UTF-8 239 bytes
 
 ~~~c
 
-void __thiscall
-firebase::ReferenceCountedFutureImpl::SetContextData
-          (ReferenceCountedFutureImpl *this,FutureHandle *param_1,void *param_2,
-          _func_void_void_ptr *param_3)
+void _ZN8firebase26ReferenceCountedFutureImpl14SetContextDataERKNS_12FutureHandleEPvPFvS4_E(void)
 
 {
-  (*(code *)PTR_SetContextData_00c1dea8)();
+  (*(code *)
+    PTR__ZN8firebase26ReferenceCountedFutureImpl14SetContextDataERKNS_12FutureHandleEPvPFvS4_E_00c1dea8
+  )();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afdcec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afdcec",
-  "name": "firebase::Path::GetRelative",
+  "name": "_ZN8firebase4Path11GetRelativeERKS0_S2_",
   "size": 612,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "58782ab0d32d02bdf786ea9808f67b1704ef9f6774c8b6201930cd66683493c4",
-  "source_text_sha256": "58782ab0d32d02bdf786ea9808f67b1704ef9f6774c8b6201930cd66683493c4"
+  "source_sha256": "78ead4e4e5d111b7e639814d87def2787b21230824c8c758f99f96b96ee69292",
+  "source_text_sha256": "78ead4e4e5d111b7e639814d87def2787b21230824c8c758f99f96b96ee69292"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdec20](../00bde/00bdec20.md)
@@ -35,13 +34,12 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bde130](../00bde/00bde130.md)
 - [00bdec40](../00bde/00bdec40.md)
 
-## 疑似コード 1/1 / UTF-8 4647 bytes
+## 疑似コード / UTF-8 4367 bytes
 
 ~~~c
 
-/* firebase::Path::GetRelative(firebase::Path const&, firebase::Path const&) */
-
-void firebase::Path::GetRelative(Path *param_1,Path *param_2)
+void _ZN8firebase4Path11GetRelativeERKS0_S2_
+               (undefined8 *param_1,undefined8 param_2,undefined8 param_3)
 
 {
   byte *pbVar1;
@@ -51,20 +49,19 @@ void firebase::Path::GetRelative(Path *param_1,Path *param_2)
   byte bVar4;
   byte bVar5;
   long lVar6;
-  char *pcVar7;
+  void *pvVar7;
   byte *pbVar8;
   undefined8 uVar9;
   undefined8 uVar10;
   byte *pbVar11;
   byte *pbVar12;
   int iVar13;
-  undefined8 *in_x8;
   ulong uVar14;
   byte *__s1;
   byte *__s2;
   byte local_b8 [8];
   ulong local_b0;
-  char *local_a8;
+  void *local_a8;
   undefined8 local_a0;
   undefined8 uStack_98;
   undefined8 local_90;
@@ -79,8 +76,8 @@ void firebase::Path::GetRelative(Path *param_1,Path *param_2)
   lVar6 = tpidr_el0;
   local_58 = *(long *)(lVar6 + 0x28);
                     /* try { // try from 00afdd20 to 00c00b67 has its CatchHandler @ 00af560c */
-  GetDirectories();
-  GetDirectories();
+  _ZNK8firebase4Path14GetDirectoriesEv(&local_70);
+  _ZNK8firebase4Path14GetDirectoriesEv(&local_88,param_3);
   pbVar12 = local_68;
   pbVar11 = local_80;
   pbVar8 = local_88;
@@ -90,30 +87,29 @@ void firebase::Path::GetRelative(Path *param_1,Path *param_2)
     if (pbVar1 == pbVar12) {
       FUN_00afd1a0(local_b8,pbVar2,pbVar11);
       uVar14 = (ulong)(local_b8[0] >> 1);
-      pcVar7 = (char *)((ulong)local_b8 | 1);
+      pvVar7 = (void *)((ulong)local_b8 | 1);
       if ((local_b8[0] & 1) != 0) {
         uVar14 = local_b0;
-        pcVar7 = local_a8;
+        pvVar7 = local_a8;
       }
       uStack_98 = 0;
       local_90 = 0;
       local_a0 = 0;
-      std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-      assign((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-             &local_a0,pcVar7,uVar14);
+      _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6assignEPKcm
+                (&local_a0,pvVar7,uVar14);
       uVar10 = uStack_98;
       uVar9 = local_a0;
       local_a0 = 0;
       uStack_98 = 0;
-      *(undefined1 *)(in_x8 + 3) = 1;
-      in_x8[2] = local_90;
-      in_x8[1] = uVar10;
-      *in_x8 = uVar9;
+      *(undefined1 *)(param_1 + 3) = 1;
+      param_1[2] = local_90;
+      param_1[1] = uVar10;
+      *param_1 = uVar9;
       local_90 = 0;
       pbVar8 = local_88;
       pbVar1 = local_88;
       if ((local_b8[0] & 1) != 0) {
-        operator_delete(local_a8);
+        _ZdlPv(local_a8);
         pbVar8 = local_88;
         pbVar1 = local_88;
       }
@@ -127,7 +123,7 @@ joined_r0x00afde74:
           while( true ) {
             pbVar1 = pbVar2;
             if ((bVar4 & 1) != 0) {
-              operator_delete(*(void **)(local_80 + -8));
+              _ZdlPv(*(void **)(local_80 + -8));
             }
             if (pbVar8 == pbVar1) break;
             bVar4 = pbVar1[-0x18];
@@ -135,7 +131,7 @@ joined_r0x00afde74:
             local_80 = pbVar1;
           }
         }
-        operator_delete(local_88);
+        _ZdlPv(local_88);
       }
       pbVar1 = local_70;
       if (local_70 != (byte *)0x0) {
@@ -145,7 +141,7 @@ joined_r0x00afde74:
           while( true ) {
             pbVar8 = pbVar2;
             if ((bVar4 & 1) != 0) {
-              operator_delete(*(void **)(local_68 + -8));
+              _ZdlPv(*(void **)(local_68 + -8));
             }
             if (pbVar1 == pbVar8) break;
             bVar4 = pbVar8[-0x18];
@@ -154,7 +150,7 @@ joined_r0x00afde74:
           }
         }
         local_68 = pbVar1;
-        operator_delete(local_70);
+        _ZdlPv(local_70);
       }
       if (*(long *)(lVar6 + 0x28) == local_58) {
         return;
@@ -164,7 +160,7 @@ joined_r0x00afde74:
     }
     if (pbVar11 == pbVar2) {
 LAB_00afddf0:
-      *(undefined1 *)(in_x8 + 3) = 0;
+      *(undefined1 *)(param_1 + 3) = 0;
       pbVar1 = local_88;
       goto joined_r0x00afde74;
     }

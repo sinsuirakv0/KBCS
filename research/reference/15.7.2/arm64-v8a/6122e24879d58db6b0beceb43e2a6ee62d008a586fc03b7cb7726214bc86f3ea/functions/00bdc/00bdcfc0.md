@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcfc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcfc0",
-  "name": "Botan::PKIX::check_crl",
+  "name": "_ZN5Botan4PKIX9check_crlERKNSt6__ndk16vectorINS1_10shared_ptrIKNS_16X509_CertificateEEENS1_9allocatorIS6_EEEERKNS2_IPNS_17Certificate_StoreENS7_ISD_EEEENS1_6chrono10time_pointINSI_12system_clockENSI_8durationIxNS1_5ratioILl1ELl1000000EEEEEEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "39ac7ab501689c97bd13fd85adc656f6212b3df70255aecd60bb9545ecc28012",
-  "source_text_sha256": "39ac7ab501689c97bd13fd85adc656f6212b3df70255aecd60bb9545ecc28012"
+  "source_sha256": "bbd5167e0428699f7dce306353f1db4bcaeecd53e3777c833f4b9c8ca6bf0d8a",
+  "source_text_sha256": "bbd5167e0428699f7dce306353f1db4bcaeecd53e3777c833f4b9c8ca6bf0d8a"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00508860](../00508/00508860.md)
@@ -30,14 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [005060a8](../00506/005060a8.md)
 
-## 疑似コード 1/1 / UTF-8 109 bytes
+## 疑似コード / UTF-8 565 bytes
 
 ~~~c
 
-void __thiscall Botan::PKIX::check_crl(void)
+void _ZN5Botan4PKIX9check_crlERKNSt6__ndk16vectorINS1_10shared_ptrIKNS_16X509_CertificateEEENS1_9allocatorIS6_EEEERKNS2_IPNS_17Certificate_StoreENS7_ISD_EEEENS1_6chrono10time_pointINSI_12system_clockENSI_8durationIxNS1_5ratioILl1ELl1000000EEEEEEE
+               (void)
 
 {
-  (*(code *)PTR_check_crl_00c1d018)();
+  (*(code *)
+    PTR__ZN5Botan4PKIX9check_crlERKNSt6__ndk16vectorINS1_10shared_ptrIKNS_16X509_CertificateEEENS1_9allocatorIS6_EEEERKNS2_IPNS_17Certificate_StoreENS7_ISD_EEEENS1_6chrono10time_pointINSI_12system_clockENSI_8durationIxNS1_5ratioILl1ELl1000000EEEEEEE_00c1d018
+  )();
   return;
 }
 

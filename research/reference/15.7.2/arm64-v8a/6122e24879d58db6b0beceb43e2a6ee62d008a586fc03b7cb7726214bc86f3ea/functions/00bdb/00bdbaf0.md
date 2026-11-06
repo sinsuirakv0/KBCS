@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbaf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbaf0",
-  "name": "std::bad_alloc::bad_alloc",
+  "name": "_ZNSt9bad_allocC2Ev",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "1e4a9f5db228a15c3e756bfa54b32d69a4284ecc93c963a36b2573f0711dd6ca",
-  "source_text_sha256": "1e4a9f5db228a15c3e756bfa54b32d69a4284ecc93c963a36b2573f0711dd6ca"
+  "source_sha256": "b4fd13d4b9cfd0bc7d0c13c77a6c03fd54adb3cb83eda9d0a59c4b553110fb4e",
+  "source_text_sha256": "b4fd13d4b9cfd0bc7d0c13c77a6c03fd54adb3cb83eda9d0a59c4b553110fb4e"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0048cd38](../0048c/0048cd38.md)
@@ -70,14 +69,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bbaca8](../00bba/00bbaca8.md)
 
-## 疑似コード 1/1 / UTF-8 123 bytes
+## 疑似コード / UTF-8 97 bytes
 
 ~~~c
 
-void __thiscall std::bad_alloc::bad_alloc(bad_alloc *this)
+void _ZNSt9bad_allocC2Ev(void)
 
 {
-  (*(code *)PTR_bad_alloc_00c1c5b0)();
+  (*(code *)PTR__ZNSt9bad_allocC2Ev_00c1c5b0)();
   return;
 }
 

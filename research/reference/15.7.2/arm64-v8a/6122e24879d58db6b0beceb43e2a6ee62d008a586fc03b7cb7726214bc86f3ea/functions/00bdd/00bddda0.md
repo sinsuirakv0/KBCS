@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddda0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddda0",
-  "name": "firebase::analytics::internal::UnregisterTerminateOnDefaultAppDestroy",
+  "name": "_ZN8firebase9analytics8internal38UnregisterTerminateOnDefaultAppDestroyEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "f1a37fb73d2e845ddcd71c6f3cf951e4b147e6345ae2c750528454ca474b7672",
-  "source_text_sha256": "f1a37fb73d2e845ddcd71c6f3cf951e4b147e6345ae2c750528454ca474b7672"
+  "source_sha256": "2ceac04ae86687f995b3f9a966ca7f18a043134ca98cb50db12cda8e6f8d3d03",
+  "source_text_sha256": "2ceac04ae86687f995b3f9a966ca7f18a043134ca98cb50db12cda8e6f8d3d03"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae124c](../00ae1/00ae124c.md)
@@ -35,14 +34,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "´®"
 ~~~
-## 疑似コード 1/1 / UTF-8 174 bytes
+
+## 疑似コード / UTF-8 218 bytes
 
 ~~~c
 
-void firebase::analytics::internal::UnregisterTerminateOnDefaultAppDestroy(void)
+void _ZN8firebase9analytics8internal38UnregisterTerminateOnDefaultAppDestroyEv(void)
 
 {
-  (*(code *)PTR_UnregisterTerminateOnDefaultAppDestroy_00c1d708)();
+  (*(code *)PTR__ZN8firebase9analytics8internal38UnregisterTerminateOnDefaultAppDestroyEv_00c1d708)
+            ();
   return;
 }
 

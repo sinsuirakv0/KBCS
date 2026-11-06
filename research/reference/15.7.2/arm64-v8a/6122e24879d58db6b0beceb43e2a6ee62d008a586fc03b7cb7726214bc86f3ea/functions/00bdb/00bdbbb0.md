@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbbb0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbbb0",
-  "name": "Botan::Internal_Error::Internal_Error",
+  "name": "_ZN5Botan14Internal_ErrorC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "41ebb362021388bc660bd51ad52658b8506d401d1a77caacfc9467e6a11ce8a5",
-  "source_text_sha256": "41ebb362021388bc660bd51ad52658b8506d401d1a77caacfc9467e6a11ce8a5"
+  "source_sha256": "c02b618a6d011fe79047094254e379a8caf91d7951f582b9ebc9a32e9caf9693",
+  "source_text_sha256": "c02b618a6d011fe79047094254e379a8caf91d7951f582b9ebc9a32e9caf9693"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0048fc00](../0048f/0048fc00.md)
@@ -37,14 +36,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004d7c34](../004d7/004d7c34.md)
 
-## 疑似コード 1/1 / UTF-8 167 bytes
+## 疑似コード / UTF-8 277 bytes
 
 ~~~c
 
-void __thiscall Botan::Internal_Error::Internal_Error(Internal_Error *this,basic_string *param_1)
+void _ZN5Botan14Internal_ErrorC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+               (void)
 
 {
-  (*(code *)PTR_Internal_Error_00c1c610)();
+  (*(code *)
+    PTR__ZN5Botan14Internal_ErrorC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE_00c1c610
+  )();
   return;
 }
 

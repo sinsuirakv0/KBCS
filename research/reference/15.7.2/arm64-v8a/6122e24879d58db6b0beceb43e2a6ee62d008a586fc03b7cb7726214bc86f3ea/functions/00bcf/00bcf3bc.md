@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bcf3bc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "eea658ef7c87f14f5bb0b566bf4d59a38f6c150c535697edbe8bc8daf5d6fe8b",
-  "source_text_sha256": "eea658ef7c87f14f5bb0b566bf4d59a38f6c150c535697edbe8bc8daf5d6fe8b"
+  "source_sha256": "95ab01379ade3343dabbd9c9d896475439b6002fa6aae7d564d915b287b02bbf",
+  "source_text_sha256": "95ab01379ade3343dabbd9c9d896475439b6002fa6aae7d564d915b287b02bbf"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -43,7 +42,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "basic_string"
 "out/llvm-project/libcxxabi/src/demangle/ItaniumDemangle.h"
 ~~~
-## 疑似コード 1/1 / UTF-8 2445 bytes
+
+## 疑似コード / UTF-8 2355 bytes
 
 ~~~c
 

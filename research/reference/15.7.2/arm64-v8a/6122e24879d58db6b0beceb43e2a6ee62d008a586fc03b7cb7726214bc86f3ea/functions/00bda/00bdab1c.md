@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdab1c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "871d4bfa4351b98c985566e041a842036fb84edab98b125bb026d7492407553f",
-  "source_text_sha256": "871d4bfa4351b98c985566e041a842036fb84edab98b125bb026d7492407553f"
+  "source_sha256": "ca19d7b6d13f571d098d5b637efe7f07a2b28d4d30c859fa5047397ab99afe31",
+  "source_text_sha256": "ca19d7b6d13f571d098d5b637efe7f07a2b28d4d30c859fa5047397ab99afe31"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bda9b4](../00bda/00bda9b4.md)
@@ -40,7 +39,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "getTableEntrySize"
 "libunwind: %s - %s\n"
 ~~~
-## 疑似コード 1/1 / UTF-8 2050 bytes
+
+## 疑似コード / UTF-8 1989 bytes
 
 ~~~c
 

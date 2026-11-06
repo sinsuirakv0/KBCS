@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbabf8.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "cfdefc1d1845d6abecdf10031d0ef0e4e790e6f0ff43657e10e3d0beb2a9b223",
-  "source_text_sha256": "cfdefc1d1845d6abecdf10031d0ef0e4e790e6f0ff43657e10e3d0beb2a9b223"
+  "source_sha256": "3a5bcc2284be8b639bd1ef9812477c15987034708e0e46a1d5790ba5fea38c9b",
+  "source_text_sha256": "3a5bcc2284be8b639bd1ef9812477c15987034708e0e46a1d5790ba5fea38c9b"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,7 +34,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "Pure virtual function called!"
 ~~~
-## 疑似コード 1/1 / UTF-8 766 bytes
+
+## 疑似コード / UTF-8 751 bytes
 
 ~~~c
 

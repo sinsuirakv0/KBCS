@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bacfcc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bacfcc",
-  "name": "std::__ndk1::codecvt<char32_t,char8_t,mbstate_t>::do_unshift",
+  "name": "_ZNKSt6__ndk17codecvtIDiDu9mbstate_tE10do_unshiftERS1_PDuS4_RS4_",
   "size": 16,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "4366e9b0222de0642b42794fe63ca3411bf46c519541fcb553ab82d42298c38b",
-  "source_text_sha256": "4366e9b0222de0642b42794fe63ca3411bf46c519541fcb553ab82d42298c38b"
+  "source_sha256": "224b72c12de02cf7c31b769e8842ae494e257c3845216ec1a7eb3b5d7e493633",
+  "source_text_sha256": "224b72c12de02cf7c31b769e8842ae494e257c3845216ec1a7eb3b5d7e493633"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,20 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 390 bytes
+## 疑似コード / UTF-8 236 bytes
 
 ~~~c
 
-/* std::__ndk1::codecvt<char32_t, char8_t, mbstate_t>::do_unshift(mbstate_t&, char8_t*, char8_t*,
-   char8_t*&) const */
-
-undefined8 __thiscall
-std::__ndk1::codecvt<char32_t,char8_t,mbstate_t>::do_unshift
-          (codecvt<char32_t,char8_t,mbstate_t> *this,mbstate_t *param_1,uchar *param_2,
-          uchar *param_3,uchar **param_4)
+undefined8
+_ZNKSt6__ndk17codecvtIDiDu9mbstate_tE10do_unshiftERS1_PDuS4_RS4_
+          (undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,
+          undefined8 *param_5)
 
 {
-  *param_4 = param_2;
+  *param_5 = param_3;
   return 3;
 }
 

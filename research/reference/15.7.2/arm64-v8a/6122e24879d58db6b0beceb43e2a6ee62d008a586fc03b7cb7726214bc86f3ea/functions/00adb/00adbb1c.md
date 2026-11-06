@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00adbb1c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "82ab4cf327a776573c9ae06c9f71023c2996d3e12bce5ad09c5be8a2e49262bf",
-  "source_text_sha256": "82ab4cf327a776573c9ae06c9f71023c2996d3e12bce5ad09c5be8a2e49262bf"
+  "source_sha256": "6c1a4428eacffd4c576577bc31dd60ede3279789aa0bb170703d89f5b227afc2",
+  "source_text_sha256": "6c1a4428eacffd4c576577bc31dd60ede3279789aa0bb170703d89f5b227afc2"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -44,7 +43,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "CgkIjM3y_ZQaEAIQBw"
 "CgkIjM3y_ZQaEAIQCA"
 ~~~
-## 疑似コード 1/1 / UTF-8 5807 bytes
+
+## 疑似コード / UTF-8 5573 bytes
 
 ~~~c
 
@@ -174,27 +174,27 @@ void _INIT_265(void)
   FUN_00418cb8(&DAT_0109fe20,&DAT_0109fe28,local_78,local_78);
   FUN_00418cb8(&DAT_0109fe20,&DAT_0109fe28,local_58,local_58);
   if ((local_50 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_3c,CONCAT13(uStack_3d,CONCAT21(uStack_3f,cStack_40))));
+    _ZdlPv((void *)CONCAT44(uStack_3c,CONCAT13(uStack_3d,CONCAT21(uStack_3f,cStack_40))));
   }
   if ((local_70 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_5c,CONCAT13(uStack_5d,CONCAT21(uStack_5f,cStack_60))));
+    _ZdlPv((void *)CONCAT44(uStack_5c,CONCAT13(uStack_5d,CONCAT21(uStack_5f,cStack_60))));
   }
   if ((local_90 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_7c,CONCAT13(uStack_7d,CONCAT21(uStack_7f,cStack_80))));
+    _ZdlPv((void *)CONCAT44(uStack_7c,CONCAT13(uStack_7d,CONCAT21(uStack_7f,cStack_80))));
   }
   if ((local_b0 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_9c,CONCAT13(uStack_9d,CONCAT21(uStack_9f,cStack_a0))));
+    _ZdlPv((void *)CONCAT44(uStack_9c,CONCAT13(uStack_9d,CONCAT21(uStack_9f,cStack_a0))));
   }
   if ((local_d0 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_bc,CONCAT13(uStack_bd,CONCAT21(uStack_bf,cStack_c0))));
+    _ZdlPv((void *)CONCAT44(uStack_bc,CONCAT13(uStack_bd,CONCAT21(uStack_bf,cStack_c0))));
   }
   if ((local_f0 & 1) != 0) {
                     /* try { // try from 00adbe70 to 00bdbe7b has its CatchHandler @ 00adbf18 */
-    operator_delete((void *)CONCAT44(uStack_dc,CONCAT13(uStack_dd,CONCAT21(uStack_df,cStack_e0))));
+    _ZdlPv((void *)CONCAT44(uStack_dc,CONCAT13(uStack_dd,CONCAT21(uStack_df,cStack_e0))));
                     /* try { // try from 00adbe7c to 00bdbf3f has its CatchHandler @ 00adbd20 */
   }
   if ((local_110 & 1) != 0) {
-    operator_delete((void *)CONCAT44(uStack_fc,CONCAT13(uStack_fd,CONCAT21(uStack_ff,cStack_100))));
+    _ZdlPv((void *)CONCAT44(uStack_fc,CONCAT13(uStack_fd,CONCAT21(uStack_ff,cStack_100))));
   }
   __cxa_atexit(FUN_00418330,&DAT_0109fe20,&PTR_LOOP_00be5ed0);
   DAT_0109fe48 = 0;

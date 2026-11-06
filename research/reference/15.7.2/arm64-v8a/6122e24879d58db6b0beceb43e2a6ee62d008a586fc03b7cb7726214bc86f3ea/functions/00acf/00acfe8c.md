@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00acfe8c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b9c7c313a71449e635f8a29a193ff67696323d2a2071dc9feb498c2943906a32",
-  "source_text_sha256": "b9c7c313a71449e635f8a29a193ff67696323d2a2071dc9feb498c2943906a32"
+  "source_sha256": "e8ab791f74e1c2ca22e39abbf41e001430122562a301081ac618cbb7acf6a8ec",
+  "source_text_sha256": "e8ab791f74e1c2ca22e39abbf41e001430122562a301081ac618cbb7acf6a8ec"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00acfa20](../00acf/00acfa20.md)
@@ -46,7 +45,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "{\n  \"client\":{\n    \"version\":\"%d\",\n    \"countryCode\":\"%s\"\n  },\n  \"os\":{\n    \"type\":\"%s\",\n    \"version\":\"%s\"\n  },\n  \"device\":{\n    \"model\":\"%s\"\n  }\n}"
 ~~~
-## 疑似コード 1/1 / UTF-8 3950 bytes
+
+## 疑似コード / UTF-8 3752 bytes
 
 ~~~c
 
@@ -77,12 +77,12 @@ void FUN_00acfe8c(undefined8 param_1)
   byte local_50 [16];
   void *local_40;
   undefined1 auStack_38 [8];
-  __shared_weak_count *local_30;
+  long *local_30;
   long local_28;
   
   lVar1 = tpidr_el0;
   local_28 = *(long *)(lVar1 + 0x28);
-  local_60 = operator_new(0x98);
+  local_60 = (char *)_Znwm(0x98);
   uStack_68 = _UNK_002b1198;
   local_70 = _DAT_002b1190;
   local_60[0x94] = '\0';
@@ -129,28 +129,28 @@ void FUN_00acfe8c(undefined8 param_1)
   FUN_00ad05f0(local_50,&local_70,0x24cae,local_88,local_a0,local_b8,local_d0);
   thunk_FUN_00567ef0(auStack_38,local_50);
   thunk_FUN_0055dbb0(param_1,auStack_38,0);
-  if ((local_30 != (__shared_weak_count *)0x0) &&
-     (lVar7 = FUN_00bd6d90(0xffffffffffffffff,local_30 + 8), lVar7 == 0)) {
-    (**(code **)(*(long *)local_30 + 0x10))(local_30);
-    std::__ndk1::__shared_weak_count::__release_weak(local_30);
+  if ((local_30 != (long *)0x0) &&
+     (lVar7 = FUN_00bd6d90(0xffffffffffffffff,local_30 + 1), lVar7 == 0)) {
+    (**(code **)(*local_30 + 0x10))(local_30);
+    _ZNSt6__ndk119__shared_weak_count14__release_weakEv(local_30);
   }
   if ((local_50[0] & 1) != 0) {
-    operator_delete(local_40);
+    _ZdlPv(local_40);
   }
   if ((local_d0[0] & 1) != 0) {
-    operator_delete(local_c0);
+    _ZdlPv(local_c0);
   }
   if ((local_b8[0] & 1) != 0) {
-    operator_delete(local_a8);
+    _ZdlPv(local_a8);
   }
   if ((local_a0[0] & 1) != 0) {
-    operator_delete(local_90);
+    _ZdlPv(local_90);
   }
   if ((local_88[0] & 1) != 0) {
-    operator_delete(local_78);
+    _ZdlPv(local_78);
   }
   if ((local_70 & 1) != 0) {
-    operator_delete(local_60);
+    _ZdlPv(local_60);
   }
   if (*(long *)(lVar1 + 0x28) == local_28) {
     return;

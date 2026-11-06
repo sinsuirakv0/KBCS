@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbadd4.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bbadd4",
-  "name": "std::logic_error::what",
+  "name": "_ZNKSt11logic_error4whatEv",
   "size": 12,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "92aadb317bc833b2c1d15db36e3128eb8874cd8412a74169a3c181cc6e543642",
-  "source_text_sha256": "92aadb317bc833b2c1d15db36e3128eb8874cd8412a74169a3c181cc6e543642"
+  "source_sha256": "21b34fdf66ea1a63c9c64f7c6cae9666ca99a696602e74f4daff575c058239c5",
+  "source_text_sha256": "21b34fdf66ea1a63c9c64f7c6cae9666ca99a696602e74f4daff575c058239c5"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,16 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 154 bytes
+## 疑似コード / UTF-8 98 bytes
 
 ~~~c
 
-/* std::logic_error::what() const */
-
-undefined8 __thiscall std::logic_error::what(logic_error *this)
+undefined8 _ZNKSt11logic_error4whatEv(long param_1)
 
 {
-  return *(undefined8 *)(this + 8);
+  return *(undefined8 *)(param_1 + 8);
 }
 
 ~~~

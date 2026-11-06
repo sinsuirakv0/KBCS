@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004ceefc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004ceefc",
-  "name": "Botan::RSA_PublicKey::key_length",
+  "name": "_ZTv0_n48_NK5Botan13RSA_PublicKey10key_lengthEv",
   "size": 132,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "dc655c381ae9bc2c0fe2acee8e7b9b63e961ddf2c020e12aa16070b1789fb19d",
-  "source_text_sha256": "dc655c381ae9bc2c0fe2acee8e7b9b63e961ddf2c020e12aa16070b1789fb19d"
+  "source_sha256": "92248f85f662ab74872ab39c16b2673522112b2972c0a2769e08f902d35e4057",
+  "source_text_sha256": "92248f85f662ab74872ab39c16b2673522112b2972c0a2769e08f902d35e4057"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,46 +29,46 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 1028 bytes
+## 疑似コード / UTF-8 899 bytes
 
 ~~~c
 
-/* virtual thunk to Botan::RSA_PublicKey::key_length() const */
-
-long __thiscall Botan::RSA_PublicKey::key_length(RSA_PublicKey *this)
+long _ZTv0_n48_NK5Botan13RSA_PublicKey10key_lengthEv(long *param_1)
 
 {
-  uint uVar1;
-  ulong uVar2;
+  long lVar1;
+  uint uVar2;
   ulong uVar3;
-  long lVar4;
+  ulong uVar4;
+  long lVar5;
   
-  lVar4 = *(long *)(this + *(long *)(*(long *)this + -0x30) + 8);
-  uVar2 = *(long *)(this + *(long *)(*(long *)this + -0x30) + 0x10) - lVar4 >> 2;
-  uVar3 = uVar2;
-  if (*(long *)(this + *(long *)(*(long *)this + -0x30) + 0x10) - lVar4 == 0) {
+  lVar5 = *(long *)((long)param_1 + *(long *)(*param_1 + -0x30) + 8);
+  lVar1 = *(long *)((long)param_1 + *(long *)(*param_1 + -0x30) + 0x10) - lVar5;
+  uVar3 = lVar1 >> 2;
+  uVar4 = uVar3;
+  if (lVar1 == 0) {
 LAB_004cef38:
-    if (uVar3 != 0) {
-      uVar3 = uVar3 - 1;
-      if (uVar3 < uVar2) {
-        uVar1 = *(uint *)(lVar4 + uVar3 * 4);
+    if (uVar4 != 0) {
+      uVar4 = uVar4 - 1;
+      if (uVar4 < uVar3) {
+        uVar2 = *(uint *)(lVar5 + uVar4 * 4);
       }
       else {
-        uVar1 = 0;
+        uVar2 = 0;
       }
-      lVar4 = 0x20;
+      lVar5 = 0x20;
       do {
-        if ((uVar1 >> (ulong)((int)lVar4 - 1U & 0x1f) & 1) != 0) break;
-        lVar4 = lVar4 + -1;
-      } while (lVar4 != 0);
-      return lVar4 + uVar3 * 0x20;
+        if ((uVar2 >> (ulong)((int)lVar5 - 1U & 0x1f) & 1) != 0) break;
+        lVar5 = lVar5 + -1;
+      } while (lVar5 != 0);
+      return lVar5 + uVar4 * 0x20;
     }
   }
   else {
     do {
-      if (*(int *)(lVar4 + -4 + uVar3 * 4) != 0) goto LAB_004cef38;
-      uVar3 = uVar3 - 1;
-    } while (uVar3 != 0);
+      if (*(int *)(lVar5 + -4 + uVar4 * 4) != 0) goto LAB_004cef38;
+      uVar4 = uVar4 - 1;
+    } while (uVar4 != 0);
   }
   return 0;
 }

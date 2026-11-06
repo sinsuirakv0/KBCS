@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae9bbc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae9bbc",
-  "name": "firebase::util::date::CacheMethodIds",
+  "name": "_ZN8firebase4util4date14CacheMethodIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "07978679dc252c93525fffdee2d6b9c41ed7d2d09fe1fc22b6e5667774caeecf",
-  "source_text_sha256": "07978679dc252c93525fffdee2d6b9c41ed7d2d09fe1fc22b6e5667774caeecf"
+  "source_sha256": "ea541ba29adefea8596a83311ad2c8d4c836e2d488cc5afd7920bc53d7719f41",
+  "source_text_sha256": "ea541ba29adefea8596a83311ad2c8d4c836e2d488cc5afd7920bc53d7719f41"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,21 +35,22 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/util/Date"
 ~~~
-## 疑似コード 1/1 / UTF-8 555 bytes
+
+## 疑似コード / UTF-8 696 bytes
 
 ~~~c
 
-/* firebase::util::date::CacheMethodIds(_JNIEnv*, _jobject*) */
-
-void firebase::util::date::CacheMethodIds(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util4date14CacheMethodIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a0650 == (_jclass *)0x0) {
-    DAT_010a0650 = (_jclass *)FindClassGlobal(param_1,param_2,0,"java/util/Date",0);
+  if (DAT_010a0650 == 0) {
+    DAT_010a0650 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/util/Date",0);
   }
                     /* try { // try from 00ae9c20 to 00be9c5f has its CatchHandler @ 00ae9c98 */
-  LookupMethodIds(param_1,DAT_010a0650,(MethodNameSignature *)&PTR_s_<init>_00c10120,3,
-                  (_jmethodID **)&DAT_010a0660,"java/util/Date");
+  _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+            (param_1,DAT_010a0650,&PTR_s_<init>_00c10120,3,&DAT_010a0660,"java/util/Date");
   return;
 }
 

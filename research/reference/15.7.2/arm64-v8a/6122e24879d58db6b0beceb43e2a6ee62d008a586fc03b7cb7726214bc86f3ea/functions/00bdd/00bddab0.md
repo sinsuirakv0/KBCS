@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddab0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddab0",
-  "name": "firebase::auth::Auth::SignOut",
+  "name": "_ZN8firebase4auth4Auth7SignOutEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "5e487618010e6e0d3ca48707deb4be55d96094669b62459687e06eecfdfaeae4",
-  "source_text_sha256": "5e487618010e6e0d3ca48707deb4be55d96094669b62459687e06eecfdfaeae4"
+  "source_sha256": "c4c9af862d9f1c321c1f725f2e625827098c0125ecbde110458841252e50e907",
+  "source_text_sha256": "c4c9af862d9f1c321c1f725f2e625827098c0125ecbde110458841252e50e907"
 }
 ~~~
+
 ## 呼び出し元
 
 - [008480dc](../00848/008480dc.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b5f9e4](../00b5f/00b5f9e4.md)
 
-## 疑似コード 1/1 / UTF-8 120 bytes
+## 疑似コード / UTF-8 123 bytes
 
 ~~~c
 
-void __thiscall firebase::auth::Auth::SignOut(Auth *this)
+void _ZN8firebase4auth4Auth7SignOutEv(void)
 
 {
-  (*(code *)PTR_SignOut_00c1d590)();
+  (*(code *)PTR__ZN8firebase4auth4Auth7SignOutEv_00c1d590)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeddfc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeddfc",
-  "name": "firebase::util::uri::GetMethodId",
+  "name": "_ZN8firebase4util3uri11GetMethodIdENS1_6MethodE",
   "size": 60,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "4d4f254acb0eac1dfce498ecff8b52870d584533312daec03ddb33acbc6d9391",
-  "source_text_sha256": "4d4f254acb0eac1dfce498ecff8b52870d584533312daec03ddb33acbc6d9391"
+  "source_sha256": "06123079e134a38e73125272fc49214e298f6fe76b37a498fd566ebedd1a21f7",
+  "source_text_sha256": "06123079e134a38e73125272fc49214e298f6fe76b37a498fd566ebedd1a21f7"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,17 +34,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "method < kMethodCount"
 ~~~
-## 疑似コード 1/1 / UTF-8 251 bytes
+
+## 疑似コード / UTF-8 203 bytes
 
 ~~~c
 
-/* firebase::util::uri::GetMethodId(firebase::util::uri::Method) */
-
-undefined8 firebase::util::uri::GetMethodId(uint param_1)
+undefined8 _ZN8firebase4util3uri11GetMethodIdENS1_6MethodE(uint param_1)
 
 {
   if (1 < (int)param_1) {
-    LogAssert("method < kMethodCount");
+    _ZN8firebase9LogAssertEPKcz("method < kMethodCount");
   }
   return (&DAT_010a0970)[param_1];
 }

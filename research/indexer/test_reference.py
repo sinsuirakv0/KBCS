@@ -7,13 +7,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from indexer.reference import PAGE_BYTES, export_cache
+from indexer.reference import export_cache, replace_reference
 from indexer.store import connect, digest
 
 
 class ReferenceTest(unittest.TestCase):
     def test_complete_export_preserves_unicode_code_and_source(self):
-        # 長い日本語の1行・コードフェンス・呼出関係を含む実ファイルで分割を確認する。
+        # 長い日本語の1行とコードフェンスを分割せず保存できるか確認する。
         with tempfile.TemporaryDirectory() as temporary:
             cache = Path(temporary) / 'cache'
             (cache / 'code').mkdir(parents=True)
@@ -38,31 +38,38 @@ class ReferenceTest(unittest.TestCase):
                 root, summary = export_cache(cache, Path(temporary) / 'export')
             self.assertEqual(before, digest(cache / 'cache.sqlite'))
             self.assertEqual((summary['cached'], summary['failed'], summary['external'], summary['low_confidence']), (1, 1, 1, 1))
-            parts = {}
             for page in root.rglob('*.md'):
                 data = page.read_bytes()
                 self.assertTrue(data.startswith(b'\xef\xbb\xbf'))
-                self.assertLessEqual(len(data), PAGE_BYTES)
+                self.assertNotIn('.part-', page.name)
                 text = data.decode('utf-8-sig')
                 for link in re.findall(r'\]\(([^)]+\.md)\)', text):
                     self.assertTrue((page.parent / link).is_file(), link)
-                for match in re.finditer(r'^## 疑似コード (\d+)/\d+ / UTF-8 (\d+) bytes\n\n~+c\n', text, re.MULTILINE):
-                    parts[int(match[1])] = text[match.end():].encode('utf-8')[:int(match[2])]
-            restored = b''.join(parts[number] for number in sorted(parts))
+            entry = (root / 'functions/00100/00100000.md').read_bytes().decode('utf-8-sig')
+            match = re.search(r'^## 疑似コード / UTF-8 (\d+) bytes\n\n~+c\n', entry, re.MULTILINE)
+            restored = entry[match.end():].encode('utf-8')[:int(match[1])]
             self.assertEqual(hashlib.sha256(restored).hexdigest(), hashlib.sha256(code.encode('utf-8')).hexdigest())
-            self.assertGreater(len(parts), 1)
-            entry = (root / 'functions/00100/00100000.md').read_text(encoding='utf-8-sig')
+            self.assertGreater(summary['max_page_bytes'], 64 * 1024)
             self.assertIn('../external/EXTERNAL-00000001.md', entry)
             self.assertIn('関連文字列', entry)
             self.assertEqual(summary['pages'], len(list(root.rglob('*.md'))))
             db = connect(cache / 'cache.sqlite')
             with db:
                 db.execute('INSERT INTO metadata VALUES(?,?)', ('analysis_revision', json.dumps('b' * 16)))
+                db.execute('UPDATE metadata SET value=? WHERE key=?', (json.dumps('c' * 64), 'sha256'))
             db.close()
             with contextlib.redirect_stdout(io.StringIO()):
-                revised, _ = export_cache(cache, Path(temporary) / 'export')
-            self.assertEqual(revised.name, 'b' * 16)
-            self.assertTrue((root / 'manifest.json').is_file())
+                revised, report = export_cache(cache, Path(temporary) / 'new-export')
+            self.assertEqual(revised.name, 'c' * 64)
+            self.assertEqual(report['analysis_revision'], 'b' * 16)
+            reference = Path(temporary) / 'export'
+            sibling = reference / '1.2.3/x86/keep.txt'
+            sibling.parent.mkdir()
+            sibling.write_text('keep')
+            replace_reference(revised, reference)
+            self.assertFalse(root.exists())
+            self.assertTrue((root.with_name('c' * 64) / 'manifest.json').is_file())
+            self.assertEqual(sibling.read_text(), 'keep')
 
 
 if __name__ == '__main__':

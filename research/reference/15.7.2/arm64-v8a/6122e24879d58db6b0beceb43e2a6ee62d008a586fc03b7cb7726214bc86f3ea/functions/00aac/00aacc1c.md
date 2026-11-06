@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aacc1c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "019c2ab89c9fb68250c8180302c45e0e9ad424159951f4c8de85bdf01f4b9a75",
-  "source_text_sha256": "019c2ab89c9fb68250c8180302c45e0e9ad424159951f4c8de85bdf01f4b9a75"
+  "source_sha256": "6b9811b362e0a669ad3e5120db3a504507ad337de59d147877abc120ff09c63c",
+  "source_text_sha256": "6b9811b362e0a669ad3e5120db3a504507ad337de59d147877abc120ff09c63c"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,7 +29,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdaf40](../00bda/00bdaf40.md)
 
-## 疑似コード 1/1 / UTF-8 405 bytes
+## 疑似コード / UTF-8 392 bytes
 
 ~~~c
 
@@ -42,7 +41,7 @@ void FUN_00aacc1c(long param_1)
   undefined8 uVar3;
   undefined8 uVar4;
   
-  puVar1 = operator_new(0x20);
+  puVar1 = (undefined8 *)_Znwm(0x20);
   uVar4 = *(undefined8 *)(param_1 + 0x10);
   uVar3 = *(undefined8 *)(param_1 + 8);
   uVar2 = *(undefined8 *)(param_1 + 0x18);

@@ -1,0 +1,55 @@
+﻿# 00ae7dfc
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00ae7dfc",
+  "name": "_ZN8firebase4util13boolean_class10CacheClassEP7_JNIEnvP8_jobject",
+  "size": 68,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "2ddc951527f741d8fb9106b35385957168017962bdfd8aae118d6ae29dfaaac7",
+  "source_text_sha256": "2ddc951527f741d8fb9106b35385957168017962bdfd8aae118d6ae29dfaaac7"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bde090](../00bde/00bde090.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"java/lang/Boolean"
+~~~
+
+## 疑似コード / UTF-8 621 bytes
+
+~~~c
+
+long _ZN8firebase4util13boolean_class10CacheClassEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
+
+{
+                    /* try { // try from 00ae7e04 to 00be7e0b has its CatchHandler @ 00ae8c68 */
+  if (DAT_010a05c0 == 0) {
+    DAT_010a05c0 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/lang/Boolean",0);
+  }
+                    /* try { // try from 00ae7e3c to 00be7e47 has its CatchHandler @ 00ae8c64 */
+  return DAT_010a05c0;
+}
+
+~~~

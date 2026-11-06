@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeceec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeceec",
-  "name": "firebase::util::set::CacheMethodIds",
+  "name": "_ZN8firebase4util3set14CacheMethodIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "6f4aeaf7823872125c4251c1cef1088693d23ece308381354091285173f27865",
-  "source_text_sha256": "6f4aeaf7823872125c4251c1cef1088693d23ece308381354091285173f27865"
+  "source_sha256": "fb607c5c64be3697534b81a67304c303bce48e3268806769de7a442c9b8bc19e",
+  "source_text_sha256": "fb607c5c64be3697534b81a67304c303bce48e3268806769de7a442c9b8bc19e"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,20 +35,21 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/util/Set"
 ~~~
-## 疑似コード 1/1 / UTF-8 455 bytes
+
+## 疑似コード / UTF-8 598 bytes
 
 ~~~c
 
-/* firebase::util::set::CacheMethodIds(_JNIEnv*, _jobject*) */
-
-void firebase::util::set::CacheMethodIds(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util3set14CacheMethodIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a08c8 == (_jclass *)0x0) {
-    DAT_010a08c8 = (_jclass *)FindClassGlobal(param_1,param_2,0,"java/util/Set",0);
+  if (DAT_010a08c8 == 0) {
+    DAT_010a08c8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/util/Set",0);
   }
-  LookupMethodIds(param_1,DAT_010a08c8,(MethodNameSignature *)&PTR_s_iterator_00c10498,1,
-                  (_jmethodID **)&DAT_010a08d8,"java/util/Set");
+  _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+            (param_1,DAT_010a08c8,&PTR_s_iterator_00c10498,1,&DAT_010a08d8,"java/util/Set");
   return;
 }
 

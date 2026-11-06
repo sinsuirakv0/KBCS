@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](007cffdc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8e77143d9d41768c5d85511d7b7d3357ce5bd75aefbf36bb6ef4a1bdc633798b",
-  "source_text_sha256": "8e77143d9d41768c5d85511d7b7d3357ce5bd75aefbf36bb6ef4a1bdc633798b"
+  "source_sha256": "f4486bdce8a96cfb25cfb89da48a68ff2b199baccd2a992a51b987b6b41eda3c",
+  "source_text_sha256": "f4486bdce8a96cfb25cfb89da48a68ff2b199baccd2a992a51b987b6b41eda3c"
 }
 ~~~
+
 ## 呼び出し元
 
 - [007cffa8](../007cf/007cffa8.md)
@@ -34,7 +33,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf40](../00bda/00bdaf40.md)
 - [00bdb140](../00bdb/00bdb140.md)
 
-## 疑似コード 1/1 / UTF-8 1882 bytes
+## 疑似コード / UTF-8 1817 bytes
 
 ~~~c
 
@@ -71,7 +70,7 @@ bool FUN_007cffdc(int param_1,int param_2)
     } while (*(byte **)pbVar2 != (byte *)0x0);
   }
 LAB_007d0050:
-  pbVar2 = operator_new(0x1f60);
+  pbVar2 = (byte *)_Znwm(0x1f60);
   *(int *)(pbVar2 + 0x1c) = param_1;
   memset(pbVar2 + 0x20,0,8000);
   pbVar2[0] = 0;

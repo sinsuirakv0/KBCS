@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbffc0.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "f1330d8a4117a1246de2e2ac269bc94ab2d910f5a1119e28c5435a99e41e3213",
-  "source_text_sha256": "f1330d8a4117a1246de2e2ac269bc94ab2d910f5a1119e28c5435a99e41e3213"
+  "source_sha256": "25350aaa2cb660a5cd9242d1e143e85b1c59033d8784838d18dec57a4fb775a7",
+  "source_text_sha256": "25350aaa2cb660a5cd9242d1e143e85b1c59033d8784838d18dec57a4fb775a7"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bbd1fc](../00bbd/00bbd1fc.md)
@@ -31,7 +30,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdb0d0](../00bdb/00bdb0d0.md)
 - [00bdd0d0](../00bdd/00bdd0d0.md)
 
-## 疑似コード 1/1 / UTF-8 1934 bytes
+## 疑似コード / UTF-8 1880 bytes
 
 ~~~c
 
@@ -58,7 +57,7 @@ void FUN_00bbffc0(long param_1,undefined8 *param_2,undefined8 *param_3,undefined
     puVar3 = malloc(0x1000);
     if (puVar3 == (void *)0x0) {
                     /* WARNING: Subroutine does not return */
-      std::terminate();
+      _ZSt9terminatev();
     }
     lVar4 = 0;
     *puVar3 = pvVar8;

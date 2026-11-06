@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004eebcc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004eebcc",
-  "name": "Botan::X509_Object::make_signed",
+  "name": "_ZN5Botan11X509_Object11make_signedEPNS_9PK_SignerERNS_21RandomNumberGeneratorERKNS_19AlgorithmIdentifierERKNSt6__ndk16vectorIhNS_16secure_allocatorIhEEEE",
   "size": 488,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "445505ce0063a900c17bc1139841f0251c8c74c7f8f4c5d1ae44b5babf4e27f3",
-  "source_text_sha256": "445505ce0063a900c17bc1139841f0251c8c74c7f8f4c5d1ae44b5babf4e27f3"
+  "source_sha256": "ff1706ae259d8c21de6985fed594a31ba66468e7c7cf075cd407c758a7b58fd0",
+  "source_text_sha256": "ff1706ae259d8c21de6985fed594a31ba66468e7c7cf075cd407c758a7b58fd0"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdce10](../00bdc/00bdce10.md)
@@ -42,28 +41,21 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdc300](../00bdc/00bdc300.md)
 - [010a5058](../010a5/010a5058.md)
 
-## 疑似コード 1/1 / UTF-8 2743 bytes
+## 疑似コード / UTF-8 2506 bytes
 
 ~~~c
 
-/* Botan::X509_Object::make_signed(Botan::PK_Signer*, Botan::RandomNumberGenerator&,
-   Botan::AlgorithmIdentifier const&, std::__ndk1::vector<unsigned char,
-   Botan::secure_allocator<unsigned char> > const&) */
-
-void __thiscall
-Botan::X509_Object::make_signed
-          (X509_Object *this,PK_Signer *param_1,RandomNumberGenerator *param_2,
-          AlgorithmIdentifier *param_3,vector *param_4)
+void _ZN5Botan11X509_Object11make_signedEPNS_9PK_SignerERNS_21RandomNumberGeneratorERKNS_19AlgorithmIdentifierERKNSt6__ndk16vectorIhNS_16secure_allocatorIhEEEE
+               (undefined8 param_1,undefined8 *param_2,undefined8 param_3,undefined8 *param_4,
+               long *param_5)
 
 {
   ulong uVar1;
-  uchar *__src;
-  uchar *puVar2;
-  long lVar3;
-  void *pvVar4;
-  void *pvVar5;
-  ulong __n;
-  ulong uVar6;
+  void *pvVar2;
+  void *pvVar3;
+  long lVar4;
+  size_t __n;
+  ulong uVar5;
   void *local_a0;
   void *pvStack_98;
   long local_90;
@@ -74,62 +66,62 @@ Botan::X509_Object::make_signed
   void *local_68;
   long local_58;
   
-  lVar3 = tpidr_el0;
-  local_58 = *(long *)(lVar3 + 0x28);
-  (**(code **)**(undefined8 **)this)
-            (*(undefined8 **)this,*(long *)param_3,*(long *)(param_3 + 8) - *(long *)param_3);
-  PK_Signer::signature((PK_Signer *)this,(RandomNumberGenerator *)param_1);
+  lVar4 = tpidr_el0;
+  local_58 = *(long *)(lVar4 + 0x28);
+  (*(code *)**(undefined8 **)*param_2)((undefined8 *)*param_2,*param_5,param_5[1] - *param_5);
+  _ZN5Botan9PK_Signer9signatureERNS_21RandomNumberGeneratorE(&local_70,param_2,param_3);
   pvStack_88 = (void *)0x0;
   local_90 = 0;
   uStack_78 = 0;
   local_80 = (void *)0x0;
   pvStack_98 = (void *)0x0;
   local_a0 = (void *)0x0;
-  DER_Encoder::start_cons(&local_a0,0x10,0);
-  __src = *(uchar **)param_3;
-  puVar2 = *(uchar **)(param_3 + 8);
-  __n = (long)puVar2 - (long)__src;
+  _ZN5Botan11DER_Encoder10start_consENS_8ASN1_TagES1_(&local_a0,0x10,0);
+  pvVar2 = (void *)*param_5;
+  pvVar3 = (void *)param_5[1];
+  __n = (long)pvVar3 - (long)pvVar2;
   if (local_80 == pvStack_88) {
-    uVar6 = (long)pvStack_98 - (long)local_a0;
-    uVar1 = uVar6 + __n;
-    if (uVar6 < uVar1) {
+    uVar5 = (long)pvStack_98 - (long)local_a0;
+    uVar1 = uVar5 + __n;
+    if (uVar5 < uVar1) {
       FUN_0051d614(&local_a0,__n);
     }
-    else if (uVar6 != uVar1) {
+    else if (uVar5 != uVar1) {
       pvStack_98 = (void *)((long)local_a0 + uVar1);
     }
-    if (puVar2 != __src) {
-      memmove((void *)((long)local_a0 + uVar6),__src,__n);
+    if (pvVar3 != pvVar2) {
+      memmove((void *)((long)local_a0 + uVar5),pvVar2,__n);
     }
   }
   else {
-    DER_Encoder::DER_Sequence::add_bytes((DER_Sequence *)((long)local_80 + -0x38),__src,__n);
+    _ZN5Botan11DER_Encoder12DER_Sequence9add_bytesEPKhm((long)local_80 + -0x38,pvVar2);
   }
-  (*(code *)**(undefined8 **)param_2)(param_2,&local_a0);
-  DER_Encoder::encode((DER_Encoder *)&local_a0,local_70,(long)local_68 - (long)local_70,3,3,0);
-  DER_Encoder::end_cons((DER_Encoder *)&local_a0);
-  FUN_00483ed8(&local_a0);
-  pvVar5 = pvStack_88;
-  pvVar4 = local_80;
+  (**(code **)*param_4)(param_4,&local_a0);
+  _ZN5Botan11DER_Encoder6encodeEPKhmNS_8ASN1_TagES3_S3_
+            (&local_a0,local_70,(long)local_68 - (long)local_70,3,3,0);
+  _ZN5Botan11DER_Encoder8end_consEv(&local_a0);
+  FUN_00483ed8(param_1,&local_a0);
+  pvVar3 = pvStack_88;
+  pvVar2 = local_80;
   if (pvStack_88 != (void *)0x0) {
-    while (pvVar4 != pvVar5) {
-      FUN_00512ca8(&uStack_78,(void *)((long)pvVar4 + -0x38));
-      pvVar4 = (void *)((long)pvVar4 + -0x38);
+    while (pvVar2 != pvVar3) {
+      FUN_00512ca8(&uStack_78,(void *)((long)pvVar2 + -0x38));
+      pvVar2 = (void *)((long)pvVar2 + -0x38);
     }
-    local_80 = pvVar5;
-    operator_delete(pvStack_88);
+    local_80 = pvVar3;
+    _ZdlPv(pvStack_88);
   }
-  pvVar4 = local_a0;
+  pvVar2 = local_a0;
   if (local_a0 != (void *)0x0) {
     pvStack_98 = local_a0;
     (*(code *)PTR_memset_00bea678)(local_a0,0,local_90 - (long)local_a0);
-    free(pvVar4);
+    free(pvVar2);
   }
   if (local_70 != (void *)0x0) {
     local_68 = local_70;
-    operator_delete(local_70);
+    _ZdlPv(local_70);
   }
-  if (*(long *)(lVar3 + 0x28) != local_58) {
+  if (*(long *)(lVar4 + 0x28) != local_58) {
                     /* WARNING: Subroutine does not return */
     __stack_chk_fail();
   }

@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00adfacc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b8cfe1a1f92677f7507b403a0abffe8429b3bdfc9927ff3a0a35c796a6ad2e18",
-  "source_text_sha256": "b8cfe1a1f92677f7507b403a0abffe8429b3bdfc9927ff3a0a35c796a6ad2e18"
+  "source_sha256": "b0efc6a615a4b1bf28df52abff604d4cfcfbdb777745e0992455b30d6bdfbbae",
+  "source_text_sha256": "b0efc6a615a4b1bf28df52abff604d4cfcfbdb777745e0992455b30d6bdfbbae"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -34,7 +33,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00886014](../00886/00886014.md)
 - [00bdb6c0](../00bdb/00bdb6c0.md)
 
-## 疑似コード 1/1 / UTF-8 1600 bytes
+## 疑似コード / UTF-8 1773 bytes
 
 ~~~c
 
@@ -57,13 +56,15 @@ void FUN_00adfacc(undefined8 param_1,undefined8 *param_2,undefined8 *param_3)
                     /* try { // try from 00adfaec to 00bdfb0b has its CatchHandler @ 00adfc0c */
   FUN_00444c54(uVar4,0xbe,0xbe,0xbe,0xff);
                     /* try { // try from 00adfb20 to 00bdfb23 has its CatchHandler @ 00adfc30 */
-  lVar3 = __dynamic_cast(DAT_00c249b8,&PTR_PTR_00be8d98,&PTR_PTR_00be8da8,0);
+  lVar3 = __dynamic_cast(DAT_00c249b8,&PTR__ZTVN10__cxxabiv117__class_type_infoE_16__00be8d98,
+                         &PTR__ZTVN10__cxxabiv120__si_class_type_infoE_16__00be8da8,0);
   uVar6 = *(undefined8 *)(lVar3 + 0x38);
   iVar1 = FUN_00886014(uVar5);
                     /* try { // try from 00adfb38 to 00bdfb3f has its CatchHandler @ 00adfc00 */
   FUN_00886014(uVar5);
                     /* try { // try from 00adfb54 to 00bdfb5b has its CatchHandler @ 00adfbfc */
-  lVar3 = __dynamic_cast(DAT_00c249b8,&PTR_PTR_00be8d98,&PTR_PTR_00be8da8,0);
+  lVar3 = __dynamic_cast(DAT_00c249b8,&PTR__ZTVN10__cxxabiv117__class_type_infoE_16__00be8d98,
+                         &PTR__ZTVN10__cxxabiv120__si_class_type_infoE_16__00be8da8,0);
   iVar2 = FUN_00467c58(*(undefined8 *)(lVar3 + 0x38));
   FUN_00886014(uVar5);
                     /* try { // try from 00adfb70 to 00bdfb77 has its CatchHandler @ 00adfc00 */

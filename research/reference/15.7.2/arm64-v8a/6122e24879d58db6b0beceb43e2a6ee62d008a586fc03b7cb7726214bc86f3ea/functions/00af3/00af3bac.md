@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00af3bac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00af3bac",
-  "name": "firebase::util::JObjectClassName",
+  "name": "_ZN8firebase4util16JObjectClassNameEP7_JNIEnvP8_jobject",
   "size": 164,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "5971cb10e1ecb643615ae852844e2ba6b51901d222e5b6606c7b060323bc56ac",
-  "source_text_sha256": "5971cb10e1ecb643615ae852844e2ba6b51901d222e5b6606c7b060323bc56ac"
+  "source_sha256": "087819567e945be810abefedcbcc6b15dd026294c2200781bf45aa233933984a",
+  "source_text_sha256": "087819567e945be810abefedcbcc6b15dd026294c2200781bf45aa233933984a"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -31,32 +30,27 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [0047495c](../00474/0047495c.md)
 - [00bddfa0](../00bdd/00bddfa0.md)
 
-## 疑似コード 1/1 / UTF-8 845 bytes
+## 疑似コード / UTF-8 706 bytes
 
 ~~~c
 
-/* firebase::util::JObjectClassName(_JNIEnv*, _jobject*) */
-
-void firebase::util::JObjectClassName(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util16JObjectClassNameEP7_JNIEnvP8_jobject(undefined8 param_1,long *param_2)
 
 {
   char cVar1;
   undefined8 uVar2;
-  _JNIEnv *p_Var3;
-  _jobject *p_Var4;
   
-  uVar2 = (**(code **)(*(long *)param_1 + 0xf8))();
-  p_Var4 = DAT_010a05b0;
-  p_Var3 = (_JNIEnv *)FUN_0047495c(param_1,uVar2);
-  cVar1 = (**(code **)(*(long *)param_1 + 0x720))(param_1);
+  uVar2 = (**(code **)(*param_2 + 0xf8))();
+  uVar2 = FUN_0047495c(param_2,uVar2,DAT_010a05b0);
+  cVar1 = (**(code **)(*param_2 + 0x720))(param_2);
   if (cVar1 != '\0') {
-    (**(code **)(*(long *)param_1 + 0x80))(param_1);
-    (**(code **)(*(long *)param_1 + 0x88))(param_1);
+    (**(code **)(*param_2 + 0x80))(param_2);
+    (**(code **)(*param_2 + 0x88))(param_2);
   }
-  JStringToString((util *)param_1,p_Var3,p_Var4);
+  _ZN8firebase4util15JStringToStringEP7_JNIEnvP8_jobject(param_1,param_2,uVar2);
                     /* WARNING: Could not recover jumptable at 0x00af3c4c. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-  (**(code **)(*(long *)param_1 + 0xb8))(param_1,p_Var3);
+  (**(code **)(*param_2 + 0xb8))(param_2,uVar2);
   return;
 }
 

@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00a3cbac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "c17544abce2648f5b01006d5189455035c62ecded19d5beec16cc90d5595eff8",
-  "source_text_sha256": "c17544abce2648f5b01006d5189455035c62ecded19d5beec16cc90d5595eff8"
+  "source_sha256": "c5169c35275898f76d193e5948903f9b3febef997489273c4f2e3041e4e29f32",
+  "source_text_sha256": "c5169c35275898f76d193e5948903f9b3febef997489273c4f2e3041e4e29f32"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -33,7 +32,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 613 bytes
+## 疑似コード / UTF-8 574 bytes
 
 ~~~c
 
@@ -55,7 +54,7 @@ void FUN_00a3cbac(void)
     local_38 = (ulong)(local_40[0] >> 1);
   }
   else {
-    operator_delete(pvStack_30);
+    _ZdlPv(pvStack_30);
   }
   lVar2 = FUN_0081f580();
   *(bool *)(lVar2 + 0x4494ea) = local_38 == 0;

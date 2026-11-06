@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddcc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddcc0",
-  "name": "firebase::CleanupNotifier::CleanupNotifier",
+  "name": "_ZN8firebase15CleanupNotifierC1Ev",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "e0f35c5c7a7e49c266f2398ef5fbd9a7fa07cad92e54975296487222797755c9",
-  "source_text_sha256": "e0f35c5c7a7e49c266f2398ef5fbd9a7fa07cad92e54975296487222797755c9"
+  "source_sha256": "837c222291a65c0c3a560c1c8a37f5db544fda50a522c3a0515d271018de7dcc",
+  "source_text_sha256": "837c222291a65c0c3a560c1c8a37f5db544fda50a522c3a0515d271018de7dcc"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae0100](../00ae0/00ae0100.md)
@@ -32,14 +31,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00afc464](../00afc/00afc464.md)
 
-## 疑似コード 1/1 / UTF-8 152 bytes
+## 疑似コード / UTF-8 125 bytes
 
 ~~~c
 
-void __thiscall firebase::CleanupNotifier::CleanupNotifier(CleanupNotifier *this)
+void _ZN8firebase15CleanupNotifierC1Ev(void)
 
 {
-  (*(code *)PTR_CleanupNotifier_00c1d698)();
+  (*(code *)PTR__ZN8firebase15CleanupNotifierC1Ev_00c1d698)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeaa5c.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeaa5c",
-  "name": "firebase::util::float_class::CacheMethodIds",
+  "name": "_ZN8firebase4util11float_class14CacheMethodIdsEP7_JNIEnvP8_jobject",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b020882a332437cdde706de306cec60885bf3ad9d5a9d4e65c16e9fbf0209878",
-  "source_text_sha256": "b020882a332437cdde706de306cec60885bf3ad9d5a9d4e65c16e9fbf0209878"
+  "source_sha256": "cd14ab0cbe1473b69fc4c75c0da3d77c4a7b308dc77b5dbf46ba47044a359c53",
+  "source_text_sha256": "cd14ab0cbe1473b69fc4c75c0da3d77c4a7b308dc77b5dbf46ba47044a359c53"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,20 +35,21 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/lang/Float"
 ~~~
-## 疑似コード 1/1 / UTF-8 473 bytes
+
+## 疑似コード / UTF-8 609 bytes
 
 ~~~c
 
-/* firebase::util::float_class::CacheMethodIds(_JNIEnv*, _jobject*) */
-
-void firebase::util::float_class::CacheMethodIds(_JNIEnv *param_1,_jobject *param_2)
+void _ZN8firebase4util11float_class14CacheMethodIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
 
 {
-  if (DAT_010a0728 == (_jclass *)0x0) {
-    DAT_010a0728 = (_jclass *)FindClassGlobal(param_1,param_2,0,"java/lang/Float",0);
+  if (DAT_010a0728 == 0) {
+    DAT_010a0728 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/lang/Float",0);
   }
-  LookupMethodIds(param_1,DAT_010a0728,(MethodNameSignature *)&PTR_s_<init>_00c10288,2,
-                  (_jmethodID **)&DAT_010a0738,"java/lang/Float");
+  _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+            (param_1,DAT_010a0728,&PTR_s_<init>_00c10288,2,&DAT_010a0738,"java/lang/Float");
   return;
 }
 

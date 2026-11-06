@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeacc8.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeacc8",
-  "name": "firebase::util::hash_map::RegisterNatives",
+  "name": "_ZN8firebase4util8hash_map15RegisterNativesEP7_JNIEnvPK15JNINativeMethodm",
   "size": 156,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "f374882ec32d3f7b181322cca8b4e8da1dec503fd995c0caf511d46c0911d612",
-  "source_text_sha256": "f374882ec32d3f7b181322cca8b4e8da1dec503fd995c0caf511d46c0911d612"
+  "source_sha256": "60e2b96c628a32ebba219e22bebb7e500956adb53cb510f8d11f3ed101975393",
+  "source_text_sha256": "60e2b96c628a32ebba219e22bebb7e500956adb53cb510f8d11f3ed101975393"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,14 +29,12 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 823 bytes
+## 疑似コード / UTF-8 693 bytes
 
 ~~~c
 
-/* firebase::util::hash_map::RegisterNatives(_JNIEnv*, JNINativeMethod const*, unsigned long) */
-
-bool firebase::util::hash_map::RegisterNatives
-               (_JNIEnv *param_1,JNINativeMethod *param_2,ulong param_3)
+bool _ZN8firebase4util8hash_map15RegisterNativesEP7_JNIEnvPK15JNINativeMethodm
+               (long *param_1,undefined8 param_2,undefined8 param_3)
 
 {
   char cVar1;
@@ -46,11 +43,11 @@ bool firebase::util::hash_map::RegisterNatives
   
   if (DAT_010a0758 == '\0') {
                     /* catch() { ... } // from try @ 00aeab8c with catch @ 00aeacf8 */
-    iVar3 = (**(code **)(*(long *)param_1 + 0x6b8))(param_1,DAT_010a0750,param_2,param_3);
-    cVar1 = (**(code **)(*(long *)param_1 + 0x720))(param_1);
+    iVar3 = (**(code **)(*param_1 + 0x6b8))(param_1,DAT_010a0750,param_2,param_3);
+    cVar1 = (**(code **)(*param_1 + 0x720))(param_1);
     if (cVar1 != '\0') {
-      (**(code **)(*(long *)param_1 + 0x80))(param_1);
-      (**(code **)(*(long *)param_1 + 0x88))(param_1);
+      (**(code **)(*param_1 + 0x80))(param_1);
+      (**(code **)(*param_1 + 0x88))(param_1);
     }
     DAT_010a0758 = iVar3 == 0;
     bVar2 = (bool)DAT_010a0758;

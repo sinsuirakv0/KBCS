@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afaaa4.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afaaa4",
-  "name": "std::__ndk1::__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>::__find_equal<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>",
+  "name": "_ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS_10unique_ptrIN8firebase10app_common7AppDataENS_14default_deleteISB_EEEEEENS_19__map_value_compareIS7_SF_NS_4lessIS7_EELb1EEENS5_ISF_EEE12__find_equalIS7_EERPNS_16__tree_node_baseIPvEERPNS_15__tree_end_nodeISQ_EERKT_",
   "size": 288,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "67ec1b25ff6fdecf70260dc969730a56da71f221accadf67f7efdf3fb398ae2c",
-  "source_text_sha256": "67ec1b25ff6fdecf70260dc969730a56da71f221accadf67f7efdf3fb398ae2c"
+  "source_sha256": "19a1845204c425822f4fe2287f76ed83defa261c334674375e3f9910fa7cc47d",
+  "source_text_sha256": "19a1845204c425822f4fe2287f76ed83defa261c334674375e3f9910fa7cc47d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bde880](../00bde/00bde880.md)
@@ -30,121 +29,82 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdb100](../00bdb/00bdb100.md)
 
-## 疑似コード 1/1 / UTF-8 20691 bytes
+## 疑似コード / UTF-8 2534 bytes
 
 ~~~c
 
-/* std::__ndk1::__tree_node_base<void*>*&
-   std::__ndk1::__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,
-   std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >,
-   std::__ndk1::unique_ptr<firebase::app_common::AppData,
-   std::__ndk1::default_delete<firebase::app_common::AppData> > >,
-   std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>,
-   std::__ndk1::allocator<char> >, std::__ndk1::__value_type<std::__ndk1::basic_string<char,
-   std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >,
-   std::__ndk1::unique_ptr<firebase::app_common::AppData,
-   std::__ndk1::default_delete<firebase::app_common::AppData> > >,
-   std::__ndk1::less<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>,
-   std::__ndk1::allocator<char> > >, true>,
-   std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,
-   std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >,
-   std::__ndk1::unique_ptr<firebase::app_common::AppData,
-   std::__ndk1::default_delete<firebase::app_common::AppData> > > >
-   >::__find_equal<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>,
-   std::__ndk1::allocator<char> >
-   >(std::__ndk1::__tree_end_node<std::__ndk1::__tree_node_base<void*>*>*&,
-   std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> >
-   const&) */
-
-__tree_node_base ** __thiscall
-std::__ndk1::
-__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-::
-__find_equal<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>
-          (__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-           *this,__tree_end_node **param_1,basic_string *param_2)
+long * _ZNSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS_10unique_ptrIN8firebase10app_common7AppDataENS_14default_deleteISB_EEEEEENS_19__map_value_compareIS7_SF_NS_4lessIS7_EELb1EEENS5_ISF_EEE12__find_equalIS7_EERPNS_16__tree_node_baseIPvEERPNS_15__tree_end_nodeISQ_EERKT_
+                 (long param_1,undefined8 *param_2,byte *param_3)
 
 {
   ulong uVar1;
   size_t __n;
+  void *__s2;
   ulong uVar2;
-  basic_string *__s1;
-  __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-  _Var3;
+  byte *__s1;
+  byte bVar3;
   int iVar4;
-  __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-  *p_Var5;
-  __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-  *p_Var6;
-  __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-  *p_Var7;
-  __tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-  *__s1_00;
+  long *plVar5;
+  long *plVar6;
+  long *plVar7;
+  void *__s1_00;
   
                     /* try { // try from 00afaab0 to 00bfaacf has its CatchHandler @ 00afff40 */
-  p_Var5 = this + 8;
-  p_Var6 = *(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-             **)p_Var5;
-  if (p_Var6 == (__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-                 *)0x0) {
-    *param_1 = (__tree_end_node *)p_Var5;
-    return (__tree_node_base **)p_Var5;
+  plVar5 = (long *)(param_1 + 8);
+  plVar6 = (long *)*plVar5;
+  if (plVar6 == (long *)0x0) {
+    *param_2 = plVar5;
+    return plVar5;
   }
-  uVar2 = *(ulong *)(param_2 + 8);
-  __s1 = *(basic_string **)(param_2 + 0x10);
-  p_Var5 = this + 8;
-  if (((byte)*param_2 & 1) == 0) {
-    __s1 = param_2 + 1;
-    uVar2 = (ulong)((byte)*param_2 >> 1);
+  uVar2 = *(ulong *)(param_3 + 8);
+  __s1 = *(byte **)(param_3 + 0x10);
+  plVar5 = (long *)(param_1 + 8);
+  if ((*param_3 & 1) == 0) {
+    __s1 = param_3 + 1;
+    uVar2 = (ulong)(*param_3 >> 1);
   }
   do {
     while( true ) {
-      p_Var7 = p_Var6;
-      _Var3 = p_Var7[0x20];
-      uVar1 = (ulong)((byte)_Var3 >> 1);
-      if (((byte)_Var3 & 1) != 0) {
-        uVar1 = *(ulong *)(p_Var7 + 0x28);
+      plVar7 = plVar6;
+      bVar3 = *(byte *)(plVar7 + 4);
+      uVar1 = (ulong)(bVar3 >> 1);
+      if ((bVar3 & 1) != 0) {
+        uVar1 = plVar7[5];
       }
       __n = uVar1;
       if (uVar2 <= uVar1) {
         __n = uVar2;
       }
       if (__n == 0) break;
-      __s1_00 = *(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-                  **)(p_Var7 + 0x30);
-      p_Var6 = __s1_00;
-      if (((byte)_Var3 & 1) == 0) {
-        p_Var6 = p_Var7 + 0x21;
+      __s1_00 = (void *)plVar7[6];
+      __s2 = __s1_00;
+      if ((bVar3 & 1) == 0) {
+        __s2 = (void *)((long)plVar7 + 0x21);
       }
-      iVar4 = memcmp(__s1,p_Var6,__n);
+      iVar4 = memcmp(__s1,__s2,__n);
       if (iVar4 == 0) break;
                     /* try { // try from 00afab48 to 00bfab4f has its CatchHandler @ 00aff51c */
       if (iVar4 < 0) goto LAB_00afab58;
 LAB_00afab70:
-      if (((byte)_Var3 & 1) == 0) {
-        __s1_00 = p_Var7 + 0x21;
+      if ((bVar3 & 1) == 0) {
+        __s1_00 = (void *)((long)plVar7 + 0x21);
       }
                     /* try { // try from 00afab78 to 00bfab8b has its CatchHandler @ 00aff518 */
       iVar4 = memcmp(__s1_00,__s1,__n);
       if (iVar4 == 0) goto LAB_00afaaf0;
       if (-1 < iVar4) goto LAB_00afab8c;
 LAB_00afaaf8:
-      p_Var5 = p_Var7 + 8;
-      p_Var6 = *(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-                 **)p_Var5;
-      if (*(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-            **)p_Var5 ==
-          (__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-           *)0x0) {
+      plVar5 = plVar7 + 1;
+      plVar6 = (long *)*plVar5;
+      if ((long *)*plVar5 == (long *)0x0) {
 LAB_00afab8c:
-        *param_1 = (__tree_end_node *)p_Var7;
-        return (__tree_node_base **)p_Var5;
+        *param_2 = plVar7;
+        return plVar5;
       }
     }
     if (uVar1 <= uVar2) {
       if (__n != 0) {
-        __s1_00 = *(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-                    **)(p_Var7 + 0x30);
+        __s1_00 = (void *)plVar7[6];
         goto LAB_00afab70;
       }
 LAB_00afaaf0:
@@ -152,15 +112,11 @@ LAB_00afaaf0:
       goto LAB_00afaaf8;
     }
 LAB_00afab58:
-    p_Var5 = p_Var7;
-    p_Var6 = *(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-               **)p_Var7;
-    if (*(__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-          **)p_Var7 ==
-        (__tree<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::__map_value_compare<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>,std::__ndk1::less<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>>,true>,std::__ndk1::allocator<std::__ndk1::__value_type<std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>,std::__ndk1::unique_ptr<firebase::app_common::AppData,std::__ndk1::default_delete<firebase::app_common::AppData>>>>>
-         *)0x0) {
-      *param_1 = (__tree_end_node *)p_Var7;
-      return (__tree_node_base **)p_Var7;
+    plVar5 = plVar7;
+    plVar6 = (long *)*plVar7;
+    if ((long *)*plVar7 == (long *)0x0) {
+      *param_2 = plVar7;
+      return plVar7;
     }
   } while( true );
 }

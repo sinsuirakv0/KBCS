@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdedb0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdedb0",
-  "name": "firebase::CreateApiIdentifier",
+  "name": "_ZN8firebase19CreateApiIdentifierEPKcPv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "ee34e503b3e2641b473f9ed8231e8a405b95896a0d161e8017eaf84a24306449",
-  "source_text_sha256": "ee34e503b3e2641b473f9ed8231e8a405b95896a0d161e8017eaf84a24306449"
+  "source_sha256": "8e199e599699cb4b7877f9ed1bced4ba70434752b8af47317bf5a81759560e0f",
+  "source_text_sha256": "8e199e599699cb4b7877f9ed1bced4ba70434752b8af47317bf5a81759560e0f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b54a2c](../00b54/00b54a2c.md)
@@ -31,14 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b02648](../00b02/00b02648.md)
 
-## 疑似コード 1/1 / UTF-8 138 bytes
+## 疑似コード / UTF-8 137 bytes
 
 ~~~c
 
-void firebase::CreateApiIdentifier(char *param_1,void *param_2)
+void _ZN8firebase19CreateApiIdentifierEPKcPv(void)
 
 {
-  (*(code *)PTR_CreateApiIdentifier_00c1df10)();
+  (*(code *)PTR__ZN8firebase19CreateApiIdentifierEPKcPv_00c1df10)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcfd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcfd0",
-  "name": "Botan::PKIX::merge_revocation_status",
+  "name": "_ZN5Botan4PKIX23merge_revocation_statusERNSt6__ndk16vectorINS1_3setINS_23Certificate_Status_CodeENS1_4lessIS4_EENS1_9allocatorIS4_EEEENS7_IS9_EEEERKSB_SE_bb",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "2dac28af49cb3cd1764a679101de0f1f8324dd55c13570403835a06d02923b40",
-  "source_text_sha256": "2dac28af49cb3cd1764a679101de0f1f8324dd55c13570403835a06d02923b40"
+  "source_sha256": "f65c0dfadf5aca6dcfd5f872fba4101c0450439c2cc197c929468b0bf598f72f",
+  "source_text_sha256": "f65c0dfadf5aca6dcfd5f872fba4101c0450439c2cc197c929468b0bf598f72f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00508860](../00508/00508860.md)
@@ -30,15 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00508250](../00508/00508250.md)
 
-## 疑似コード 1/1 / UTF-8 212 bytes
+## 疑似コード / UTF-8 395 bytes
 
 ~~~c
 
-void Botan::PKIX::merge_revocation_status
-               (vector *param_1,vector *param_2,vector *param_3,bool param_4,bool param_5)
+void _ZN5Botan4PKIX23merge_revocation_statusERNSt6__ndk16vectorINS1_3setINS_23Certificate_Status_CodeENS1_4lessIS4_EENS1_9allocatorIS4_EEEENS7_IS9_EEEERKSB_SE_bb
+               (void)
 
 {
-  (*(code *)PTR_merge_revocation_status_00c1d020)();
+  (*(code *)
+    PTR__ZN5Botan4PKIX23merge_revocation_statusERNSt6__ndk16vectorINS1_3setINS_23Certificate_Status_CodeENS1_4lessIS4_EENS1_9allocatorIS4_EEEENS7_IS9_EEEERKSB_SE_bb_00c1d020
+  )();
   return;
 }
 

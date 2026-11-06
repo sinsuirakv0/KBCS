@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ba9ebc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ba9ebc",
-  "name": "std::__ndk1::ctype<char>::do_tolower",
+  "name": "_ZNKSt6__ndk15ctypeIcE10do_tolowerEc",
   "size": 140,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "671be3350dae3e965dd394698ad6a61d3584563fa06e0707f3b5bd30eec3318d",
-  "source_text_sha256": "671be3350dae3e965dd394698ad6a61d3584563fa06e0707f3b5bd30eec3318d"
+  "source_sha256": "23d737c9e9593261b65b049c3f5ac8434d537538e84000195356d66f76ba7199",
+  "source_text_sha256": "23d737c9e9593261b65b049c3f5ac8434d537538e84000195356d66f76ba7199"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -32,30 +31,25 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf20](../00bda/00bdaf20.md)
 - [00be1470](../00be1/00be1470.md)
 
-## 疑似コード 1/1 / UTF-8 599 bytes
+## 疑似コード / UTF-8 444 bytes
 
 ~~~c
 
-/* std::__ndk1::ctype<char>::do_tolower(char) const */
-
-uint __thiscall std::__ndk1::ctype<char>::do_tolower(ctype<char> *this,char param_1)
+uint _ZNKSt6__ndk15ctypeIcE10do_tolowerEc(undefined8 param_1,uint param_2)
 
 {
   int iVar1;
-  uint uVar2;
   
-  uVar2 = (uint)(byte)param_1;
-  if (-1 < param_1) {
+  if ((param_2 >> 7 & 1) == 0) {
     if (((DAT_010a2898 & 1) == 0) && (iVar1 = __cxa_guard_acquire(&DAT_010a2898), iVar1 != 0)) {
       DAT_010a2890 = newlocale(0x1fbf,"C",(__locale_t)0x0);
       __cxa_guard_release(&DAT_010a2898);
     }
-    uVar2 = (uint)(byte)param_1;
-    if (0xffffffe5 < (byte)param_1 - 0x5b) {
-      uVar2 = (byte)param_1 + 0x20;
+    if (0xffffffe5 < (param_2 & 0xff) - 0x5b) {
+      param_2 = param_2 + 0x20;
     }
   }
-  return uVar2;
+  return param_2;
 }
 
 ~~~

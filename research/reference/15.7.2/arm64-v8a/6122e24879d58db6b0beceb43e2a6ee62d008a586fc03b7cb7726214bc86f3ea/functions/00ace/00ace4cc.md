@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ace4cc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "d5cd2b9aef8066174942fe89cff0149bb49033970a407b74e8fda70da4403d25",
-  "source_text_sha256": "d5cd2b9aef8066174942fe89cff0149bb49033970a407b74e8fda70da4403d25"
+  "source_sha256": "199941e5079325a6c1b009b88db1ee40f3d70250cf16cad96c8e0a0156a8a962",
+  "source_text_sha256": "199941e5079325a6c1b009b88db1ee40f3d70250cf16cad96c8e0a0156a8a962"
 }
 ~~~
+
 ## 呼び出し元
 
 - [008d99b0](../008d9/008d99b0.md)
@@ -84,7 +83,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "img102.png"
 "lang"
 ~~~
-## 疑似コード 1/1 / UTF-8 20877 bytes
+
+## 疑似コード / UTF-8 19957 bytes
 
 ~~~c
 
@@ -111,11 +111,11 @@ void FUN_00ace4cc(long param_1,uint param_2)
   long lVar15;
   long lVar16;
   undefined8 uVar17;
-  __shared_weak_count *p_Var18;
-  __shared_weak_count *p_Var19;
+  long *plVar18;
+  long *plVar19;
   undefined8 uVar20;
   ulong local_100;
-  __shared_weak_count *p_Stack_f8;
+  long *plStack_f8;
   void *local_f0;
   byte local_e8 [16];
   void *local_d8;
@@ -125,7 +125,7 @@ void FUN_00ace4cc(long param_1,uint param_2)
   byte local_a8 [16];
   void *local_98;
   ulong local_90;
-  __shared_weak_count *p_Stack_88;
+  long *plStack_88;
   void *local_80;
   byte local_78;
   undefined5 local_77;
@@ -164,7 +164,7 @@ void FUN_00ace4cc(long param_1,uint param_2)
                                  CONCAT24(uStack_54,
                                           CONCAT13(cStack_55,CONCAT21(uStack_57,cStack_58)))));
       uVar14 = CONCAT26(uStack_5a,CONCAT51(acStack_5f,local_60));
-      p_Var18 = (__shared_weak_count *)puVar1[1];
+      plVar18 = (long *)puVar1[1];
       local_60 = 0;
       acStack_5f[0] = '\0';
       acStack_5f[1] = '\0';
@@ -180,20 +180,20 @@ void FUN_00ace4cc(long param_1,uint param_2)
       cStack_51 = '\0';
       puVar1[1] = uVar11;
       *puVar1 = uVar14;
-      if ((p_Var18 != (__shared_weak_count *)0x0) &&
-         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,p_Var18 + 8), lVar16 == 0)) {
-        (**(code **)(*(long *)p_Var18 + 0x10))(p_Var18);
-        std::__ndk1::__shared_weak_count::__release_weak(p_Var18);
+      if ((plVar18 != (long *)0x0) &&
+         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,plVar18 + 1), lVar16 == 0)) {
+        (**(code **)(*plVar18 + 0x10))(plVar18);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar18);
       }
-      p_Var18 = (__shared_weak_count *)
-                CONCAT17(cStack_51,
-                         CONCAT16(cStack_52,
-                                  CONCAT24(uStack_54,
-                                           CONCAT13(cStack_55,CONCAT21(uStack_57,cStack_58)))));
-      if ((p_Var18 != (__shared_weak_count *)0x0) &&
-         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,p_Var18 + 8), lVar16 == 0)) {
-        (**(code **)(*(long *)p_Var18 + 0x10))(p_Var18);
-        std::__ndk1::__shared_weak_count::__release_weak(p_Var18);
+      plVar18 = (long *)CONCAT17(cStack_51,
+                                 CONCAT16(cStack_52,
+                                          CONCAT24(uStack_54,
+                                                   CONCAT13(cStack_55,CONCAT21(uStack_57,cStack_58))
+                                                  )));
+      if ((plVar18 != (long *)0x0) &&
+         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,plVar18 + 1), lVar16 == 0)) {
+        (**(code **)(*plVar18 + 0x10))(plVar18);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar18);
       }
       goto LAB_00aceac0;
     }
@@ -303,27 +303,26 @@ void FUN_00ace4cc(long param_1,uint param_2)
       FUN_0045b734(&local_90,&DAT_00c24f40,&local_60,&local_78,0x2601);
     }
 LAB_00acea34:
-    p_Var18 = p_Stack_88;
+    plVar18 = plStack_88;
     uVar14 = local_90;
-    p_Var19 = (__shared_weak_count *)puVar1[1];
+    plVar19 = (long *)puVar1[1];
     local_90 = 0;
-    p_Stack_88 = (__shared_weak_count *)0x0;
-    puVar1[1] = (ulong)p_Var18;
+    plStack_88 = (long *)0x0;
+    puVar1[1] = (ulong)plVar18;
     *puVar1 = uVar14;
-    if ((p_Var19 != (__shared_weak_count *)0x0) &&
-       (lVar16 = FUN_00bd6d90(0xffffffffffffffff,p_Var19 + 8), lVar16 == 0)) {
-      (**(code **)(*(long *)p_Var19 + 0x10))(p_Var19);
-      std::__ndk1::__shared_weak_count::__release_weak(p_Var19);
+    if ((plVar19 != (long *)0x0) &&
+       (lVar16 = FUN_00bd6d90(0xffffffffffffffff,plVar19 + 1), lVar16 == 0)) {
+      (**(code **)(*plVar19 + 0x10))(plVar19);
+      _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar19);
     }
-    p_Var18 = p_Stack_88;
-    if ((p_Stack_88 != (__shared_weak_count *)0x0) &&
-       (lVar16 = FUN_00bd6d90(0xffffffffffffffff,p_Stack_88 + 8), lVar16 == 0)) {
-      (**(code **)(*(long *)p_Var18 + 0x10))(p_Var18);
-      std::__ndk1::__shared_weak_count::__release_weak(p_Var18);
+    plVar18 = plStack_88;
+    if ((plStack_88 != (long *)0x0) &&
+       (lVar16 = FUN_00bd6d90(0xffffffffffffffff,plStack_88 + 1), lVar16 == 0)) {
+      (**(code **)(*plVar18 + 0x10))(plVar18);
+      _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar18);
     }
     if ((local_78 & 1) != 0) {
-      operator_delete((void *)CONCAT17(uStack_61,CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68))))
-      ;
+      _ZdlPv((void *)CONCAT17(uStack_61,CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68))));
     }
     if ((local_60 & 1) == 0) goto LAB_00aceac0;
     local_80 = (void *)CONCAT44(uStack_4c,uStack_50);
@@ -432,34 +431,33 @@ LAB_00acea34:
       FUN_00469f7c(&local_60,&local_78);
       local_c0[0] = 0;
       FUN_0045b734(&local_100,&DAT_00c24f40,&local_60,local_c0,0x2601);
-      p_Var18 = p_Stack_f8;
+      plVar18 = plStack_f8;
       uVar14 = local_100;
-      p_Var19 = (__shared_weak_count *)puVar1[1];
+      plVar19 = (long *)puVar1[1];
       local_100 = 0;
-      p_Stack_f8 = (__shared_weak_count *)0x0;
-      puVar1[1] = (ulong)p_Var18;
+      plStack_f8 = (long *)0x0;
+      puVar1[1] = (ulong)plVar18;
       *puVar1 = uVar14;
-      if ((p_Var19 != (__shared_weak_count *)0x0) &&
-         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,p_Var19 + 8), lVar16 == 0)) {
-        (**(code **)(*(long *)p_Var19 + 0x10))(p_Var19);
-        std::__ndk1::__shared_weak_count::__release_weak(p_Var19);
+      if ((plVar19 != (long *)0x0) &&
+         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,plVar19 + 1), lVar16 == 0)) {
+        (**(code **)(*plVar19 + 0x10))(plVar19);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar19);
       }
-      p_Var18 = p_Stack_f8;
-      if ((p_Stack_f8 != (__shared_weak_count *)0x0) &&
-         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,p_Stack_f8 + 8), lVar16 == 0)) {
-        (**(code **)(*(long *)p_Var18 + 0x10))(p_Var18);
-        std::__ndk1::__shared_weak_count::__release_weak(p_Var18);
+      plVar18 = plStack_f8;
+      if ((plStack_f8 != (long *)0x0) &&
+         (lVar16 = FUN_00bd6d90(0xffffffffffffffff,plStack_f8 + 1), lVar16 == 0)) {
+        (**(code **)(*plVar18 + 0x10))(plVar18);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar18);
       }
       if ((local_c0[0] & 1) != 0) {
-        operator_delete(local_b0);
+        _ZdlPv(local_b0);
       }
       if ((local_60 & 1) != 0) {
-        operator_delete((void *)CONCAT44(uStack_4c,uStack_50));
+        _ZdlPv((void *)CONCAT44(uStack_4c,uStack_50));
       }
       local_b0 = local_98;
       if ((local_78 & 1) != 0) {
-        operator_delete((void *)CONCAT17(uStack_61,CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68))
-                                        ));
+        _ZdlPv((void *)CONCAT17(uStack_61,CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68))));
         local_b0 = local_98;
       }
       if ((local_a8[0] & 1) != 0) goto LAB_00acee90;
@@ -537,23 +535,22 @@ LAB_00acea34:
         FUN_005bdd9c(puVar1,auStack_d0);
         FUN_0044b660(auStack_d0);
         if ((local_100 & 1) != 0) {
-          operator_delete(local_f0);
+          _ZdlPv(local_f0);
         }
                     /* try { // try from 00acee30 to 00bcee3b has its CatchHandler @ 00ad0980 */
         if ((local_60 & 1) != 0) {
-          operator_delete((void *)CONCAT44(uStack_4c,uStack_50));
+          _ZdlPv((void *)CONCAT44(uStack_4c,uStack_50));
                     /* try { // try from 00acee3c to 00bcfcf7 has its CatchHandler @ 00ace1d0 */
         }
         if ((local_78 & 1) != 0) {
-          operator_delete((void *)CONCAT17(uStack_61,
-                                           CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68))));
+          _ZdlPv((void *)CONCAT17(uStack_61,CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68))));
         }
         if ((local_e8[0] & 1) != 0) {
-          operator_delete(local_d8);
+          _ZdlPv(local_d8);
         }
         if ((local_c0[0] & 1) != 0) {
 LAB_00acee90:
-          operator_delete(local_b0);
+          _ZdlPv(local_b0);
         }
       }
       else {
@@ -573,10 +570,10 @@ LAB_00acedbc:
         FUN_005bdd9c(puVar1,&local_100);
         FUN_0044b660(&local_100);
         if ((local_c0[0] & 1) != 0) {
-          operator_delete(local_b0);
+          _ZdlPv(local_b0);
         }
         if ((local_60 & 1) != 0) {
-          operator_delete((void *)CONCAT44(uStack_4c,uStack_50));
+          _ZdlPv((void *)CONCAT44(uStack_4c,uStack_50));
         }
         if ((local_78 & 1) != 0) {
           local_b0 = (void *)CONCAT17(uStack_61,CONCAT52(uStack_66,CONCAT11(cStack_67,cStack_68)));
@@ -586,7 +583,7 @@ LAB_00acedbc:
     }
     if ((local_90 & 1) == 0) goto LAB_00aceac0;
   }
-  operator_delete(local_80);
+  _ZdlPv(local_80);
 LAB_00aceac0:
   if (*(long *)(lVar10 + 0x28) != local_48) {
                     /* WARNING: Subroutine does not return */

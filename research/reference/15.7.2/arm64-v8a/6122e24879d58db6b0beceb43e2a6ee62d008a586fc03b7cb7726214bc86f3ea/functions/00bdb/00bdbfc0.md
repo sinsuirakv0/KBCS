@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbfc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbfc0",
-  "name": "std::__ndk1::basic_filebuf<char,std::__ndk1::char_traits<char>>::open",
+  "name": "_ZNSt6__ndk113basic_filebufIcNS_11char_traitsIcEEE4openEPKcj",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "34719a60f9bb65af0cffcf72b08a9955863efc4c33b08e4f89ba34912f03bb70",
-  "source_text_sha256": "34719a60f9bb65af0cffcf72b08a9955863efc4c33b08e4f89ba34912f03bb70"
+  "source_sha256": "cb1273fbfe37c1c0fc15c8ed1a7f182d9a17b4f05e723f4e4425d058518330dd",
+  "source_text_sha256": "cb1273fbfe37c1c0fc15c8ed1a7f182d9a17b4f05e723f4e4425d058518330dd"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004a36fc](../004a3/004a36fc.md)
@@ -33,16 +32,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b48960](../00b48/00b48960.md)
 
-## 疑似コード 1/1 / UTF-8 263 bytes
+## 疑似コード / UTF-8 179 bytes
 
 ~~~c
 
-void __thiscall
-std::__ndk1::basic_filebuf<char,std::__ndk1::char_traits<char>>::open
-          (basic_filebuf<char,std::__ndk1::char_traits<char>> *this,char *param_1,uint param_2)
+void _ZNSt6__ndk113basic_filebufIcNS_11char_traitsIcEEE4openEPKcj(void)
 
 {
-  (*(code *)PTR_open_00c1c818)(this,param_1,param_2);
+  (*(code *)PTR__ZNSt6__ndk113basic_filebufIcNS_11char_traitsIcEEE4openEPKcj_00c1c818)();
   return;
 }
 

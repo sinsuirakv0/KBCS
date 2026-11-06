@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdddb0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdddb0",
-  "name": "std::__ndk1::__vector_base_common<true>::__throw_length_error",
+  "name": "_ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "782b33ec352da15dbcef8a15c140653b30a3e6de53387f666bb2bee7b48a3d9a",
-  "source_text_sha256": "782b33ec352da15dbcef8a15c140653b30a3e6de53387f666bb2bee7b48a3d9a"
+  "source_sha256": "99bf797bfb1f2c3e9a1596dc7e779faedf21477ca154aa7b0e3e55288a6ceb33",
+  "source_text_sha256": "99bf797bfb1f2c3e9a1596dc7e779faedf21477ca154aa7b0e3e55288a6ceb33"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae01e4](../00ae0/00ae01e4.md)
@@ -42,14 +41,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00ae03a0](../00ae0/00ae03a0.md)
 
-## 疑似コード 1/1 / UTF-8 148 bytes
+## 疑似コード / UTF-8 189 bytes
 
 ~~~c
 
-void std::__ndk1::__vector_base_common<true>::__throw_length_error(void)
+void _ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv(void)
 
 {
-  (*(code *)PTR___throw_length_error_00c1d710)();
+  (*(code *)PTR__ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv_00c1d710)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b6afcc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b6afcc",
-  "name": "firebase::auth::PhoneAuthProvider::Listener::~Listener",
+  "name": "_ZN8firebase4auth17PhoneAuthProvider8ListenerD1Ev",
   "size": 144,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "b5c6e2fca67ddd097b8751c2fd1a71c08dba578d6aeb870d5f10cac53a8f537c",
-  "source_text_sha256": "b5c6e2fca67ddd097b8751c2fd1a71c08dba578d6aeb870d5f10cac53a8f537c"
+  "source_sha256": "f456947af486f0c6c6ff6cd0df263c6609dbcd1ac3b1e78d19c92cc1113c79b4",
+  "source_text_sha256": "f456947af486f0c6c6ff6cd0df263c6609dbcd1ac3b1e78d19c92cc1113c79b4"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -39,28 +38,27 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "app != nullptr"
 ~~~
-## 疑似コード 1/1 / UTF-8 673 bytes
+
+## 疑似コード / UTF-8 614 bytes
 
 ~~~c
 
-/* firebase::auth::PhoneAuthProvider::Listener::~Listener() */
-
-void __thiscall firebase::auth::PhoneAuthProvider::Listener::~Listener(Listener *this)
+void _ZN8firebase4auth17PhoneAuthProvider8ListenerD1Ev(long *param_1)
 
 {
-  App *this_00;
-  long *plVar1;
+  long lVar1;
+  long *plVar2;
   
-  *(undefined **)this = PTR_vtable_00c1bb10 + 0x10;
-  this_00 = (App *)app_common::GetAnyApp();
-  if (this_00 == (App *)0x0) {
-    LogAssert("app != nullptr");
+  *param_1 = (long)(PTR__ZTVN8firebase4auth17PhoneAuthProvider8ListenerE_00c1bb10 + 0x10);
+  lVar1 = _ZN8firebase10app_common9GetAnyAppEv();
+  if (lVar1 == 0) {
+    _ZN8firebase9LogAssertEPKcz("app != nullptr");
   }
-  plVar1 = (long *)App::GetJNIEnv(this_00);
-  FUN_00551e14(plVar1,**(undefined8 **)(this + 8),DAT_010a18c0);
-  (**(code **)(*plVar1 + 0xb0))(plVar1,**(undefined8 **)(this + 8));
-  if (*(void **)(this + 8) != (void *)0x0) {
-    operator_delete(*(void **)(this + 8));
+  plVar2 = (long *)_ZNK8firebase3App9GetJNIEnvEv(lVar1);
+  FUN_00551e14(plVar2,*(undefined8 *)param_1[1],DAT_010a18c0);
+  (**(code **)(*plVar2 + 0xb0))(plVar2,*(undefined8 *)param_1[1]);
+  if ((void *)param_1[1] != (void *)0x0) {
+    _ZdlPv((void *)param_1[1]);
     return;
   }
   return;

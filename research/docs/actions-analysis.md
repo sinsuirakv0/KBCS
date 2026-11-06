@@ -4,11 +4,13 @@
 
 最初の対象はJP15.7.2 / versionCode 1507021 / arm64-v8a / libnative-lib.so。入力の版・APK/アーカイブ/SO SHA-256は `research/inputs/jp-1507021.json` に固定する。2026-10-20に確認した原本の再生成であり、最新版の版番号を推測しない。上流の取得workflowは起動・変更しない。
 
-Python 3.13、Ghidra 12.1.2、Temurin JDK 21.0.11+10、apktool 2.12.1を使用する。Ghidra/apktoolの公式配布URLとSHA-256は `research/ghidra/runtime.json`。解析・抽出・資料生成はPython/Javaで実行し、AI APIは使わない。比較、関数の版間対応、意味の推測は対象外。
+Python 3.13、Ghidra 12.1.2、Temurin JDK 21.0.11+10、apktool 2.12.1を使用する。Ghidra/apktoolの公式配布URLとSHA-256は `research/ghidra/runtime.json`。解析・抽出・資料生成はPython/Javaで実行し、AI APIは使わない。版間の関数対応は別途調査する。
 
-2026-11-06に15.7.2の[GitHub Actions実行](https://github.com/sinsuirakv0/KBCS/actions/runs/42078163411)が正常終了した。対象はarm64-v8aの `libnative-lib.so`、解析IDは `5ed057380ac853a2`。取得・解析・検証・公開のステップは92分06秒。検出25,525件のうち内部25,233件の疑似コードを保存し、失敗0件、外部292件。代替設定で抽出した3件は確度low。資料は26,145ページ、ページ合計83,806,897バイト。[関数資料](https://github.com/sinsuirakv0/KBCS/tree/main/research/reference/15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/5ed057380ac853a2)と[チェックポイントのRelease](https://github.com/sinsuirakv0/KBCS/releases/tag/native-analysis-15.7.2-arm64-v8a-5ed057380ac853a2)に保存済み。
+2026-11-06に15.7.2の[GitHub Actions実行](https://github.com/sinsuirakv0/KBCS/actions/runs/42078163411)が正常終了した。対象はarm64-v8aの `libnative-lib.so`、解析IDは `5ed057380ac853a2`。取得・解析・検証・公開は92分06秒。検出25,525件のうち内部25,233件の疑似コードを保存し、失敗0件、外部292件。代替設定で抽出した3件は確度low。[チェックポイントのRelease](https://github.com/sinsuirakv0/KBCS/releases/tag/native-analysis-15.7.2-arm64-v8a-5ed057380ac853a2)
 
-次の対象はJP15.7.4 / versionCode 1507040。上流の版情報は [metadata/jp/current.json](https://github.com/sinsuirakv0/KBC-rakv0-assets/blob/main/metadata/jp/current.json) に移った。版別の[検証記録](https://github.com/sinsuirakv0/KBC-rakv0-assets/blob/main/metadata/jp/versions/1507040.proof.json)に記載されたPrivate Releaseの `source.tar` を用い、`research/inputs/jp-1507040.json` で原本とライブラリを固定する。base APKにはSOが存在せず、`config.arm64_v8a` のSplitにarm64-v8aの `libnative-lib.so` が存在することを実物で確認済み。
+JP15.7.4 / versionCode 1507040の[GitHub Actions実行](https://github.com/sinsuirakv0/KBCS/actions/runs/42211867789)も2026-11-06に正常終了した。解析IDは `6cf79e30b2bdfc73`。取得・解析・検証・公開は73分06秒。検出25,525件、内部疑似コード25,233件、失敗0件、外部292件、確度lowは2件。[チェックポイントのRelease](https://github.com/sinsuirakv0/KBCS/releases/tag/native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73)
+
+15.7.4は上流の版別検証記録に載るPrivate Releaseの `source.tar` を使い、`research/inputs/jp-1507040.json` で原本とライブラリを固定する。base APKにはSOがなく、`config.arm64_v8a` のSplitに対象が入っている。[版情報](https://github.com/sinsuirakv0/KBC-rakv0-assets/blob/main/metadata/jp/current.json)・[版別検証記録](https://github.com/sinsuirakv0/KBC-rakv0-assets/blob/main/metadata/jp/versions/1507040.proof.json)
 
 ## 無料運用の境界
 
@@ -36,13 +38,15 @@ workflowは `.github/workflows/native-analysis.yml`。
 | --- | --- | --- |
 | source_manifest | research/inputs/jp-1507021.json | リポジトリ内の検証済み入力台帳 |
 | revision_label | ci-v1 | 同じ値で再開、変更すると別リビジョンを作成 |
-| publish_reference | true | 完了した新リビジョンだけmainへ追記 |
+| publish_reference | true | 完成した資料でmain上の同じゲーム版・ABIを更新 |
 
 `workflow_dispatch`と、認証された上流からの`repository_dispatch: native-analysis-request`を入口にする。後者のclient_payloadは同名のsource_manifest/revision_label/publish_referenceを使用し、publish_reference省略時はmainへ反映しない。上流での更新検知・通知設定と、無人での定期再実行は今回追加しない。自動解析の安定性を確認してから接続する。
 
 同じ入力でも、ツール・スクリプト・JDK・メモリ設定・ラベルが変わると別の解析IDになる。台帳の誤りや未知の版を名前から補完して実行しない。
 
 15.7.4を解析するときは `source_manifest=research/inputs/jp-1507040.json` を指定する。公開済みの15.7.2は別リビジョンで保持する。ローカルで原本の検証とSO抽出だけをする場合は `python -m indexer.apk --manifest research/inputs/jp-1507040.json --apktool <apktool.jar> --java <java>` を使う（`PYTHONPATH=research`）。自動紐づけの前に両版の資料を参照し、共通化に使う根拠を調べる。
+
+両版の既存キャッシュを使った照合の実測は [15.7.2と15.7.4の関数照合](native-comparison-15.7.2-15.7.4.md) を参照。
 
 ## 処理と再開
 
@@ -53,7 +57,7 @@ workflowは `.github/workflows/native-analysis.yml`。
 5. 1000関数以下を1バッチとして逐次デコンパイルする。プロセス中断時も、書き終えた関数があれば同期・保存して残りへ進む。進捗0の場合は時間に余裕があれば1回だけ再起動する。保存時はGitHub側のsize/digestも照合する。
 6. 標準→conservative→minimalの有限3設定で未保存分を処理する。過去に同じ設定で処理した失敗関数を自動反復しない。
 7. 未処理0を確認して最終checkpointを保存し、Git閲覧用の資料を生成する。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
-8. publish_reference=trueなら、最新mainの独立worktreeへ新規リビジョンだけ追加してpushする。非fast-forwardや権限エラーでは停止し、解析成果はReleaseに残る。
+8. publish_reference=trueなら、最新mainの独立worktreeで同じゲーム版・ABIの資料を入れ替えてpushする。非fast-forwardや権限エラーでは停止し、解析成果はReleaseに残る。
 
 checkpointにはGhidraプロジェクトを含めない。そのため未完了の再開時は元APKからプロジェクトを再解析する。以前と新しい索引を、実行パスや所要時間を除いた構造ハッシュで照合し、一致した場合だけ保存済み疑似コードを再利用する。不一致時は停止し、別ラベルで新規生成する。完了checkpointからの再開では、同じ解析IDの資料生成・反映から再試行できる。Actionsの結果と `ci-status.json` の `complete` で、関数処理と資料公開の状態を区別する。
 
@@ -66,10 +70,10 @@ JVMヒープ1GiB、native RSS上限は `min(8GiB, 実行機RAM−3GiB)`。実行
 ## 成果物と従来資料の保全
 
 実行機内: `research/.local/cache/<版>/<ABI>/<SO SHA>-ci-<解析ID>/`。
-Gitへ追記する資料: `research/reference/<版>/<ABI>/<SO SHA>/<解析ID>/`。
+Gitで閲覧する資料: `research/reference/<版>/<ABI>/<SO SHA>/`。1関数につきMarkdown 1ファイル。解析IDは `manifest.json` に記録する。
 Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと全ファイルのSHA-256一覧をバッチ単位で追記する。以前のcheckpointを上書き・削除しない。
 
-旧来の `research/reference/<版>/<ABI>/<SO SHA>/` 配下の資料を移動・削除・置換しない。新旧双方を入口から選べる。ローカルの既定参照先や既存Ghidraプロジェクトも変更しない。新資料は機械抽出結果であり、意味・型・名前は未確認。追加設定で復旧したものはlowとして表示する。
+同じ版・ABIの公開ツリーには今回のSO SHAの資料一式を置く。対象の版・ABI以外の公開資料、過去のGitコミット、Releaseのチェックポイント、ローカルのGhidraプロジェクトは保持する。資料は機械抽出結果で、追加設定で復旧したものはlowとして表示する。
 
 資料だけのmain更新でアプリの版が上がらないよう、アプリbuildのpush/pull_requestに `research/reference/**` のpaths-ignoreを追加する。手動のアプリビルドや、解析ツール自体の変更時の従来ビルドは維持する。
 
@@ -83,7 +87,8 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 - `ci.decompile_batch`：途中で止まった処理のジャーナルを同期し、再開する関数を選ぶ。
 - `ci.index_digest/select_functions`：再解析時の一致確認と、処理済み試行の再実行防止。
 - `memory.linux_memory`：Linuxの所有子プロセスだけをRSS/空きRAMで保護する。
-- `ci.publish_reference`：アプリ作業とは別のworktreeで、新規リビジョンだけをmainへ追加する。
-- `reference.export_cache`：解析IDがある場合だけ版/ABI/SHAの下へ追加階層を作る。従来の出力形式も維持する。
+- `ci.publish_reference`：アプリ作業とは別のworktreeで、対象の版・ABIの資料だけを更新する。
+- `reference.export_cache`：完成済みキャッシュから版・ABI・SO SHA配下へ1関数1ファイルで書き出す。
+- `reference.replace_reference`：新しい一式を準備してから対象を切り替え、入口を更新する。
 
-最初のジョブはsetup-javaの版解決で停止した。配布元の正確な `21.0.11+10.0.LTS` 表記へ直した後、上記の実ジョブで起動から公開まで確認した。復旧処理はローカルテストで、壊れた保存からの切替、通信失敗後のアセット照合、ジャーナルの部分保存、進捗0での停止を検証する。復旧処理を加えた後の実環境での通し運転は別途確認する。
+最初のジョブはsetup-javaの版解決で停止した。配布元の正確な `21.0.11+10.0.LTS` 表記へ直し、上記の実ジョブで起動から公開まで確認した。復旧処理はローカルテストで、壊れた保存からの切替、通信失敗後のアセット照合、ジャーナルの部分保存、進捗0での停止を検証する。公開形式の変更は両版の完了チェックポイントからの再生成で検証する。

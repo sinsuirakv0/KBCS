@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bab9ac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bab9ac",
-  "name": "std::__ndk1::codecvt<wchar_t,char,mbstate_t>::do_unshift",
+  "name": "_ZNKSt6__ndk17codecvtIwc9mbstate_tE10do_unshiftERS1_PcS4_RS4_",
   "size": 200,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "5ce9f8fe37cc445c8c9a600ede28e63a60b2ac86c560a81ed2dd1463c5b46b0c",
-  "source_text_sha256": "5ce9f8fe37cc445c8c9a600ede28e63a60b2ac86c560a81ed2dd1463c5b46b0c"
+  "source_sha256": "d938319d40ff8ac555a4534e2d3d1a199eedd1fe340293917a61ca9d142d1fd6",
+  "source_text_sha256": "d938319d40ff8ac555a4534e2d3d1a199eedd1fe340293917a61ca9d142d1fd6"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -31,17 +30,13 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00be1480](../00be1/00be1480.md)
 - [00be1a50](../00be1/00be1a50.md)
 
-## 疑似コード 1/1 / UTF-8 1539 bytes
+## 疑似コード / UTF-8 1336 bytes
 
 ~~~c
 
-/* std::__ndk1::codecvt<wchar_t, char, mbstate_t>::do_unshift(mbstate_t&, char*, char*, char*&)
-   const */
-
-undefined8 __thiscall
-std::__ndk1::codecvt<wchar_t,char,mbstate_t>::do_unshift
-          (codecvt<wchar_t,char,mbstate_t> *this,mbstate_t *param_1,char *param_2,char *param_3,
-          char **param_4)
+undefined8
+_ZNKSt6__ndk17codecvtIwc9mbstate_tE10do_unshiftERS1_PcS4_RS4_
+          (long param_1,mbstate_t *param_2,long param_3,long param_4,long *param_5)
 
 {
   char cVar1;
@@ -54,10 +49,10 @@ std::__ndk1::codecvt<wchar_t,char,mbstate_t>::do_unshift
   char acStack_3c [4];
   __locale_t local_38;
   
-  *param_4 = param_2;
-  __dataset = uselocale(*(__locale_t *)(this + 0x10));
+  *param_5 = param_3;
+  __dataset = uselocale(*(__locale_t *)(param_1 + 0x10));
   local_38 = __dataset;
-  sVar2 = wcrtomb(acStack_3c,L'\0',param_1);
+  sVar2 = wcrtomb(acStack_3c,L'\0',param_2);
   if (__dataset != (__locale_t)0x0) {
                     /* try { // try from 00baba00 to 00caba17 has its CatchHandler @ 00babc6c */
     uselocale(__dataset);
@@ -67,18 +62,18 @@ std::__ndk1::codecvt<wchar_t,char,mbstate_t>::do_unshift
   }
   else {
     uVar4 = sVar2 - 1;
-    if ((ulong)((long)param_3 - (long)*param_4) < uVar4) {
+    if ((ulong)(param_4 - *param_5) < uVar4) {
       uVar3 = 1;
     }
     else {
       if (uVar4 != 0) {
         pcVar5 = acStack_3c;
         do {
-          pcVar6 = *param_4;
+          pcVar6 = (char *)*param_5;
           cVar1 = *pcVar5;
                     /* try { // try from 00baba44 to 00caba63 has its CatchHandler @ 00babbfc */
           uVar4 = uVar4 - 1;
-          *param_4 = pcVar6 + 1;
+          *param_5 = (long)(pcVar6 + 1);
           *pcVar6 = cVar1;
           pcVar5 = pcVar5 + 1;
         } while (uVar4 != 0);

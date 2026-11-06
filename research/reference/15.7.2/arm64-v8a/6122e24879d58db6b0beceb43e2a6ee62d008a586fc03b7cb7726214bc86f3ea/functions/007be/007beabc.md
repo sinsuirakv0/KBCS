@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](007beabc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "6a436be9c35f79a777dc05342d2348ecd4494cc36eecc5d01d82ed2b3d7db91c",
-  "source_text_sha256": "6a436be9c35f79a777dc05342d2348ecd4494cc36eecc5d01d82ed2b3d7db91c"
+  "source_sha256": "0944b1ceb76945adc1bdb2944f105b8b0acf00249c2ca27bc1bffb49d46f6f5a",
+  "source_text_sha256": "0944b1ceb76945adc1bdb2944f105b8b0acf00249c2ca27bc1bffb49d46f6f5a"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0078adc4](../0078a/0078adc4.md)
@@ -33,7 +32,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 1183 bytes
+## 疑似コード / UTF-8 1116 bytes
 
 ~~~c
 
@@ -73,10 +72,10 @@ void FUN_007beabc(undefined8 param_1,undefined8 param_2,undefined4 param_3,undef
   }
   FUN_007bebf8(param_1,param_2,0,param_3,param_4,&local_60,&local_80);
   if ((local_80 & 1) != 0) {
-    operator_delete(local_70);
+    _ZdlPv(local_70);
   }
   if ((local_60 & 1) != 0) {
-    operator_delete(local_50);
+    _ZdlPv(local_50);
   }
   if (*(long *)(lVar2 + 0x28) != local_48) {
                     /* WARNING: Subroutine does not return */

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae3bdc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae3bdc",
-  "name": "firebase::ReferenceCountedFutureImpl::CompleteInternal<int,firebase::ReferenceCountedFutureImpl::CompleteWithResultInternal<int>(firebase::FutureHandle_const&,int,char_const*,int_const&)::{lambda(int*)#1}>",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl16CompleteInternalIiZNS0_26CompleteWithResultInternalIiEEvRKNS_12FutureHandleEiPKcRKT_EUlPiE_EEvS5_iS7_RKT0_",
   "size": 292,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "38cc2081ba35265904f8144094fe21def44001401b5bf9c7bef0c219fb70f1c1",
-  "source_text_sha256": "38cc2081ba35265904f8144094fe21def44001401b5bf9c7bef0c219fb70f1c1"
+  "source_sha256": "d4e8e9555b05303c6de4c2983767d552b2662f3af24881834f3c06accce1974d",
+  "source_text_sha256": "d4e8e9555b05303c6de4c2983767d552b2662f3af24881834f3c06accce1974d"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdde10](../00bdd/00bdde10.md)
@@ -44,55 +43,51 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "GetFutureStatus(handle) == kFutureStatusPending"
 ~~~
-## 疑似コード 1/1 / UTF-8 2378 bytes
+
+## 疑似コード / UTF-8 2249 bytes
 
 ~~~c
 
-/* void firebase::ReferenceCountedFutureImpl::CompleteInternal<int,
-   firebase::ReferenceCountedFutureImpl::CompleteWithResultInternal<int>(firebase::FutureHandle
-   const&, int, char const*, int const&)::{lambda(int*)#1}>(firebase::FutureHandle const&, int, char
-   const*,
-   firebase::ReferenceCountedFutureImpl::CompleteWithResultInternal<int>(firebase::FutureHandle
-   const&, int, char const*, int const&)::{lambda(int*)#1} const&) */
-
-void __thiscall
-firebase::ReferenceCountedFutureImpl::
-CompleteInternal<int,firebase::ReferenceCountedFutureImpl::CompleteWithResultInternal<int>(firebase::FutureHandle_const&,int,char_const*,int_const&)::_lambda(int*)_1_>
-          (ReferenceCountedFutureImpl *this,FutureHandle *param_1,int param_2,char *param_3,
-          _lambda_int___1_ *param_4)
+void _ZN8firebase26ReferenceCountedFutureImpl16CompleteInternalIiZNS0_26CompleteWithResultInternalIiEEvRKNS_12FutureHandleEiPKcRKT_EUlPiE_EEvS5_iS7_RKT0_
+               (long *param_1,undefined8 *param_2,undefined4 param_3,undefined8 param_4,
+               undefined4 *param_5)
 
 {
   int iVar1;
-  FutureBackingData *pFVar2;
+  long lVar2;
   undefined4 *puVar3;
   ulong uVar4;
   
-  Mutex::Acquire((Mutex *)(this + 8));
-  pFVar2 = (FutureBackingData *)BackingFromHandle(this,*(ulong *)param_1);
-  if (pFVar2 == (FutureBackingData *)0x0) {
-    Mutex::Release((Mutex *)(this + 8));
+  _ZN8firebase5Mutex7AcquireEv(param_1 + 1);
+  lVar2 = _ZN8firebase26ReferenceCountedFutureImpl17BackingFromHandleEm(param_1,*param_2);
+  if (lVar2 == 0) {
+    _ZN8firebase5Mutex7ReleaseEv(param_1 + 1);
     return;
   }
-  iVar1 = (**(code **)(*(long *)this + 0x20))(this,param_1);
+  iVar1 = (**(code **)(*param_1 + 0x20))(param_1,param_2);
   if (iVar1 != 1) {
-    LogAssert("GetFutureStatus(handle) == kFutureStatusPending");
+    _ZN8firebase9LogAssertEPKcz("GetFutureStatus(handle) == kFutureStatusPending");
   }
                     /* try { // try from 00ae3c58 to 00be3c9f has its CatchHandler @ 00ae3c58
                        catch() { ... } // from try @ 00ae3c58 with catch @ 00ae3c58
                        catch() { ... } // from try @ 00ae3cac with catch @ 00ae3c58 */
-  SetBackingError(this,pFVar2,param_2,param_3);
-  puVar3 = (undefined4 *)BackingData(this,pFVar2);
-  *puVar3 = *(undefined4 *)param_4;
-  CompleteHandle(this,param_1);
-  CompleteProxy(this,pFVar2);
-  ReleaseMutexAndRunCallbacks(this,param_1);
+  _ZN8firebase26ReferenceCountedFutureImpl15SetBackingErrorEPNS_17FutureBackingDataEiPKc
+            (param_1,lVar2,param_3,param_4);
+  puVar3 = (undefined4 *)
+           _ZN8firebase26ReferenceCountedFutureImpl11BackingDataEPNS_17FutureBackingDataE
+                     (param_1,lVar2);
+  *puVar3 = *param_5;
+  _ZN8firebase26ReferenceCountedFutureImpl14CompleteHandleERKNS_12FutureHandleE(param_1,param_2);
+  _ZN8firebase26ReferenceCountedFutureImpl13CompleteProxyEPNS_17FutureBackingDataE(param_1,lVar2);
+  _ZN8firebase26ReferenceCountedFutureImpl27ReleaseMutexAndRunCallbacksERKNS_12FutureHandleE
+            (param_1,param_2);
                     /* try { // try from 00ae3ca0 to 00be3cab has its CatchHandler @ 00ae3cfc */
-  uVar4 = is_orphaned(this);
+  uVar4 = _ZNK8firebase26ReferenceCountedFutureImpl11is_orphanedEv(param_1);
   if ((uVar4 & 1) != 0) {
                     /* try { // try from 00ae3cac to 00be3d4b has its CatchHandler @ 00ae3c58 */
                     /* WARNING: Could not recover jumptable at 0x00ae3cc8. Too many branches */
                     /* WARNING: Treating indirect jump as call */
-    (**(code **)(*(long *)this + 8))(this);
+    (**(code **)(*param_1 + 8))(param_1);
     return;
   }
                     /* catch() { ... } // from try @ 00ae3ca0 with catch @ 00ae3cfc */

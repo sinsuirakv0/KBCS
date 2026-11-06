@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004dbcfc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004dbcfc",
-  "name": "Botan::version_patch",
+  "name": "_ZN5Botan13version_patchEv",
   "size": 8,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "39b7c8b32eddb7e071931a1095f67acb96c626b14eb001adb0c17587b21de302",
-  "source_text_sha256": "39b7c8b32eddb7e071931a1095f67acb96c626b14eb001adb0c17587b21de302"
+  "source_sha256": "e7ccec3750939a12e7409ddd48843e5e2757eb7be8ffbc6635e05d4ce0ddccfd",
+  "source_text_sha256": "e7ccec3750939a12e7409ddd48843e5e2757eb7be8ffbc6635e05d4ce0ddccfd"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,13 +29,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 96 bytes
+## 疑似コード / UTF-8 63 bytes
 
 ~~~c
 
-/* Botan::version_patch() */
-
-undefined8 Botan::version_patch(void)
+undefined8 _ZN5Botan13version_patchEv(void)
 
 {
   return 0;

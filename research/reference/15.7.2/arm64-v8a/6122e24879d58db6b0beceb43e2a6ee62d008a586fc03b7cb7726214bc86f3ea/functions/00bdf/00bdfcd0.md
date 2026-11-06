@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdfcd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdfcd0",
-  "name": "std::__ndk1::__insertion_sort_incomplete<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Field>&,flatbuffers::Offset<reflection::Field>*>",
+  "name": "_ZNSt6__ndk127__insertion_sort_incompleteIRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection5FieldEEEPNS1_6OffsetIS5_EEEEbT0_SB_T_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "9150233083a2439ce46bc55f0827fd50995da410e02dcafc2b93f6399280fce6",
-  "source_text_sha256": "9150233083a2439ce46bc55f0827fd50995da410e02dcafc2b93f6399280fce6"
+  "source_sha256": "74a1e27b22afc76df4429606d61f283323720b8d2628386e06d1bab4c65d85fa",
+  "source_text_sha256": "74a1e27b22afc76df4429606d61f283323720b8d2628386e06d1bab4c65d85fa"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b39d04](../00b39/00b39d04.md)
@@ -30,21 +29,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b3ac8c](../00b3a/00b3ac8c.md)
 
-## 疑似コード 1/1 / UTF-8 527 bytes
+## 疑似コード / UTF-8 379 bytes
 
 ~~~c
 
-bool std::__ndk1::
-     __insertion_sort_incomplete<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Field>&,flatbuffers::Offset<reflection::Field>*>
-               (Offset *param_1,Offset *param_2,TableKeyComparator *param_3)
+void _ZNSt6__ndk127__insertion_sort_incompleteIRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection5FieldEEEPNS1_6OffsetIS5_EEEEbT0_SB_T_
+               (void)
 
 {
-  bool bVar1;
-  
-  bVar1 = (bool)(*(code *)
-                  PTR___insertion_sort_incomplete<flatbuffers::FlatBufferBuilder::TableKeyComparator<reflection::Field>&,flatbuffers::Offset<reflection::Field>*>_00c1e6a0
-                )((char)param_1);
-  return bVar1;
+  (*(code *)
+    PTR__ZNSt6__ndk127__insertion_sort_incompleteIRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection5FieldEEEPNS1_6OffsetIS5_EEEEbT0_SB_T__00c1e6a0
+  )();
+  return;
 }
 
 ~~~

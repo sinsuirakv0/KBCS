@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae3fcc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae3fcc",
-  "name": "firebase::LogDebug",
+  "name": "_ZN8firebase8LogDebugEPKcz",
   "size": 164,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "4d3fe119e83d15d044329d31cf62410083365593f110de6d2c4ac8b19ce599ae",
-  "source_text_sha256": "4d3fe119e83d15d044329d31cf62410083365593f110de6d2c4ac8b19ce599ae"
+  "source_sha256": "b193ea10af8a68dbc6dd8abe2e4151710e390d3aa175357c441a0f4d0805455b",
+  "source_text_sha256": "b193ea10af8a68dbc6dd8abe2e4151710e390d3aa175357c441a0f4d0805455b"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bde1b0](../00bde/00bde1b0.md)
@@ -31,23 +30,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf90](../00bda/00bdaf90.md)
 - [00bde1a0](../00bde/00bde1a0.md)
 
-## 疑似コード 1/1 / UTF-8 1231 bytes
+## 疑似コード / UTF-8 1228 bytes
 
 ~~~c
 
-/* firebase::LogDebug(char const*, ...) */
-
-void firebase::LogDebug(char *param_1,...)
+void _ZN8firebase8LogDebugEPKcz
+               (undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,
+               undefined8 param_5,undefined8 param_6,undefined8 param_7,undefined8 param_8)
 
 {
   long lVar1;
-  undefined8 in_x1;
-  undefined8 in_x2;
-  undefined8 in_x3;
-  undefined8 in_x4;
-  undefined8 in_x5;
-  undefined8 in_x6;
-  undefined8 in_x7;
   long lVar2;
   undefined1 auStack_b0 [8];
   undefined8 local_a8;
@@ -68,15 +60,15 @@ void firebase::LogDebug(char *param_1,...)
   ppuStack_68 = &local_70;
   puStack_60 = auStack_b0;
   uStack_58 = 0xffffff80ffffffc8;
-  local_a8 = in_x1;
-  uStack_a0 = in_x2;
-  local_98 = in_x3;
-  uStack_90 = in_x4;
-  local_88 = in_x5;
-  uStack_80 = in_x6;
-  local_78 = in_x7;
+  local_a8 = param_2;
+  uStack_a0 = param_3;
+  local_98 = param_4;
+  uStack_90 = param_5;
+  local_88 = param_6;
+  uStack_80 = param_7;
+  local_78 = param_8;
   local_70 = (undefined1 *)register0x00000008;
-  LogMessageWithCallbackV(1,param_1,&local_70);
+  _ZN8firebase23LogMessageWithCallbackVENS_8LogLevelEPKcSt9__va_list(1,param_1,&local_70);
   if (*(long *)(lVar1 + 0x28) == lVar2) {
     return;
   }

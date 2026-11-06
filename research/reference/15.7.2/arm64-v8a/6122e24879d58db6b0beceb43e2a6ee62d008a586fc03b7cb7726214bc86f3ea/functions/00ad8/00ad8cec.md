@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ad8cec.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "818452c8a66b74e30fe33d21ff0f050a87797109e40f0e6c5db0ffc1fe4b283d",
-  "source_text_sha256": "818452c8a66b74e30fe33d21ff0f050a87797109e40f0e6c5db0ffc1fe4b283d"
+  "source_sha256": "f1f7f461c14eb610c983f6f92f52f7344a5b7181ee61e8e10f4978a1ed3290a0",
+  "source_text_sha256": "f1f7f461c14eb610c983f6f92f52f7344a5b7181ee61e8e10f4978a1ed3290a0"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -33,7 +32,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 1858 bytes
+## 疑似コード / UTF-8 1800 bytes
 
 ~~~c
 
@@ -74,7 +73,7 @@ void Java_jp_co_ponos_battlecats_IronSourceImplementation_onAdRewarded
     }
     (**(code **)(*DAT_0109fdb0 + 0x30))(DAT_0109fdb0,&local_40);
     if ((local_58 & 1) != 0) {
-      operator_delete(local_48);
+      _ZdlPv(local_48);
     }
   }
   if (*(long *)(lVar1 + 0x28) == local_38) {

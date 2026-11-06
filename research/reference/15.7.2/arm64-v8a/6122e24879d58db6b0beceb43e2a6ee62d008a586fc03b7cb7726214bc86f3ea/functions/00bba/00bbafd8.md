@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbafd8.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bbafd8",
-  "name": "std::bad_cast::bad_cast",
+  "name": "_ZNSt8bad_castC1Ev",
   "size": 24,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8fe54ffc1edad7b3a1bd9e93ab5b9b06bd8e55884fe0945cecca98b7df8a2aa5",
-  "source_text_sha256": "8fe54ffc1edad7b3a1bd9e93ab5b9b06bd8e55884fe0945cecca98b7df8a2aa5"
+  "source_sha256": "a924d8fa41a617d23a3f4988c13f148765c8f20710ee742d597a07231c8eaf45",
+  "source_text_sha256": "a924d8fa41a617d23a3f4988c13f148765c8f20710ee742d597a07231c8eaf45"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00be1380](../00be1/00be1380.md)
@@ -30,16 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 168 bytes
+## 疑似コード / UTF-8 114 bytes
 
 ~~~c
 
-/* std::bad_cast::bad_cast() */
-
-void __thiscall std::bad_cast::bad_cast(bad_cast *this)
+void _ZNSt8bad_castC1Ev(long *param_1)
 
 {
-  *(undefined **)this = PTR_vtable_00c1bf38 + 0x10;
+  *param_1 = (long)(PTR__ZTVSt8bad_cast_00c1bf38 + 0x10);
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdddf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdddf0",
-  "name": "firebase::FutureBase::operator=",
+  "name": "_ZN8firebase10FutureBaseaSERKS0_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "53d5b4c64436e98b831da0fdebe7ff0af77131427a96611b33bf1f7521a712d6",
-  "source_text_sha256": "53d5b4c64436e98b831da0fdebe7ff0af77131427a96611b33bf1f7521a712d6"
+  "source_sha256": "38d3e939a9ca21bb749b2e513ea39ec735a94fe39064b09e9f77d842b3e15bff",
+  "source_text_sha256": "38d3e939a9ca21bb749b2e513ea39ec735a94fe39064b09e9f77d842b3e15bff"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae2d54](../00ae2/00ae2d54.md)
@@ -67,14 +66,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00ae37cc](../00ae3/00ae37cc.md)
 
-## 疑似コード 1/1 / UTF-8 150 bytes
+## 疑似コード / UTF-8 123 bytes
 
 ~~~c
 
-void __thiscall firebase::FutureBase::operator=(FutureBase *this,FutureBase *param_1)
+void _ZN8firebase10FutureBaseaSERKS0_(void)
 
 {
-  (*(code *)PTR_operator__00c1d730)();
+  (*(code *)PTR__ZN8firebase10FutureBaseaSERKS0__00c1d730)();
   return;
 }
 

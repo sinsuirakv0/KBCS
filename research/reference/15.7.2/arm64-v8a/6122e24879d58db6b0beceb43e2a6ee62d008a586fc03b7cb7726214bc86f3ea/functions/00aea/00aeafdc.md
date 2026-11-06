@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aeafdc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aeafdc",
-  "name": "firebase::util::integer_class::CacheClass",
+  "name": "_ZN8firebase4util13integer_class10CacheClassEP7_JNIEnvP8_jobjectNS0_16ClassRequirementE",
   "size": 68,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "be454806abb444f1d47346db524c8977373a2510ce9e7262b6bd7667654124ed",
-  "source_text_sha256": "be454806abb444f1d47346db524c8977373a2510ce9e7262b6bd7667654124ed"
+  "source_sha256": "2dd0861f05df9117f05f0fc200b559637ed6afa55d5c66038636670a92228ecc",
+  "source_text_sha256": "2dd0861f05df9117f05f0fc200b559637ed6afa55d5c66038636670a92228ecc"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,19 +34,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/lang/Integer"
 ~~~
-## 疑似コード 1/1 / UTF-8 387 bytes
+
+## 疑似コード / UTF-8 475 bytes
 
 ~~~c
 
-/* firebase::util::integer_class::CacheClass(_JNIEnv*, _jobject*, firebase::util::ClassRequirement)
-    */
-
-long firebase::util::integer_class::CacheClass
+long _ZN8firebase4util13integer_class10CacheClassEP7_JNIEnvP8_jobjectNS0_16ClassRequirementE
                (undefined8 param_1,undefined8 param_2,undefined4 param_3)
 
 {
   if (DAT_010a0770 == 0) {
-    DAT_010a0770 = FindClassGlobal(param_1,param_2,0,"java/lang/Integer",param_3);
+    DAT_010a0770 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,"java/lang/Integer",param_3);
   }
   return DAT_010a0770;
 }

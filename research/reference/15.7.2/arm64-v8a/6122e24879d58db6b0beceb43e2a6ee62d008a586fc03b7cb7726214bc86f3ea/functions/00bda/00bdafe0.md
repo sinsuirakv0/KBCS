@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdafe0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdafe0",
-  "name": "std::logic_error::logic_error",
+  "name": "_ZNSt11logic_errorC1EPKc",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "93ced2edd4646f0a217a01664be8c6a18d273874bdf5415514c7b90ec8b7fc9b",
-  "source_text_sha256": "93ced2edd4646f0a217a01664be8c6a18d273874bdf5415514c7b90ec8b7fc9b"
+  "source_sha256": "841dcc4a09116e37e70ddc4d3f9ae9bf85b6153d47c6f73563d3dc7d942c208e",
+  "source_text_sha256": "841dcc4a09116e37e70ddc4d3f9ae9bf85b6153d47c6f73563d3dc7d942c208e"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00418c88](../00418/00418c88.md)
@@ -33,14 +32,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b736a8](../00b73/00b736a8.md)
 
-## 疑似コード 1/1 / UTF-8 145 bytes
+## 疑似コード / UTF-8 107 bytes
 
 ~~~c
 
-void __thiscall std::logic_error::logic_error(logic_error *this,char *param_1)
+void _ZNSt11logic_errorC1EPKc(void)
 
 {
-  (*(code *)PTR_logic_error_00c1c028)();
+  (*(code *)PTR__ZNSt11logic_errorC1EPKc_00c1c028)();
   return;
 }
 

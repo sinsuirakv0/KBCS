@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bacbec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bacbec",
-  "name": "std::__ndk1::codecvt<char32_t,char,mbstate_t>::do_encoding",
+  "name": "_ZNKSt6__ndk17codecvtIDic9mbstate_tE11do_encodingEv",
   "size": 12,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "eee905be8babc105f3174419437af60cdadf9c5dd7b5105eb6ed6b8350023379",
-  "source_text_sha256": "eee905be8babc105f3174419437af60cdadf9c5dd7b5105eb6ed6b8350023379"
+  "source_sha256": "429601099445a022d700d3b3adc23fd03f0ad3d16aa8178a270ee23d80b86fbd",
+  "source_text_sha256": "429601099445a022d700d3b3adc23fd03f0ad3d16aa8178a270ee23d80b86fbd"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,13 +29,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 180 bytes
+## 疑似コード / UTF-8 88 bytes
 
 ~~~c
 
-/* std::__ndk1::codecvt<char32_t, char, mbstate_t>::do_encoding() const */
-
-undefined8 std::__ndk1::codecvt<char32_t,char,mbstate_t>::do_encoding(void)
+undefined8 _ZNKSt6__ndk17codecvtIDic9mbstate_tE11do_encodingEv(void)
 
 {
   return 0;

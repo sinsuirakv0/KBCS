@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](007ceacc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "5d2e24616de8e236149a3987da9b448e3129a0108818a7e93504aba8ac7c75bc",
-  "source_text_sha256": "5d2e24616de8e236149a3987da9b448e3129a0108818a7e93504aba8ac7c75bc"
+  "source_sha256": "86c77a6940e05451867f9ac4c8b3d853c70371f069af5115c9399b4e0ef3f53f",
+  "source_text_sha256": "86c77a6940e05451867f9ac4c8b3d853c70371f069af5115c9399b4e0ef3f53f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0073fa38](../0073f/0073fa38.md)
@@ -38,7 +37,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00419064](../00419/00419064.md)
 - [00bdaf40](../00bda/00bdaf40.md)
 
-## 疑似コード 1/1 / UTF-8 1630 bytes
+## 疑似コード / UTF-8 1576 bytes
 
 ~~~c
 
@@ -80,7 +79,7 @@ LAB_007ceb18:
   puVar4 = puVar3;
   if ((undefined8 *)*puVar3 == (undefined8 *)0x0) {
 LAB_007ceb60:
-    puVar1 = operator_new(0x28);
+    puVar1 = (undefined8 *)_Znwm(0x28);
     *puVar1 = 0;
     puVar1[1] = 0;
     puVar1[2] = puVar3;

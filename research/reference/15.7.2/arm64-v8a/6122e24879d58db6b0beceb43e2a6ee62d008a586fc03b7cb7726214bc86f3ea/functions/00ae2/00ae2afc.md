@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae2afc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae2afc",
-  "name": "firebase::analytics::SetDesktopDebugMode",
+  "name": "_ZN8firebase9analytics19SetDesktopDebugModeEb",
   "size": 4,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "96f5bd9282dd9be97e1e2205ed87799f874e7aaec9c5ccdc2b8a6ba67d9d9d11",
-  "source_text_sha256": "96f5bd9282dd9be97e1e2205ed87799f874e7aaec9c5ccdc2b8a6ba67d9d9d11"
+  "source_sha256": "670b1823ec28f8ff32c84f477029f6546b288419dd029077828294db73e416b6",
+  "source_text_sha256": "670b1823ec28f8ff32c84f477029f6546b288419dd029077828294db73e416b6"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,16 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 148 bytes
+## 疑似コード / UTF-8 74 bytes
 
 ~~~c
 
-/* firebase::analytics::SetDesktopDebugMode(bool) */
-
-bool firebase::analytics::SetDesktopDebugMode(bool param_1)
+void _ZN8firebase9analytics19SetDesktopDebugModeEb(void)
 
 {
-  return param_1;
+  return;
 }
 
 ~~~

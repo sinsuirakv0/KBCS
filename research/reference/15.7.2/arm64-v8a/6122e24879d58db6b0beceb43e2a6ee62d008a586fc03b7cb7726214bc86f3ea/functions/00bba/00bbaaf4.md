@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbaaf4.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "1beb45a6edd823c39df0df55d54bd22f8bae19c9a01fd52741f5164820e8eb8b",
-  "source_text_sha256": "1beb45a6edd823c39df0df55d54bd22f8bae19c9a01fd52741f5164820e8eb8b"
+  "source_sha256": "1a159dcdd11055ae0967db7cbc007dc55007530ea348a3bafab8ca96881ebc2d",
+  "source_text_sha256": "1a159dcdd11055ae0967db7cbc007dc55007530ea348a3bafab8ca96881ebc2d"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,7 +34,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "unexpected"
 ~~~
-## 疑似コード 1/1 / UTF-8 437 bytes
+
+## 疑似コード / UTF-8 426 bytes
 
 ~~~c
 
@@ -47,7 +47,7 @@ void FUN_00bbaaf4(void)
                     /* catch() { ... } // from try @ 00bb36a8 with catch @ 00bbab0c */
   PTR_s_uncaught_00c248a0 = s_unexpected_002a1122;
                     /* WARNING: Subroutine does not return */
-  std::terminate();
+  _ZSt9terminatev();
 }
 
 ~~~

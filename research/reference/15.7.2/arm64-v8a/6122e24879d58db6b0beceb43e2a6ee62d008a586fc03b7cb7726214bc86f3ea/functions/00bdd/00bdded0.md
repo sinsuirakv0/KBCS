@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdded0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdded0",
-  "name": "firebase::ReferenceCountedFutureImpl::CompleteProxy",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl13CompleteProxyEPNS_17FutureBackingDataE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "8cd5b3037511d6e96adff494913b842716af82b42b2d9ab89c428c34231af55f",
-  "source_text_sha256": "8cd5b3037511d6e96adff494913b842716af82b42b2d9ab89c428c34231af55f"
+  "source_sha256": "21fa6dae1fc5853af44ac7868599bf0bd3790c32dfd0657d4ea0c9a420c9f238",
+  "source_text_sha256": "21fa6dae1fc5853af44ac7868599bf0bd3790c32dfd0657d4ea0c9a420c9f238"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae348c](../00ae3/00ae348c.md)
@@ -49,16 +48,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00aff154](../00aff/00aff154.md)
 
-## 疑似コード 1/1 / UTF-8 210 bytes
+## 疑似コード / UTF-8 227 bytes
 
 ~~~c
 
-void __thiscall
-firebase::ReferenceCountedFutureImpl::CompleteProxy
-          (ReferenceCountedFutureImpl *this,FutureBackingData *param_1)
+void _ZN8firebase26ReferenceCountedFutureImpl13CompleteProxyEPNS_17FutureBackingDataE(void)
 
 {
-  (*(code *)PTR_CompleteProxy_00c1d7a0)();
+  (*(code *)
+    PTR__ZN8firebase26ReferenceCountedFutureImpl13CompleteProxyEPNS_17FutureBackingDataE_00c1d7a0)()
+  ;
   return;
 }
 

@@ -1,0 +1,45 @@
+﻿# 00bbafa8
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bbafa8",
+  "name": "_ZNSt16invalid_argumentD0Ev",
+  "size": 44,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "5cf47e2386bc4191cb8b195ba7032ef0146b0c28ac8c53499606ef2191e700bf",
+  "source_text_sha256": "5cf47e2386bc4191cb8b195ba7032ef0146b0c28ac8c53499606ef2191e700bf"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bdb060](../00bdb/00bdb060.md)
+- [00be1130](../00be1/00be1130.md)
+
+## 疑似コード / UTF-8 112 bytes
+
+~~~c
+
+void _ZNSt16invalid_argumentD0Ev(void *param_1)
+
+{
+  _ZNSt11logic_errorD1Ev();
+  _ZdlPv(param_1);
+  return;
+}
+
+~~~

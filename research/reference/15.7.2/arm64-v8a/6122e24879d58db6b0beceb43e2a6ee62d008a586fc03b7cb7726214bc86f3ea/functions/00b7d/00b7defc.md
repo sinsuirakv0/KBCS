@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b7defc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "e8fc19a1c9129ed9078875fa453943cbce42d3bd80ef32044ef1cfd659918059",
-  "source_text_sha256": "e8fc19a1c9129ed9078875fa453943cbce42d3bd80ef32044ef1cfd659918059"
+  "source_sha256": "55f615184c4d6a4169c4aeae97bf8e1b02e1305d096470d377d35b28daaa06ee",
+  "source_text_sha256": "55f615184c4d6a4169c4aeae97bf8e1b02e1305d096470d377d35b28daaa06ee"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -36,7 +35,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "unspecified iostream_category error"
 ~~~
-## 疑似コード 1/1 / UTF-8 1093 bytes
+
+## 疑似コード / UTF-8 1054 bytes
 
 ~~~c
 
@@ -57,7 +57,7 @@ void FUN_00b7defc(undefined8 *param_1,undefined8 param_2,int param_3)
     FUN_00b7b694();
     return;
   }
-  pcVar7 = operator_new(0x28);
+  pcVar7 = (char *)_Znwm(0x28);
   param_1[2] = pcVar7;
   uVar6 = _UNK_002b1018;
   uVar5 = _DAT_002b1010;

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aebdc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00aebdc0",
-  "name": "firebase::util::iterator::GetFieldId",
+  "name": "_ZN8firebase4util8iterator10GetFieldIdENS1_5FieldE",
   "size": 60,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "9f22c8d22d005e1929559bad2b3f5ad3c95a702966396a28d52a21ddcccbb4e7",
-  "source_text_sha256": "9f22c8d22d005e1929559bad2b3f5ad3c95a702966396a28d52a21ddcccbb4e7"
+  "source_sha256": "732e47a7f9336cf2c2dc92822ffe6a8210af9911982072b063032d03056de93f",
+  "source_text_sha256": "732e47a7f9336cf2c2dc92822ffe6a8210af9911982072b063032d03056de93f"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,17 +34,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "field < kFieldCount"
 ~~~
-## 疑似コード 1/1 / UTF-8 288 bytes
+
+## 疑似コード / UTF-8 231 bytes
 
 ~~~c
 
-/* firebase::util::iterator::GetFieldId(firebase::util::iterator::Field) */
-
-undefined8 firebase::util::iterator::GetFieldId(uint param_1)
+undefined8 _ZN8firebase4util8iterator10GetFieldIdENS1_5FieldE(uint param_1)
 
 {
   if (0 < (int)param_1) {
-    LogAssert("field < kFieldCount");
+    _ZN8firebase9LogAssertEPKcz("field < kFieldCount");
   }
   return *(undefined8 *)(&DAT_010a0818 + (ulong)param_1 * 8);
 }

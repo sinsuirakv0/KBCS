@@ -20,7 +20,7 @@ from pathlib import Path
 from indexer.apk import acquire, validate_split_source
 from indexer.complete import build_reference
 from indexer.network import ATTEMPTS, download_asset, gh, gh_json as api, http_status, retry, transient
-from indexer.reference import export_cache
+from indexer.reference import export_cache, replace_reference
 from indexer.run import headless, locked
 from indexer.store import LOCAL, configure_output, digest, import_index, read_json, sync_results, write_json
 
@@ -327,28 +327,21 @@ def ensure_release(tag, version, revision):
 
 def publish_reference(source, revision):
     public_only()
-    # 最新mainの独立worktreeへ資料だけを追記する。アプリの差分を混ぜない。
+    # 最新mainの独立worktreeで、対象の版とABIの資料だけを更新する。
     git_remote(['git', 'fetch', 'origin', 'main'])
     work = Path(os.environ['RUNNER_TEMP']) / ('native-publish-' + revision)
     subprocess.run(['git', 'worktree', 'add', '--detach', str(work), 'origin/main'], check=True)
-    target = work / 'research/reference' / source.relative_to(LOCAL / 'ci-reference')
-    if target.exists():
-        left = {p.relative_to(source).as_posix(): digest(p) for p in source.rglob('*') if p.is_file()}
-        right = {p.relative_to(target).as_posix(): digest(p) for p in target.rglob('*') if p.is_file()}
-        if left != right:
-            raise ValueError('Published revision is immutable; choose another revision label')
+    replace_reference(source, work / 'research/reference')
+    subprocess.run(['git', '-C', str(work), 'add', '--', 'research/reference'], check=True)
+    diff = subprocess.run(['git', '-C', str(work), 'diff', '--cached', '--quiet', '--', 'research/reference'])
+    if not diff.returncode:
         return
-    shutil.copytree(source, target)
-    reference = work / 'research/reference'
-    datasets = sorted([*reference.glob('*/*/*/manifest.json'), *reference.glob('*/*/*/*/manifest.json')])
-    text = '# ネイティブ解析資料\n\n' + ''.join(f'- [{p.parent.relative_to(reference).as_posix()}]({p.parent.relative_to(reference).as_posix()}/README.md)\n' for p in datasets)
-    (reference / 'README.md').write_text(text, encoding='utf-8-sig')
-    shutil.copyfile(LOCAL / 'ci-reference/.gitattributes', reference / '.gitattributes')
+    if diff.returncode != 1:
+        diff.check_returncode()
     subprocess.run(['gh', 'auth', 'setup-git'], check=True)
-    for args in (['config', 'user.name', 'github-actions[bot]'], ['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'],
-                 ['add', '--', 'research/reference']):
+    for args in (['config', 'user.name', 'github-actions[bot]'], ['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com']):
         subprocess.run(['git', '-C', str(work), *args], check=True)
-    subprocess.run(['git', '-C', str(work), 'commit', '-q', '-m', f'Add native analysis revision {revision}'], check=True)
+    subprocess.run(['git', '-C', str(work), 'commit', '-q', '-m', f'Publish native analysis revision {revision}'], check=True)
     git_remote(['git', '-C', str(work), '-c', 'pack.threads=1', 'push', 'origin', 'HEAD:main'])
 
 

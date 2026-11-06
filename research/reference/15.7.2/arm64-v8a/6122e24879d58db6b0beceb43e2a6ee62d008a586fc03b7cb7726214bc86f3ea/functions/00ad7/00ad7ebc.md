@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ad7ebc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "85d549b260e2e10f727a63ec3bcc454e4badbd023db10e5ad23b719b65259c3e",
-  "source_text_sha256": "85d549b260e2e10f727a63ec3bcc454e4badbd023db10e5ad23b719b65259c3e"
+  "source_sha256": "97bf5f4c6114450b44b65cb4ddf7111c3dc56a7e261cfc68922f7d16cc6a52da",
+  "source_text_sha256": "97bf5f4c6114450b44b65cb4ddf7111c3dc56a7e261cfc68922f7d16cc6a52da"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00855450](../00855/00855450.md)
@@ -51,7 +50,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "(Ljava/lang/String;)V"
 "ironsourceShow"
 ~~~
-## 疑似コード 1/1 / UTF-8 7116 bytes
+
+## 疑似コード / UTF-8 6792 bytes
 
 ~~~c
 
@@ -134,11 +134,10 @@ void FUN_00ad7ebc(char *param_1,long *param_2,long *param_3,long *param_4,long *
   uStack_12a = 0;
   local_128 = FUN_00566448(uVar3,&local_120,&local_140,uVar2);
   if ((local_140 & 1) != 0) {
-    operator_delete((void *)CONCAT17(uStack_129,
-                                     CONCAT16(uStack_12a,CONCAT51(acStack_12f,cStack_130))));
+    _ZdlPv((void *)CONCAT17(uStack_129,CONCAT16(uStack_12a,CONCAT51(acStack_12f,cStack_130))));
   }
   if ((local_120 & 1) != 0) {
-    operator_delete(local_110);
+    _ZdlPv(local_110);
   }
   uVar4 = FUN_0056626c(&local_128);
   if ((uVar4 & 1) != 0) {
@@ -249,9 +248,9 @@ LAB_00ad8164:
       if ((__n | 7) != 0x17) {
         uVar4 = __n | 7;
       }
-      uVar4 = uVar4 + 1;
-      __dest = operator_new(uVar4);
-      local_140 = (byte)uVar4 | 1;
+      lVar11 = uVar4 + 1;
+      __dest = (void *)_Znwm(lVar11);
+      local_140 = (byte)lVar11 | 1;
       cStack_138 = (char)__n;
       acStack_137 = SUB85(__n >> 8,0);
       uStack_132 = (undefined2)(__n >> 0x30);
@@ -259,15 +258,14 @@ LAB_00ad8164:
       acStack_12f = SUB85((ulong)__dest >> 8,0);
       uStack_12a = (undefined1)((ulong)__dest >> 0x30);
       uStack_129 = (undefined1)((ulong)__dest >> 0x38);
-      uStack_13f = (undefined7)(uVar4 >> 8);
+      uStack_13f = (undefined7)((ulong)lVar11 >> 8);
 LAB_00ad81d4:
       memcpy(__dest,param_1,__n);
     }
     *(undefined1 *)((long)__dest + __n) = 0;
     FUN_005669f8(&local_120,uVar2,&local_140);
     if ((local_140 & 1) != 0) {
-      operator_delete((void *)CONCAT17(uStack_129,
-                                       CONCAT16(uStack_12a,CONCAT51(acStack_12f,cStack_130))));
+      _ZdlPv((void *)CONCAT17(uStack_129,CONCAT16(uStack_12a,CONCAT51(acStack_12f,cStack_130))));
     }
     FUN_00566284();
     uVar3 = FUN_00566978();

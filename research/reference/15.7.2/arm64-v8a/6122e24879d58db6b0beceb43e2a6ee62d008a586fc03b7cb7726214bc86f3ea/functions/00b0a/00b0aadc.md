@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b0aadc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b0aadc",
-  "name": "flatbuffers::IDLOptions::IDLOptions",
+  "name": "_ZN11flatbuffers10IDLOptionsC2ERKS0_",
   "size": 412,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "72f759ec79363846a573a21b11993ca92b12d61dab893bf5e36ed9bf4fca4f93",
-  "source_text_sha256": "72f759ec79363846a573a21b11993ca92b12d61dab893bf5e36ed9bf4fca4f93"
+  "source_sha256": "a2cb362fc9843e7c5ee3d6e91264b59b4ee1a053a159e27c025205c54adbab5c",
+  "source_text_sha256": "a2cb362fc9843e7c5ee3d6e91264b59b4ee1a053a159e27c025205c54adbab5c"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bde900](../00bde/00bde900.md)
@@ -32,111 +31,91 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bde1c0](../00bde/00bde1c0.md)
 - [00bde630](../00bde/00bde630.md)
 
-## 疑似コード 1/1 / UTF-8 5906 bytes
+## 疑似コード / UTF-8 3480 bytes
 
 ~~~c
 
-/* flatbuffers::IDLOptions::IDLOptions(flatbuffers::IDLOptions const&) */
-
-void __thiscall flatbuffers::IDLOptions::IDLOptions(IDLOptions *this,IDLOptions *param_1)
+void _ZN11flatbuffers10IDLOptionsC2ERKS0_(undefined8 *param_1,undefined8 *param_2)
 
 {
-  basic_string *pbVar1;
-  basic_string *pbVar2;
-  undefined4 uVar3;
-  IDLOptions IVar4;
-  undefined2 uVar5;
-  ulong uVar6;
-  basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *this_00;
+  long lVar1;
+  undefined4 uVar2;
+  undefined1 uVar3;
+  undefined2 uVar4;
+  long lVar5;
+  long lVar6;
   undefined8 uVar7;
   undefined8 uVar8;
   undefined8 uVar9;
   
-  uVar7 = *(undefined8 *)(param_1 + 9);
-  uVar9 = *(undefined8 *)(param_1 + 8);
-  uVar8 = *(undefined8 *)param_1;
-  *(undefined8 *)(this + 0x11) = *(undefined8 *)(param_1 + 0x11);
-  *(undefined8 *)(this + 9) = uVar7;
-  *(undefined8 *)(this + 8) = uVar9;
-  *(undefined8 *)this = uVar8;
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x20),(basic_string *)(param_1 + 0x20));
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x38),(basic_string *)(param_1 + 0x38));
-  *(undefined4 *)(this + 0x50) = *(undefined4 *)(param_1 + 0x50);
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x58),(basic_string *)(param_1 + 0x58));
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x70),(basic_string *)(param_1 + 0x70));
-  uVar5 = *(undefined2 *)(param_1 + 0x88);
-  this[0x8a] = param_1[0x8a];
-  *(undefined2 *)(this + 0x88) = uVar5;
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x90),(basic_string *)(param_1 + 0x90));
-  uVar3 = *(undefined4 *)(param_1 + 0xa8);
-  this[0xac] = param_1[0xac];
-  *(undefined4 *)(this + 0xa8) = uVar3;
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0xb0),(basic_string *)(param_1 + 0xb0));
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 200),(basic_string *)(param_1 + 200));
-  *(undefined4 *)(this + 0xe0) = *(undefined4 *)(param_1 + 0xe0);
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0xe8),(basic_string *)(param_1 + 0xe8));
-  uVar5 = *(undefined2 *)(param_1 + 0x100);
-  IVar4 = param_1[0x102];
-  *(undefined8 *)(this + 0x110) = 0;
-  *(undefined8 *)(this + 0x118) = 0;
-  *(undefined8 *)(this + 0x108) = 0;
-  *(undefined2 *)(this + 0x100) = uVar5;
-  this[0x102] = IVar4;
-  uVar6 = *(long *)(param_1 + 0x110) - *(long *)(param_1 + 0x108);
-  if (uVar6 != 0) {
-    if (0xaaaaaaaaaaaaaaa < (ulong)(((long)uVar6 >> 3) * -0x5555555555555555)) {
+  uVar7 = *(undefined8 *)((long)param_2 + 9);
+  uVar9 = param_2[1];
+  uVar8 = *param_2;
+  *(undefined8 *)((long)param_1 + 0x11) = *(undefined8 *)((long)param_2 + 0x11);
+  *(undefined8 *)((long)param_1 + 9) = uVar7;
+  param_1[1] = uVar9;
+  *param_1 = uVar8;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 4,param_2 + 4);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 7,param_2 + 7);
+  *(undefined4 *)(param_1 + 10) = *(undefined4 *)(param_2 + 10);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0xb,param_2 + 0xb);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0xe,param_2 + 0xe);
+  uVar4 = *(undefined2 *)(param_2 + 0x11);
+  *(undefined1 *)((long)param_1 + 0x8a) = *(undefined1 *)((long)param_2 + 0x8a);
+  *(undefined2 *)(param_1 + 0x11) = uVar4;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x12,param_2 + 0x12);
+  uVar2 = *(undefined4 *)(param_2 + 0x15);
+  *(undefined1 *)((long)param_1 + 0xac) = *(undefined1 *)((long)param_2 + 0xac);
+  *(undefined4 *)(param_1 + 0x15) = uVar2;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x16,param_2 + 0x16);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x19,param_2 + 0x19);
+  *(undefined4 *)(param_1 + 0x1c) = *(undefined4 *)(param_2 + 0x1c);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x1d,param_2 + 0x1d);
+  uVar4 = *(undefined2 *)(param_2 + 0x20);
+  uVar3 = *(undefined1 *)((long)param_2 + 0x102);
+  param_1[0x22] = 0;
+  param_1[0x23] = 0;
+  param_1[0x21] = 0;
+  *(undefined2 *)(param_1 + 0x20) = uVar4;
+  *(undefined1 *)((long)param_1 + 0x102) = uVar3;
+  if (param_2[0x22] - param_2[0x21] != 0) {
+    lVar6 = (long)(param_2[0x22] - param_2[0x21]) >> 3;
+    if (0xaaaaaaaaaaaaaaa < (ulong)(lVar6 * -0x5555555555555555)) {
                     /* WARNING: Subroutine does not return */
       abort();
     }
-    this_00 = operator_new(uVar6);
-    *(basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> **)
-     (this + 0x108) = this_00;
-    *(basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> **)
-     (this + 0x110) = this_00;
-    *(basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> **)
-     (this + 0x118) = this_00 + ((long)uVar6 >> 3) * 8;
-    pbVar2 = *(basic_string **)(param_1 + 0x110);
-    for (pbVar1 = *(basic_string **)(param_1 + 0x108); pbVar1 != pbVar2; pbVar1 = pbVar1 + 0x18) {
-      std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-      basic_string(this_00,pbVar1);
-      this_00 = this_00 + 0x18;
+    lVar5 = _Znwm();
+    param_1[0x21] = lVar5;
+    param_1[0x22] = lVar5;
+    param_1[0x23] = lVar5 + lVar6 * 8;
+    lVar1 = param_2[0x22];
+    for (lVar6 = param_2[0x21]; lVar6 != lVar1; lVar6 = lVar6 + 0x18) {
+      _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_(lVar5,lVar6);
+      lVar5 = lVar5 + 0x18;
     }
-    *(basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> **)
-     (this + 0x110) = this_00;
+    param_1[0x22] = lVar5;
   }
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x120),(basic_string *)(param_1 + 0x120));
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x138),(basic_string *)(param_1 + 0x138));
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x150),(basic_string *)(param_1 + 0x150));
-  std::__ndk1::basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  basic_string((basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *)
-               (this + 0x168),(basic_string *)(param_1 + 0x168));
-  uVar8 = *(undefined8 *)(param_1 + 0x188);
-  uVar7 = *(undefined8 *)(param_1 + 0x180);
-  *(undefined2 *)(this + 400) = *(undefined2 *)(param_1 + 400);
-  *(undefined8 *)(this + 0x188) = uVar8;
-  *(undefined8 *)(this + 0x180) = uVar7;
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x24,param_2 + 0x24);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x27,param_2 + 0x27);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x2a,param_2 + 0x2a);
+  _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_
+            (param_1 + 0x2d,param_2 + 0x2d);
+  uVar8 = param_2[0x31];
+  uVar7 = param_2[0x30];
+  *(undefined2 *)(param_1 + 0x32) = *(undefined2 *)(param_2 + 0x32);
+  param_1[0x31] = uVar8;
+  param_1[0x30] = uVar7;
   return;
 }
 

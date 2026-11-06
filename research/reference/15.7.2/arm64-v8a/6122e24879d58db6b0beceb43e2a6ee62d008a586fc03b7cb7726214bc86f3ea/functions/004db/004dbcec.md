@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004dbcec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004dbcec",
-  "name": "Botan::version_major",
+  "name": "_ZN5Botan13version_majorEv",
   "size": 8,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "6a4f7b5a3f63e4834f90a8edd8284211ac662629e13817a9344fdc8137bd3690",
-  "source_text_sha256": "6a4f7b5a3f63e4834f90a8edd8284211ac662629e13817a9344fdc8137bd3690"
+  "source_sha256": "a94835c28b56c3b240a7607e0edd892b0917df9e07bcedd57cab18cb193e3775",
+  "source_text_sha256": "a94835c28b56c3b240a7607e0edd892b0917df9e07bcedd57cab18cb193e3775"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,13 +29,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 96 bytes
+## 疑似コード / UTF-8 63 bytes
 
 ~~~c
 
-/* Botan::version_major() */
-
-undefined8 Botan::version_major(void)
+undefined8 _ZN5Botan13version_majorEv(void)
 
 {
   return 2;

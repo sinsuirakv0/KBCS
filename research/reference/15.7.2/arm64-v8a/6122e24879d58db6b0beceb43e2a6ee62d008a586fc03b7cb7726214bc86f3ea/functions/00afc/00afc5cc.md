@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afc5cc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afc5cc",
-  "name": "firebase::CleanupNotifier::CleanupAll",
+  "name": "_ZN8firebase15CleanupNotifier10CleanupAllEv",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "120a0ba896d9ef6d02b759a204317b092574dabc0454c6bf5d24ca2c58e40b21",
-  "source_text_sha256": "120a0ba896d9ef6d02b759a204317b092574dabc0454c6bf5d24ca2c58e40b21"
+  "source_sha256": "08bd96baf28270f855e2de42c684fe5f2f191fd9c0435da7659459d1a0b97362",
+  "source_text_sha256": "08bd96baf28270f855e2de42c684fe5f2f191fd9c0435da7659459d1a0b97362"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bde810](../00bde/00bde810.md)
@@ -32,32 +31,30 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bddb30](../00bdd/00bddb30.md)
 - [00bddcb0](../00bdd/00bddcb0.md)
 
-## 疑似コード 1/1 / UTF-8 825 bytes
+## 疑似コード / UTF-8 758 bytes
 
 ~~~c
 
-/* firebase::CleanupNotifier::CleanupAll() */
-
-void __thiscall firebase::CleanupNotifier::CleanupAll(CleanupNotifier *this)
+void _ZN8firebase15CleanupNotifier10CleanupAllEv(long param_1)
 
 {
-  void *pvVar1;
-  CleanupNotifier *pCVar2;
+  undefined8 uVar1;
+  long lVar2;
   
-  Mutex::Acquire((Mutex *)this);
-  if (this[0x40] == (CleanupNotifier)0x0) {
-    pCVar2 = *(CleanupNotifier **)(this + 0x28);
-    while (pCVar2 != this + 0x30) {
+  _ZN8firebase5Mutex7AcquireEv();
+  if (*(char *)(param_1 + 0x40) == '\0') {
+    lVar2 = *(long *)(param_1 + 0x28);
+    while (lVar2 != param_1 + 0x30) {
                     /* try { // try from 00afc5fc to 00bfc60f has its CatchHandler @ 00b00398 */
-      pvVar1 = *(void **)(pCVar2 + 0x20);
-      (**(code **)(pCVar2 + 0x28))(pvVar1);
+      uVar1 = *(undefined8 *)(lVar2 + 0x20);
+      (**(code **)(lVar2 + 0x28))(uVar1);
                     /* try { // try from 00afc610 to 00bfc61b has its CatchHandler @ 00b00418 */
-      UnregisterObject(this,pvVar1);
-      pCVar2 = *(CleanupNotifier **)(this + 0x28);
+      _ZN8firebase15CleanupNotifier16UnregisterObjectEPv(param_1,uVar1);
+      lVar2 = *(long *)(param_1 + 0x28);
     }
-    this[0x40] = (CleanupNotifier)0x1;
+    *(undefined1 *)(param_1 + 0x40) = 1;
   }
-  Mutex::Release((Mutex *)this);
+  _ZN8firebase5Mutex7ReleaseEv(param_1);
   return;
 }
 

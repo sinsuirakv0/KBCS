@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00adab2c.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "351dfd61aceae2e72abc3fe047ec9a8cfa033f9480f3a251c0ca5874de3e5b4b",
-  "source_text_sha256": "351dfd61aceae2e72abc3fe047ec9a8cfa033f9480f3a251c0ca5874de3e5b4b"
+  "source_sha256": "9ea7b608b3dff791e063c3e8a577b27e949d0d472f7a01a8c310b64e21e1ca71",
+  "source_text_sha256": "9ea7b608b3dff791e063c3e8a577b27e949d0d472f7a01a8c310b64e21e1ca71"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -33,7 +32,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdaf90](../00bda/00bdaf90.md)
 
-## 疑似コード 1/1 / UTF-8 1192 bytes
+## 疑似コード / UTF-8 1145 bytes
 
 ~~~c
 
@@ -62,7 +61,7 @@ void Java_jp_co_ponos_battlecats_TapjoyImplementation_onTapjoySpendCurrency
                     /* try { // try from 00adab78 to 00bdaba7 has its CatchHandler @ 00adac9c */
     (**(code **)(*DAT_0109fef0 + 0x30))(DAT_0109fef0,local_58,&local_3c);
     if ((local_58[0] & 1) != 0) {
-      operator_delete(local_48);
+      _ZdlPv(local_48);
     }
   }
   if (*(long *)(lVar1 + 0x28) == local_38) {

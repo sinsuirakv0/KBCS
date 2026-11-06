@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00baf2ac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00baf2ac",
-  "name": "std::__ndk1::numpunct_byname<char>::__init",
+  "name": "_ZNSt6__ndk115numpunct_bynameIcE6__initEPKc",
   "size": 600,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "93398b1405aec22db6b0da85971f8755339af00137a5ec04982381b975b8fac5",
-  "source_text_sha256": "93398b1405aec22db6b0da85971f8755339af00137a5ec04982381b975b8fac5"
+  "source_sha256": "86fdfff5ed31b49358e3d310ef60eba5966b7cd42fe0515385987305b4c53512",
+  "source_text_sha256": "86fdfff5ed31b49358e3d310ef60eba5966b7cd42fe0515385987305b4c53512"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00be1b70](../00be1/00be1b70.md)
@@ -47,14 +46,12 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "numpunct_byname<char>::numpunct_byname failed to construct for "
 ~~~
-## 疑似コード 1/1 / UTF-8 3808 bytes
+
+## 疑似コード / UTF-8 3487 bytes
 
 ~~~c
 
-/* std::__ndk1::numpunct_byname<char>::__init(char const*) */
-
-void __thiscall
-std::__ndk1::numpunct_byname<char>::__init(numpunct_byname<char> *this,char *param_1)
+void _ZNSt6__ndk115numpunct_bynameIcE6__initEPKc(long param_1,char *param_2)
 
 {
   wchar_t __c;
@@ -63,26 +60,26 @@ std::__ndk1::numpunct_byname<char>::__init(numpunct_byname<char> *this,char *par
   __locale_t p_Var2;
   lconv *plVar3;
   size_t sVar4;
-  numpunct_byname<char> *pnVar5;
+  char *pcVar5;
   mbstate_t local_80 [3];
   undefined8 local_68;
-  char *local_58;
+  long local_58;
   __locale_t local_50;
   wchar_t local_44;
   
-  iVar1 = strcmp(param_1,"C");
+  iVar1 = strcmp(param_2,"C");
   if (iVar1 != 0) {
-    __dataset = newlocale(0x1fbf,param_1,(__locale_t)0x0);
+    __dataset = newlocale(0x1fbf,param_2,(__locale_t)0x0);
     local_50 = __dataset;
     if (__dataset == (__locale_t)0x0) {
-      FUN_0041b298(local_80,param_1);
+      FUN_0041b298(local_80,param_2);
                     /* try { // try from 00baf4e0 to 00caf583 has its CatchHandler @ 00baf60c */
       FUN_00ba89b8(&local_68,"numpunct_byname<char>::numpunct_byname failed to construct for ",
                    local_80);
       if (((byte)local_68 & 1) == 0) {
-        local_58 = (char *)((long)&local_68 + 1);
+        local_58 = (long)&local_68 + 1;
       }
-      __throw_runtime_error(local_58);
+      _ZNSt6__ndk121__throw_runtime_errorEPKc(local_58);
                     /* WARNING: Subroutine does not return */
       FUN_0041e0fc();
     }
@@ -92,18 +89,18 @@ std::__ndk1::numpunct_byname<char>::__init(numpunct_byname<char> *this,char *par
     if (p_Var2 != (__locale_t)0x0) {
       uselocale(p_Var2);
     }
-    pnVar5 = (numpunct_byname<char> *)plVar3->decimal_point;
-    if (*pnVar5 != (numpunct_byname<char>)0x0) {
-      if (pnVar5[1] == (numpunct_byname<char>)0x0) {
-        this[0x10] = *pnVar5;
+    pcVar5 = plVar3->decimal_point;
+    if (*pcVar5 != '\0') {
+      if (pcVar5[1] == '\0') {
+        *(char *)(param_1 + 0x10) = *pcVar5;
       }
       else {
         local_80[0].__count = 0;
         local_80[0].__value = (_union_27)0x0;
-        sVar4 = strlen((char *)pnVar5);
+        sVar4 = strlen(pcVar5);
         p_Var2 = uselocale(__dataset);
         local_68 = p_Var2;
-        sVar4 = mbrtowc(&local_44,(char *)pnVar5,sVar4,local_80);
+        sVar4 = mbrtowc(&local_44,pcVar5,sVar4,local_80);
         if (p_Var2 != (__locale_t)0x0) {
           uselocale(p_Var2);
         }
@@ -117,23 +114,23 @@ std::__ndk1::numpunct_byname<char>::__init(numpunct_byname<char> *this,char *par
             uselocale(p_Var2);
           }
           if (((iVar1 != -1) || (iVar1 = 0x20, __c == L'\x202f')) || (__c == L'\xa0')) {
-            this[0x10] = SUB41(iVar1,0);
+            *(char *)(param_1 + 0x10) = (char)iVar1;
           }
         }
       }
     }
-    pnVar5 = (numpunct_byname<char> *)plVar3->thousands_sep;
-    if (*pnVar5 != (numpunct_byname<char>)0x0) {
-      if (pnVar5[1] == (numpunct_byname<char>)0x0) {
-        this[0x11] = *pnVar5;
+    pcVar5 = plVar3->thousands_sep;
+    if (*pcVar5 != '\0') {
+      if (pcVar5[1] == '\0') {
+        *(char *)(param_1 + 0x11) = *pcVar5;
       }
       else {
         local_80[0].__count = 0;
         local_80[0].__value = (_union_27)0x0;
-        sVar4 = strlen((char *)pnVar5);
+        sVar4 = strlen(pcVar5);
         p_Var2 = uselocale(__dataset);
         local_68 = p_Var2;
-        sVar4 = mbrtowc(&local_44,(char *)pnVar5,sVar4,local_80);
+        sVar4 = mbrtowc(&local_44,pcVar5,sVar4,local_80);
         if (p_Var2 != (__locale_t)0x0) {
           uselocale(p_Var2);
         }
@@ -148,12 +145,12 @@ std::__ndk1::numpunct_byname<char>::__init(numpunct_byname<char> *this,char *par
           }
                     /* try { // try from 00baf4bc to 00caf4d7 has its CatchHandler @ 00baf608 */
           if (((iVar1 != -1) || (iVar1 = 0x20, local_44 == L'\x202f')) || (local_44 == L'\xa0')) {
-            this[0x11] = SUB41(iVar1,0);
+            *(char *)(param_1 + 0x11) = (char)iVar1;
           }
         }
       }
     }
-    FUN_00b7501c(this + 0x18,plVar3->grouping);
+    FUN_00b7501c(param_1 + 0x18,plVar3->grouping);
     freelocale(__dataset);
   }
                     /* try { // try from 00baf480 to 00caf49b has its CatchHandler @ 00baf600 */

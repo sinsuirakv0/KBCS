@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aaeab8.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "089c14a7cc6388afc70e3aee5bc69e5f489b05c8f6172ebe31dcdb94b7514a8f",
-  "source_text_sha256": "089c14a7cc6388afc70e3aee5bc69e5f489b05c8f6172ebe31dcdb94b7514a8f"
+  "source_sha256": "acf7f39155eff23493de490d8d685db80092e10241d7d5af7fa974320d1a0320",
+  "source_text_sha256": "acf7f39155eff23493de490d8d685db80092e10241d7d5af7fa974320d1a0320"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0076dd00](../0076d/0076dd00.md)
@@ -49,9 +48,12 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "showPopup"
 ~~~
-## 疑似コード 1/1 / UTF-8 4176 bytes
+
+## 疑似コード / UTF-8 4417 bytes
 
 ~~~c
+
+/* WARNING: Type propagation algorithm not settling */
 
 void FUN_00aaeab8(undefined8 *param_1)
 
@@ -70,8 +72,7 @@ void FUN_00aaeab8(undefined8 *param_1)
   char local_177 [8];
   undefined2 local_16f;
   void *local_168;
-  long *local_160;
-  undefined *local_158 [8];
+  long *local_160 [9];
   ulong local_118;
   undefined8 uStack_110;
   void *local_108;
@@ -85,7 +86,7 @@ void FUN_00aaeab8(undefined8 *param_1)
   
   lVar3 = tpidr_el0;
   local_58 = *(long *)(lVar3 + 0x28);
-  plVar5 = operator_new(0x28);
+  plVar5 = (long *)_Znwm(0x28);
   pbVar1 = (byte *)*param_1;
   pbVar2 = (byte *)param_1[1];
   *(undefined4 *)(plVar5 + 1) = 6;
@@ -93,11 +94,16 @@ void FUN_00aaeab8(undefined8 *param_1)
   plVar5[3] = 0;
   plVar5[4] = 0;
   plVar5[2] = 0;
-  plVar6 = (long *)PTR_VTT_00c1acc8;
-  puVar4 = PTR_vtable_00c1ad98;
-  for (; PTR_VTT_00c1acc8 = (undefined *)plVar6, PTR_vtable_00c1ad98 = puVar4, pbVar1 != pbVar2;
-      pbVar1 = pbVar1 + 0x18) {
-    plVar6 = operator_new(0x28);
+  plVar6 = (long *)
+           PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acc8
+  ;
+  puVar4 = PTR__ZTVNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1ad98
+  ;
+  for (; PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acc8 =
+              (undefined *)plVar6,
+      PTR__ZTVNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1ad98 =
+           puVar4, pbVar1 != pbVar2; pbVar1 = pbVar1 + 0x18) {
+    plVar6 = (long *)_Znwm(0x28);
     *(undefined4 *)(plVar6 + 1) = 5;
     *plVar6 = (long)&PTR_FUN_00be66a0;
     if ((*pbVar1 & 1) == 0) {
@@ -110,36 +116,40 @@ void FUN_00aaeab8(undefined8 *param_1)
     else {
       FUN_00418fe0(plVar6 + 2,*(undefined8 *)(pbVar1 + 0x10),*(undefined8 *)(pbVar1 + 8));
     }
-    local_160 = plVar6;
-    FUN_0057462c(plVar5,&local_160);
-    plVar6 = local_160;
-    local_160 = (long *)0x0;
+    local_160[0] = plVar6;
+    FUN_0057462c(plVar5,local_160);
+    plVar6 = local_160[0];
+    local_160[0] = (long *)0x0;
     if (plVar6 != (long *)0x0) {
       (**(code **)(*plVar6 + 8))();
     }
-    plVar6 = (long *)PTR_VTT_00c1acc8;
-    puVar4 = PTR_vtable_00c1ad98;
+    plVar6 = (long *)
+             PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acc8
+    ;
+    puVar4 = 
+    PTR__ZTVNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1ad98;
   }
   local_c0 = 0;
-  local_160 = (long *)plVar6[1];
+  local_160[0] = (long *)plVar6[1];
   local_f0[0] = puVar4 + 0x40;
-  *(long *)((long)local_158 + local_160[-3] + -8) = plVar6[2];
-  lVar7 = local_160[-3];
-  std::__ndk1::ios_base::init((ios_base *)((long)local_158 + lVar7 + -8),local_158);
-  local_160 = (long *)(puVar4 + 0x18);
+  *(long *)((long)local_160 + local_160[0][-3]) = plVar6[2];
+  lVar7 = local_160[0][-3];
+  _ZNSt6__ndk18ios_base4initEPv((long)local_160 + lVar7,local_160 + 1);
+  local_160[0] = (long *)(puVar4 + 0x18);
   *(undefined8 *)((long)&uStack_d8 + lVar7) = 0;
   *(undefined4 *)((long)auStack_d0 + lVar7) = 0xffffffff;
   local_f0[0] = puVar4 + 0x40;
-  std::__ndk1::basic_streambuf<char,std::__ndk1::char_traits<char>>::basic_streambuf
-            ((basic_streambuf<char,std::__ndk1::char_traits<char>> *)local_158);
-  puVar4 = PTR_vtable_00c1acd0;
-  local_158[0] = PTR_vtable_00c1acd0 + 0x10;
+  _ZNSt6__ndk115basic_streambufIcNS_11char_traitsIcEEEC1Ev(local_160 + 1);
+  puVar4 = PTR__ZTVNSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acd0;
+  local_160[1] = (long *)(
+                         PTR__ZTVNSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c1acd0
+                         + 0x10);
   uStack_110 = 0;
   local_118 = 0;
   uStack_100 = 0;
   local_108 = (void *)0x0;
   local_f8 = 0x10;
-  FUN_0042eb00(&local_160,plVar5);
+  FUN_0042eb00(local_160,plVar5);
   local_178 = 0x12;
   local_16f = 0x70;
   local_177[0] = s_showPopup_00297307[0];
@@ -150,27 +160,24 @@ void FUN_00aaeab8(undefined8 *param_1)
   local_177[5] = s_showPopup_00297307[5];
   local_177[6] = s_showPopup_00297307[6];
   local_177[7] = s_showPopup_00297307[7];
-  std::__ndk1::basic_stringbuf<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-  str();
+  _ZNKSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEE3strEv
+            (local_190,local_160 + 1);
   FUN_00aae970(&local_178,local_190,1);
   if ((local_190[0] & 1) != 0) {
-    operator_delete(local_180);
+    _ZdlPv(local_180);
   }
   if ((local_178 & 1) != 0) {
-    operator_delete(local_168);
+    _ZdlPv(local_168);
   }
-  local_160 = (long *)*plVar6;
-  *(long *)((long)local_158 + local_160[-3] + -8) = plVar6[3];
-  local_158[0] = puVar4 + 0x10;
+  local_160[0] = (long *)*plVar6;
+  *(long *)((long)local_160 + local_160[0][-3]) = plVar6[3];
+  local_160[1] = (long *)(puVar4 + 0x10);
   if ((local_118 & 1) != 0) {
-    operator_delete(local_108);
+    _ZdlPv(local_108);
   }
-  std::__ndk1::basic_streambuf<char,std::__ndk1::char_traits<char>>::~basic_streambuf
-            ((basic_streambuf<char,std::__ndk1::char_traits<char>> *)local_158);
-  std::__ndk1::basic_ostream<char,std::__ndk1::char_traits<char>>::~basic_ostream
-            ((basic_ostream<char,std::__ndk1::char_traits<char>> *)&local_160);
-  std::__ndk1::basic_ios<char,std::__ndk1::char_traits<char>>::~basic_ios
-            ((basic_ios<char,std::__ndk1::char_traits<char>> *)local_f0);
+  _ZNSt6__ndk115basic_streambufIcNS_11char_traitsIcEEED2Ev(local_160 + 1);
+  _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEED2Ev(local_160,plVar6 + 1);
+  _ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEED1Ev(local_f0);
   (**(code **)(*plVar5 + 8))(plVar5);
   if (*(long *)(lVar3 + 0x28) == local_58) {
     return;

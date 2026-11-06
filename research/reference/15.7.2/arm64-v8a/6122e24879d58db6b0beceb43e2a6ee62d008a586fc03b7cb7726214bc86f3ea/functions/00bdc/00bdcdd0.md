@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcdd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcdd0",
-  "name": "Botan::Cert_Extension::Basic_Constraints::get_path_limit",
+  "name": "_ZNK5Botan14Cert_Extension17Basic_Constraints14get_path_limitEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "886814439ef76413806e9a24e48153d7330943cd9ae648528ff01ea16ba02bd6",
-  "source_text_sha256": "886814439ef76413806e9a24e48153d7330943cd9ae648528ff01ea16ba02bd6"
+  "source_sha256": "0bddc313f3b85fe9031e2ba61d5cb7b87000f19f8b88a496decde93834b8165b",
+  "source_text_sha256": "0bddc313f3b85fe9031e2ba61d5cb7b87000f19f8b88a496decde93834b8165b"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004ec8c8](../004ec/004ec8c8.md)
@@ -31,14 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004eca70](../004ec/004eca70.md)
 
-## 疑似コード 1/1 / UTF-8 167 bytes
+## 疑似コード / UTF-8 185 bytes
 
 ~~~c
 
-void __thiscall Botan::Cert_Extension::Basic_Constraints::get_path_limit(Basic_Constraints *this)
+void _ZNK5Botan14Cert_Extension17Basic_Constraints14get_path_limitEv(void)
 
 {
-  (*(code *)PTR_get_path_limit_00c1cf20)();
+  (*(code *)PTR__ZNK5Botan14Cert_Extension17Basic_Constraints14get_path_limitEv_00c1cf20)();
   return;
 }
 

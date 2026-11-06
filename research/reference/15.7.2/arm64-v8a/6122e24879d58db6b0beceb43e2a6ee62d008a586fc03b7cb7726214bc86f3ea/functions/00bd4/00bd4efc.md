@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bd4efc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "0db61eabf0e743df10df7fa8f7502ceca63bbdadb555687e2a591f2b7a45ffd0",
-  "source_text_sha256": "0db61eabf0e743df10df7fa8f7502ceca63bbdadb555687e2a591f2b7a45ffd0"
+  "source_sha256": "7f6a8fc0cf16473423b27f27e10f92c87596a011e50a3f942e5c678437fbc23c",
+  "source_text_sha256": "7f6a8fc0cf16473423b27f27e10f92c87596a011e50a3f942e5c678437fbc23c"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdafa0](../00bda/00bdafa0.md)
@@ -32,7 +31,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdb0d0](../00bdb/00bdb0d0.md)
 - [00bdb140](../00bdb/00bdb140.md)
 
-## 疑似コード 1/1 / UTF-8 1297 bytes
+## 疑似コード / UTF-8 1272 bytes
 
 ~~~c
 
@@ -58,7 +57,7 @@ long __cxa_allocate_exception(long param_1)
     return (long)__s + 0x80;
   }
                     /* WARNING: Subroutine does not return */
-  std::terminate();
+  _ZSt9terminatev();
 }
 
 ~~~

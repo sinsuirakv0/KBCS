@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdefd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdefd0",
-  "name": "reflection::TypeBuilder::add_element",
+  "name": "_ZN10reflection11TypeBuilder11add_elementENS_8BaseTypeE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "df41c98799b43d50f283d811c59d5322caf944dd9f19820d2282dd1708c78cec",
-  "source_text_sha256": "df41c98799b43d50f283d811c59d5322caf944dd9f19820d2282dd1708c78cec"
+  "source_sha256": "bf3bc83d460abff9a48d55ab822556c921ea2207ed2eb5183c618fe4edd390da",
+  "source_text_sha256": "bf3bc83d460abff9a48d55ab822556c921ea2207ed2eb5183c618fe4edd390da"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b2c5c0](../00b2c/00b2c5c0.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b35160](../00b35/00b35160.md)
 
-## 疑似コード 1/1 / UTF-8 125 bytes
+## 疑似コード / UTF-8 169 bytes
 
 ~~~c
 
-void __thiscall reflection::TypeBuilder::add_element(void)
+void _ZN10reflection11TypeBuilder11add_elementENS_8BaseTypeE(void)
 
 {
-  (*(code *)PTR_add_element_00c1e020)();
+  (*(code *)PTR__ZN10reflection11TypeBuilder11add_elementENS_8BaseTypeE_00c1e020)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdfda0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdfda0",
-  "name": "std::__ndk1::__sort<bool(*&)(flatbuffers::EnumDef_const*,flatbuffers::EnumDef_const*),flatbuffers::EnumDef**>",
+  "name": "_ZNSt6__ndk16__sortIRPFbPKN11flatbuffers7EnumDefES4_EPPS2_EEvT0_SA_T_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "a2c19ce4a8a5cf9c53f5cdcb74f9e7c513e7a6b73c479bc71d952d625cbb2eb5",
-  "source_text_sha256": "a2c19ce4a8a5cf9c53f5cdcb74f9e7c513e7a6b73c479bc71d952d625cbb2eb5"
+  "source_sha256": "8e3fff5fe43680ce6c07afff92ea70b9ee3c6784770a6dd954331b3d47e3aefe",
+  "source_text_sha256": "8e3fff5fe43680ce6c07afff92ea70b9ee3c6784770a6dd954331b3d47e3aefe"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00b28fc8](../00b28/00b28fc8.md)
@@ -31,18 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b4561c](../00b45/00b4561c.md)
 
-## 疑似コード 1/1 / UTF-8 381 bytes
+## 疑似コード / UTF-8 197 bytes
 
 ~~~c
 
-void std::__ndk1::
-     __sort<bool(*&)(flatbuffers::EnumDef_const*,flatbuffers::EnumDef_const*),flatbuffers::EnumDef**>
-               (EnumDef **param_1,EnumDef **param_2,_func_bool_EnumDef_ptr_EnumDef_ptr *param_3)
+void _ZNSt6__ndk16__sortIRPFbPKN11flatbuffers7EnumDefES4_EPPS2_EEvT0_SA_T_(void)
 
 {
-  (*(code *)
-    PTR___sort<bool(*&)(flatbuffers::EnumDef_const*,flatbuffers::EnumDef_const*),flatbuffers::EnumDef**>_00c1e708
-  )();
+  (*(code *)PTR__ZNSt6__ndk16__sortIRPFbPKN11flatbuffers7EnumDefES4_EPPS2_EEvT0_SA_T__00c1e708)();
   return;
 }
 

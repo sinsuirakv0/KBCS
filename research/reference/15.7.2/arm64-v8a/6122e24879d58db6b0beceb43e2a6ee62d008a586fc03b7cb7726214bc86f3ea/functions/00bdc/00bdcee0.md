@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcee0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcee0",
-  "name": "Botan::BER_Decoder::decode_list<Botan::OID>",
+  "name": "_ZN5Botan11BER_Decoder11decode_listINS_3OIDEEERS0_RNSt6__ndk16vectorIT_NS4_9allocatorIS6_EEEENS_8ASN1_TagESB_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "13cfd8b4ec0bde05cc9eaa691e8dc9ea65e89ee262689947c4fb9284919fea9a",
-  "source_text_sha256": "13cfd8b4ec0bde05cc9eaa691e8dc9ea65e89ee262689947c4fb9284919fea9a"
+  "source_sha256": "42df370e02b485bbc194fb4f41344216b1b22173b32e0492f6d6994d8b2255a4",
+  "source_text_sha256": "42df370e02b485bbc194fb4f41344216b1b22173b32e0492f6d6994d8b2255a4"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004f6e58](../004f6/004f6e58.md)
@@ -30,17 +29,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004f6f28](../004f6/004f6f28.md)
 
-## 疑似コード 1/1 / UTF-8 212 bytes
+## 疑似コード / UTF-8 301 bytes
 
 ~~~c
 
-BER_Decoder * __thiscall Botan::BER_Decoder::decode_list<Botan::OID>(void)
+void _ZN5Botan11BER_Decoder11decode_listINS_3OIDEEERS0_RNSt6__ndk16vectorIT_NS4_9allocatorIS6_EEEENS_8ASN1_TagESB_
+               (void)
 
 {
-  BER_Decoder *pBVar1;
-  
-  pBVar1 = (BER_Decoder *)(*(code *)PTR_decode_list<Botan::OID>_00c1cfa8)();
-  return pBVar1;
+  (*(code *)
+    PTR__ZN5Botan11BER_Decoder11decode_listINS_3OIDEEERS0_RNSt6__ndk16vectorIT_NS4_9allocatorIS6_EEEENS_8ASN1_TagESB__00c1cfa8
+  )();
+  return;
 }
 
 ~~~

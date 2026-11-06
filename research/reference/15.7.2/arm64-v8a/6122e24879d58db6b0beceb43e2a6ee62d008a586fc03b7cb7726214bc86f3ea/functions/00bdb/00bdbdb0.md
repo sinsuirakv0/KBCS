@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbdb0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbdb0",
-  "name": "Botan::BigInt::random_integer",
+  "name": "_ZN5Botan6BigInt14random_integerERNS_21RandomNumberGeneratorERKS0_S4_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "15a40e071bc6a3aa1a79042a85e3eca7157959a3f07c603b15d6ab7e94fe1492",
-  "source_text_sha256": "15a40e071bc6a3aa1a79042a85e3eca7157959a3f07c603b15d6ab7e94fe1492"
+  "source_sha256": "52572f4c9276568c177464f703d1213e83d36b48c6ec567d96776bce8273c19f",
+  "source_text_sha256": "52572f4c9276568c177464f703d1213e83d36b48c6ec567d96776bce8273c19f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004b5c14](../004b5/004b5c14.md)
@@ -31,16 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00497bf4](../00497/00497bf4.md)
 
-## 疑似コード 1/1 / UTF-8 205 bytes
+## 疑似コード / UTF-8 197 bytes
 
 ~~~c
 
-void __thiscall
-Botan::BigInt::random_integer
-          (BigInt *this,RandomNumberGenerator *param_1,BigInt *param_2,BigInt *param_3)
+void _ZN5Botan6BigInt14random_integerERNS_21RandomNumberGeneratorERKS0_S4_(void)
 
 {
-  (*(code *)PTR_random_integer_00c1c710)();
+  (*(code *)PTR__ZN5Botan6BigInt14random_integerERNS_21RandomNumberGeneratorERKS0_S4__00c1c710)();
   return;
 }
 

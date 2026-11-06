@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00baaab0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00baaab0",
-  "name": "std::__ndk1::ctype_byname<wchar_t>::do_is",
+  "name": "_ZNKSt6__ndk112ctype_bynameIwE5do_isEPKwS3_Pm",
   "size": 412,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "fda756c96b482b5079cdb4d70c7dd3d0a3abcaf6015362acadac068aa6571be8",
-  "source_text_sha256": "fda756c96b482b5079cdb4d70c7dd3d0a3abcaf6015362acadac068aa6571be8"
+  "source_sha256": "7c15fb5a32a1181b30a46ed4089f889256ee6d61994fe526164e718937eb2708",
+  "source_text_sha256": "7c15fb5a32a1181b30a46ed4089f889256ee6d61994fe526164e718937eb2708"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -39,83 +38,79 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00be19c0](../00be1/00be19c0.md)
 - [00be19d0](../00be1/00be19d0.md)
 
-## 疑似コード 1/1 / UTF-8 2139 bytes
+## 疑似コード / UTF-8 1943 bytes
 
 ~~~c
 
-/* std::__ndk1::ctype_byname<wchar_t>::do_is(wchar_t const*, wchar_t const*, unsigned long*) const
-    */
-
-wchar_t * __thiscall
-std::__ndk1::ctype_byname<wchar_t>::do_is
-          (ctype_byname<wchar_t> *this,wchar_t *param_1,wchar_t *param_2,ulong *param_3)
+uint * _ZNKSt6__ndk112ctype_bynameIwE5do_isEPKwS3_Pm
+                 (long param_1,uint *param_2,uint *param_3,ulong *param_4)
 
 {
-  wchar_t __wc;
-  wchar_t *pwVar1;
+  uint __wc;
+  uint *puVar1;
   int iVar2;
   __locale_t __locale;
   ulong uVar3;
   
-  pwVar1 = param_1;
+  puVar1 = param_2;
   do {
-    if (param_1 == param_2) {
-      return pwVar1;
+    if (param_2 == param_3) {
+      return puVar1;
     }
-    __wc = *param_1;
-    if ((uint)__wc < 0x80) {
-      uVar3 = *(ulong *)(&DAT_002fb120 + (ulong)(uint)__wc * 8);
+    __wc = *param_2;
+    if (__wc < 0x80) {
+      uVar3 = *(ulong *)(&DAT_002fb120 + (ulong)__wc * 8);
 LAB_00baaaf0:
-      *param_3 = uVar3;
+      *param_4 = uVar3;
     }
     else {
-      __locale = *(__locale_t *)(this + 0x10);
-      *param_3 = 0;
+      __locale = *(__locale_t *)(param_1 + 0x10);
+      *param_4 = 0;
       iVar2 = iswspace_l(__wc,__locale);
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 1;
+        *param_4 = *param_4 | 1;
       }
-      iVar2 = iswprint_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswprint_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 2;
+        *param_4 = *param_4 | 2;
       }
-      iVar2 = iswcntrl_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswcntrl_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 4;
+        *param_4 = *param_4 | 4;
       }
-      iVar2 = iswupper_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswupper_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 8;
+        *param_4 = *param_4 | 8;
       }
-      iVar2 = iswlower_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswlower_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 0x10;
+        *param_4 = *param_4 | 0x10;
       }
-      iVar2 = iswalpha_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswalpha_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 0x20;
+        *param_4 = *param_4 | 0x20;
       }
-      iVar2 = iswdigit_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswdigit_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 0x40;
+        *param_4 = *param_4 | 0x40;
       }
-      iVar2 = iswpunct_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswpunct_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 0x80;
+        *param_4 = *param_4 | 0x80;
       }
-      iVar2 = iswxdigit_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswxdigit_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        *param_3 = *param_3 | 0x100;
+        *param_4 = *param_4 | 0x100;
       }
-      iVar2 = iswblank_l(__wc,*(__locale_t *)(this + 0x10));
+      iVar2 = iswblank_l(__wc,*(__locale_t *)(param_1 + 0x10));
       if (iVar2 != 0) {
-        uVar3 = *param_3 | 0x200;
+        uVar3 = *param_4 | 0x200;
         goto LAB_00baaaf0;
       }
     }
-    param_1 = param_1 + 1;
-    param_3 = param_3 + 1;
-    pwVar1 = param_2;
+    param_2 = param_2 + 1;
+    param_4 = param_4 + 1;
+    puVar1 = param_3;
   } while( true );
 }
 

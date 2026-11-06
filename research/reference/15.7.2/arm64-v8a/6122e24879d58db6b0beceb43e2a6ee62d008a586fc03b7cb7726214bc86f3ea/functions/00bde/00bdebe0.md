@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdebe0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdebe0",
-  "name": "firebase::CleanupNotifier::UnregisterOwner",
+  "name": "_ZN8firebase15CleanupNotifier15UnregisterOwnerENSt6__ndk114__map_iteratorINS1_15__tree_iteratorINS1_12__value_typeIPvPS0_EEPNS1_11__tree_nodeIS7_S5_EElEEEE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "2fc9cb3d6941857a2aeba6dacb12f6360d1c5262e80689751c19119a41aac51f",
-  "source_text_sha256": "2fc9cb3d6941857a2aeba6dacb12f6360d1c5262e80689751c19119a41aac51f"
+  "source_sha256": "3fe766d279b5b1589c59f28ab96a9a4c3473d9d155f0bae38e5000fc2bb96cba",
+  "source_text_sha256": "3fe766d279b5b1589c59f28ab96a9a4c3473d9d155f0bae38e5000fc2bb96cba"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00afc63c](../00afc/00afc63c.md)
@@ -32,14 +31,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00afcb88](../00afc/00afcb88.md)
 
-## 疑似コード 1/1 / UTF-8 124 bytes
+## 疑似コード / UTF-8 393 bytes
 
 ~~~c
 
-void firebase::CleanupNotifier::UnregisterOwner(void)
+void _ZN8firebase15CleanupNotifier15UnregisterOwnerENSt6__ndk114__map_iteratorINS1_15__tree_iteratorINS1_12__value_typeIPvPS0_EEPNS1_11__tree_nodeIS7_S5_EElEEEE
+               (void)
 
 {
-  (*(code *)PTR_UnregisterOwner_00c1de28)();
+  (*(code *)
+    PTR__ZN8firebase15CleanupNotifier15UnregisterOwnerENSt6__ndk114__map_iteratorINS1_15__tree_iteratorINS1_12__value_typeIPvPS0_EEPNS1_11__tree_nodeIS7_S5_EElEEEE_00c1de28
+  )();
   return;
 }
 

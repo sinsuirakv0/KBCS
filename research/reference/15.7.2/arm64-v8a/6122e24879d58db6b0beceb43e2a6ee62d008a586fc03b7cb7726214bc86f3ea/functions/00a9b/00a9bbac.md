@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00a9bbac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "669ae71e6857ec7db9ee705fb655b69fa53ac67f49cfbc7264e0958e54bde065",
-  "source_text_sha256": "669ae71e6857ec7db9ee705fb655b69fa53ac67f49cfbc7264e0958e54bde065"
+  "source_sha256": "2112b0f97cea77fd2af031dbd24a3e8b06eefd668ebfb36fb1841078ed8e2fbb",
+  "source_text_sha256": "2112b0f97cea77fd2af031dbd24a3e8b06eefd668ebfb36fb1841078ed8e2fbb"
 }
 ~~~
+
 ## 呼び出し元
 
 - [005ced48](../005ce/005ced48.md)
@@ -39,7 +38,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [005bbc90](../005bb/005bbc90.md)
 - [0081f580](../0081f/0081f580.md)
 
-## 疑似コード 1/1 / UTF-8 1463 bytes
+## 疑似コード / UTF-8 1418 bytes
 
 ~~~c
 

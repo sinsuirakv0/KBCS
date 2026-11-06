@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbab0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbab0",
-  "name": "Botan::calendar_point::to_std_timepoint",
+  "name": "_ZNK5Botan14calendar_point16to_std_timepointEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "6bd03f9cba24f7ed35cf5edf5172da864d3faf2e5f03c1ce654c6a043fd8ad27",
-  "source_text_sha256": "6bd03f9cba24f7ed35cf5edf5172da864d3faf2e5f03c1ce654c6a043fd8ad27"
+  "source_sha256": "d0c3ea32c6b0fc1f4b232db7aed596ca181b2282dd31111f329ca9604db07ee2",
+  "source_text_sha256": "d0c3ea32c6b0fc1f4b232db7aed596ca181b2282dd31111f329ca9604db07ee2"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0048c288](../0048c/0048c288.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [0048c2e0](../0048c/0048c2e0.md)
 
-## 疑似コード 1/1 / UTF-8 149 bytes
+## 疑似コード / UTF-8 151 bytes
 
 ~~~c
 
-void __thiscall Botan::calendar_point::to_std_timepoint(calendar_point *this)
+void _ZNK5Botan14calendar_point16to_std_timepointEv(void)
 
 {
-  (*(code *)PTR_to_std_timepoint_00c1c590)();
+  (*(code *)PTR__ZNK5Botan14calendar_point16to_std_timepointEv_00c1c590)();
   return;
 }
 

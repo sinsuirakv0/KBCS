@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b6ddfc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b6ddfc",
-  "name": "firebase::auth::metadata::CacheClassFromFiles",
+  "name": "_ZN8firebase4auth8metadata19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "edb63035b5eb3a8cef95c13e5765b49f8aa59425a6eb1a7e0f2f2ba59be797fe",
-  "source_text_sha256": "edb63035b5eb3a8cef95c13e5765b49f8aa59425a6eb1a7e0f2f2ba59be797fe"
+  "source_sha256": "0d095363187b126dc851e6a2e4eab0b71b83aba56f39f1fca2eb181271b3e712",
+  "source_text_sha256": "0d095363187b126dc851e6a2e4eab0b71b83aba56f39f1fca2eb181271b3e712"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,21 +34,19 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "%PG%com/google/firebase/auth/FirebaseUserMetadata"
 ~~~
-## 疑似コード 1/1 / UTF-8 528 bytes
+
+## 疑似コード / UTF-8 514 bytes
 
 ~~~c
 
-/* firebase::auth::metadata::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*) */
-
-long firebase::auth::metadata::CacheClassFromFiles
-               (_JNIEnv *param_1,_jobject *param_2,vector *param_3)
+long _ZN8firebase4auth8metadata19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEE
+               (void)
 
 {
   if (DAT_010a19f8 == 0) {
                     /* catch() { ... } // from try @ 00b6ddb8 with catch @ 00b6de1c */
-    DAT_010a19f8 = util::FindClassGlobal();
+    DAT_010a19f8 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
   return DAT_010a19f8;
 }

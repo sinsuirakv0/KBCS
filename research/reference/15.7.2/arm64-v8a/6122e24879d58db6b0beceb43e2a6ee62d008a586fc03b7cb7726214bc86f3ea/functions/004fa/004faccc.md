@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004faccc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004faccc",
-  "name": "Botan::Cert_Extension::CRL_ReasonCode::encode_inner",
+  "name": "_ZNK5Botan14Cert_Extension14CRL_ReasonCode12encode_innerEv",
   "size": 296,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "6cb14e10cf6485babf3b79b793462c9f2d4265de8b38ac7000c167f335a63ec5",
-  "source_text_sha256": "6cb14e10cf6485babf3b79b793462c9f2d4265de8b38ac7000c167f335a63ec5"
+  "source_sha256": "886c41107f0fa7204976d2c2c04b351bb86cf41eda9e76066f3219eda372c726",
+  "source_text_sha256": "886c41107f0fa7204976d2c2c04b351bb86cf41eda9e76066f3219eda372c726"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -37,19 +36,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdbbc0](../00bdb/00bdbbc0.md)
 - [010a5058](../010a5/010a5058.md)
 
-## 疑似コード 1/1 / UTF-8 1578 bytes
+## 疑似コード / UTF-8 1492 bytes
 
 ~~~c
 
-/* Botan::Cert_Extension::CRL_ReasonCode::encode_inner() const */
-
-void Botan::Cert_Extension::CRL_ReasonCode::encode_inner(void)
+void _ZNK5Botan14Cert_Extension14CRL_ReasonCode12encode_innerEv(undefined8 param_1,long param_2)
 
 {
   long lVar1;
   void *pvVar2;
   void *pvVar3;
-  long in_x0;
   void *local_a0;
   void *pvStack_98;
   long local_90;
@@ -69,14 +65,14 @@ void Botan::Cert_Extension::CRL_ReasonCode::encode_inner(void)
   local_80 = (void *)0x0;
   pvStack_98 = (void *)0x0;
   local_a0 = (void *)0x0;
-  BigInt::BigInt((BigInt *)&local_68,(ulong)*(uint *)(in_x0 + 8));
-  DER_Encoder::encode((DER_Encoder *)&local_a0,&local_68,10,0);
+  _ZN5Botan6BigIntC1Em(&local_68,*(undefined4 *)(param_2 + 8));
+  _ZN5Botan11DER_Encoder6encodeERKNS_6BigIntENS_8ASN1_TagES4_(&local_a0,&local_68,10,0);
   if (local_68 != (void *)0x0) {
     local_60 = local_68;
     (*(code *)PTR_memset_00bea678)(local_68,0,local_58 - (long)local_68);
     free(local_68);
   }
-  FUN_00483ed8(&local_a0);
+  FUN_00483ed8(param_1,&local_a0);
   pvVar3 = pvStack_88;
   pvVar2 = local_80;
   if (pvStack_88 != (void *)0x0) {
@@ -85,7 +81,7 @@ void Botan::Cert_Extension::CRL_ReasonCode::encode_inner(void)
       pvVar2 = (void *)((long)pvVar2 + -0x38);
     }
     local_80 = pvVar3;
-    operator_delete(pvStack_88);
+    _ZdlPv(pvStack_88);
   }
   pvVar2 = local_a0;
   if (local_a0 != (void *)0x0) {

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddef0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddef0",
-  "name": "firebase::ReferenceCountedFutureImpl::SetBackingError",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl15SetBackingErrorEPNS_17FutureBackingDataEiPKc",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "eff941e342220f528ad1bbe46d0542b9377d2e11a68f81f579679723477ce6bd",
-  "source_text_sha256": "eff941e342220f528ad1bbe46d0542b9377d2e11a68f81f579679723477ce6bd"
+  "source_sha256": "b09702398c5e48c9af6ccf7dce820d51133c16e7e32417a29a7ee8d804d922bf",
+  "source_text_sha256": "b09702398c5e48c9af6ccf7dce820d51133c16e7e32417a29a7ee8d804d922bf"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae348c](../00ae3/00ae348c.md)
@@ -48,16 +47,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00aff110](../00aff/00aff110.md)
 
-## 疑似コード 1/1 / UTF-8 260 bytes
+## 疑似コード / UTF-8 239 bytes
 
 ~~~c
 
-void __thiscall
-firebase::ReferenceCountedFutureImpl::SetBackingError
-          (ReferenceCountedFutureImpl *this,FutureBackingData *param_1,int param_2,char *param_3)
+void _ZN8firebase26ReferenceCountedFutureImpl15SetBackingErrorEPNS_17FutureBackingDataEiPKc(void)
 
 {
-  (*(code *)PTR_SetBackingError_00c1d7b0)(this,param_1,param_2);
+  (*(code *)
+    PTR__ZN8firebase26ReferenceCountedFutureImpl15SetBackingErrorEPNS_17FutureBackingDataEiPKc_00c1d7b0
+  )();
   return;
 }
 

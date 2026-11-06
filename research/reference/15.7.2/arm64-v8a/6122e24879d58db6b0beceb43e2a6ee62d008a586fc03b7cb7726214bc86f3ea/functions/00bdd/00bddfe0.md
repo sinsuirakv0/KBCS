@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddfe0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddfe0",
-  "name": "firebase::util::CheckAndClearJniExceptions",
+  "name": "_ZN8firebase4util26CheckAndClearJniExceptionsEP7_JNIEnv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "f5ec5abb9a76f92c6c4bd5445723588eaa6c5070377aafddb2fd3acd18e0325f",
-  "source_text_sha256": "f5ec5abb9a76f92c6c4bd5445723588eaa6c5070377aafddb2fd3acd18e0325f"
+  "source_sha256": "736190b46552d0a8421ff858b9e2e5480824599ebba4fe9d943748de5db072a1",
+  "source_text_sha256": "736190b46552d0a8421ff858b9e2e5480824599ebba4fe9d943748de5db072a1"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae05e4](../00ae0/00ae05e4.md)
@@ -257,14 +256,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00ae4920](../00ae4/00ae4920.md)
 
-## 疑似コード 1/1 / UTF-8 147 bytes
+## 疑似コード / UTF-8 169 bytes
 
 ~~~c
 
-void firebase::util::CheckAndClearJniExceptions(_JNIEnv *param_1)
+void _ZN8firebase4util26CheckAndClearJniExceptionsEP7_JNIEnv(void)
 
 {
-  (*(code *)PTR_CheckAndClearJniExceptions_00c1d828)();
+  (*(code *)PTR__ZN8firebase4util26CheckAndClearJniExceptionsEP7_JNIEnv_00c1d828)();
   return;
 }
 

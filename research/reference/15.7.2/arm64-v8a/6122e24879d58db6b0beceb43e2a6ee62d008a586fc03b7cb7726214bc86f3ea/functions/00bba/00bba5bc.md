@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bba5bc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "d0f8a2d9b397cc0cf983dc41cb04d6b548deea01eb97c0095b38b3f85a8c42c9",
-  "source_text_sha256": "d0f8a2d9b397cc0cf983dc41cb04d6b548deea01eb97c0095b38b3f85a8c42c9"
+  "source_sha256": "f22a776c4ba7d77827f046f895bafa4bba42960d478705cddec3365fe39347a6",
+  "source_text_sha256": "f22a776c4ba7d77827f046f895bafa4bba42960d478705cddec3365fe39347a6"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -32,22 +31,23 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdafc0](../00bda/00bdafc0.md)
 - [00bdb0e0](../00bdb/00bdb0e0.md)
 
-## 疑似コード 1/1 / UTF-8 619 bytes
+## 疑似コード / UTF-8 597 bytes
 
 ~~~c
 
 void __cxa_throw_bad_array_new_length(void)
 
 {
-  bad_array_new_length *this;
+  undefined8 uVar1;
   
                     /* catch() { ... } // from try @ 00bb6d68 with catch @ 00bba5cc */
-  this = (bad_array_new_length *)__cxa_allocate_exception(8);
-  std::bad_array_new_length::bad_array_new_length(this);
+  uVar1 = __cxa_allocate_exception(8);
+  _ZNSt20bad_array_new_lengthC1Ev();
                     /* catch() { ... } // from try @ 00bb6d5c with catch @ 00bba5e0 */
                     /* catch() { ... } // from try @ 00bb69c4 with catch @ 00bba5e4 */
                     /* WARNING: Subroutine does not return */
-  __cxa_throw(this,PTR_typeinfo_00c1ace0,PTR__bad_array_new_length_00c1ace8);
+  __cxa_throw(uVar1,PTR__ZTISt20bad_array_new_length_00c1ace0,
+              PTR__ZNSt20bad_array_new_lengthD1Ev_00c1ace8);
 }
 
 ~~~

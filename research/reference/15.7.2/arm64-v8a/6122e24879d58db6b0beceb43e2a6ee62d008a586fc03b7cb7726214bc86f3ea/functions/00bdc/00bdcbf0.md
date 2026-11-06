@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcbf0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcbf0",
-  "name": "Botan::X509_DN::decode_from",
+  "name": "_ZN5Botan7X509_DN11decode_fromERNS_11BER_DecoderE",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "ffa6922319a4d240ab1c267d9d785a7419838ff29d7aed07d7fcdba212d6d7d4",
-  "source_text_sha256": "ffa6922319a4d240ab1c267d9d785a7419838ff29d7aed07d7fcdba212d6d7d4"
+  "source_sha256": "5ef8f4e425ae91165654ffdab196626bedd74552872b2672463a6bc539a47dca",
+  "source_text_sha256": "5ef8f4e425ae91165654ffdab196626bedd74552872b2672463a6bc539a47dca"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004e3840](../004e3/004e3840.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004e40b8](../004e4/004e40b8.md)
 
-## 疑似コード 1/1 / UTF-8 146 bytes
+## 疑似コード / UTF-8 157 bytes
 
 ~~~c
 
-void __thiscall Botan::X509_DN::decode_from(X509_DN *this,BER_Decoder *param_1)
+void _ZN5Botan7X509_DN11decode_fromERNS_11BER_DecoderE(void)
 
 {
-  (*(code *)PTR_decode_from_00c1ce30)();
+  (*(code *)PTR__ZN5Botan7X509_DN11decode_fromERNS_11BER_DecoderE_00c1ce30)();
   return;
 }
 

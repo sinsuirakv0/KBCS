@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbacfc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bbacfc",
-  "name": "std::bad_array_new_length::bad_array_new_length",
+  "name": "_ZNSt20bad_array_new_lengthC1Ev",
   "size": 24,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "fadd85b101243367f895d3c3fd87049c889f00141c84b1c5e7c50dbada82b124",
-  "source_text_sha256": "fadd85b101243367f895d3c3fd87049c889f00141c84b1c5e7c50dbada82b124"
+  "source_sha256": "6196d8070b1d6bc29ba5e69f10645f5e8986372285e0e91f25b63e127945297f",
+  "source_text_sha256": "6196d8070b1d6bc29ba5e69f10645f5e8986372285e0e91f25b63e127945297f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdb0e0](../00bdb/00bdb0e0.md)
@@ -30,20 +29,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 668 bytes
+## 疑似コード / UTF-8 575 bytes
 
 ~~~c
 
-/* std::bad_array_new_length::bad_array_new_length() */
-
-void __thiscall std::bad_array_new_length::bad_array_new_length(bad_array_new_length *this)
+void _ZNSt20bad_array_new_lengthC1Ev(long *param_1)
 
 {
                     /* catch() { ... } // from try @ 00bb4c88 with catch @ 00bbad00 */
                     /* catch() { ... } // from try @ 00bb4ca0 with catch @ 00bbad04 */
                     /* catch() { ... } // from try @ 00bb48c0 with catch @ 00bbad08 */
                     /* catch() { ... } // from try @ 00bb48a8 with catch @ 00bbad0c */
-  *(undefined **)this = PTR_vtable_00c1bf20 + 0x10;
+  *param_1 = (long)(PTR__ZTVSt20bad_array_new_length_00c1bf20 + 0x10);
                     /* catch() { ... } // from try @ 00bb4500 with catch @ 00bbad10 */
   return;
 }

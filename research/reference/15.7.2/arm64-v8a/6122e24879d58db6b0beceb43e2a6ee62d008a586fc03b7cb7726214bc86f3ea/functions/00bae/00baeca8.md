@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00baeca8.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00baeca8",
-  "name": "std::__ndk1::__codecvt_utf8_utf16<char16_t>::do_encoding",
+  "name": "_ZNKSt6__ndk120__codecvt_utf8_utf16IDsE11do_encodingEv",
   "size": 12,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "904a296baf766cba28c910b84ee9b244273a85fabb8317b42f540036700297c1",
-  "source_text_sha256": "904a296baf766cba28c910b84ee9b244273a85fabb8317b42f540036700297c1"
+  "source_sha256": "ab71df9d0136349a678f1d7b1bad5084f40534a373e66e86da821d6d645bdb00",
+  "source_text_sha256": "ab71df9d0136349a678f1d7b1bad5084f40534a373e66e86da821d6d645bdb00"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,13 +29,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 解決済みの記録なし。
 
-## 疑似コード 1/1 / UTF-8 174 bytes
+## 疑似コード / UTF-8 91 bytes
 
 ~~~c
 
-/* std::__ndk1::__codecvt_utf8_utf16<char16_t>::do_encoding() const */
-
-undefined8 std::__ndk1::__codecvt_utf8_utf16<char16_t>::do_encoding(void)
+undefined8 _ZNKSt6__ndk120__codecvt_utf8_utf16IDsE11do_encodingEv(void)
 
 {
   return 0;

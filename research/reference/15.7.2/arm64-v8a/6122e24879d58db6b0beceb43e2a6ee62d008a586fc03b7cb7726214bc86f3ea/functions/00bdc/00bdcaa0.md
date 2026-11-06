@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcaa0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcaa0",
-  "name": "Botan::X509_Certificate::data",
+  "name": "_ZNK5Botan16X509_Certificate4dataEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "6b7a0a8a5a597c1739fce0289e083748d0f83bf2a62150cdc343604696a44e61",
-  "source_text_sha256": "6b7a0a8a5a597c1739fce0289e083748d0f83bf2a62150cdc343604696a44e61"
+  "source_sha256": "c83c94a6b5739b9d5166b5ae79a9c463b78507ddb19afa17850f3c9ba239842f",
+  "source_text_sha256": "c83c94a6b5739b9d5166b5ae79a9c463b78507ddb19afa17850f3c9ba239842f"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004de868](../004de/004de868.md)
@@ -96,14 +95,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004ff98c](../004ff/004ff98c.md)
 
-## 疑似コード 1/1 / UTF-8 129 bytes
+## 疑似コード / UTF-8 129 bytes
 
 ~~~c
 
-void __thiscall Botan::X509_Certificate::data(X509_Certificate *this)
+void _ZNK5Botan16X509_Certificate4dataEv(void)
 
 {
-  (*(code *)PTR_data_00c1cd88)();
+  (*(code *)PTR__ZNK5Botan16X509_Certificate4dataEv_00c1cd88)();
   return;
 }
 

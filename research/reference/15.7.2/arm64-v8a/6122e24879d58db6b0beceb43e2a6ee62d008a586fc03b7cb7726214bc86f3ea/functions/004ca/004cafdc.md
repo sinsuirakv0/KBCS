@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004cafdc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004cafdc",
-  "name": "Botan::PKCS8::copy_key",
+  "name": "_ZN5Botan5PKCS88copy_keyERKNS_11Private_KeyE",
   "size": 244,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "c7b28c38fa7f05eed04bacaf27eda858b0bc4f7bf234eb4e6772b283a9201bf4",
-  "source_text_sha256": "c7b28c38fa7f05eed04bacaf27eda858b0bc4f7bf234eb4e6772b283a9201bf4"
+  "source_sha256": "af474d5eae3e8d87cfb81bb57dad4ab4d92b0ecf59533308d175842097559431",
+  "source_text_sha256": "af474d5eae3e8d87cfb81bb57dad4ab4d92b0ecf59533308d175842097559431"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdc700](../00bdc/00bdc700.md)
@@ -38,19 +37,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdc6a0](../00bdc/00bdc6a0.md)
 - [010a5058](../010a5/010a5058.md)
 
-## 疑似コード 1/1 / UTF-8 1319 bytes
+## 疑似コード / UTF-8 1281 bytes
 
 ~~~c
 
-/* Botan::PKCS8::copy_key(Botan::Private_Key const&) */
-
-void __thiscall Botan::PKCS8::copy_key(PKCS8 *this,Private_Key *param_1)
+void _ZN5Botan5PKCS88copy_keyERKNS_11Private_KeyE(undefined8 param_1)
 
 {
   long lVar1;
   undefined ***pppuVar2;
   long lVar3;
-  DataSource_Memory aDStack_98 [8];
+  undefined1 auStack_98 [8];
   void *local_90;
   void *local_88;
   long local_80;
@@ -61,14 +58,15 @@ void __thiscall Botan::PKCS8::copy_key(PKCS8 *this,Private_Key *param_1)
   
   lVar1 = tpidr_el0;
   local_38 = *(long *)(lVar1 + 0x28);
-  PEM_encode((Private_Key *)this);
-  DataSource_Memory::DataSource_Memory(aDStack_98,(basic_string *)local_70);
-  if (((byte)local_70[0]._0_1_ & 1) != 0) {
-    operator_delete(local_60);
+  _ZN5Botan5PKCS810PEM_encodeERKNS_11Private_KeyE(local_70);
+  _ZN5Botan17DataSource_MemoryC1ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+            (auStack_98,local_70);
+  if (((byte)local_70[0] & 1) != 0) {
+    _ZdlPv(local_60);
   }
   local_70[0] = &PTR_FUN_00bed4f0;
   local_50 = local_70;
-  FUN_004c9e38(aDStack_98,local_70,0);
+  FUN_004c9e38(param_1,auStack_98,local_70,0);
   if (local_50 == local_70) {
     lVar3 = 0x20;
     pppuVar2 = local_70;

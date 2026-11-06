@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](005afdbc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "bbbf923226e623793117547bfd28c722c3832bde4dce79beb209aff65dd568b8",
-  "source_text_sha256": "bbbf923226e623793117547bfd28c722c3832bde4dce79beb209aff65dd568b8"
+  "source_sha256": "1af74dfae23699aba18ef616db4a9ee78b98eabc9c2e598ba18778b9a799fd72",
+  "source_text_sha256": "1af74dfae23699aba18ef616db4a9ee78b98eabc9c2e598ba18778b9a799fd72"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,7 +29,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdaf60](../00bda/00bdaf60.md)
 
-## 疑似コード 1/1 / UTF-8 267 bytes
+## 疑似コード / UTF-8 273 bytes
 
 ~~~c
 
@@ -40,11 +39,11 @@ void FUN_005afdbc(long *param_1)
   long *plVar1;
   
   plVar1 = (long *)param_1[1];
-  *param_1 = (long)(PTR_vtable_00c1b4b0 + 0x10);
+  *param_1 = (long)(PTR__ZTVNSt6__ndk116__owns_one_stateIcEE_00c1b4b0 + 0x10);
   if (plVar1 != (long *)0x0) {
     (**(code **)(*plVar1 + 8))(plVar1);
   }
-  operator_delete(param_1);
+  _ZdlPv(param_1);
   return;
 }
 

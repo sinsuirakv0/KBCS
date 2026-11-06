@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbce0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbce0",
-  "name": "Botan::BigInt::operator>>=",
+  "name": "_ZN5Botan6BigIntrSEm",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "223a52b5b2c0538e4e8a0a71e2b31d142b381b94a4ebf7e0b6c96d8a0fd1d938",
-  "source_text_sha256": "223a52b5b2c0538e4e8a0a71e2b31d142b381b94a4ebf7e0b6c96d8a0fd1d938"
+  "source_sha256": "f04eb9007231774562bb60ce0cef336b59826ba0f110669a5bb91ffd93b7f5eb",
+  "source_text_sha256": "f04eb9007231774562bb60ce0cef336b59826ba0f110669a5bb91ffd93b7f5eb"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00493850](../00493/00493850.md)
@@ -31,14 +30,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00496564](../00496/00496564.md)
 
-## 疑似コード 1/1 / UTF-8 137 bytes
+## 疑似コード / UTF-8 99 bytes
 
 ~~~c
 
-void __thiscall Botan::BigInt::operator>>=(BigInt *this,ulong param_1)
+void _ZN5Botan6BigIntrSEm(void)
 
 {
-  (*(code *)PTR_operator>>__00c1c6a8)();
+  (*(code *)PTR__ZN5Botan6BigIntrSEm_00c1c6a8)();
   return;
 }
 

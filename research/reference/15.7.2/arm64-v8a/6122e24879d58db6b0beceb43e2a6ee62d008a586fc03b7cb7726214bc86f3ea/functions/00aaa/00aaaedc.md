@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00aaaedc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "f18e8c4678031eece74ff60703a23d0d87f7e963adbe50e262bfc84c94b6ca76",
-  "source_text_sha256": "f18e8c4678031eece74ff60703a23d0d87f7e963adbe50e262bfc84c94b6ca76"
+  "source_sha256": "7b7fca21868bc26a91479ea88d9f9a6290219030567bbd4d65a04d01960456ca",
+  "source_text_sha256": "7b7fca21868bc26a91479ea88d9f9a6290219030567bbd4d65a04d01960456ca"
 }
 ~~~
+
 ## 呼び出し元
 
 - [005d996c](../005d9/005d996c.md)
@@ -41,7 +40,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf90](../00bda/00bdaf90.md)
 - [00bdb0b0](../00bdb/00bdb0b0.md)
 
-## 疑似コード 1/1 / UTF-8 7943 bytes
+## 疑似コード / UTF-8 7699 bytes
 
 ~~~c
 
@@ -106,7 +105,7 @@ void FUN_00aaaedc(long param_1,int param_2,int param_3,int param_4)
     puVar18 = puVar15 + 1;
   }
 LAB_00aaaf98:
-  puVar15 = operator_new(0x40);
+  puVar15 = (undefined8 *)_Znwm(0x40);
   puVar15[6] = 0;
   puVar15[7] = 0;
   puVar15[5] = 0;
@@ -141,7 +140,7 @@ LAB_00aaafec:
       puVar18 = puVar15 + 1;
     }
 LAB_00aab084:
-    puVar15 = operator_new(0x40);
+    puVar15 = (undefined8 *)_Znwm(0x40);
     puVar15[6] = 0;
     puVar15[7] = 0;
     puVar15[5] = 0;
@@ -174,7 +173,7 @@ LAB_00aab0d8:
       puVar15[6] = uVar16;
       if (local_80 != (void *)0x0) {
         local_78 = local_80;
-        operator_delete(local_80);
+        _ZdlPv(local_80);
       }
     }
     lVar26 = 0;
@@ -210,7 +209,7 @@ LAB_00aab0d8:
         puVar19 = (undefined8 *)*puVar18;
       }
 LAB_00aab218:
-      puVar18 = operator_new(0x40);
+      puVar18 = (undefined8 *)_Znwm(0x40);
       puVar18[2] = puVar15;
       puVar18[6] = 0;
       puVar18[7] = 0;
@@ -266,7 +265,7 @@ LAB_00aab370:
         }
         else {
           if (uVar23 >> 0x3d != 0) goto LAB_00aab370;
-          __dest = operator_new(uVar23 << 3);
+          __dest = (void *)_Znwm(uVar23 << 3);
         }
         puVar24 = (undefined8 *)((long)__dest + lVar17 * 8);
         puVar18 = puVar24 + 1;
@@ -276,7 +275,7 @@ LAB_00aab370:
         *(undefined8 **)(lVar25 + -0x10) = puVar18;
         *(void **)(lVar25 + -8) = (void *)((long)__dest + uVar23 * 8);
         if (__src != (void *)0x0) {
-          operator_delete(__src);
+          _ZdlPv(__src);
         }
       }
       lVar26 = lVar26 + 1;

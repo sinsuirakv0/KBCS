@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddad0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddad0",
-  "name": "firebase::auth::User::User",
+  "name": "_ZN8firebase4auth4UserC1ERKS1_",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "c6aee88b20d105f646f7ae190b55e5635c379cb0f609a56aaada0cb2ddb4a4fa",
-  "source_text_sha256": "c6aee88b20d105f646f7ae190b55e5635c379cb0f609a56aaada0cb2ddb4a4fa"
+  "source_sha256": "d11ae5c53c09e0f9c57c60d8b95ba23ca234e7f50504c909ca55c166215d4ab1",
+  "source_text_sha256": "d11ae5c53c09e0f9c57c60d8b95ba23ca234e7f50504c909ca55c166215d4ab1"
 }
 ~~~
+
 ## 呼び出し元
 
 - [008480ec](../00848/008480ec.md)
@@ -34,14 +33,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b6e7d8](../00b6e/00b6e7d8.md)
 
-## 疑似コード 1/1 / UTF-8 128 bytes
+## 疑似コード / UTF-8 119 bytes
 
 ~~~c
 
-void __thiscall firebase::auth::User::User(User *this,User *param_1)
+void _ZN8firebase4auth4UserC1ERKS1_(void)
 
 {
-  (*(code *)PTR_User_00c1d5a0)();
+  (*(code *)PTR__ZN8firebase4auth4UserC1ERKS1__00c1d5a0)();
   return;
 }
 

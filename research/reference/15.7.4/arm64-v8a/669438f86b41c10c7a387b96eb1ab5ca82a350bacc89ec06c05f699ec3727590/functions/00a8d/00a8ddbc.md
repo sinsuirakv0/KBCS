@@ -1,0 +1,55 @@
+﻿# 00a8ddbc
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00a8ddbc",
+  "name": "FUN_00a8ddbc",
+  "size": 64,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "c41cda0609d65a0dda0b241186977d50c8f6c7408f00be59ec28d55e3f437177",
+  "source_text_sha256": "c41cda0609d65a0dda0b241186977d50c8f6c7408f00be59ec28d55e3f437177"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bdb040](../00bdb/00bdb040.md)
+
+## 疑似コード / UTF-8 392 bytes
+
+~~~c
+
+void FUN_00a8ddbc(long param_1)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  undefined8 uVar3;
+  undefined8 uVar4;
+  
+  puVar1 = (undefined8 *)_Znwm(0x20);
+  uVar4 = *(undefined8 *)(param_1 + 0x10);
+  uVar3 = *(undefined8 *)(param_1 + 8);
+  uVar2 = *(undefined8 *)(param_1 + 0x18);
+  *puVar1 = &PTR_FUN_00c0e0d8;
+  puVar1[2] = uVar4;
+  puVar1[1] = uVar3;
+  puVar1[3] = uVar2;
+  return;
+}
+
+~~~

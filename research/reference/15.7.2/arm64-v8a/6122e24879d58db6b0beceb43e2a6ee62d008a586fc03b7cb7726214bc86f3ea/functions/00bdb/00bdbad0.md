@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdbad0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdbad0",
-  "name": "Botan::BER_Decoder::verify_end",
+  "name": "_ZN5Botan11BER_Decoder10verify_endEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3bfde3b0219550b12db9092955c47d7e5f51c6724a473f6a7ee5625dd34e6fe9",
-  "source_text_sha256": "3bfde3b0219550b12db9092955c47d7e5f51c6724a473f6a7ee5625dd34e6fe9"
+  "source_sha256": "08b11d317529a2d8691ced8a395ca39ecddec42c2e32f1cf42f8d8df849b1c00",
+  "source_text_sha256": "08b11d317529a2d8691ced8a395ca39ecddec42c2e32f1cf42f8d8df849b1c00"
 }
 ~~~
+
 ## 呼び出し元
 
 - [004c05ec](../004c0/004c05ec.md)
@@ -46,14 +45,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [0048c9bc](../0048c/0048c9bc.md)
 
-## 疑似コード 1/1 / UTF-8 131 bytes
+## 疑似コード / UTF-8 131 bytes
 
 ~~~c
 
-void __thiscall Botan::BER_Decoder::verify_end(BER_Decoder *this)
+void _ZN5Botan11BER_Decoder10verify_endEv(void)
 
 {
-  (*(code *)PTR_verify_end_00c1c5a0)();
+  (*(code *)PTR__ZN5Botan11BER_Decoder10verify_endEv_00c1c5a0)();
   return;
 }
 

@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](004eedec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "004eedec",
-  "name": "Botan::X509_CA::new_crl",
+  "name": "_ZNK5Botan7X509_CA7new_crlERNS_21RandomNumberGeneratorEj",
   "size": 140,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "48cae04d394c2a1634ec86e94635189928ccd25e668652a35c74631befe46f64",
-  "source_text_sha256": "48cae04d394c2a1634ec86e94635189928ccd25e668652a35c74631befe46f64"
+  "source_sha256": "cbc4a4365a9bde7dda2d1faec967f76dd65484b8010c1d47b7df8dca4152c3a1",
+  "source_text_sha256": "cbc4a4365a9bde7dda2d1faec967f76dd65484b8010c1d47b7df8dca4152c3a1"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -32,18 +31,16 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdb630](../00bdb/00bdb630.md)
 - [00bdce20](../00bdc/00bdce20.md)
 
-## 疑似コード 1/1 / UTF-8 693 bytes
+## 疑似コード / UTF-8 885 bytes
 
 ~~~c
 
-/* Botan::X509_CA::new_crl(Botan::RandomNumberGenerator&, unsigned int) const */
-
-void Botan::X509_CA::new_crl(RandomNumberGenerator *param_1,uint param_2)
+void _ZNK5Botan7X509_CA7new_crlERNS_21RandomNumberGeneratorEj
+               (undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined4 param_4)
 
 {
   long lVar1;
   undefined8 uVar2;
-  undefined4 in_w2;
   undefined8 local_60;
   undefined8 uStack_58;
   undefined8 local_50;
@@ -51,11 +48,12 @@ void Botan::X509_CA::new_crl(RandomNumberGenerator *param_1,uint param_2)
   
   lVar1 = tpidr_el0;
   local_48 = *(long *)(lVar1 + 0x28);
-  uVar2 = std::__ndk1::chrono::system_clock::now();
+  uVar2 = _ZNSt6__ndk16chrono12system_clock3nowEv();
   local_60 = 0;
   uStack_58 = 0;
   local_50 = 0;
-  make_crl(param_1,&local_60,1,param_2,uVar2,in_w2);
+  _ZNK5Botan7X509_CA8make_crlERKNSt6__ndk16vectorINS_9CRL_EntryENS1_9allocatorIS3_EEEEjRNS_21RandomNumberGeneratorENS1_6chrono10time_pointINSB_12system_clockENSB_8durationIxNS1_5ratioILl1ELl1000000EEEEEEENSE_IxNSF_ILl1ELl1EEEEE
+            (param_1,param_2,&local_60,1,param_3,uVar2,param_4);
   if (*(long *)(lVar1 + 0x28) == local_48) {
     return;
   }

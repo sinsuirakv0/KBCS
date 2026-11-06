@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ba8ffc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ba8ffc",
-  "name": "std::__ndk1::collate_byname<wchar_t>::collate_byname",
+  "name": "_ZNSt6__ndk114collate_bynameIwEC2ERKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEm",
   "size": 188,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "197446273832c26cc96d2659fecb89b0bbfbcfa1e8083530e6fbfd0f51e6e714",
-  "source_text_sha256": "197446273832c26cc96d2659fecb89b0bbfbcfa1e8083530e6fbfd0f51e6e714"
+  "source_sha256": "ac6cbe1e4c87c26d145a12c31cdf7f6e539b13ec2c645b71a4195ef60c5caa51",
+  "source_text_sha256": "ac6cbe1e4c87c26d145a12c31cdf7f6e539b13ec2c645b71a4195ef60c5caa51"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00be1740](../00be1/00be1740.md)
@@ -40,51 +39,47 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "collate_byname<wchar_t>::collate_byname(size_t refs) failed to construct for "
 ~~~
-## 疑似コード 1/1 / UTF-8 1439 bytes
+
+## 疑似コード / UTF-8 1236 bytes
 
 ~~~c
 
-/* std::__ndk1::collate_byname<wchar_t>::collate_byname(std::__ndk1::basic_string<char,
-   std::__ndk1::char_traits<char>, std::__ndk1::allocator<char> > const&, unsigned long) */
-
-void __thiscall
-std::__ndk1::collate_byname<wchar_t>::collate_byname
-          (collate_byname<wchar_t> *this,basic_string *param_1,ulong param_2)
+void _ZNSt6__ndk114collate_bynameIwEC2ERKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEm
+               (long *param_1,byte *param_2,long param_3)
 
 {
-  char *pcVar1;
+  undefined1 *puVar1;
   __locale_t p_Var2;
   undefined8 uVar3;
-  basic_string *pbVar4;
-  basic_string *__locale;
+  byte *__locale;
   byte local_38;
-  char acStack_37 [15];
-  char *local_28;
+  undefined1 auStack_37 [15];
+  undefined1 *local_28;
   
-  *(undefined **)this = PTR_vtable_00c1be90 + 0x10;
-  *(ulong *)(this + 8) = param_2 - 1;
-  __locale = *(basic_string **)(param_1 + 0x10);
-  if (((byte)*param_1 & 1) == 0) {
-    __locale = param_1 + 1;
+  *param_1 = (long)(PTR__ZTVNSt6__ndk114collate_bynameIwEE_00c1be90 + 0x10);
+  param_1[1] = param_3 + -1;
+  __locale = *(byte **)(param_2 + 0x10);
+  if ((*param_2 & 1) == 0) {
+    __locale = param_2 + 1;
   }
-  pbVar4 = (basic_string *)0x0;
   p_Var2 = newlocale(0x1fbf,(char *)__locale,(__locale_t)0x0);
-  *(__locale_t *)(this + 0x10) = p_Var2;
+  param_1[2] = (long)p_Var2;
   if (p_Var2 != (__locale_t)0x0) {
     return;
   }
-  operator+((__ndk1 *)
-            "collate_byname<wchar_t>::collate_byname(size_t refs) failed to construct for ",
-            (char *)param_1,pbVar4);
-  pcVar1 = local_28;
+  _ZNSt6__ndk1plIcNS_11char_traitsIcEENS_9allocatorIcEEEENS_12basic_stringIT_T0_T1_EEPKS6_RKS9_
+            (&local_38,
+             "collate_byname<wchar_t>::collate_byname(size_t refs) failed to construct for ",param_2
+            );
+  puVar1 = local_28;
   if ((local_38 & 1) == 0) {
-    pcVar1 = acStack_37;
+    puVar1 = auStack_37;
   }
-  uVar3 = __throw_runtime_error(pcVar1);
+  uVar3 = _ZNSt6__ndk121__throw_runtime_errorEPKc(puVar1);
   if ((local_38 & 1) != 0) {
-    operator_delete(local_28);
+    _ZdlPv(local_28);
   }
-  __shared_weak_count::~__shared_weak_count((__shared_weak_count *)this);
+  _ZNSt6__ndk119__shared_weak_countD2Ev(param_1);
                     /* WARNING: Subroutine does not return */
   FUN_00bd6fec(uVar3);
 }

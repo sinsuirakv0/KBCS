@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae5eec.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae5eec",
-  "name": "firebase::util::uribuilder::CacheClassFromFiles",
+  "name": "_ZN8firebase4util10uribuilder19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "a08a111b29255f7e5e0e7b8c8f746483b1d18016b9232605e57d6b3c2338ba4f",
-  "source_text_sha256": "a08a111b29255f7e5e0e7b8c8f746483b1d18016b9232605e57d6b3c2338ba4f"
+  "source_sha256": "391c300875eed64a553cab3611e0c5e1ebdb6785d10e9b908ae73232d332a788",
+  "source_text_sha256": "391c300875eed64a553cab3611e0c5e1ebdb6785d10e9b908ae73232d332a788"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,22 +34,20 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "android/net/Uri$Builder"
 ~~~
-## 疑似コード 1/1 / UTF-8 589 bytes
+
+## 疑似コード / UTF-8 627 bytes
 
 ~~~c
 
-/* firebase::util::uribuilder::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*,
-   firebase::util::ClassRequirement) */
-
-long firebase::util::uribuilder::CacheClassFromFiles(void)
+long _ZN8firebase4util10uribuilder19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE
+               (void)
 
 {
                     /* catch() { ... } // from try @ 00ae5c64 with catch @ 00ae5eec */
                     /* catch() { ... } // from try @ 00ae5bfc with catch @ 00ae5ef0 */
   if (DAT_010a0338 == 0) {
-    DAT_010a0338 = FindClassGlobal();
+    DAT_010a0338 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
   return DAT_010a0338;
 }

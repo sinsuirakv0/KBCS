@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afcdb8.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "45ef21b224c47813658e73c8cbddece62a6c0f1f5c39abc4fc118244873b476b",
-  "source_text_sha256": "45ef21b224c47813658e73c8cbddece62a6c0f1f5c39abc4fc118244873b476b"
+  "source_sha256": "d506302ef376401ac49ad7ee34fb2d0f6cf3bd7c6532c48bf713383b5003cdf7",
+  "source_text_sha256": "d506302ef376401ac49ad7ee34fb2d0f6cf3bd7c6532c48bf713383b5003cdf7"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -31,20 +30,21 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf40](../00bda/00bdaf40.md)
 - [00bddd20](../00bdd/00bddd20.md)
 
-## 疑似コード 1/1 / UTF-8 403 bytes
+## 疑似コード / UTF-8 434 bytes
 
 ~~~c
 
 void _INIT_273(void)
 
 {
-  Mutex *pMVar1;
+  undefined8 uVar1;
   
                     /* try { // try from 00afcdc8 to 00bfcddf has its CatchHandler @ 00aff3b8 */
-  pMVar1 = operator_new(0x28);
-  firebase::Mutex::Mutex(pMVar1,1);
+  uVar1 = _Znwm(0x28);
+  _ZN8firebase5MutexC2ENS0_4ModeE(uVar1,1);
                     /* try { // try from 00afcde0 to 00bfce7b has its CatchHandler @ 00af560c */
-  *(Mutex **)PTR_cleanup_notifiers_by_owner_mutex__00c1b898 = pMVar1;
+  *(undefined8 *)PTR__ZN8firebase15CleanupNotifier33cleanup_notifiers_by_owner_mutex_E_00c1b898 =
+       uVar1;
   return;
 }
 

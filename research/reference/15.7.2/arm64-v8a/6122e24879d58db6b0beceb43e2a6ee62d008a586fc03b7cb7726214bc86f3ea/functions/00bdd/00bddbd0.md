@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddbd0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddbd0",
-  "name": "firebase::Variant::assert_is_string",
+  "name": "_ZNK8firebase7Variant16assert_is_stringEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3f7fe3dc00f8ae516feb2a791d19f2a86814e377b3dbede3a880367753377c0e",
-  "source_text_sha256": "3f7fe3dc00f8ae516feb2a791d19f2a86814e377b3dbede3a880367753377c0e"
+  "source_sha256": "77977e348d6dffc6e9f935fb233af530137f1474592e7eb3862ccd0f27529ec7",
+  "source_text_sha256": "77977e348d6dffc6e9f935fb233af530137f1474592e7eb3862ccd0f27529ec7"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0084a9ec](../0084a/0084a9ec.md)
@@ -34,14 +33,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b044fc](../00b04/00b044fc.md)
 
-## 疑似コード 1/1 / UTF-8 138 bytes
+## 疑似コード / UTF-8 141 bytes
 
 ~~~c
 
-void __thiscall firebase::Variant::assert_is_string(Variant *this)
+void _ZNK8firebase7Variant16assert_is_stringEv(void)
 
 {
-  (*(code *)PTR_assert_is_string_00c1d620)();
+  (*(code *)PTR__ZNK8firebase7Variant16assert_is_stringEv_00c1d620)();
   return;
 }
 

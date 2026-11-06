@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bdcea0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bdcea0",
-  "name": "Botan::Decoding_Error::Decoding_Error",
+  "name": "_ZN5Botan14Decoding_ErrorC2ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPKc",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3a332b427bf6ad8140f23ca62e1d1ed83def03f1fd03427047851564fcc6289e",
-  "source_text_sha256": "3a332b427bf6ad8140f23ca62e1d1ed83def03f1fd03427047851564fcc6289e"
+  "source_sha256": "6e8dc9aa912add50fbb40ba6ece083473e75e6b9606a6ca39f95591a02d4a21e",
+  "source_text_sha256": "6e8dc9aa912add50fbb40ba6ece083473e75e6b9606a6ca39f95591a02d4a21e"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -30,15 +29,17 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [004d8ab8](../004d8/004d8ab8.md)
 
-## 疑似コード 1/1 / UTF-8 182 bytes
+## 疑似コード / UTF-8 283 bytes
 
 ~~~c
 
-void __thiscall
-Botan::Decoding_Error::Decoding_Error(Decoding_Error *this,basic_string *param_1,char *param_2)
+void _ZN5Botan14Decoding_ErrorC2ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPKc
+               (void)
 
 {
-  (*(code *)PTR_Decoding_Error_00c1cf88)();
+  (*(code *)
+    PTR__ZN5Botan14Decoding_ErrorC2ERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPKc_00c1cf88
+  )();
   return;
 }
 

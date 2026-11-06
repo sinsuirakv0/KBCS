@@ -1,0 +1,167 @@
+﻿# 00b3decc
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b3decc",
+  "name": "_ZNSt6__ndk17__sort3IRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection7ServiceEEEPNS1_6OffsetIS5_EEEEjT0_SB_SB_T_",
+  "size": 588,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "0c25c3deb94e941193334e0700b0bbe8a0ca1d8cd8b99a8224bae226b7c0287e",
+  "source_text_sha256": "0c25c3deb94e941193334e0700b0bbe8a0ca1d8cd8b99a8224bae226b7c0287e"
+}
+~~~
+
+## 呼び出し元
+
+- [00be0120](../00be0/00be0120.md)
+
+## 呼び出し先
+
+- [00bdb200](../00bdb/00bdb200.md)
+
+## 疑似コード / UTF-8 4260 bytes
+
+~~~c
+
+undefined8
+_ZNSt6__ndk17__sort3IRN11flatbuffers17FlatBufferBuilder18TableKeyComparatorIN10reflection7ServiceEEEPNS1_6OffsetIS5_EEEEjT0_SB_SB_T_
+          (uint *param_1,uint *param_2,uint *param_3,long *param_4)
+
+{
+  long lVar1;
+  uint *puVar2;
+  uint *puVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  uint uVar9;
+  bool bVar10;
+  bool bVar11;
+  int iVar12;
+  int *piVar13;
+  uint *__s1;
+  int *piVar14;
+  
+  uVar4 = *param_2;
+  uVar5 = *param_1;
+  lVar1 = *(long *)(*param_4 + 0x28) + *(long *)(*param_4 + 0x20);
+  piVar13 = (int *)(lVar1 - (ulong)uVar4);
+  piVar14 = (int *)(lVar1 - (ulong)uVar5);
+  puVar2 = (uint *)((long)piVar13 + (ulong)*(ushort *)((long)piVar13 + (4 - (long)*piVar13)));
+  puVar3 = (uint *)((long)piVar14 + (ulong)*(ushort *)((long)piVar14 + (4 - (long)*piVar14)));
+  puVar2 = (uint *)((long)puVar2 + (ulong)*puVar2);
+  puVar3 = (uint *)((long)puVar3 + (ulong)*puVar3);
+  __s1 = puVar2 + 1;
+  uVar7 = *puVar2;
+  uVar8 = *puVar3;
+  uVar6 = uVar8;
+  if (uVar7 <= uVar8) {
+    uVar6 = uVar7;
+  }
+  iVar12 = memcmp(__s1,puVar3 + 1,(ulong)uVar6);
+  uVar6 = *param_3;
+  piVar13 = (int *)(lVar1 - (ulong)uVar6);
+                    /* try { // try from 00b3df6c to 00c3e00b has its CatchHandler @ 00b3df6c
+                       catch() { ... } // from try @ 00b3df6c with catch @ 00b3df6c
+                       catch() { ... } // from try @ 00b3e2f8 with catch @ 00b3df6c
+                       catch() { ... } // from try @ 00b3e3a4 with catch @ 00b3df6c
+                       catch() { ... } // from try @ 00b3e51c with catch @ 00b3df6c */
+  puVar2 = (uint *)((long)piVar13 + (ulong)*(ushort *)((long)piVar13 + (4 - (long)*piVar13)));
+  puVar2 = (uint *)((long)puVar2 + (ulong)*puVar2);
+  uVar9 = *puVar2;
+  bVar10 = uVar7 < uVar8;
+  if (iVar12 != 0) {
+    bVar10 = iVar12 < 0;
+  }
+  uVar8 = uVar7;
+  if (uVar9 <= uVar7) {
+    uVar8 = uVar9;
+  }
+  iVar12 = memcmp(puVar2 + 1,__s1,(ulong)uVar8);
+  bVar11 = uVar9 < uVar7;
+  if (iVar12 != 0) {
+    bVar11 = iVar12 < 0;
+  }
+  if (bVar10) {
+    if (bVar11) {
+      *param_1 = uVar6;
+      *param_3 = uVar5;
+      return 1;
+    }
+    *param_1 = uVar4;
+                    /* try { // try from 00b3e06c to 00c3e07b has its CatchHandler @ 00b3e554 */
+    *param_2 = uVar5;
+    uVar4 = *param_3;
+    piVar13 = (int *)(lVar1 - (ulong)uVar4);
+    puVar2 = (uint *)((long)piVar14 + (ulong)*(ushort *)((long)piVar14 + (4 - (long)*piVar14)));
+    puVar3 = (uint *)((long)piVar13 + (ulong)*(ushort *)((long)piVar13 + (4 - (long)*piVar13)));
+    puVar2 = (uint *)((long)puVar2 + (ulong)*puVar2);
+    puVar3 = (uint *)((long)puVar3 + (ulong)*puVar3);
+    uVar7 = *puVar3;
+    uVar8 = *puVar2;
+    uVar6 = uVar8;
+    if (uVar7 <= uVar8) {
+      uVar6 = uVar7;
+    }
+    iVar12 = memcmp(puVar3 + 1,puVar2 + 1,(ulong)uVar6);
+                    /* try { // try from 00b3e0c8 to 00c3e0d3 has its CatchHandler @ 00b3e540 */
+    bVar10 = uVar7 < uVar8;
+    if (iVar12 != 0) {
+      bVar10 = iVar12 < 0;
+    }
+    if (!bVar10) {
+      return 1;
+    }
+    *param_2 = uVar4;
+    *param_3 = uVar5;
+  }
+  else {
+    if (!bVar11) {
+      return 0;
+    }
+    *param_2 = uVar6;
+    *param_3 = uVar4;
+    uVar4 = *param_2;
+    uVar5 = *param_1;
+    piVar13 = (int *)(lVar1 - (ulong)uVar4);
+    piVar14 = (int *)(lVar1 - (ulong)uVar5);
+                    /* try { // try from 00b3e00c to 00c3e01f has its CatchHandler @ 00b3e524 */
+    puVar2 = (uint *)((long)piVar13 + (ulong)*(ushort *)((long)piVar13 + (4 - (long)*piVar13)));
+    puVar3 = (uint *)((long)piVar14 + (ulong)*(ushort *)((long)piVar14 + (4 - (long)*piVar14)));
+    puVar2 = (uint *)((long)puVar2 + (ulong)*puVar2);
+    puVar3 = (uint *)((long)puVar3 + (ulong)*puVar3);
+    uVar7 = *puVar2;
+    uVar8 = *puVar3;
+    uVar6 = uVar8;
+    if (uVar7 <= uVar8) {
+      uVar6 = uVar7;
+    }
+    iVar12 = memcmp(puVar2 + 1,puVar3 + 1,(ulong)uVar6);
+                    /* try { // try from 00b3e03c to 00c3e047 has its CatchHandler @ 00b3e570 */
+    bVar10 = uVar7 < uVar8;
+                    /* try { // try from 00b3e04c to 00c3e06b has its CatchHandler @ 00b3e578 */
+    if (iVar12 != 0) {
+      bVar10 = iVar12 < 0;
+    }
+    if (!bVar10) {
+      return 1;
+    }
+    *param_1 = uVar4;
+    *param_2 = uVar5;
+  }
+  return 2;
+}
+
+~~~

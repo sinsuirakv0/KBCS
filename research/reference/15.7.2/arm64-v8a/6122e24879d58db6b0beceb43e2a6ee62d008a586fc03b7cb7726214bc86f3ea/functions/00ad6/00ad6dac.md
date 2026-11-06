@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ad6dac.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "a307a3fd8307d7afd87d9b4d9e77446b35b59d46f200ee495898d3c0a9f3d7e2",
-  "source_text_sha256": "a307a3fd8307d7afd87d9b4d9e77446b35b59d46f200ee495898d3c0a9f3d7e2"
+  "source_sha256": "500c39f25ba4290cf55a1fa82c88b6e3012ddffc800e08617bef2b162bda850c",
+  "source_text_sha256": "500c39f25ba4290cf55a1fa82c88b6e3012ddffc800e08617bef2b162bda850c"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -38,7 +37,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "Google サインイン 失敗"
 "ンイン 失敗"
 ~~~
-## 疑似コード 1/1 / UTF-8 1303 bytes
+
+## 疑似コード / UTF-8 1254 bytes
 
 ~~~c
 
@@ -63,7 +63,7 @@ void Java_jp_co_ponos_battlecats_MyGoogleSignInListener_onFailure(void)
   lVar1 = tpidr_el0;
   local_28 = *(long *)(lVar1 + 0x28);
   if (DAT_0109fcc0 != (long *)0x0) {
-    local_40 = operator_new(0x20);
+    local_40 = (undefined8 *)_Znwm(0x20);
     uStack_48 = _UNK_002b14c8;
     local_50 = _DAT_002b14c0;
     uVar5 = _UNK_002a7d29;
@@ -78,7 +78,7 @@ void Java_jp_co_ponos_battlecats_MyGoogleSignInListener_onFailure(void)
     local_2c = 0;
     (**(code **)(*plVar6 + 0x30))(plVar6,&local_2c,&local_50);
     if ((local_50 & 1) != 0) {
-      operator_delete(local_40);
+      _ZdlPv(local_40);
     }
   }
   if (*(long *)(lVar1 + 0x28) == local_28) {

@@ -4,8 +4,6 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](007bdafc.md)
-
 ## 関数情報
 
 ~~~json
@@ -18,10 +16,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "43c813bd32f3ae76a0e41bcdffcbf2e9f2418161518b431c6c8ade0c7c4650da",
-  "source_text_sha256": "43c813bd32f3ae76a0e41bcdffcbf2e9f2418161518b431c6c8ade0c7c4650da"
+  "source_sha256": "efb0a072a2aeadd4c670886502e27a26ee365e62516e8a76b4275c1eb69ea2e2",
+  "source_text_sha256": "efb0a072a2aeadd4c670886502e27a26ee365e62516e8a76b4275c1eb69ea2e2"
 }
 ~~~
+
 ## 呼び出し元
 
 - [007c9cac](../007c9/007c9cac.md)
@@ -76,7 +75,8 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 "sec2_id"
 "sec2_type"
 ~~~
-## 疑似コード 1/1 / UTF-8 8688 bytes
+
+## 疑似コード / UTF-8 8368 bytes
 
 ~~~c
 
@@ -147,62 +147,62 @@ void FUN_007bdafc(long param_1,undefined4 param_2,undefined4 param_3)
     local_120[0] = 0;
     local_118 = 0;
     local_140[0] = 0;
-    firebase::Variant::Clear((Variant *)local_140,4);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,4);
     local_138 = "MapID";
-    firebase::Variant::operator=((Variant *)local_120,(Variant *)local_140);
-    firebase::Variant::Clear((Variant *)local_140,0);
+    _ZN8firebase7VariantaSEOS0_(local_120,local_140);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,0);
     iVar4 = FUN_007cf950(0);
     local_108 = "sec1_id";
     local_100[0] = 0;
     local_f8 = 0;
     local_140[0] = 0;
-    firebase::Variant::Clear((Variant *)local_140,1);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,1);
     local_138 = (char *)(long)iVar4;
-    firebase::Variant::operator=((Variant *)local_100,(Variant *)local_140);
-    firebase::Variant::Clear((Variant *)local_140,0);
+    _ZN8firebase7VariantaSEOS0_(local_100,local_140);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,0);
     local_e8 = "sec2_type";
     local_e0[0] = 0;
     local_d8 = 0;
     local_140[0] = 0;
-    firebase::Variant::Clear((Variant *)local_140,4);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,4);
     local_138 = "StageIdx";
-    firebase::Variant::operator=((Variant *)local_e0,(Variant *)local_140);
-    firebase::Variant::Clear((Variant *)local_140,0);
+    _ZN8firebase7VariantaSEOS0_(local_e0,local_140);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,0);
     iVar4 = FUN_007cfaa0();
     local_c8 = "sec2_id";
     local_c0[0] = 0;
     local_b8 = 0;
     local_140[0] = 0;
-    firebase::Variant::Clear((Variant *)local_140,1);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,1);
     local_138 = (char *)(long)iVar4;
-    firebase::Variant::operator=((Variant *)local_c0,(Variant *)local_140);
-    firebase::Variant::Clear((Variant *)local_140,0);
+    _ZN8firebase7VariantaSEOS0_(local_c0,local_140);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,0);
     local_a8 = "ex_type";
     local_a0[0] = 0;
     local_98 = 0;
     local_140[0] = 0;
-    firebase::Variant::Clear((Variant *)local_140,4);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,4);
     local_138 = "StageLv";
-    firebase::Variant::operator=((Variant *)local_a0,(Variant *)local_140);
-    firebase::Variant::Clear((Variant *)local_140,0);
+    _ZN8firebase7VariantaSEOS0_(local_a0,local_140);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,0);
     iVar4 = FUN_007cfcd8();
     local_88 = "ex_id";
     local_80[0] = 0;
     local_78 = 0;
     local_140[0] = 0;
-    firebase::Variant::Clear((Variant *)local_140,1);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,1);
     local_138 = (char *)(long)iVar4;
-    firebase::Variant::operator=((Variant *)local_80,(Variant *)local_140);
-    firebase::Variant::Clear((Variant *)local_140,0);
+    _ZN8firebase7VariantaSEOS0_(local_80,local_140);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_140,0);
     lVar9 = FUN_0081f580();
     FUN_00846bc4(*(undefined8 *)(lVar9 + 0x21c8),0x1317f09,*(undefined4 *)(param_1 + 0x41c),
                  &local_128,6);
-    firebase::Variant::Clear((Variant *)local_80,0);
-    firebase::Variant::Clear((Variant *)local_a0,0);
-    firebase::Variant::Clear((Variant *)local_c0,0);
-    firebase::Variant::Clear((Variant *)local_e0,0);
-    firebase::Variant::Clear((Variant *)local_100,0);
-    firebase::Variant::Clear((Variant *)local_120,0);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_80,0);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_a0,0);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_c0,0);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_e0,0);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_100,0);
+    _ZN8firebase7Variant5ClearENS0_4TypeE(local_120,0);
   }
   piVar1 = (int *)(param_1 + 0x4a5b8);
   uVar7 = FUN_005bfb9c(1);

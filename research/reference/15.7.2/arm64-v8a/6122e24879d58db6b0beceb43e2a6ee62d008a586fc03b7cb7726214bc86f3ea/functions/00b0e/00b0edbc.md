@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b0edbc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b0edbc",
-  "name": "flatbuffers::Parser::Warning",
+  "name": "_ZN11flatbuffers6Parser7WarningERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE",
   "size": 112,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "ab050f2ebc7822d0780a5d6a11f2d7f257d9cb99ee6cc19a107d787c58e9d0c5",
-  "source_text_sha256": "ab050f2ebc7822d0780a5d6a11f2d7f257d9cb99ee6cc19a107d787c58e9d0c5"
+  "source_sha256": "526837294ef7c76c6897889cfd7d09d9b4fe24c3135eea067c8f684130c2aa8c",
+  "source_text_sha256": "526837294ef7c76c6897889cfd7d09d9b4fe24c3135eea067c8f684130c2aa8c"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -38,29 +37,28 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "warning: "
 ~~~
-## 疑似コード 1/1 / UTF-8 1594 bytes
+
+## 疑似コード / UTF-8 1607 bytes
 
 ~~~c
 
-/* flatbuffers::Parser::Warning(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>,
-   std::__ndk1::allocator<char> > const&) */
-
-void flatbuffers::Parser::Warning(basic_string *param_1)
+void _ZN11flatbuffers6Parser7WarningERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+               (undefined8 param_1)
 
 {
   long lVar1;
-  char *in_x1;
-  basic_string *in_x2;
-  basic_string local_40 [16];
+  byte local_40 [16];
   void *local_30;
   long local_28;
   
   lVar1 = tpidr_el0;
   local_28 = *(long *)(lVar1 + 0x28);
-  std::__ndk1::operator+((__ndk1 *)"warning: ",in_x1,in_x2);
-  Message((Parser *)param_1,local_40);
-  if (((byte)local_40[0] & 1) != 0) {
-    operator_delete(local_30);
+  _ZNSt6__ndk1plIcNS_11char_traitsIcEENS_9allocatorIcEEEENS_12basic_stringIT_T0_T1_EEPKS6_RKS9_
+            (local_40,"warning: ");
+  _ZN11flatbuffers6Parser7MessageERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+            (param_1,local_40);
+  if ((local_40[0] & 1) != 0) {
+    _ZdlPv(local_30);
   }
   if (*(long *)(lVar1 + 0x28) == local_28) {
     return;

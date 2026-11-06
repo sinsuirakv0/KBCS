@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bafaf4.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bafaf4",
-  "name": "std::__ndk1::__time_get_c_storage<char>::__weeks",
+  "name": "_ZNKSt6__ndk120__time_get_c_storageIcE7__weeksEv",
   "size": 108,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "29ea55e8643f2480ef1186efda785a10352e2e8f11abd170911e63917af10496",
-  "source_text_sha256": "29ea55e8643f2480ef1186efda785a10352e2e8f11abd170911e63917af10496"
+  "source_sha256": "975907a8ae54983651d58d8323847def352da2816f62eb4662a67826a74c835d",
+  "source_text_sha256": "975907a8ae54983651d58d8323847def352da2816f62eb4662a67826a74c835d"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -32,13 +31,11 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf00](../00bda/00bdaf00.md)
 - [00bdaf20](../00bda/00bdaf20.md)
 
-## 疑似コード 1/1 / UTF-8 485 bytes
+## 疑似コード / UTF-8 404 bytes
 
 ~~~c
 
-/* std::__ndk1::__time_get_c_storage<char>::__weeks() const */
-
-undefined1 * std::__ndk1::__time_get_c_storage<char>::__weeks(void)
+undefined1 * _ZNKSt6__ndk120__time_get_c_storageIcE7__weeksEv(void)
 
 {
   int iVar1;

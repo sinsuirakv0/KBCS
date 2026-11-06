@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddbc0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddbc0",
-  "name": "firebase::Variant::AsString",
+  "name": "_ZNK8firebase7Variant8AsStringEv",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "0dbbbe6daebe56779e395828a2e4ff918df7835f54770772c3bc88e52af816e4",
-  "source_text_sha256": "0dbbbe6daebe56779e395828a2e4ff918df7835f54770772c3bc88e52af816e4"
+  "source_sha256": "21e193f334dcee3e4bffe022b3d0fecf6f0e2c2ae02aa03cf6a01638251af8dd",
+  "source_text_sha256": "21e193f334dcee3e4bffe022b3d0fecf6f0e2c2ae02aa03cf6a01638251af8dd"
 }
 ~~~
+
 ## 呼び出し元
 
 - [0084a9ec](../0084a/0084a9ec.md)
@@ -30,14 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b045c4](../00b04/00b045c4.md)
 
-## 疑似コード 1/1 / UTF-8 102 bytes
+## 疑似コード / UTF-8 123 bytes
 
 ~~~c
 
-void firebase::Variant::AsString(void)
+void _ZNK8firebase7Variant8AsStringEv(void)
 
 {
-  (*(code *)PTR_AsString_00c1d618)();
+  (*(code *)PTR__ZNK8firebase7Variant8AsStringEv_00c1d618)();
   return;
 }
 

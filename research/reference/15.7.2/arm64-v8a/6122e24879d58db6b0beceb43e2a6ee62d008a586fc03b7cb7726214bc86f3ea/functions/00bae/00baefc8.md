@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00baefc8.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00baefc8",
-  "name": "std::__ndk1::numpunct<wchar_t>::~numpunct",
+  "name": "_ZNSt6__ndk18numpunctIwED1Ev",
   "size": 80,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "e8b151bcf4f32c6ea164f8b33587c78eeff888f261b2a4b280dcc58aaea578a9",
-  "source_text_sha256": "e8b151bcf4f32c6ea164f8b33587c78eeff888f261b2a4b280dcc58aaea578a9"
+  "source_sha256": "5919f904ce1447580872d7288890fa1ce5c907ce500360a978adbfb960fe3931",
+  "source_text_sha256": "5919f904ce1447580872d7288890fa1ce5c907ce500360a978adbfb960fe3931"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00be1b50](../00be1/00be1b50.md)
@@ -33,20 +32,18 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdaf60](../00bda/00bdaf60.md)
 - [00bdb3b0](../00bdb/00bdb3b0.md)
 
-## 疑似コード 1/1 / UTF-8 378 bytes
+## 疑似コード / UTF-8 265 bytes
 
 ~~~c
 
-/* std::__ndk1::numpunct<wchar_t>::~numpunct() */
-
-void __thiscall std::__ndk1::numpunct<wchar_t>::~numpunct(numpunct<wchar_t> *this)
+void _ZNSt6__ndk18numpunctIwED1Ev(long *param_1)
 
 {
-  *(undefined **)this = PTR_vtable_00c1bec0 + 0x10;
-  if (((byte)this[0x18] & 1) != 0) {
-    operator_delete(*(void **)(this + 0x28));
+  *param_1 = (long)(PTR__ZTVNSt6__ndk18numpunctIwEE_00c1bec0 + 0x10);
+  if ((*(byte *)(param_1 + 3) & 1) != 0) {
+    _ZdlPv((void *)param_1[5]);
   }
-  __shared_weak_count::~__shared_weak_count((__shared_weak_count *)this);
+  _ZNSt6__ndk119__shared_weak_countD2Ev(param_1);
   return;
 }
 

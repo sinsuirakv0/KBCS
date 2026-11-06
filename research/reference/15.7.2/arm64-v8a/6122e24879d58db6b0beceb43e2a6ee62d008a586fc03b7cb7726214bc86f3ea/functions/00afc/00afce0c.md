@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00afce0c.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00afce0c",
-  "name": "firebase::Path::NormalizeSlashes",
+  "name": "_ZN8firebase4Path16NormalizeSlashesERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE",
   "size": 496,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "ee3cf131b8e401fb658494d3a5dbfb9c429c1569d6cfe81133cd87d0aab9ea90",
-  "source_text_sha256": "ee3cf131b8e401fb658494d3a5dbfb9c429c1569d6cfe81133cd87d0aab9ea90"
+  "source_sha256": "f410c2961d0cc37920bcca1d75b34288fa05830a36c44a9421bc9d2b197a0f46",
+  "source_text_sha256": "f410c2961d0cc37920bcca1d75b34288fa05830a36c44a9421bc9d2b197a0f46"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00bdec30](../00bde/00bdec30.md)
@@ -32,110 +31,132 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 - [00bdec50](../00bde/00bdec50.md)
 - [00bdec70](../00bde/00bdec70.md)
 
-## 疑似コード 1/1 / UTF-8 3634 bytes
+## 疑似コード / UTF-8 4052 bytes
 
 ~~~c
 
-/* firebase::Path::NormalizeSlashes(std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>,
-   std::__ndk1::allocator<char> > const&) */
-
-void __thiscall firebase::Path::NormalizeSlashes(Path *this,basic_string *param_1)
+void _ZN8firebase4Path16NormalizeSlashesERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE
+               (byte *param_1,byte *param_2)
 
 {
-  Path *pPVar1;
+  byte *pbVar1;
   ulong uVar2;
-  Path PVar3;
-  Path *pPVar4;
+  byte bVar3;
+  byte *pbVar4;
   bool bVar5;
   long lVar6;
-  basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>> *in_x8;
-  Path *pPVar7;
+  byte *pbVar7;
   ulong uVar8;
-  Path *pPVar9;
-  Path *pPVar10;
+  byte *pbVar9;
+  byte *pbVar10;
   bool bVar11;
   
-  *(undefined8 *)in_x8 = 0;
-  *(undefined8 *)(in_x8 + 8) = 0;
-  *(undefined8 *)(in_x8 + 0x10) = 0;
-  PVar3 = *this;
-  uVar8 = *(ulong *)(this + 8);
-  pPVar9 = *(Path **)(this + 0x10);
-  bVar5 = ((byte)PVar3 & 1) == 0;
-  pPVar10 = pPVar9;
+  param_1[0] = 0;
+  param_1[1] = 0;
+  param_1[2] = 0;
+  param_1[3] = 0;
+  param_1[4] = 0;
+  param_1[5] = 0;
+  param_1[6] = 0;
+  param_1[7] = 0;
+  param_1[8] = 0;
+  param_1[9] = 0;
+  param_1[10] = 0;
+  param_1[0xb] = 0;
+  param_1[0xc] = 0;
+  param_1[0xd] = 0;
+  param_1[0xe] = 0;
+  param_1[0xf] = 0;
+  param_1[0x10] = 0;
+  param_1[0x11] = 0;
+  param_1[0x12] = 0;
+  param_1[0x13] = 0;
+  param_1[0x14] = 0;
+  param_1[0x15] = 0;
+  param_1[0x16] = 0;
+  param_1[0x17] = 0;
+  bVar3 = *param_2;
+  uVar8 = *(ulong *)(param_2 + 8);
+  pbVar9 = *(byte **)(param_2 + 0x10);
+  bVar5 = (bVar3 & 1) == 0;
+  pbVar10 = pbVar9;
   uVar2 = uVar8;
   if (bVar5) {
-    pPVar10 = this + 1;
-    uVar2 = (ulong)((byte)PVar3 >> 1);
+    pbVar10 = param_2 + 1;
+    uVar2 = (ulong)(bVar3 >> 1);
   }
   if (uVar2 != 0) {
-    pPVar1 = this + 1;
+    pbVar1 = param_2 + 1;
     bVar11 = true;
     do {
-      uVar2 = (ulong)((byte)PVar3 >> 1);
-      pPVar4 = pPVar1;
+      uVar2 = (ulong)(bVar3 >> 1);
+      pbVar4 = pbVar1;
                     /* try { // try from 00afceac to 00bfcec3 has its CatchHandler @ 00aff3ac */
       if (!bVar5) {
         uVar2 = uVar8;
-        pPVar4 = pPVar9;
+        pbVar4 = pbVar9;
       }
-      pPVar9 = pPVar10;
+      pbVar9 = pbVar10;
                     /* try { // try from 00afcec4 to 00bfcf27 has its CatchHandler @ 00af560c */
-      if ((pPVar4 + uVar2 != pPVar10) &&
-         (lVar6 = __strchr_chk(&DAT_0029583d,*pPVar10,2), lVar6 != 0)) {
+      if ((pbVar4 + uVar2 != pbVar10) &&
+         (lVar6 = __strchr_chk(&DAT_0029583d,*pbVar10,2), lVar6 != 0)) {
         do {
-          pPVar9 = pPVar4 + uVar2;
-          if (pPVar4 + (uVar2 - 1) == pPVar10) break;
-          pPVar9 = pPVar10 + 1;
-          lVar6 = __strchr_chk(&DAT_0029583d,pPVar10[1],2);
-          pPVar10 = pPVar9;
+          pbVar9 = pbVar4 + uVar2;
+          if (pbVar4 + (uVar2 - 1) == pbVar10) break;
+          pbVar9 = pbVar10 + 1;
+          lVar6 = __strchr_chk(&DAT_0029583d,pbVar10[1],2);
+          pbVar10 = pbVar9;
         } while (lVar6 != 0);
       }
-      uVar8 = (ulong)((byte)*this >> 1);
-      pPVar4 = pPVar1;
-      if (((byte)*this & 1) != 0) {
-        uVar8 = *(ulong *)(this + 8);
-        pPVar4 = *(Path **)(this + 0x10);
+      uVar8 = (ulong)(*param_2 >> 1);
+      pbVar4 = pbVar1;
+      if ((*param_2 & 1) != 0) {
+        uVar8 = *(ulong *)(param_2 + 8);
+        pbVar4 = *(byte **)(param_2 + 0x10);
       }
                     /* try { // try from 00afcf28 to 00bfcf2f has its CatchHandler @ 00aff3a8 */
-      pPVar10 = pPVar9;
-      if ((pPVar4 + uVar8 != pPVar9) && (lVar6 = __strchr_chk(&DAT_0029583d,*pPVar9,2), lVar6 == 0))
+      pbVar10 = pbVar9;
+      if ((pbVar4 + uVar8 != pbVar9) && (lVar6 = __strchr_chk(&DAT_0029583d,*pbVar9,2), lVar6 == 0))
       {
-        pPVar7 = pPVar9;
+        pbVar7 = pbVar9;
         do {
-          pPVar10 = pPVar4 + uVar8;
-          if (pPVar4 + (uVar8 - 1) == pPVar7) break;
+          pbVar10 = pbVar4 + uVar8;
+          if (pbVar4 + (uVar8 - 1) == pbVar7) break;
                     /* try { // try from 00afcf58 to 00bfcf6f has its CatchHandler @ 00aff3a4 */
-          pPVar10 = pPVar7 + 1;
-          pPVar7 = pPVar7 + 1;
-          lVar6 = __strchr_chk(&DAT_0029583d,*pPVar10,2);
-          pPVar10 = pPVar7;
+          pbVar10 = pbVar7 + 1;
+          pbVar7 = pbVar7 + 1;
+          lVar6 = __strchr_chk(&DAT_0029583d,*pbVar10,2);
+          pbVar10 = pbVar7;
         } while (lVar6 == 0);
-        if (pPVar10 != pPVar9) {
+        if (pbVar10 != pbVar9) {
           if (!bVar11) {
                     /* try { // try from 00afcf80 to 00bfcf87 has its CatchHandler @ 00aff3a0 */
-            std::__ndk1::
-            basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::append
-                      (in_x8,"/",1);
+            _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6appendEPKcm
+                      (param_1,&DAT_0029583d,1);
           }
+          uVar8 = (ulong)(*param_1 >> 1);
+          pbVar4 = param_1 + 1;
                     /* try { // try from 00afcfb0 to 00bfcfc7 has its CatchHandler @ 00aff39c */
-          std::__ndk1::
-          basic_string<char,std::__ndk1::char_traits<char>,std::__ndk1::allocator<char>>::
-          insert<std::__ndk1::__wrap_iter<char_const*>>();
+          if ((*param_1 & 1) != 0) {
+            uVar8 = *(ulong *)(param_1 + 8);
+            pbVar4 = *(byte **)(param_1 + 0x10);
+          }
+          _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEE6insertINS_11__wrap_iterIPKcEEEENS_9enable_ifIXaasr21__is_forward_iteratorIT_EE5valuesr38__libcpp_string_gets_noexcept_iteratorISC_EE5valueENS7_IPcEEE4typeESA_SC_SC_
+                    (param_1,pbVar4 + uVar8,pbVar9,pbVar10);
           bVar11 = false;
         }
       }
-      PVar3 = *this;
-      uVar8 = *(ulong *)(this + 8);
-      pPVar9 = *(Path **)(this + 0x10);
-      bVar5 = ((byte)PVar3 & 1) == 0;
-      uVar2 = (ulong)((byte)PVar3 >> 1);
-      pPVar4 = pPVar1;
+      bVar3 = *param_2;
+      uVar8 = *(ulong *)(param_2 + 8);
+      pbVar9 = *(byte **)(param_2 + 0x10);
+      bVar5 = (bVar3 & 1) == 0;
+      uVar2 = (ulong)(bVar3 >> 1);
+      pbVar4 = pbVar1;
       if (!bVar5) {
         uVar2 = uVar8;
-        pPVar4 = pPVar9;
+        pbVar4 = pbVar9;
       }
-    } while (pPVar4 + uVar2 != pPVar10);
+    } while (pbVar4 + uVar2 != pbVar10);
   }
                     /* try { // try from 00afcff8 to 00bfd00f has its CatchHandler @ 00aff38c */
   return;

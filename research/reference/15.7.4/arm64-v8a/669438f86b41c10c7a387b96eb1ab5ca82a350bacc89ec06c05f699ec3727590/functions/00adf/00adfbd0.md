@@ -1,0 +1,43 @@
+﻿# 00adfbd0
+
+版: 15.7.4 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00adfbd0",
+  "name": "FUN_00adfbd0",
+  "size": 4,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "1c6ea1f3bd5527100bea454bbf6f4a91420c5589ee986c2e1747098421dc590c",
+  "source_text_sha256": "1c6ea1f3bd5527100bea454bbf6f4a91420c5589ee986c2e1747098421dc590c"
+}
+~~~
+
+## 呼び出し元
+
+- [00ade9d4](../00ade/00ade9d4.md)
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 138 bytes
+
+~~~c
+
+void FUN_00adfbd0(void)
+
+{
+                    /* try { // try from 00adfbd0 to 00bdfbd7 has its CatchHandler @ 00adfc28 */
+  return;
+}
+
+~~~

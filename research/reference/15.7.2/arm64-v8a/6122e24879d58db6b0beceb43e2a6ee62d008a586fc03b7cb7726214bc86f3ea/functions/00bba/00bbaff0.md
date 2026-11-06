@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bbaff0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bbaff0",
-  "name": "std::bad_cast::~bad_cast",
+  "name": "_ZNSt8bad_castD1Ev",
   "size": 8,
   "external": 0,
-  "thunk": 0,
+  "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "ada845cd6d7b838da364a0f7b4415dd559824dea4e9efd94f033bcf592f298ef",
-  "source_text_sha256": "ada845cd6d7b838da364a0f7b4415dd559824dea4e9efd94f033bcf592f298ef"
+  "source_sha256": "90aefd0e796e8803278559c7823991a0e3f222bd5807330272b7699e80813997",
+  "source_text_sha256": "90aefd0e796e8803278559c7823991a0e3f222bd5807330272b7699e80813997"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00be1390](../00be1/00be1390.md)
@@ -30,16 +29,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00bdb390](../00bdb/00bdb390.md)
 
-## 疑似コード 1/1 / UTF-8 195 bytes
+## 疑似コード / UTF-8 84 bytes
 
 ~~~c
 
-/* std::bad_cast::~bad_cast() */
-
-void __thiscall std::bad_cast::~bad_cast(bad_cast *this)
+void _ZNSt8bad_castD1Ev(void)
 
 {
-  bad_array_new_length::~bad_array_new_length((bad_array_new_length *)this);
+  _ZNSt20bad_array_new_lengthD1Ev();
   return;
 }
 

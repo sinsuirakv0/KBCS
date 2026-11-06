@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00bddec0.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00bddec0",
-  "name": "firebase::ReferenceCountedFutureImpl::AllocInternal",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl13AllocInternalEiPvPFvS1_E",
   "size": 16,
   "external": 0,
   "thunk": 1,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "3ef1b784c164bcd4013051a28c374bc705123c423e08caedf597dc987e319d3c",
-  "source_text_sha256": "3ef1b784c164bcd4013051a28c374bc705123c423e08caedf597dc987e319d3c"
+  "source_sha256": "6f7f3e34e31e9bd6796f308d8071849c76d0a09c9a216fdaec4c55548d4fa660",
+  "source_text_sha256": "6f7f3e34e31e9bd6796f308d8071849c76d0a09c9a216fdaec4c55548d4fa660"
 }
 ~~~
+
 ## 呼び出し元
 
 - [00ae2b00](../00ae2/00ae2b00.md)
@@ -61,15 +60,14 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00afec34](../00afe/00afec34.md)
 
-## 疑似コード 1/1 / UTF-8 205 bytes
+## 疑似コード / UTF-8 191 bytes
 
 ~~~c
 
-void firebase::ReferenceCountedFutureImpl::AllocInternal
-               (int param_1,void *param_2,_func_void_void_ptr *param_3)
+void _ZN8firebase26ReferenceCountedFutureImpl13AllocInternalEiPvPFvS1_E(void)
 
 {
-  (*(code *)PTR_AllocInternal_00c1d798)(param_1);
+  (*(code *)PTR__ZN8firebase26ReferenceCountedFutureImpl13AllocInternalEiPvPFvS1_E_00c1d798)();
   return;
 }
 

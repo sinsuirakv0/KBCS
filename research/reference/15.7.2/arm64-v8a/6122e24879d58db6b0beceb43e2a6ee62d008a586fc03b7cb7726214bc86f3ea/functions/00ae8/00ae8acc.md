@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00ae8acc.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00ae8acc",
-  "name": "firebase::util::class_class::CacheClassFromFiles",
+  "name": "_ZN8firebase4util11class_class19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE",
   "size": 64,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "76ec7e63f2c1fb64d5f488aff85d9fb0cc9ad08756cba17c96f33e941be3d0a6",
-  "source_text_sha256": "76ec7e63f2c1fb64d5f488aff85d9fb0cc9ad08756cba17c96f33e941be3d0a6"
+  "source_sha256": "69f6d33a6f3731a229dac64a49ec78d55874d2696e2d51e91a00fb1022e6a841",
+  "source_text_sha256": "69f6d33a6f3731a229dac64a49ec78d55874d2696e2d51e91a00fb1022e6a841"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -35,21 +34,19 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "java/lang/Class"
 ~~~
-## 疑似コード 1/1 / UTF-8 591 bytes
+
+## 疑似コード / UTF-8 628 bytes
 
 ~~~c
 
-/* firebase::util::class_class::CacheClassFromFiles(_JNIEnv*, _jobject*,
-   std::__ndk1::vector<firebase::internal::EmbeddedFile,
-   std::__ndk1::allocator<firebase::internal::EmbeddedFile> > const*,
-   firebase::util::ClassRequirement) */
-
-long firebase::util::class_class::CacheClassFromFiles(void)
+long _ZN8firebase4util11class_class19CacheClassFromFilesEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS6_9allocatorIS9_EEEENS0_16ClassRequirementE
+               (void)
 
 {
   if (DAT_010a0598 == 0) {
                     /* catch() { ... } // from try @ 00ae6b74 with catch @ 00ae8ae8 */
-    DAT_010a0598 = FindClassGlobal();
+    DAT_010a0598 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             ();
   }
                     /* catch() { ... } // from try @ 00ae6b64 with catch @ 00ae8b08 */
   return DAT_010a0598;

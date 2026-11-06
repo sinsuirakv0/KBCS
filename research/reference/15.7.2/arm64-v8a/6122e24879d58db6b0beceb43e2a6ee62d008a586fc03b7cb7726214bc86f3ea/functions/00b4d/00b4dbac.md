@@ -4,24 +4,23 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
-ページ 1/1。[入口](00b4dbac.md)
-
 ## 関数情報
 
 ~~~json
 {
   "address": "00b4dbac",
-  "name": "firebase::messaging::UnsubscribeLastResult",
+  "name": "_ZN8firebase9messaging21UnsubscribeLastResultEv",
   "size": 168,
   "external": 0,
   "thunk": 0,
   "status": "cached",
   "confidence": "unreviewed",
   "error": "",
-  "source_sha256": "06bc397da24df9903bac7fe958da5f23744f37887a872b48c1caa0b8c05bd5e2",
-  "source_text_sha256": "06bc397da24df9903bac7fe958da5f23744f37887a872b48c1caa0b8c05bd5e2"
+  "source_sha256": "1f34a339f713174c77ab300a55fe87c7ec4b7775dfebfae79fdeb249904136e7",
+  "source_text_sha256": "1f34a339f713174c77ab300a55fe87c7ec4b7775dfebfae79fdeb249904136e7"
 }
 ~~~
+
 ## 呼び出し元
 
 解決済みの記録なし。
@@ -42,44 +41,42 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 ~~~text
 "internal::IsInitialized()"
 ~~~
-## 疑似コード 1/1 / UTF-8 1947 bytes
+
+## 疑似コード / UTF-8 1913 bytes
 
 ~~~c
 
-/* firebase::messaging::UnsubscribeLastResult() */
-
-void __thiscall firebase::messaging::UnsubscribeLastResult(messaging *this)
+void _ZN8firebase9messaging21UnsubscribeLastResultEv(long param_1)
 
 {
   long lVar1;
-  FutureBase *in_x8;
   long lVar2;
   
   if (DAT_010a0fa0 == 0) {
                     /* catch() { ... } // from try @ 00b4c46c with catch @ 00b4dc20 */
-    LogAssert("internal::IsInitialized()");
+    _ZN8firebase9LogAssertEPKcz("internal::IsInitialized()");
                     /* catch() { ... } // from try @ 00b4c44c with catch @ 00b4dc24 */
-    Mutex::Mutex();
+    _ZN8firebase5MutexC2ENS0_4ModeE(param_1,0);
                     /* catch() { ... } // from try @ 00b4c418 with catch @ 00b4dc34 */
-    *(undefined8 *)(in_x8 + 0x28) = 0;
+    *(undefined8 *)(param_1 + 0x28) = 0;
                     /* catch() { ... } // from try @ 00b4c3f4 with catch @ 00b4dc38 */
-    FutureHandle::FutureHandle((FutureHandle *)(in_x8 + 0x30),0,(FutureApiInterface *)0x0);
+    _ZN8firebase12FutureHandleC1EmPNS_6detail18FutureApiInterfaceE(param_1 + 0x30,0,0);
   }
   else {
-    lVar1 = FutureData::Get();
-    Mutex::Acquire((Mutex *)(lVar1 + 8));
+    lVar1 = _ZN8firebase9messaging10FutureData3GetEv();
+    _ZN8firebase5Mutex7AcquireEv(lVar1 + 8);
                     /* catch() { ... } // from try @ 00b4d37c with catch @ 00b4dbe0 */
     lVar2 = *(long *)(lVar1 + 0x50);
                     /* catch() { ... } // from try @ 00b4cfe4 with catch @ 00b4dbe4 */
-    Mutex::Release((Mutex *)(lVar1 + 8));
-    Mutex::Mutex();
+    _ZN8firebase5Mutex7ReleaseEv(lVar1 + 8);
+    _ZN8firebase5MutexC2ENS0_4ModeE(param_1,0);
                     /* catch() { ... } // from try @ 00b4ceec with catch @ 00b4dbf8 */
                     /* catch() { ... } // from try @ 00b4cbe0 with catch @ 00b4dbfc */
-    *(undefined8 *)(in_x8 + 0x28) = 0;
+    *(undefined8 *)(param_1 + 0x28) = 0;
                     /* catch() { ... } // from try @ 00b4c200 with catch @ 00b4dc00 */
                     /* catch() { ... } // from try @ 00b4bee8 with catch @ 00b4dc04 */
-    FutureHandle::FutureHandle((FutureHandle *)(in_x8 + 0x30));
-    FutureBase::operator=(in_x8,(FutureBase *)(lVar2 + 0x80));
+    _ZN8firebase12FutureHandleC1Ev(param_1 + 0x30);
+    _ZN8firebase10FutureBaseaSERKS0_(param_1,lVar2 + 0x80);
   }
                     /* catch() { ... } // from try @ 00b4c7c0 with catch @ 00b4dc48 */
                     /* catch() { ... } // from try @ 00b4c624 with catch @ 00b4dc4c */

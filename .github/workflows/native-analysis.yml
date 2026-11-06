@@ -12,7 +12,7 @@ on:
         type: string
         default: ci-v1
       publish_reference:
-        description: 'Append the completed reference revision to main'
+        description: 'Replace the published reference for this version and ABI on main'
         type: boolean
         default: true
   repository_dispatch:
