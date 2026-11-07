@@ -20,7 +20,6 @@ from pathlib import Path
 from indexer.apk import acquire, acquire_split, validate_split_source
 from indexer.complete import build_reference
 from indexer.network import ATTEMPTS, download_asset, gh, gh_json as api, http_status, retry, transient
-from indexer.reference import export_cache, reference_path, replace_reference
 from indexer.run import headless, locked
 from indexer.store import LOCAL, configure_output, digest, import_index, read_json, sync_results, write_json
 
@@ -54,11 +53,11 @@ def download_runtime(url, target):
     return partial
 
 
-def setup():
+def setup(*, apk_only=False):
     root = LOCAL / 'runtime'
     root.mkdir(parents=True, exist_ok=True)
     runtime = read_json(RESEARCH / 'ghidra/runtime.json')
-    for name in ('ghidra', 'apktool'):
+    for name in (('apktool',) if apk_only else ('ghidra', 'apktool')):
         item = runtime[name]
         if not item['url'].startswith('https://github.com/') or not re.fullmatch('[a-f0-9]{64}', item['sha256']):
             raise ValueError('Invalid pinned runtime')
@@ -68,6 +67,10 @@ def setup():
             raise ValueError('Runtime SHA-256 mismatch')
         if downloaded != target:
             downloaded.replace(target)
+    with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
+        output.write(f'APKTOOL={root.resolve() / "apktool.jar"}\n')
+    if apk_only:
+        return
     ghidra = root / f"ghidra_{runtime['ghidra_version']}_PUBLIC"
     utility = Path('Ghidra/Framework/Utility/lib/Utility.jar')
     if not ghidra.exists():
@@ -90,7 +93,7 @@ def setup():
     if not (ghidra / utility).is_file():
         raise RuntimeError('Ghidra runtime is incomplete')
     with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
-        output.write(f'GHIDRA_HOME={ghidra.resolve()}\nAPKTOOL={root.resolve() / "apktool.jar"}\n')
+        output.write(f'GHIDRA_HOME={ghidra.resolve()}\n')
 
 
 def load_input(path):
@@ -125,7 +128,7 @@ def plan(data, label, java_version, total_mb):
     hashes = {str(path.relative_to(RESEARCH)): digest(path) for path in [
         *sorted((RESEARCH / 'indexer').glob('*.py')), RESEARCH / 'ghidra/ExportCache.java',
         RESEARCH / 'ghidra/runtime.json'] if not path.name.startswith('test_')
-        and path.name not in ('upstream.py', 'ci_comparison.py')}
+        and path.name not in ('upstream.py', 'ci_comparison.py', 'ci_delivery.py')}
     result = {'input': data, 'label': label, 'java': java_version, 'tools': hashes,
               'heap': '1024M', 'native_memory_limit_mb': min(8192, total_mb - 3072),
               'function_timeout_seconds': 900, 'script_batch_seconds': 1200, 'schema': 1}
@@ -326,17 +329,17 @@ def ensure_release(tag, version, revision):
     retry(create, 'Create checkpoint Release')
 
 
-def publish_reference(source, revision, previous=None):
+def reference_worktree(revision):
     public_only()
     # 最新mainの独立worktreeで、対象の版とABIの資料だけを更新する。
     git_remote(['git', 'fetch', 'origin', 'main'])
     work = Path(os.environ['RUNNER_TEMP']) / ('native-publish-' + revision)
     subprocess.run(['git', 'worktree', 'add', '--detach', str(work), 'origin/main'], check=True)
-    if previous:
-        baseline = work / 'research/reference' / reference_path(previous) / 'manifest.json'
-        if not baseline.is_file() or read_json(baseline) != previous:
-            raise ValueError('Comparison baseline changed before publication; re-run from the checkpoint')
-    replace_reference(source, work / 'research/reference')
+    return work
+
+
+def publish_worktree(work, message):
+    public_only()
     subprocess.run(['git', '-C', str(work), 'add', '--', 'research/reference'], check=True)
     diff = subprocess.run(['git', '-C', str(work), 'diff', '--cached', '--quiet', '--', 'research/reference'])
     if not diff.returncode:
@@ -346,7 +349,7 @@ def publish_reference(source, revision, previous=None):
     subprocess.run(['gh', 'auth', 'setup-git'], check=True)
     for args in (['config', 'user.name', 'github-actions[bot]'], ['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com']):
         subprocess.run(['git', '-C', str(work), *args], check=True)
-    subprocess.run(['git', '-C', str(work), 'commit', '-q', '-m', f'Publish native analysis revision {revision}'], check=True)
+    subprocess.run(['git', '-C', str(work), 'commit', '-q', '-m', message], check=True)
     git_remote(['git', '-C', str(work), '-c', 'pack.threads=1', 'push', 'origin', 'HEAD:main'])
 
 
@@ -380,7 +383,7 @@ def acquire_input(data, java_home, *, discover_library=False):
     return library
 
 
-def run(input_path, label, publish, *, from_assets=False):
+def analyze(input_path, label, *, from_assets=False):
     public_only()
     data = read_json(LOCAL / 'ci-upstream.json') if from_assets else load_input(input_path)
     total_mb = int(next(line.split()[1] for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemTotal:'))) // 1024
@@ -452,15 +455,8 @@ def run(input_path, label, publish, *, from_assets=False):
                     raise RuntimeError('Pending functions remain')
                 write_json(root / 'ci-status.json', {'complete': True, 'report': report})
                 checkpoint(root, tag, sequence)
-            source, report = export_cache(root, LOCAL / 'ci-reference')
-            from indexer.ci_comparison import build_comparison
-
-            previous = build_comparison(data, root, binary, source, tag, java_home)
-            report.update(source_archive_sha256=data['archiveSha256'], source_version_code=data['versionCode'])
-            write_json(source / 'manifest.json', report)
-            if publish:
-                publish_reference(source, revision, previous)
-            print(json.dumps({'complete': True, 'revision': revision, 'release': tag, 'reference': str(source), 'summary': report}, ensure_ascii=False))
+            print(json.dumps({'complete': True, 'revision': revision, 'release': tag}, ensure_ascii=False))
+            return tag
         except Exception:
             # 強制終了に備え、各バッチ直後の検証済みcheckpointもReleaseに残す。
             print(f'Check the last verified checkpoint in Release {tag} before retrying.', flush=True)
@@ -470,16 +466,27 @@ def run(input_path, label, publish, *, from_assets=False):
 def main():
     configure_output()
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('setup', 'run'))
+    parser.add_argument('action', choices=('setup', 'setup-apk', 'run', 'references', 'match'))
     parser.add_argument('--manifest', type=Path, default=RESEARCH / 'inputs/jp-1507021.json')
     parser.add_argument('--label', default='ci-v1')
     parser.add_argument('--publish', action='store_true')
+    parser.add_argument('--checkpoint')
     args = parser.parse_args()
-    if args.action == 'setup':
+    if args.action in ('setup', 'setup-apk'):
         public_only()
-        setup()
+        setup(apk_only=args.action == 'setup-apk')
     else:
-        run(args.manifest, args.label, args.publish)
+        from indexer.ci_delivery import publish_comparison, publish_materials
+
+        if args.action == 'run':
+            tag = analyze(args.manifest, args.label)
+            publish_materials(tag, args.publish)
+            publish_comparison(tag, args.publish)
+        else:
+            if not args.checkpoint:
+                parser.error('--checkpoint is required')
+            operation = publish_materials if args.action == 'references' else publish_comparison
+            operation(args.checkpoint, args.publish)
 
 
 if __name__ == '__main__':

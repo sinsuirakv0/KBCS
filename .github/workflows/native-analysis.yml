@@ -1,4 +1,4 @@
-﻿name: Analyze native library and build references
+﻿name: Native analysis pipeline
 
 on:
   schedule:
@@ -9,6 +9,19 @@ on:
         description: 'Pinned manifest under research/inputs; blank uses the latest verified JP assets'
         type: string
         default: ''
+      assets_commit:
+        description: 'Commit from the assets publication event; blank checks assets main'
+        type: string
+        default: ''
+      checkpoint:
+        description: 'Completed native-analysis Release tag for a replay'
+        type: string
+        default: ''
+      stage:
+        description: 'Run the full pipeline or replay one publication stage'
+        type: choice
+        options: [all, analyze, references, match]
+        default: all
       check_only:
         description: 'Check the source and publication status without analysis or publication'
         type: boolean
@@ -31,21 +44,27 @@ concurrency:
   group: native-analysis
   cancel-in-progress: false
 
+env:
+  PYTHONPATH: ${{ github.workspace }}/research
+  PYTHONUTF8: '1'
+  GH_TOKEN: ${{ github.token }}
+  PUBLISH_REFERENCE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish_reference) || (github.event_name == 'repository_dispatch' && github.event.client_payload.publish_reference == true) }}
+
 jobs:
   analyze:
+    name: Analyze native library
     # 標準Public実行だけを許可する。有料runnerへの切替は用意しない。
     if: github.repository == 'sinsuirakv0/KBCS' && github.event.repository.private == false && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 340
     permissions:
       contents: write
+    outputs:
+      checkpoint: ${{ steps.pipeline.outputs.checkpoint || steps.source.outputs.checkpoint }}
+      match_only: ${{ steps.source.outputs.match_only }}
     env:
-      PYTHONPATH: ${{ github.workspace }}/research
-      PYTHONUTF8: '1'
-      GH_TOKEN: ${{ github.token }}
       INPUT_MANIFEST: ${{ inputs.source_manifest || github.event.client_payload.source_manifest }}
       REVISION_LABEL: ${{ inputs.revision_label || github.event.client_payload.revision_label || 'ci-v1' }}
-      PUBLISH_REFERENCE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish_reference) || (github.event_name == 'repository_dispatch' && github.event.client_payload.publish_reference == true) }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -58,11 +77,28 @@ jobs:
         id: source
         env:
           CHECK_ONLY: ${{ inputs.check_only }}
+          ASSETS_COMMIT: ${{ inputs.assets_commit }}
+          REQUESTED_CHECKPOINT: ${{ inputs.checkpoint }}
+          STAGE: ${{ inputs.stage || 'all' }}
         shell: bash
         run: |
+          if [[ -n "$REQUESTED_CHECKPOINT" ]]; then
+            [[ "$REQUESTED_CHECKPOINT" =~ ^native-analysis-[0-9]+\.[0-9]+\.[0-9]+-[a-zA-Z0-9_-]+-[a-f0-9]{16}$ ]]
+            if [[ -n "$INPUT_MANIFEST" || -n "$ASSETS_COMMIT" || "$STAGE" == analyze ]]; then
+              echo 'A checkpoint cannot be combined with a source selection' >&2
+              exit 1
+            fi
+            if [[ "$CHECK_ONLY" != true ]]; then printf 'checkpoint=%s\n' "$REQUESTED_CHECKPOINT" >> "$GITHUB_OUTPUT"; fi
+            exit 0
+          fi
+          if [[ "$STAGE" == references || "$STAGE" == match || ( -n "$INPUT_MANIFEST" && -n "$ASSETS_COMMIT" ) ]]; then
+            echo 'Select a completed checkpoint for a stage replay, or select one source for analysis' >&2
+            exit 1
+          fi
           if [[ -z "$INPUT_MANIFEST" ]]; then
             args=()
             if [[ "$CHECK_ONLY" == true ]]; then args+=(--check-only); fi
+            if [[ -n "$ASSETS_COMMIT" ]]; then args+=(--assets-commit "$ASSETS_COMMIT"); fi
             python3 -m indexer.upstream "${args[@]}"
           else
             python3 -c 'import os; from pathlib import Path; from indexer.ci import load_input, public_only; public_only(); load_input(Path(os.environ["INPUT_MANIFEST"]))'
@@ -95,7 +131,7 @@ jobs:
       - name: Install checksum-pinned analysis tools
         if: steps.source.outputs.needed == 'true'
         run: python -m indexer.ci setup
-      - name: Analyze, checkpoint, generate and optionally publish
+      - name: Analyze and save verified checkpoint
         if: steps.source.outputs.needed == 'true'
         id: pipeline
         env:
@@ -105,9 +141,11 @@ jobs:
           python - <<'PY'
           import os
           from pathlib import Path
-          from indexer.ci import run
+          from indexer.ci import analyze
           manifest = os.environ.get('INPUT_MANIFEST', '')
-          run(Path(manifest), os.environ['REVISION_LABEL'], os.environ['PUBLISH_REFERENCE'].lower() == 'true', from_assets=not manifest)
+          tag = analyze(Path(manifest), os.environ['REVISION_LABEL'], from_assets=not manifest)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f'checkpoint={tag}\n')
           PY
       - name: Report status
         if: always()
@@ -131,3 +169,56 @@ jobs:
                       output.write(f"- Internal: `{state['report']['internal']}`; external: `{state['report']['external']}`\n")
               output.write('\nSee the `native-analysis-*` prerelease for verified text checkpoints. Re-run the same inputs to resume.\n')
           PY
+
+  references:
+    name: Generate reference documents
+    needs: analyze
+    if: needs.analyze.outputs.checkpoint != '' && needs.analyze.outputs.match_only != 'true' && inputs.stage != 'analyze' && inputs.stage != 'match'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      CHECKPOINT: ${{ needs.analyze.outputs.checkpoint }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Restore checkpoint and generate references
+        shell: bash
+        run: |
+          args=()
+          if [[ "$PUBLISH_REFERENCE" == true ]]; then args+=(--publish); fi
+          python3 -m indexer.ci references --checkpoint "$CHECKPOINT" "${args[@]}"
+
+  match:
+    name: Match functions across versions
+    needs: [analyze, references]
+    if: >-
+      !cancelled() && needs.analyze.result == 'success' && needs.analyze.outputs.checkpoint != '' &&
+      inputs.stage != 'analyze' && inputs.stage != 'references' &&
+      (needs.references.result == 'success' || inputs.stage == 'match' || needs.analyze.outputs.match_only == 'true')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    permissions:
+      contents: write
+    env:
+      CHECKPOINT: ${{ needs.analyze.outputs.checkpoint }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21.0.11+10.0.LTS'
+      - name: Install pinned APK verification tool
+        run: python3 -m indexer.ci setup-apk
+      - name: Compare verified indexes and publish results
+        env:
+          BATTLECATS_APK_READ_TOKEN: ${{ secrets.BATTLECATS_APK_READ_TOKEN }}
+        shell: bash
+        run: |
+          args=()
+          if [[ "$PUBLISH_REFERENCE" == true ]]; then args+=(--publish); fi
+          python3 -m indexer.ci match --checkpoint "$CHECKPOINT" "${args[@]}"

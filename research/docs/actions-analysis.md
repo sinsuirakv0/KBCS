@@ -37,11 +37,16 @@ workflowは `.github/workflows/native-analysis.yml`。
 | 入力 | 既定値 | 意味 |
 | --- | --- | --- |
 | source_manifest | 空 | assetsの検証済み最新版。旧版を指定する場合は `research/inputs` 内の固定台帳 |
+| assets_commit | 空 | assetsの公開通知に含まれるコミットSHA。新しいJPデータセットに置き換わった通知は処理を終える |
+| checkpoint | 空 | 処理済みの `native-analysis-*` Releaseタグ。指定時は保存済み解析から開始 |
+| stage | all | `analyze` は解析のみ、`references` と `match` は完成checkpointからその段階だけを実行 |
 | check_only | false | 台帳と公開状態だけを確認。解析、Release書込、Git公開を行わない |
 | revision_label | ci-v1 | 同じ値で再開、変更すると別リビジョンを作成 |
 | publish_reference | true | 完成した資料でmain上の同じゲーム版・ABIを更新 |
 
-KBCSのmainで毎時23分にassetsを確認する。上流のPlay更新検知・APK取得・展開・検証が完了し、`metadata/jp/current.json` がassetsのmainへ公開された版を対象にする。`current.json` と版別 `proof.json` は同じコミットから読み、公開済みならAPK取得と解析環境のセットアップを省く。GitHubの定期実行には遅延があり、実行時点のcurrentを処理する。[GitHub Actionsのschedule仕様](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
+上流のPlay更新検知・APK取得・展開・検証が完了し、`metadata/jp/current.json` がassetsのmainへ公開された版を対象にする。assetsの `notify-native-analysis.yml` がコミットSHA付きでKBCSを起動し、受付応答で終了する。既存のZIP配布と通知は独立。即時起動にはassets側の `KBCS_ACTIONS_TOKEN` が必要で、権限はKBCSへの `Actions: write` に限定する。[GitHubのworkflow dispatch権限](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
+
+KBCSのmainでも毎時23分にassetsを確認し、通知の未着や失敗を拾う。`current.json` と版別 `proof.json` は同じコミットから読む。全段階が済んだ原本はスキップし、資料公開済みで照合待ちの原本は `match` ジョブだけを再開する。GitHubの定期実行には遅延があり、定期実行は起動時点のcurrentを処理する。[GitHub Actionsのschedule仕様](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
 
 新規版では保全済みのPrivate Releaseを取得し、アーカイブ、署名検証記録、base/ABI SplitのSHA-256、実APKのmanifestを照合する。上流の記録にSO SHA-256がないため、検証済みABI Splitから抽出したSHA-256を解析計画に固定する。現在の15.7.4は既存の固定台帳と公開済みSOのSHA-256が一致するためスキップする。同じ版でも原本アーカイブが変われば新規入力として扱う。
 
@@ -61,11 +66,11 @@ KBCSのmainで毎時23分にassetsを確認する。上流のPlay更新検知・
 4. 未完了ならPrivate Releaseから対象APKを取得・検証する。Ghidraの独立プロジェクトを新規作成し、自動解析と全件索引を作る。
 5. 1000関数以下を1バッチとして逐次デコンパイルする。プロセス中断時も、書き終えた関数があれば同期・保存して残りへ進む。進捗0の場合は時間に余裕があれば1回だけ再起動する。保存時はGitHub側のsize/digestも照合する。
 6. 標準→conservative→minimalの有限3設定で未保存分を処理する。過去に同じ設定で処理した失敗関数を自動反復しない。
-7. 未処理0を確認して最終checkpointを保存し、Git閲覧用の資料を生成する。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
-8. 同じABIの直前の公開版があれば、公開manifestに一致する完成checkpointを復元する。両SOを元APKから照合し、関数照合と名前を隠した検証を実行する。検証を通った検索用SQLiteを今回のReleaseに保存し、sizeとSHA-256を照合する。比較元のない初回は解析資料だけを作る。
-9. `publish_reference=true`なら、最新mainで比較元が変わっていないことを確認し、対象のゲーム版・ABIの資料を入れ替えてpushする。新版のREADMEから `comparison.md` と検索用SQLiteを参照できる。
+7. `analyze` は未処理0を確認して最終checkpointを保存し、Releaseタグを後続へ渡す。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
+8. `references` はそのcheckpointから資料を生成する。`publish_reference=true` ならmainの同じゲーム版・ABIを差し替え、manifestに `comparison_state=pending` を記録する。
+9. `match` は同じABIの直前の公開版と対象版を復元し、両SOのSHA-256と名前を隠した検証を通す。検索用SQLiteを今回のReleaseへ保存し、sizeとSHA-256を照合する。mainの対象資料と比較元が照合に用いたcheckpointと一致することを確認して `comparison.md` を追加する。比較元のない初回は `no_baseline`、比較公開後は `complete` をmanifestに記録する。
 
-比較、Release書込、Git公開の途中で停止した場合も、新版の完成checkpointから再開できる。比較で誤対応が出た場合は採用表と新版資料の公開を保留する。比較元のcheckpointが見つからない場合や、版・SHAが一致しない場合は原因を解消して同じ入力とラベルで再実行する。上流currentが進んだ後に旧版を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
+資料生成や照合だけをやり直す場合は `checkpoint` と `stage` を指定する。例えば15.7.4を共通化する初回確認には `checkpoint=native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73`、`stage=all` を指定できる。完成済み索引から資料を生成し、15.7.2との照合へ進む。比較が失敗しても公開済みの新版資料は利用できる。誤対応が検出された照合結果は保留し、修正後に `stage=match` で再実行できる。上流currentが進んだ後に旧版の未完了解析を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
 
 checkpointにはGhidraプロジェクトを含めない。そのため未完了の再開時は元APKからプロジェクトを再解析する。以前と新しい索引を、実行パスや所要時間を除いた構造ハッシュで照合し、一致した場合だけ保存済み疑似コードを再利用する。不一致時は停止し、別ラベルで新規生成する。完了checkpointからの再開では、同じ解析IDの資料生成・反映から再試行できる。Actionsの結果と `ci-status.json` の `complete` で、関数処理と資料公開の状態を区別する。
 
@@ -88,15 +93,15 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 ## 関数の関係と検証
 
 - `ci.setup`：ハッシュ固定の公式配布物だけを準備する。
-- `upstream.snapshot/source_input/published`：assetsの同一コミットの検証記録から入力を作り、公開済みのAPK原本を照合して重複解析を省く。
+- `upstream.snapshot/source_input/matching_publication`：assetsの同一コミットの検証記録から入力を作り、公開済みのAPK原本を照合して重複解析を省く。
 - `ci.load_input/plan`：台帳の境界検証、無料条件、解析ID・メモリ設定の作成。
-- `ci.run`：取得→索引→バッチ→資料生成を調整する。`run.headless`と既存ExportCacheを共用する。
+- `ci.analyze`：取得→索引→バッチ→完成checkpointを調整する。`run.headless`と既存ExportCacheを共用する。
 - `ci.allowed/restore/checkpoint`：配布可能なファイルを限定し、パス・サイズ・各ハッシュ・GitHubのdigestを検証する。
 - `network.retry/download_asset`：一時的なエラーの判定と、APK・解析配布物の取得の再試行を共用する。
 - `ci.decompile_batch`：途中で止まった処理のジャーナルを同期し、再開する関数を選ぶ。
 - `ci.index_digest/select_functions`：再解析時の一致確認と、処理済み試行の再実行防止。
 - `memory.linux_memory`：Linuxの所有子プロセスだけをRSS/空きRAMで保護する。
-- `ci.publish_reference`：アプリ作業とは別のworktreeで、対象の版・ABIの資料だけを更新する。
+- `ci_delivery.restore_completed/publish_materials/publish_comparison`：完成checkpointの版・ABI・解析ID・SOを確認し、資料と比較を独立して公開する。
 - `ci_comparison.build_comparison/deliver_database/write_comparison`：直前の公開版を復元し、既存matcherで検証して検索用SQLiteと比較資料を公開用に組み立てる。
 - `reference.export_cache`：完成済みキャッシュから版・ABI・SO SHA配下へ1関数1ファイルで書き出す。
 - `reference.replace_reference`：新しい一式を準備してから対象を切り替え、入口を更新する。
@@ -104,3 +109,5 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 最初のジョブはsetup-javaの版解決で停止した。配布元の正確な `21.0.11+10.0.LTS` 表記へ直し、上記の実ジョブで起動から公開まで確認した。復旧処理はローカルテストで、壊れた保存からの切替、通信失敗後のアセット照合、ジャーナルの部分保存、進捗0での停止を検証する。公開形式の変更は両版の完了チェックポイントからの再生成で検証する。
 
 2026-11-07の接続検証では、公開assetsの15.7.4からPrivate Releaseのdigestを照合し、実APKから既知のARM64 SOを抽出した。公開済み版のスキップと15.7.2の完成checkpointの復元を確認した。比較資料の生成とSQLiteの送信後照合は、両索引のSHA-256に一致する保存済みの照合結果を使い、送信先をローカルで模擬して確認した。構文検査と20件のテストを実行した。
+
+3段階への分離後は、両版の実checkpointと保存済み照合結果を使って、資料公開、照合失敗時の `pending` 維持、照合だけの再実行、SQLite配布と `complete` 更新をローカルで確認した。GitHubへの送信は模擬した。

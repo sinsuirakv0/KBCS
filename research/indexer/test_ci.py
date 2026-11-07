@@ -44,8 +44,10 @@ class CiTests(unittest.TestCase):
                      'source_version_code': source['versionCode']}
         with patch.object(upstream, 'gh_json', return_value={'object': {'sha': 'a' * 40}}), \
                 patch.object(upstream, 'reference_at', return_value=reference):
-            self.assertTrue(upstream.published(source, ci.REPO, ci.RESEARCH / 'inputs'))
-            self.assertFalse(upstream.published(source | {'archiveSha256': 'a' * 64}, ci.REPO, ci.RESEARCH / 'inputs'))
+            self.assertEqual(upstream.matching_publication(source, ci.REPO, ci.RESEARCH / 'inputs'), reference)
+            self.assertIsNone(upstream.matching_publication(source | {'archiveSha256': 'a' * 64}, ci.REPO, ci.RESEARCH / 'inputs'))
+            reference['comparison_state'] = 'pending'
+            self.assertEqual(upstream.matching_publication(source, ci.REPO, ci.RESEARCH / 'inputs')['comparison_state'], 'pending')
 
     def test_budget_identity_and_public_guard(self):
         data = ci.load_input(ci.RESEARCH / 'inputs/jp-1507021.json')

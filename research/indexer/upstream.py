@@ -58,7 +58,7 @@ def source_input(current, proof):
     return data
 
 
-def snapshot():
+def snapshot(assets_commit=None):
     def read_public(url):
         with urllib.request.urlopen(url, timeout=30) as response:
             raw = response.read(2 * 1024**2 + 1)
@@ -66,12 +66,18 @@ def snapshot():
             raise ValueError('Assets metadata exceeds the size limit')
         return json.loads(raw.decode('utf-8-sig'))
 
-    commit = retry(lambda: read_public(f'https://api.github.com/repos/{ASSETS}/git/ref/heads/main'), 'Assets main')['object']['sha']
+    latest = retry(lambda: read_public(f'https://api.github.com/repos/{ASSETS}/git/ref/heads/main'), 'Assets main')['object']['sha']
+    commit = assets_commit or latest
     if not re.fullmatch('[a-f0-9]{40}', commit):
         raise ValueError('Invalid assets commit')
     root = f'https://raw.githubusercontent.com/{ASSETS}/{commit}/metadata/jp'
     current = retry(lambda: read_public(f'{root}/current.json'), 'Assets current')
     _, code = version_identity(current)
+    if commit != latest:
+        canonical = retry(lambda: read_public(f'https://raw.githubusercontent.com/{ASSETS}/{latest}/metadata/jp/current.json'), 'Latest assets current')
+        if (current['versionName'], current['datasetId']) != (canonical['versionName'], canonical['datasetId']):
+            print(f'Assets event {commit} was superseded; the latest publication will be checked separately', flush=True)
+            return None, commit
     proof = retry(lambda: read_public(f'{root}/versions/{code}.proof.json'), 'Assets proof')
     return source_input(current, proof), commit
 
@@ -94,21 +100,22 @@ def reference_at(repository, ref, version, architecture, library):
     return manifest
 
 
-def published(data, repository, inputs):
+def matching_publication(data, repository, inputs):
     ref = gh_json(f'repos/{repository}/git/ref/heads/main')['object']['sha']
     manifest = reference_at(repository, ref, data['versionName'], data['architecture'], data['library'])
     if manifest is None:
-        return False
+        return None
     if 'source_archive_sha256' in manifest:
-        return (manifest['source_archive_sha256'], manifest['source_version_code']) == (
-            data['archiveSha256'], data['versionCode'])
+        if (manifest['source_archive_sha256'], manifest['source_version_code']) == (data['archiveSha256'], data['versionCode']):
+            return manifest
+        return None
     # 既存の公開版は固定台帳とSOの組で照合する。
     for path in inputs.glob('jp-*.json'):
         previous = read_json(path)
         if (previous['versionCode'], previous['archiveSha256'], previous['librarySha256']) == (
                 data['versionCode'], data['archiveSha256'], manifest['sha256']):
-            return True
-    return False
+            return manifest
+    return None
 
 
 def previous_reference(data, repository):
@@ -133,15 +140,27 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--check-only', action='store_true')
+    parser.add_argument('--assets-commit')
     args = parser.parse_args()
     public_only()
-    data, commit = snapshot()
-    exists = published(data, REPO, RESEARCH / 'inputs')
-    print(f"Assets {data['versionName']} / {data['versionCode']} at {commit}; reference already published: {exists}", flush=True)
-    if not exists and not args.check_only:
-        write_json(LOCAL / 'ci-upstream.json', data)
-        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+    data, commit = snapshot(args.assets_commit)
+    if data is None:
+        return
+    manifest = matching_publication(data, REPO, RESEARCH / 'inputs')
+    state = 'new' if manifest is None else manifest.get('comparison_state', 'complete')
+    print(f"Assets {data['versionName']} / {data['versionCode']} at {commit}; state: {state}", flush=True)
+    if args.check_only:
+        return
+    with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+        if state == 'new':
+            write_json(LOCAL / 'ci-upstream.json', data)
             output.write('needed=true\n')
+        elif state == 'pending':
+            revision = manifest['analysis_revision']
+            if not re.fullmatch('[a-f0-9]{16}', revision):
+                raise ValueError('Invalid published revision')
+            output.write(f"checkpoint=native-analysis-{data['versionName']}-{data['architecture']}-{revision}\n")
+            output.write('match_only=true\n')
 
 
 if __name__ == '__main__':

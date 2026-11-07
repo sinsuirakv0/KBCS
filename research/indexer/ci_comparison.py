@@ -5,7 +5,8 @@ import subprocess
 from argparse import Namespace
 from pathlib import Path
 
-from indexer.ci import REPO, acquire_input, release_state, restore
+from indexer.ci import REPO, acquire_input, release_state
+from indexer.ci_delivery import link_comparison, restore_completed
 from indexer.network import gh, retry
 from indexer.reference import reference_path
 from indexer.store import LOCAL, digest, read_json
@@ -60,12 +61,10 @@ def write_comparison(source, metadata, tag, asset, checksum):
              '対応先と根拠を調べるには `python -m cli.match show <旧アドレス> --db <SQLite>` を使う。`--side new` で新版から検索できる。',
              '本文差は復元表現の差を含む。候補がない関数も削除・追加とは断定しない。', '', f'SQLite SHA-256 `{checksum}`', '']
     (source / 'comparison.md').write_text('\n'.join(lines), encoding='utf-8-sig')
-    readme = source / 'README.md'
-    with readme.open('a', encoding='utf-8') as output:
-        output.write('\n[直前の公開版との関数対応](comparison.md)\n')
+    link_comparison(source)
 
 
-def build_comparison(data, root, binary, source, tag, java_home):
+def build_comparison(data, root, source, tag):
     previous = previous_reference(data, REPO)
     if previous is None:
         print('No earlier published reference for this ABI', flush=True)
@@ -74,17 +73,15 @@ def build_comparison(data, root, binary, source, tag, java_home):
     if not re.fullmatch('[a-f0-9]{16}', revision):
         raise ValueError('Invalid comparison baseline revision')
     old_tag = f"native-analysis-{previous['version']}-{previous['architecture']}-{revision}"
-    old_root = LOCAL / 'ci-previous'
-    restore(old_root, old_tag, revision)
-    if (not old_root.is_dir() or not read_json(old_root / 'ci-status.json').get('complete')
-            or digest(old_root / 'cache.sqlite') != previous['source_database_sha256']):
+    old_root = root.with_name('previous')
+    old_data, _ = restore_completed(old_tag, old_root)
+    if digest(old_root / 'cache.sqlite') != previous['source_database_sha256']:
         raise ValueError('Published comparison baseline has no matching completed checkpoint')
-    old_data = read_json(old_root / 'ci-plan.json')['input']
     if old_data['librarySha256'] != previous['sha256']:
         raise ValueError('Comparison baseline library differs from the published reference')
+    java_home = Path(os.environ['JAVA_HOME'])
     old_binary = Path(acquire_input(old_data, java_home)['path']).resolve()
-    if binary is None:
-        binary = Path(acquire_input(data, java_home)['path']).resolve()
+    binary = Path(acquire_input(data, java_home)['path']).resolve()
     database = build(Namespace(old_cache=old_root, new_cache=root, old_binary=old_binary, new_binary=binary,
                                features=LOCAL / 'matching/features', output=None, decisions=None, validate=True))
     metadata = read_json(database.with_name('summary.json'))
