@@ -146,3 +146,5 @@ GitHub連携の検索結果が不十分なら、既知のファイルパスを�
 - [00be](index/00be.md)
 - [010a](index/010a.md)
 - [external](index/external.md)
+
+[直前の公開版との関数対応](comparison.md)
