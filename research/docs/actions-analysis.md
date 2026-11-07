@@ -4,7 +4,7 @@
 
 最初の対象はJP15.7.2 / versionCode 1507021 / arm64-v8a / libnative-lib.so。入力の版・APK/アーカイブ/SO SHA-256は `research/inputs/jp-1507021.json` に固定する。2026-10-20に確認した原本の再生成であり、最新版の版番号を推測しない。上流の取得workflowは起動・変更しない。
 
-Python 3.13、Ghidra 12.1.2、Temurin JDK 21.0.11+10、apktool 2.12.1を使用する。Ghidra/apktoolの公式配布URLとSHA-256は `research/ghidra/runtime.json`。解析・抽出・資料生成はPython/Javaで実行し、AI APIは使わない。版間の関数対応は別途調査する。
+Python 3.13、Ghidra 12.1.2、Temurin JDK 21.0.11+10、apktool 2.12.1を使用する。Ghidra/apktoolの公式配布URLとSHA-256は `research/ghidra/runtime.json`。解析・抽出・資料生成はPython/Javaで実行し、AI APIは使わない。直前の公開版との関数対応は [matcher](../matcher/docs/README.md) で作成する。
 
 2026-11-06に15.7.2の[GitHub Actions実行](https://github.com/sinsuirakv0/KBCS/actions/runs/42078163411)が正常終了した。対象はarm64-v8aの `libnative-lib.so`、解析IDは `5ed057380ac853a2`。取得・解析・検証・公開は92分06秒。検出25,525件のうち内部25,233件の疑似コードを保存し、失敗0件、外部292件。代替設定で抽出した3件は確度low。[チェックポイントのRelease](https://github.com/sinsuirakv0/KBCS/releases/tag/native-analysis-15.7.2-arm64-v8a-5ed057380ac853a2)
 
@@ -36,28 +36,36 @@ workflowは `.github/workflows/native-analysis.yml`。
 
 | 入力 | 既定値 | 意味 |
 | --- | --- | --- |
-| source_manifest | research/inputs/jp-1507021.json | リポジトリ内の検証済み入力台帳 |
+| source_manifest | 空 | assetsの検証済み最新版。旧版を指定する場合は `research/inputs` 内の固定台帳 |
+| check_only | false | 台帳と公開状態だけを確認。解析、Release書込、Git公開を行わない |
 | revision_label | ci-v1 | 同じ値で再開、変更すると別リビジョンを作成 |
 | publish_reference | true | 完成した資料でmain上の同じゲーム版・ABIを更新 |
 
-`workflow_dispatch`と、認証された上流からの`repository_dispatch: native-analysis-request`を入口にする。後者のclient_payloadは同名のsource_manifest/revision_label/publish_referenceを使用し、publish_reference省略時はmainへ反映しない。上流での更新検知・通知設定と、無人での定期再実行は今回追加しない。自動解析の安定性を確認してから接続する。
+KBCSのmainで毎時23分にassetsを確認する。上流のPlay更新検知・APK取得・展開・検証が完了し、`metadata/jp/current.json` がassetsのmainへ公開された版を対象にする。`current.json` と版別 `proof.json` は同じコミットから読み、公開済みならAPK取得と解析環境のセットアップを省く。GitHubの定期実行には遅延があり、実行時点のcurrentを処理する。[GitHub Actionsのschedule仕様](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
+
+新規版では保全済みのPrivate Releaseを取得し、アーカイブ、署名検証記録、base/ABI SplitのSHA-256、実APKのmanifestを照合する。上流の記録にSO SHA-256がないため、検証済みABI Splitから抽出したSHA-256を解析計画に固定する。現在の15.7.4は既存の固定台帳と公開済みSOのSHA-256が一致するためスキップする。同じ版でも原本アーカイブが変われば新規入力として扱う。
+
+手動確認は `workflow_dispatch` の `check_only=true`、最新版をすぐ確認・処理するには入力台帳を空にして通常起動する。`repository_dispatch: native-analysis-request` は従来どおり同名のclient_payloadを受け取り、`publish_reference` 省略時はmainへ反映しない。定期実行では完成資料をmainへ公開する。解析中のジョブは後着の定期実行で中断しない。GitHubの同時実行制御で待機中のジョブが置き換わった場合は手動で再起動できる。
 
 同じ入力でも、ツール・スクリプト・JDK・メモリ設定・ラベルが変わると別の解析IDになる。台帳の誤りや未知の版を名前から補完して実行しない。
 
-15.7.4を解析するときは `source_manifest=research/inputs/jp-1507040.json` を指定する。公開済みの15.7.2は別リビジョンで保持する。ローカルで原本の検証とSO抽出だけをする場合は `python -m indexer.apk --manifest research/inputs/jp-1507040.json --apktool <apktool.jar> --java <java>` を使う（`PYTHONPATH=research`）。自動紐づけの前に両版の資料を参照し、共通化に使う根拠を調べる。
+15.7.4を指定して再解析するときは `source_manifest=research/inputs/jp-1507040.json` を使う。公開済みの15.7.2は別リビジョンで保持する。ローカルで原本の検証とSO抽出だけをする場合は `python -m indexer.apk --manifest research/inputs/jp-1507040.json --apktool <apktool.jar> --java <java>` を使う（`PYTHONPATH=research`）。
 
 両版の既存キャッシュを使った照合の実測は [15.7.2と15.7.4の関数照合](native-comparison-15.7.2-15.7.4.md) を参照。
 
 ## 処理と再開
 
-1. Public条件とSecret・台帳を確認し、最小テストを実行する。
+1. Public条件と台帳を確認する。解析する場合だけSecretを利用し、テストとセットアップへ進む。
 2. 配布物のハッシュを確認する。Ghidraは一時領域に展開し、起動に必要なJARを確認してから配置する。
 3. 計画から16桁の解析IDを作る。同じIDの最新3組までを新しい順に確認する。Releaseのdigest・アーカイブと各ファイルのSHA-256・展開先を照合し、検証が完了した一式を作業領域へ移す。保存済みの組がすべて不正なら停止する。
 4. 未完了ならPrivate Releaseから対象APKを取得・検証する。Ghidraの独立プロジェクトを新規作成し、自動解析と全件索引を作る。
 5. 1000関数以下を1バッチとして逐次デコンパイルする。プロセス中断時も、書き終えた関数があれば同期・保存して残りへ進む。進捗0の場合は時間に余裕があれば1回だけ再起動する。保存時はGitHub側のsize/digestも照合する。
 6. 標準→conservative→minimalの有限3設定で未保存分を処理する。過去に同じ設定で処理した失敗関数を自動反復しない。
 7. 未処理0を確認して最終checkpointを保存し、Git閲覧用の資料を生成する。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
-8. publish_reference=trueなら、最新mainの独立worktreeで同じゲーム版・ABIの資料を入れ替えてpushする。非fast-forwardや権限エラーでは停止し、解析成果はReleaseに残る。
+8. 同じABIの直前の公開版があれば、公開manifestに一致する完成checkpointを復元する。両SOを元APKから照合し、関数照合と名前を隠した検証を実行する。検証を通った検索用SQLiteを今回のReleaseに保存し、sizeとSHA-256を照合する。比較元のない初回は解析資料だけを作る。
+9. `publish_reference=true`なら、最新mainで比較元が変わっていないことを確認し、対象のゲーム版・ABIの資料を入れ替えてpushする。新版のREADMEから `comparison.md` と検索用SQLiteを参照できる。
+
+比較、Release書込、Git公開の途中で停止した場合も、新版の完成checkpointから再開できる。比較で誤対応が出た場合は採用表と新版資料の公開を保留する。比較元のcheckpointが見つからない場合や、版・SHAが一致しない場合は原因を解消して同じ入力とラベルで再実行する。上流currentが進んだ後に旧版を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
 
 checkpointにはGhidraプロジェクトを含めない。そのため未完了の再開時は元APKからプロジェクトを再解析する。以前と新しい索引を、実行パスや所要時間を除いた構造ハッシュで照合し、一致した場合だけ保存済み疑似コードを再利用する。不一致時は停止し、別ラベルで新規生成する。完了checkpointからの再開では、同じ解析IDの資料生成・反映から再試行できる。Actionsの結果と `ci-status.json` の `complete` で、関数処理と資料公開の状態を区別する。
 
@@ -80,6 +88,7 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 ## 関数の関係と検証
 
 - `ci.setup`：ハッシュ固定の公式配布物だけを準備する。
+- `upstream.snapshot/source_input/published`：assetsの同一コミットの検証記録から入力を作り、公開済みのAPK原本を照合して重複解析を省く。
 - `ci.load_input/plan`：台帳の境界検証、無料条件、解析ID・メモリ設定の作成。
 - `ci.run`：取得→索引→バッチ→資料生成を調整する。`run.headless`と既存ExportCacheを共用する。
 - `ci.allowed/restore/checkpoint`：配布可能なファイルを限定し、パス・サイズ・各ハッシュ・GitHubのdigestを検証する。
@@ -88,7 +97,10 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 - `ci.index_digest/select_functions`：再解析時の一致確認と、処理済み試行の再実行防止。
 - `memory.linux_memory`：Linuxの所有子プロセスだけをRSS/空きRAMで保護する。
 - `ci.publish_reference`：アプリ作業とは別のworktreeで、対象の版・ABIの資料だけを更新する。
+- `ci_comparison.build_comparison/deliver_database/write_comparison`：直前の公開版を復元し、既存matcherで検証して検索用SQLiteと比較資料を公開用に組み立てる。
 - `reference.export_cache`：完成済みキャッシュから版・ABI・SO SHA配下へ1関数1ファイルで書き出す。
 - `reference.replace_reference`：新しい一式を準備してから対象を切り替え、入口を更新する。
 
 最初のジョブはsetup-javaの版解決で停止した。配布元の正確な `21.0.11+10.0.LTS` 表記へ直し、上記の実ジョブで起動から公開まで確認した。復旧処理はローカルテストで、壊れた保存からの切替、通信失敗後のアセット照合、ジャーナルの部分保存、進捗0での停止を検証する。公開形式の変更は両版の完了チェックポイントからの再生成で検証する。
+
+2026-11-07の接続検証では、公開assetsの15.7.4からPrivate Releaseのdigestを照合し、実APKから既知のARM64 SOを抽出した。公開済み版のスキップと15.7.2の完成checkpointの復元を確認した。比較資料の生成とSQLiteの送信後照合は、両索引のSHA-256に一致する保存済みの照合結果を使い、送信先をローカルで模擬して確認した。構文検査と20件のテストを実行した。

@@ -4,3 +4,5 @@
 SQLパラメータをバインドし、既定10件・最大100件、文字列240文字、疑似コード4000文字に抑える。
 起動時の `store.sync_results` はGhidraが中断した場合の結果ジャーナルを同期する。
 使い方は[research README](../../README.md)、保存構造は[共通設計](../../docs/architecture.md)を参照。
+
+`python -m cli.match` は版間の関数探索用。`build` で照合し、`stats` / `find` / `show` / `gaps` で結果と根拠を検索する。既定5件、最大20件、結果DBは読取専用。[照合設計と操作](../../matcher/docs/README.md)を参照。

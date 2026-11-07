@@ -17,10 +17,10 @@ import zipfile
 import zlib
 from pathlib import Path
 
-from indexer.apk import acquire, validate_split_source
+from indexer.apk import acquire, acquire_split, validate_split_source
 from indexer.complete import build_reference
 from indexer.network import ATTEMPTS, download_asset, gh, gh_json as api, http_status, retry, transient
-from indexer.reference import export_cache, replace_reference
+from indexer.reference import export_cache, reference_path, replace_reference
 from indexer.run import headless, locked
 from indexer.store import LOCAL, configure_output, digest, import_index, read_json, sync_results, write_json
 
@@ -124,7 +124,8 @@ def plan(data, label, java_version, total_mb):
         raise RuntimeError('At least 6 GiB RAM is required; no paid runner fallback')
     hashes = {str(path.relative_to(RESEARCH)): digest(path) for path in [
         *sorted((RESEARCH / 'indexer').glob('*.py')), RESEARCH / 'ghidra/ExportCache.java',
-        RESEARCH / 'ghidra/runtime.json'] if not path.name.startswith('test_')}
+        RESEARCH / 'ghidra/runtime.json'] if not path.name.startswith('test_')
+        and path.name not in ('upstream.py', 'ci_comparison.py')}
     result = {'input': data, 'label': label, 'java': java_version, 'tools': hashes,
               'heap': '1024M', 'native_memory_limit_mb': min(8192, total_mb - 3072),
               'function_timeout_seconds': 900, 'script_batch_seconds': 1200, 'schema': 1}
@@ -325,12 +326,16 @@ def ensure_release(tag, version, revision):
     retry(create, 'Create checkpoint Release')
 
 
-def publish_reference(source, revision):
+def publish_reference(source, revision, previous=None):
     public_only()
     # 最新mainの独立worktreeで、対象の版とABIの資料だけを更新する。
     git_remote(['git', 'fetch', 'origin', 'main'])
     work = Path(os.environ['RUNNER_TEMP']) / ('native-publish-' + revision)
     subprocess.run(['git', 'worktree', 'add', '--detach', str(work), 'origin/main'], check=True)
+    if previous:
+        baseline = work / 'research/reference' / reference_path(previous) / 'manifest.json'
+        if not baseline.is_file() or read_json(baseline) != previous:
+            raise ValueError('Comparison baseline changed before publication; re-run from the checkpoint')
     replace_reference(source, work / 'research/reference')
     subprocess.run(['git', '-C', str(work), 'add', '--', 'research/reference'], check=True)
     diff = subprocess.run(['git', '-C', str(work), 'diff', '--cached', '--quiet', '--', 'research/reference'])
@@ -354,12 +359,38 @@ def git_remote(args):
         raise
 
 
-def run(input_path, label, publish):
+def acquire_input(data, java_home, *, discover_library=False):
+    token = os.environ.get('BATTLECATS_APK_READ_TOKEN')
+    if not token:
+        raise RuntimeError('BATTLECATS_APK_READ_TOKEN is required (source repository read only)')
+    previous = os.environ.get('GH_TOKEN')
+    try:
+        os.environ['GH_TOKEN'] = token
+        apktool, java = Path(os.environ['APKTOOL']), str(java_home / 'bin/java')
+        verified = (acquire_split(apktool, java, data, discover_library=True) if discover_library
+                    else acquire(apktool, java, data))
+    finally:
+        if previous is None:
+            os.environ.pop('GH_TOKEN', None)
+        else:
+            os.environ['GH_TOKEN'] = previous
+    library = next(row for row in verified['libraries'] if row['architecture'] == data['architecture'] and row['library'] == data['library'])
+    if not discover_library and library['sha256'] != data['librarySha256']:
+        raise ValueError('Pinned native library SHA-256 mismatch')
+    return library
+
+
+def run(input_path, label, publish, *, from_assets=False):
     public_only()
-    data = load_input(input_path)
+    data = read_json(LOCAL / 'ci-upstream.json') if from_assets else load_input(input_path)
     total_mb = int(next(line.split()[1] for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemTotal:'))) // 1024
     java_home = Path(os.environ['JAVA_HOME'])
     java_version = subprocess.check_output([str(java_home / 'bin/java'), '-version'], stderr=subprocess.STDOUT, timeout=30).decode()
+    binary = None
+    if from_assets:
+        library = acquire_input(data, java_home, discover_library=True)
+        data = data | {'librarySha256': library['sha256']}
+        binary = Path(library['path']).resolve()
     settings = plan(data, label, java_version, total_mb)
     revision = settings['revision']
     root = LOCAL / 'cache' / data['versionName'] / data['architecture'] / (data['librarySha256'] + '-ci-' + revision)
@@ -381,22 +412,8 @@ def run(input_path, label, publish):
         try:
             status = read_json(root / 'ci-status.json') if (root / 'ci-status.json').exists() else {}
             if not status.get('complete'):
-                token = os.environ.get('BATTLECATS_APK_READ_TOKEN')
-                if not token:
-                    raise RuntimeError('BATTLECATS_APK_READ_TOKEN is required (source repository read only)')
-                previous = os.environ.get('GH_TOKEN')
-                try:
-                    os.environ['GH_TOKEN'] = token
-                    verified = acquire(Path(os.environ['APKTOOL']), str(java_home / 'bin/java'), data)
-                finally:
-                    if previous is None:
-                        os.environ.pop('GH_TOKEN', None)
-                    else:
-                        os.environ['GH_TOKEN'] = previous
-                library = next(row for row in verified['libraries'] if row['architecture'] == data['architecture'] and row['library'] == data['library'])
-                if library['sha256'] != data['librarySha256']:
-                    raise ValueError('Pinned native library SHA-256 mismatch')
-                binary = Path(library['path']).resolve()
+                if binary is None:
+                    binary = Path(acquire_input(data, java_home)['path']).resolve()
                 if shutil.disk_usage(root).free < 3 * 1024**3:
                     raise RuntimeError('Insufficient runner disk; no paid storage fallback')
                 if not (root / 'project/cache.gpr').exists():
@@ -409,7 +426,7 @@ def run(input_path, label, publish):
                     if old_index and old_index != index_digest(root / 'index.jsonl'):
                         raise RuntimeError('Rebuilt index changed; refuse to reuse cached pseudocode')
                     identity = {'version': data['versionName'], 'version_code': data['versionCode'], 'architecture': data['architecture'],
-                                'sha256': library['sha256'], 'library': data['library'], 'analysis_revision': revision,
+                                'sha256': data['librarySha256'], 'library': data['library'], 'analysis_revision': revision,
                                 'analysis_timed_out': False, 'snapshot_format': 'ephemeral_project', 'source_manifest': data}
                     import_index(root, identity)
                     write_json(root / 'identity.json', identity)
@@ -436,8 +453,13 @@ def run(input_path, label, publish):
                 write_json(root / 'ci-status.json', {'complete': True, 'report': report})
                 checkpoint(root, tag, sequence)
             source, report = export_cache(root, LOCAL / 'ci-reference')
+            from indexer.ci_comparison import build_comparison
+
+            previous = build_comparison(data, root, binary, source, tag, java_home)
+            report.update(source_archive_sha256=data['archiveSha256'], source_version_code=data['versionCode'])
+            write_json(source / 'manifest.json', report)
             if publish:
-                publish_reference(source, revision)
+                publish_reference(source, revision, previous)
             print(json.dumps({'complete': True, 'revision': revision, 'release': tag, 'reference': str(source), 'summary': report}, ensure_ascii=False))
         except Exception:
             # 強制終了に備え、各バッチ直後の検証済みcheckpointもReleaseに残す。

@@ -10,11 +10,43 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from indexer import ci, memory, network
+from indexer import ci, memory, network, upstream
 from indexer.store import connect
 
 
 class CiTests(unittest.TestCase):
+    def test_assets_proof_requires_the_verified_source_and_splits(self):
+        expected = ci.load_input(ci.RESEARCH / 'inputs/jp-1507040.json')
+        identity = {key: expected[key] for key in ('packageName', 'versionName', 'versionCode')} | {'split': ''}
+        current = {key: expected[key] for key in ('versionName', 'versionCode')} | {
+            'status': 'verified', 'sourceRegion': 'jp', 'datasetId': expected['archiveTag'].removeprefix('source-')}
+        splits = []
+        for entry in (expected['baseApk'], expected['nativeApk']):
+            split = entry.get('split', '')
+            manifest = identity if not split else identity | {'split': split, 'versionName': ''}
+            splits.append({'manifest': manifest, 'name': entry['member'].removeprefix('./'), 'size': entry['bytes'],
+                           'sha256': entry['sha256'], 'signatureVerified': True, 'certificateSha256': upstream.SIGNER})
+        proof = {'schemaVersion': 1, 'manifest': identity, 'proof': {'source': 'google-play', 'splits': splits},
+                 'sourceArchive': {'provider': 'github-release', 'repository': upstream.REPOSITORY,
+                                   'tag': expected['archiveTag'], 'size': expected['archiveBytes'],
+                                   'sha256': expected['archiveSha256']}}
+        self.assertEqual(upstream.source_input(current, proof), {
+            key: value for key, value in expected.items() if key not in ('librarySha256', 'provenance')})
+        with self.assertRaises(ValueError):
+            upstream.source_input(current | {'versionCode': current['versionCode'] + 1}, proof)
+        splits[1]['signatureVerified'] = False
+        with self.assertRaises(ValueError):
+            upstream.source_input(current, proof)
+
+    def test_same_version_with_new_source_is_not_skipped(self):
+        source = ci.load_input(ci.RESEARCH / 'inputs/jp-1507040.json')
+        reference = {'sha256': source['librarySha256'], 'source_archive_sha256': source['archiveSha256'],
+                     'source_version_code': source['versionCode']}
+        with patch.object(upstream, 'gh_json', return_value={'object': {'sha': 'a' * 40}}), \
+                patch.object(upstream, 'reference_at', return_value=reference):
+            self.assertTrue(upstream.published(source, ci.REPO, ci.RESEARCH / 'inputs'))
+            self.assertFalse(upstream.published(source | {'archiveSha256': 'a' * 64}, ci.REPO, ci.RESEARCH / 'inputs'))
+
     def test_budget_identity_and_public_guard(self):
         data = ci.load_input(ci.RESEARCH / 'inputs/jp-1507021.json')
         first = ci.plan(data, 'test', 'JDK21', 16384)

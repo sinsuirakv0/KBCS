@@ -66,7 +66,7 @@ def validate_split_source(version):
         raise ValueError('Invalid source archive proof')
 
 
-def acquire_split(apktool, java, version):
+def acquire_split(apktool, java, version, *, discover_library=False):
     validate_split_source(version)
     root = LOCAL / 'apk' / str(version['compactVersion'])
     root.mkdir(parents=True, exist_ok=True)
@@ -110,8 +110,10 @@ def acquire_split(apktool, java, version):
     entry = f"lib/{version['architecture']}/{version['library']}"
     libraries = extract_libraries(root / 'native.apk', root, version['nativeApk']['member'], entry)
     library = libraries[0]
-    if library['sha256'] != version['librarySha256'] or (library['elf_class'], library['elf_machine']) != (2, 183):
+    check_library = not discover_library or 'librarySha256' in version
+    if (check_library and library['sha256'] != version['librarySha256']) or (library['elf_class'], library['elf_machine']) != (2, 183):
         raise ValueError('AArch64 library does not match its pinned ELF/SHA-256')
+    version = version | {'librarySha256': library['sha256']}
     report = {'version': version, 'libraries': libraries, 'source_repository': REPOSITORY}
     write_json(root / 'verified.json', report)
     return report
