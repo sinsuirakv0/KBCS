@@ -68,7 +68,7 @@ KBCSのmainでも毎時23分にassetsを確認し、通知の未着や失敗を�
 6. 標準→conservative→minimalの有限3設定で未保存分を処理する。過去に同じ設定で処理した失敗関数を自動反復しない。
 7. `analyze` は未処理0を確認して最終checkpointを保存し、Releaseタグを後続へ渡す。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
 8. `references` はそのcheckpointから資料を生成する。`publish_reference=true` ならmainの同じゲーム版・ABIを差し替え、manifestに `comparison_state=pending` を記録する。
-9. `match` は同じABIの直前の公開版と対象版を復元し、両SOのSHA-256と名前を隠した検証を通す。検索用SQLiteを今回のReleaseへ保存し、sizeとSHA-256を照合する。mainの対象資料と比較元が照合に用いたcheckpointと一致することを確認して `comparison.md` を追加する。比較元のない初回は `no_baseline`、比較公開後は `complete` をmanifestに記録する。
+9. `match` は同じABIの直前の公開版と対象版を復元し、両SOのSHA-256と名前を隠した検証を通す。検索用SQLiteを今回のReleaseへ保存し、sizeとSHA-256を照合する。mainの両版の資料が照合に使ったcheckpointと一致すれば、`comparison.md`、対応した関数資料の相互リンク、本文差分と変更一覧を一つのコミットで公開する。比較元のない初回は `no_baseline`、比較公開後は `complete` をmanifestに記録する。
 
 資料生成や照合だけをやり直す場合は `checkpoint` と `stage` を指定する。例えば15.7.4を共通化する初回確認には `checkpoint=native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73`、`stage=all` を指定できる。完成済み索引から資料を生成し、15.7.2との照合へ進む。比較が失敗しても公開済みの新版資料は利用できる。誤対応が検出された照合結果は保留し、修正後に `stage=match` で再実行できる。上流currentが進んだ後に旧版の未完了解析を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
 
@@ -86,7 +86,7 @@ JVMヒープ1GiB、native RSS上限は `min(8GiB, 実行機RAM−3GiB)`。実行
 Gitで閲覧する資料: `research/reference/<版>/<ABI>/<SO SHA>/`。1関数につきMarkdown 1ファイル。解析IDは `manifest.json` に記録する。
 Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと全ファイルのSHA-256一覧をバッチ単位で追記する。以前のcheckpointを上書き・削除しない。
 
-同じ版・ABIの公開ツリーには今回のSO SHAの資料一式を置く。対象の版・ABI以外の公開資料、過去のGitコミット、Releaseのチェックポイント、ローカルのGhidraプロジェクトは保持する。資料は機械抽出結果で、追加設定で復旧したものはlowとして表示する。
+同じ版・ABIの公開ツリーには今回のSO SHAの資料一式を置く。同一checkpointから資料を再生成する場合、相互リンクと変更一覧を引き継ぐ。別の解析原本で差し替える場合は、隣接版の古いリンクも取り除く。差し替えた版を比較元とする新版は `pending` に戻り、照合段階を再実行できる。過去のGitコミット、Releaseのチェックポイント、ローカルのGhidraプロジェクトは保持する。資料は機械抽出結果で、追加設定で復旧したものはlowとして表示する。
 
 資料だけのmain更新でアプリの版が上がらないよう、アプリbuildのpush/pull_requestに `research/reference/**` のpaths-ignoreを追加する。手動のアプリビルドや、解析ツール自体の変更時の従来ビルドは維持する。
 
@@ -103,6 +103,7 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 - `memory.linux_memory`：Linuxの所有子プロセスだけをRSS/空きRAMで保護する。
 - `ci_delivery.restore_completed/publish_materials/publish_comparison`：完成checkpointの版・ABI・解析ID・SOを確認し、資料と比較を独立して公開する。
 - `ci_comparison.build_comparison/deliver_database/write_comparison`：直前の公開版を復元し、既存matcherで検証して検索用SQLiteと比較資料を公開用に組み立てる。
+- `matcher.comparison_pages.publish_links`：検証済み照合DBと両版の索引を確認し、関数資料と版の目次に相互リンクを付ける。差分は新版の `changes/` に作成する。
 - `reference.export_cache`：完成済みキャッシュから版・ABI・SO SHA配下へ1関数1ファイルで書き出す。
 - `reference.replace_reference`：新しい一式を準備してから対象を切り替え、入口を更新する。
 
@@ -111,3 +112,5 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 2026-11-07の接続検証では、公開assetsの15.7.4からPrivate Releaseのdigestを照合し、実APKから既知のARM64 SOを抽出した。公開済み版のスキップと15.7.2の完成checkpointの復元を確認した。比較資料の生成とSQLiteの送信後照合は、両索引のSHA-256に一致する保存済みの照合結果を使い、送信先をローカルで模擬して確認した。構文検査と20件のテストを実行した。
 
 3段階への分離後は、両版の実checkpointと保存済み照合結果を使って、資料公開、照合失敗時の `pending` 維持、照合だけの再実行、SQLite配布と `complete` 更新をローカルで確認した。GitHubへの送信は模擬した。
+
+相互リンクの追加時は、15.7.2と15.7.4のARM64資料で対応済み23,412組の両端がGitにあることを確認した。保存済み疑似コードから変更候補365組の差分を生成し、サンプルの相互リンクをローカルで開いた。移動したデータアドレスと、索引で裏付けられた分割アドレスの差を除けることも確認した。

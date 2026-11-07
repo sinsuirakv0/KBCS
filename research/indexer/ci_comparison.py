@@ -87,4 +87,4 @@ def build_comparison(data, root, source, tag):
     metadata = read_json(database.with_name('summary.json'))
     asset, checksum = deliver_database(database, tag)
     write_comparison(source, metadata, tag, asset, checksum)
-    return previous
+    return previous, database, old_root
