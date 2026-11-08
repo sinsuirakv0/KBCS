@@ -1,9 +1,9 @@
-﻿from bisect import bisect_right
-from collections import Counter
+﻿from collections import Counter
 from difflib import SequenceMatcher
 from itertools import groupby, islice
 
-from matcher.structure import cfg, indexed_refs, operations
+from matcher import effects
+from matcher.structure import ADDRESS, cfg, indexed_refs, operations
 
 
 CALLS = {'CALL', 'CALLIND'}
@@ -18,15 +18,59 @@ def args_of(op):
 
 
 def refs_signature(row, targets):
-    # 実データの同一性が未確認の参照先は、値を残して別途報告する。
-    result = []
-    for _, target, kind, _, callee, name, datatype in row['refs']:
+    entry = int(row['address'], 16)
+    body = [(int(a, 16), int(b, 16)) for a, b in row['ranges']]
+    result, calls = Counter(), set()
+    unknown = row.get('unresolved', 0)
+    for site, target, kind, _, callee, name, datatype in row['refs']:
+        position = int(site, 16) - entry
         if 'CALL' in kind or 'JUMP' in kind:
-            if callee and callee != row['address']:
-                result.append((kind, targets.get(callee, callee)))
-        elif kind in ('READ', 'WRITE', 'READ_WRITE', 'DATA', 'PARAM'):
-            result.append((kind, (name, datatype) if name and datatype else target))
-    return result
+            if 'CALL' in kind:
+                calls.add(site)
+            if callee in targets:
+                key = ('mapped_function', targets[callee])
+            elif 'JUMP' in kind and ADDRESS.fullmatch(target) and any(a <= int(target, 16) <= b for a, b in body):
+                key = ('local_branch', int(target, 16) - entry)
+            else:
+                key = ('unresolved_target', target)
+                unknown += 1
+        else:
+            # シンボル名が等しくても異なるデータアドレスは保持する。
+            key = ('storage', target, name, datatype)
+            unknown += int(not target)
+        result[(position, kind, key)] += 1
+    for site, kind in row.get('call_positions', ()):
+        if site not in calls:
+            result[(int(site, 16)-entry, kind, ('unresolved_target', None))] += 1
+            unknown += 1
+    return result, unknown
+
+
+def reference_comparison(old, new, old_targets, new_targets):
+    left, left_unknown = refs_signature(old, old_targets)
+    right, right_unknown = refs_signature(new, new_targets)
+    removed, added = left - right, right - left
+    unknown = [left_unknown, right_unknown]
+    state = 'changed' if removed or added else 'unresolved' if any(unknown) else 'equal'
+    kinds = Counter(kind for _, kind, _ in removed.keys() | added.keys())
+    # 位置差とは別に、既知の宛先集合・多重度が変わったかを判定する。
+    def endpoints(rows, predicate):
+        counts = Counter()
+        for (_, kind, key), count in rows.items():
+            if predicate(kind, key):
+                counts[(kind, key)] += count
+        return counts
+    calls = lambda kind, key: ('CALL' in kind or 'JUMP' in kind) and key[0] == 'mapped_function'
+    def writes(rows):
+        counts = Counter()
+        for (_, kind, key), count in rows.items():
+            if 'WRITE' in kind and key[0] == 'storage':
+                counts[(kind, key[1])] += count
+        return counts
+    return {'state': state, 'unknown': unknown, 'counts': [left.total(), right.total()],
+            'removed': list(islice(removed.elements(), 16)), 'added': list(islice(added.elements(), 16)),
+            'changed_kinds': dict(kinds), 'mapped_call_target_changed': bool(kinds) and endpoints(left, calls) != endpoints(right, calls),
+            'write_reference_changed': bool(kinds) and writes(left) != writes(right)}
 
 
 def explain_ops(before, after):
@@ -68,33 +112,39 @@ def conditions(sequence):
 
 def local_dependencies(row, sequence):
     # 基本ブロック内の同一記憶域だけを追い、別ブロックや別サイズの別名は推測しない。
-    spans = sorted((int(a, 16), int(b, 16), block) for block, ranges, _ in row['blocks'] for a, b in ranges)
-    starts = [span[0] for span in spans]
-    definitions, result = {}, []
-    last_block = None
-    for index, (site, (_, output, inputs)) in enumerate(sequence):
-        position = int(site, 16)
-        slot = bisect_right(starts, position) - 1
-        block = spans[slot][2] if slot >= 0 and position <= spans[slot][1] else site
+    block_at = effects.block_lookup(row)
+    registers, temporaries, result = {}, {}, []
+    last_block, last_site = None, None
+    for index, (site, (opcode, output, inputs)) in enumerate(sequence):
+        block = block_at(site) or site
         if block != last_block:
-            definitions.clear()
-            last_block = block
-
-        def key(value):
-            return (site, value) if value.startswith('tmp:') else value
-
-        result.append(tuple(index - definitions[key(value)] if key(value) in definitions else None
-                            for value in inputs if value and value.startswith(('tmp:', 'register:'))))
-        if output and output.startswith(('tmp:', 'register:')):
-            definitions[key(output)] = index
+            registers.clear()
+        if site != last_site:
+            temporaries.clear()
+        last_block, last_site = block, site
+        dependencies = []
+        for value in inputs:
+            if value and value.startswith(('tmp:', 'register:')):
+                source = temporaries.get(value) if value.startswith('tmp:') else registers.get(value, (None, None))[1]
+                dependencies.append(index - source if source is not None else ('live', value))
+        result.append(tuple(dependencies))
+        if opcode in CALLS:
+            registers.clear()
+            temporaries.clear()
+        if output and output.startswith('tmp:'):
+            temporaries[output] = index
+        elif output and output.startswith('register:'):
+            effects.write_register(registers, output, effects.register(output), index)
     return result
 
 
-def relocation_shape(row, targets):
+def relocation_shape(row, targets, *, raw=None):
     # アドレス生成命令と、Ghidraの参照先と一致した直後のオフセットを区別する。
     # この投影は差分の分類専用。実際のオペランドを置き換えて等価とは判定しない。
-    projected = iter(operations(row, targets, search=True))
+    projected = iter(raw if raw is not None else operations(row, targets, search=True))
     refs = indexed_refs(row)
+    function_pointers = {int(target, 16): targets[callee] for _, target, _, _, callee, _, _ in row['refs']
+                         if raw is not None and target == callee and callee in targets and ADDRESS.fullmatch(target)}
     result = []
     previous = {}
     block_starts = {block[0] for block in row['blocks']}
@@ -107,7 +157,8 @@ def relocation_shape(row, targets):
             if mnemonic.lower() in ('adr', 'adrp') and opcode == 'COPY' and inputs[0].startswith('const:'):
                 _, offset, width = inputs[0].split(':')
                 pointer = int(offset, 16)
-                values[0] = f'pc_relative_address:{width}'
+                known = function_pointers.get(pointer)
+                values[0] = f'function_pointer:{known}:{width}' if known else f'pc_relative_address:{width}'
             elif (mnemonic.lower() in ('bl', 'blr') and 'CALL' in flow and opcode == 'INT_ADD'
                   and inputs[0] == f'const:{int(site, 16):x}:8' and inputs[1] == 'const:4:8'):
                 values[0] = 'call_return_pc:8'
@@ -126,49 +177,109 @@ def relocation_shape(row, targets):
     return result
 
 
-def compare(old, new, old_targets, new_targets):
+def grade(record, old, new, left, right, targets, abi):
+    record['confidence'] = 'limited' if record['warnings'] else 'observed'
+    impact = record.get('impact', {})
+    significant = impact
+    if impact:
+        before = relocation_shape(old, targets[0], raw=left)
+        after = relocation_shape(new, targets[1], raw=right)
+        if before == after:
+            significant = {}
+        elif before != [op for _, op in left] or after != [op for _, op in right]:
+            first = [(site, op) for (site, _), op in zip(left, before)]
+            second = [(site, op) for (site, _), op in zip(right, after)]
+            significant, _ = effects.changes(old, new, first, second, abi, include_evidence=False)
+        record['priority_impact'] = significant
+        record['address_sensitive_impact'] = {kind: amount - significant.get(kind, 0) for kind, amount in impact.items()
+                                              if amount > significant.get(kind, 0)}
+    tags = set(record['changes'])
+    refs = record['references']
+    if significant or refs['mapped_call_target_changed'] or tags & {
+            'cfg_edge_inventory', 'memory_write_count', 'call_count', 'control_flow_count'}:
+        record['importance'] = 'critical'
+        record['confidence'] = 'limited' if record['warnings'] or any(
+            item['confidence'] == 'limited' for item in record.get('effects', ()) if item['kind'] in significant
+        ) else 'bounded' if significant else 'observed'
+    elif record['cfg_changed'] or record['reference_changed'] or (
+            record['status'] == 'logic_change_candidate' and tags & {'constant', 'comparison', 'operation_order', 'operation_sequence'}
+            and not record.get('address_sensitive_impact')):
+        record['importance'] = 'high'
+        if record.get('address_sensitive_impact'):
+            record['confidence'] = 'limited'
+    elif record['status'] in ('no_difference_in_scope', 'detail_skipped'):
+        record['importance'] = 'none'
+    else:
+        record['importance'] = 'review'
+        if record.get('address_sensitive_impact'):
+            record['confidence'] = 'limited'
+
+
+def skipped(shapes, references):
+    return {'status': 'detail_skipped', 'scope': 'instruction_bytes_cfg_and_recorded_references',
+            'operations': [shape[2] for shape in shapes], 'machine_equal': True, 'cfg_equal': True,
+            'reference_state': 'equal', 'references': references, 'importance': 'none',
+            'confidence': 'observed', 'equivalence': 'unproven',
+            'unchecked': ['raw_pcode_operands', 'reaching_definitions', 'runtime_behavior']}
+
+
+def compare(old, new, old_targets, new_targets, *, references=None, abi=False):
     old_cfg, new_cfg = cfg(old), cfg(new)
     graph = old_cfg != new_cfg
     left, right = operations(old, old_targets), operations(new, new_targets)
     a, b = [op for _, op in left], [op for _, op in right]
-    old_refs, new_refs = refs_signature(old, old_targets), refs_signature(new, new_targets)
-    ref_changed = old_refs != new_refs
+    refs = references if references is not None else reference_comparison(old, new, old_targets, new_targets)
+    ref_changed = refs['state'] == 'changed'
     machine = old['bytes_sha256'] != new['bytes_sha256']
     warnings = []
-    if old['unresolved'] or new['unresolved']:
-        warnings.append('unresolved_indirect_flow')
+    if any(refs['unknown']):
+        warnings.append('unresolved_reference_or_flow')
     if old['instruction_bytes'] != old['body_bytes'] or new['instruction_bytes'] != new['body_bytes']:
         warnings.append('incomplete_instruction_coverage')
     result = {'scope': 'raw_instruction_pcode', 'operations': [len(a), len(b)], 'cfg_changed': graph,
-              'machine_changed': machine, 'reference_changed': ref_changed, 'warnings': warnings,
+              'machine_changed': machine, 'machine_equal': not machine, 'cfg_equal': not graph,
+              'reference_changed': ref_changed, 'reference_state': refs['state'], 'references': refs,
+              'equivalence': 'unproven', 'unchecked': ['cross_block_values', 'runtime_behavior'],
+              'warnings': warnings,
               'changes': [], 'details': [], 'detail_truncated': False}
+    if abi:
+        result['unchecked'].extend(['actual_call_signature', 'stack_and_vector_arguments'])
     if graph:
         result['cfg'] = {'blocks': [len(old_cfg), len(new_cfg)], 'ranges': [old['ranges'], new['ranges']],
                          'changed_blocks': [[index, left, right] for index, (left, right) in
                              islice(((index, pair) for index, pair in enumerate(zip(old_cfg, new_cfg)) if pair[0] != pair[1]), 16)]}
-    if ref_changed:
-        old_counts, new_counts = Counter(old_refs), Counter(new_refs)
-        result['references'] = {'removed': list(islice((old_counts-new_counts).elements(), 16)),
-                                'added': list(islice((new_counts-old_counts).elements(), 16)),
-                                'order_only': old_counts == new_counts}
+    flow_shape_changed = graph and Counter(kind for edges in old_cfg for kind, _ in edges) != Counter(
+        kind for edges in new_cfg for kind, _ in edges)
+    if flow_shape_changed:
+        result['changes'].append('cfg_edge_inventory')
     if a == b:
         result['status'] = 'structure_or_reference_change' if graph or ref_changed else (
-            'machine_only_observed' if machine else 'no_difference_in_scope')
+            'reference_unresolved' if warnings else 'machine_only_observed' if machine else 'no_difference_in_scope')
+        grade(result, old, new, left, right, (old_targets, new_targets), abi)
         return result
-    tags = explain_ops(a, b)
+    tags = explain_ops(a, b) | set(result['changes'])
     if conditions(left) != conditions(right):
         tags.add('branch_condition_or_target')
-    if local_dependencies(old, left) != local_dependencies(new, right):
+    old_dependencies, new_dependencies = local_dependencies(old, left), local_dependencies(new, right)
+    if old_dependencies != new_dependencies:
         tags.add('local_def_use')
     known_calls = [[op[2][0] for op in ops if op[0] == 'CALL' and op[2][0].startswith('callee:')]
                    for ops in (a, b)]
-    if relaxed_registers(a) == relaxed_registers(b):
-        result['status'] = 'register_sensitive'
-    elif known_calls[0] == known_calls[1] and not graph and (
-            relocation_shape(old, old_targets) == relocation_shape(new, new_targets)):
+    relocation = known_calls[0] == known_calls[1] and not graph and (
+        relocation_shape(old, old_targets) == relocation_shape(new, new_targets))
+    impact, effects_found = effects.changes(old, new, left, right, abi)
+    if relocation:
         result['status'] = 'reference_sensitive'
+    elif relaxed_registers(a) == relaxed_registers(b):
+        local_renaming = (not impact and not graph and not ref_changed and not warnings and
+                          old_dependencies == new_dependencies and
+                          any(isinstance(source, int) for values in old_dependencies for source in values))
+        result['status'] = 'register_renaming_candidate' if local_renaming else 'register_sensitive'
     else:
         result['status'] = 'logic_change_candidate'
+    result['impact'] = impact
+    result['effects'] = effects_found
+    tags.update(impact)
     if max(len(a), len(b)) <= 3500:
         changes = ((i, j, k, l) for op, i, j, k, l in SequenceMatcher(None, a, b, autojunk=False).get_opcodes()
                    if op != 'equal')
@@ -186,6 +297,7 @@ def compare(old, new, old_targets, new_targets):
                                   'counts': [j - i, l - k], 'types': sorted(local)})
         result['detail_truncated'] |= max(j - i, l - k) > 6
     result['changes'] = sorted(tags)
+    grade(result, old, new, left, right, (old_targets, new_targets), abi)
     return result
 
 

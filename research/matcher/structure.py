@@ -74,11 +74,9 @@ def operations(row, targets=None, *, search=False):
                     dest = f'b{blocks[number]}' if number in blocks else f'i{insns[number]}'
                     return f'local:{dest}:{width}'
                 if number in site_refs:
-                    kind, callee, name, datatype = site_refs[number]
+                    kind, callee, _, _ = site_refs[number]
                     if is_control and callee in targets:
                         return f'callee:{targets[callee]}:{width}'
-                    if not is_control and kind in ('READ', 'WRITE', 'READ_WRITE', 'DATA', 'PARAM') and name and datatype:
-                        return f'data:{kind}:{name}:{datatype}:{width}'
                     if search:
                         return f'ref:{kind}:{width}'
             return value
@@ -87,6 +85,11 @@ def operations(row, targets=None, *, search=False):
             args = tuple(storage(value, i == 0 and name in CONTROL) for i, value in enumerate(inputs))
             result.append((site, (name, storage(output), args)))
     return result
+
+
+def load_metadata(db, address):
+    hit = db.execute('SELECT metadata FROM functions WHERE address=?', (address,)).fetchone()
+    return json.loads(hit[0]) if hit else None
 
 
 def load_row(db, address):

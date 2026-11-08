@@ -1,6 +1,8 @@
 ﻿name: Native analysis pipeline
 
 on:
+  schedule:
+    - cron: '37 18 * * *'
   workflow_dispatch:
     inputs:
       source_manifest:
@@ -18,7 +20,7 @@ on:
       stage:
         description: 'Run the full pipeline or replay one publication stage'
         type: choice
-        options: [all, analyze, references, match]
+        options: [all, analyze, references, backfill, match]
         default: all
       check_only:
         description: 'Check the source and publication status without analysis or publication'
@@ -40,13 +42,13 @@ permissions:
 
 concurrency:
   group: native-analysis
-  cancel-in-progress: false
+  queue: max
 
 env:
   PYTHONPATH: ${{ github.workspace }}/research
   PYTHONUTF8: '1'
   GH_TOKEN: ${{ github.token }}
-  PUBLISH_REFERENCE: ${{ (github.event_name == 'workflow_dispatch' && inputs.publish_reference) || (github.event_name == 'repository_dispatch' && github.event.client_payload.publish_reference == true) }}
+  PUBLISH_REFERENCE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish_reference) || (github.event_name == 'repository_dispatch' && github.event.client_payload.publish_reference == true) }}
 
 jobs:
   analyze:
@@ -89,7 +91,7 @@ jobs:
             if [[ "$CHECK_ONLY" != true ]]; then printf 'checkpoint=%s\n' "$REQUESTED_CHECKPOINT" >> "$GITHUB_OUTPUT"; fi
             exit 0
           fi
-          if [[ "$STAGE" == references || "$STAGE" == match || ( -n "$INPUT_MANIFEST" && -n "$ASSETS_COMMIT" ) ]]; then
+          if [[ "$STAGE" == references || "$STAGE" == match || "$STAGE" == backfill || ( -n "$INPUT_MANIFEST" && -n "$ASSETS_COMMIT" ) ]]; then
             echo 'Select a completed checkpoint for a stage replay, or select one source for analysis' >&2
             exit 1
           fi
@@ -171,7 +173,7 @@ jobs:
   references:
     name: Generate reference documents
     needs: analyze
-    if: needs.analyze.outputs.checkpoint != '' && needs.analyze.outputs.match_only != 'true' && inputs.stage != 'analyze' && inputs.stage != 'match'
+    if: needs.analyze.outputs.checkpoint != '' && needs.analyze.outputs.match_only != 'true' && inputs.stage != 'analyze' && inputs.stage != 'match' && inputs.stage != 'backfill'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -189,12 +191,58 @@ jobs:
           if [[ "$PUBLISH_REFERENCE" == true ]]; then args+=(--publish); fi
           python3 -m indexer.ci references --checkpoint "$CHECKPOINT" "${args[@]}"
 
+  structures:
+    name: Prepare missing structure checkpoints
+    needs: analyze
+    if: needs.analyze.outputs.checkpoint != '' && inputs.stage != 'analyze' && inputs.stage != 'references'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 135
+    permissions:
+      contents: write
+    env:
+      CHECKPOINT: ${{ needs.analyze.outputs.checkpoint }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            /research/indexer/
+            /research/ghidra/
+            /research/matcher/
+          sparse-checkout-cone-mode: false
+      - name: Check the structure asset inventory
+        id: plan
+        run: python3 -m indexer.ci backfill-plan --checkpoint "$CHECKPOINT"
+      - name: Require permission to preserve missing checkpoints
+        if: steps.plan.outputs.needed == 'true' && env.PUBLISH_REFERENCE != 'true'
+        run: |
+          echo 'Missing structure checkpoints. Run stage=backfill with publish_reference=true.' >&2
+          exit 1
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        if: steps.plan.outputs.needed == 'true'
+        with:
+          distribution: temurin
+          java-version: '21.0.11+10.0.LTS'
+      - name: Install pinned analysis runtime
+        if: steps.plan.outputs.needed == 'true'
+        run: python3 -m indexer.ci setup
+      - name: Verify Ghidra extraction with independent ARM64 binaries
+        if: steps.plan.outputs.needed == 'true'
+        env:
+          KBCS_TEST_GHIDRA: '1'
+        run: python3 -m unittest matcher.test_tracking
+      - name: Backfill missing structures
+        if: steps.plan.outputs.needed == 'true'
+        env:
+          BATTLECATS_APK_READ_TOKEN: ${{ secrets.BATTLECATS_APK_READ_TOKEN }}
+        run: python3 -m indexer.ci backfill --checkpoint "$CHECKPOINT" --publish
+
   match:
     name: Track native functions across versions
-    needs: [analyze, references]
+    needs: [analyze, references, structures]
     if: >-
-      !cancelled() && needs.analyze.result == 'success' && needs.analyze.outputs.checkpoint != '' &&
-      inputs.stage != 'analyze' && inputs.stage != 'references' &&
+      !cancelled() && needs.analyze.result == 'success' && needs.structures.result == 'success' &&
+      inputs.stage != 'backfill' &&
       (needs.references.result == 'success' || inputs.stage == 'match' || needs.analyze.outputs.match_only == 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 90
@@ -210,12 +258,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '21.0.11+10.0.LTS'
-      - name: Install pinned analysis runtime
-        run: python3 -m indexer.ci setup
-      - name: Verify Ghidra extraction with independent ARM64 binaries
-        env:
-          KBCS_TEST_GHIDRA: '1'
-        run: python3 -m unittest matcher.test_tracking
+      - name: Install pinned APK verification tool
+        run: python3 -m indexer.ci setup-apk
       - name: Track verified versions and publish results
         env:
           BATTLECATS_APK_READ_TOKEN: ${{ secrets.BATTLECATS_APK_READ_TOKEN }}

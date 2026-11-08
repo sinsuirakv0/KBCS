@@ -10,11 +10,15 @@ from matcher.comparison_pages import COMPARISON_LINK, DIRECTIONS, carry_links, d
 from matcher.tracking_pages import link
 
 
-def restore_completed(tag, root):
+def checkpoint_key(tag):
     match = re.fullmatch(r'native-analysis-(\d+\.\d+\.\d+)-([A-Za-z0-9_-]+)-([a-f0-9]{16})', tag)
     if not match:
         raise ValueError('Invalid native analysis Release tag')
-    version, architecture, revision = match.groups()
+    return match.groups()
+
+
+def restore_completed(tag, root):
+    version, architecture, revision = checkpoint_key(tag)
     restore(root, tag, revision)
     state = root / 'ci-status.json'
     if not state.is_file() or read_json(state).get('complete') is not True:
@@ -60,7 +64,7 @@ def publish_materials(tag, publish):
             if previous and same_reference(previous, expected):
                 comparison = manifest.with_name('comparison.md')
                 if previous.get('tracking_format') == 2:
-                    keys = ('comparison_state', 'tracking_format', 'tracking_run', 'tracking_page', 'tracking_sources')
+                    keys = ('comparison_state', 'tracking_format', 'tracking_policy', 'tracking_run', 'tracking_page', 'tracking_sources')
                     report.update({key: previous[key] for key in keys if key in previous})
                     if report.get('tracking_page'):
                         target = work / report['tracking_page']

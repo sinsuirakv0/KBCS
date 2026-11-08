@@ -1,4 +1,5 @@
 ﻿import os
+import re
 import shutil
 import subprocess
 import tarfile
@@ -16,14 +17,22 @@ STRUCTURE = 'structure.jsonl.gz'
 RECEIPT = 'structure-metrics.json'
 
 
-def get_asset(tag, name, destination):
+def asset_record(tag, name):
     state = release_state(tag)
     assets = state['assets'] if state else ()
     asset = next((row for row in assets if row['name'] == name and row['state'] == 'uploaded'), None)
     if not asset:
         return None
-    if not 0 < asset['size'] < ASSET_BYTES:
-        raise ValueError('Release asset size is outside the permitted range')
+    checksum = asset.get('digest')
+    if not 0 < asset['size'] < ASSET_BYTES or not isinstance(checksum, str) or not re.fullmatch('sha256:[0-9a-f]{64}', checksum):
+        raise ValueError('Release asset is missing a valid size or SHA-256')
+    return asset
+
+
+def get_asset(tag, name, destination):
+    asset = asset_record(tag, name)
+    if not asset:
+        return None
     destination.mkdir(parents=True, exist_ok=True)
     path = destination / name
     if not path.is_file():
@@ -86,13 +95,19 @@ def unpack(path, root, source):
     return export, metadata['metrics']
 
 
-def structure_checkpoint(cache, binary, data, identity, tag, destination, *, config=None, publish=False):
+def structure_asset_name():
+    return 'native-structure-' + digest(EXPORTER)[:20] + '.tar'
+
+
+def structure_checkpoint(cache, binary, data, identity, tag, destination, *, config=None, publish=False, extract=True):
     source = source_id(cache, identity)
-    name = 'native-structure-' + source['extractor_sha256'][:20] + '.tar'
+    name = structure_asset_name()
     recovered = get_asset(tag, name, destination)
     if recovered:
         print(f'Restored structure checkpoint {tag}/{name}', flush=True)
         return unpack(recovered, destination, source)
+    if not extract:
+        raise ValueError(f'Missing verified structure for {tag}; run stage=backfill first')
     binary = binary() if callable(binary) else binary
     if digest(binary) != source['identity']['sha256']:
         raise ValueError('Structure extraction binary has the wrong SHA-256')
@@ -118,5 +133,5 @@ def structure_checkpoint(cache, binary, data, identity, tag, destination, *, con
         result = unpack(path, destination, source)
         if publish:
             deliver_asset(tag, path)
-        print(f'Structure saved: {tag}/{name} · {metrics["wall_seconds"]:.1f}s', flush=True)
+        print(f'Structure saved: {tag}/{name} · {metrics["wall_seconds"]:.1f}s · {path.stat().st_size:,} bytes', flush=True)
     return result

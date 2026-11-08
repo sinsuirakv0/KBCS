@@ -39,18 +39,18 @@ workflowは `.github/workflows/native-analysis.yml`。
 | source_manifest | 空 | assetsの検証済み最新版。旧版を指定する場合は `research/inputs` 内の固定台帳 |
 | assets_commit | 空 | assetsの公開通知に含まれるコミットSHA。新しいJPデータセットに置き換わった通知は処理を終える |
 | checkpoint | 空 | 処理済みの `native-analysis-*` Releaseタグ。指定時は保存済み解析から開始 |
-| stage | all | `analyze` は解析のみ、`references` と `match` は完成checkpointからその段階だけを実行 |
+| stage | all | `analyze` は解析、`references` は関数資料、`backfill` は不足構造の補完、`match` は構造の確認と追跡公開 |
 | check_only | false | 台帳と公開状態だけを確認。解析、Release書込、Git公開を行わない |
 | revision_label | ci-v1 | 同じ値で再開、変更すると別リビジョンを作成 |
 | publish_reference | true | 完成した資料でmain上の同じゲーム版・ABIを更新 |
 
 上流のPlay更新検知・APK取得・展開・検証が完了し、`metadata/jp/current.json` がassetsのmainへ公開された版を対象にする。assetsの `notify-native-analysis.yml` がコミットSHA付きでKBCSを起動し、受付応答で終了する。既存のZIP配布と通知は独立。即時起動にはassets側の `KBCS_ACTIONS_TOKEN` が必要で、権限はKBCSへの `Actions: write` に限定する。[GitHubのworkflow dispatch権限](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
 
-KBCSはassetsの通知で受け取ったコミットから `current.json` と版別 `proof.json` を読む。全段階が済んだ原本はスキップし、資料公開済みで照合待ちの原本は `match` ジョブだけを再開する。通知が失敗した場合は、assetsの通知ジョブを再実行するか、KBCSで手動確認する。
+KBCSはassetsの通知で受け取ったコミットから `current.json` と版別 `proof.json` を読む。通知失敗の補完は1日1回、03:37 JST（18:37 UTC）に最新版を確認する。確認時は原本・公開リビジョン・追跡ポリシーを照合し、公開済みの同一入力はGhidraのセットアップ前に終了する。関数資料まで済んだ入力は構造確認と追跡公開だけを再開する。
 
 新規版では保全済みのPrivate Releaseを取得し、アーカイブ、署名検証記録、base/ABI SplitのSHA-256、実APKのmanifestを照合する。検証済みABI Splitから抽出したSOのSHA-256を解析計画に固定する。同じ版でも原本アーカイブが変われば新規入力として扱う。v1の結果しか存在しない場合や、直前2版の構成・リビジョンが変わった場合は、公開済みcheckpointから追跡を実行する。
 
-手動確認は `workflow_dispatch` の `check_only=true`、最新版を確認・処理するには入力台帳を空にして通常起動する。`repository_dispatch: native-analysis-request` では、`publish_reference=true` を指定すると完成資料をmainへ公開する。解析中のジョブは後着の通知を受けても続行する。GitHubの同時実行制御で待機中のジョブが置き換わった場合は手動で再起動できる。
+手動確認は `workflow_dispatch` の `check_only=true`、最新版を確認・処理するには入力台帳を空にして通常起動する。`repository_dispatch: native-analysis-request` では、`publish_reference=true` を指定すると完成資料をmainへ公開する。通知と定期確認は同じ直列キューを使い、後着の確認は先行ジョブ完了後の公開状態を見て処理を決める。[GitHub Actionsの同時実行とキュー](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)
 
 同じ入力でも、ツール・スクリプト・JDK・メモリ設定・ラベルが変わると別の解析IDになる。台帳の誤りや未知の版を名前から補完して実行しない。
 
@@ -68,13 +68,14 @@ KBCSはassetsの通知で受け取ったコミットから `current.json` と版
 6. 標準→conservative→minimalの有限3設定で未保存分を処理する。過去に同じ設定で処理した失敗関数を自動反復しない。
 7. `analyze` は未処理0を確認して最終checkpointを保存し、Releaseタグを後続へ渡す。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
 8. `references` はそのcheckpointから資料を生成する。`publish_reference=true` ならmainの同じゲーム版・ABIを差し替え、manifestに `comparison_state=pending` を記録する。
-9. `match` は対象と同じABIの直前2公開版を復元する。構造sidecarがない旧版だけ隔離プロジェクトでバックフィルする。連続比較と直接検証を集約し、SQLiteを解析Releaseに保存してsizeとSHA-256を照合する。全リンクの検査後、`research/comparisons/` の公開、版目次への導線、旧比較資料の廃止を同一コミットで行う。比較元がなければ `no_baseline`、追跡公開後は `complete` を版のmanifestに記録する。
+9. `structures` は対象と同じABIの直前2公開版を含めてsidecarの在庫を確認する。不足している版だけ隔離Ghidraプロジェクトで構造を抽出し、元の解析Releaseへ保存する。ReleaseのSHA-256、SO、解析ID、索引、抽出器を照合する。
+10. `match` は検証済みsidecarから連続比較と直接検証を集約する。完成SQLiteを解析Releaseに保存してsizeとSHA-256を照合し、Markdown生成の中断後も再利用する。全リンクの検査後、`research/comparisons/` の公開、版目次への導線、旧比較資料の廃止を同一コミットで行う。比較元がなければ `no_baseline`、追跡公開後は `complete` を版のmanifestに記録する。
 
-15.7.2・15.7.3・15.7.4の既存資料から初回追跡を実行する場合は、`checkpoint=native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73`、`stage=match`、`publish_reference=true` を指定する。資料生成だけなら `stage=references` を使う。追跡を再実行すると、検証済み構造sidecarと、同じ入力・エンジン・手動判断で完成した追跡SQLiteを再利用する。上流currentが進んだ後に旧版の未完了解析を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
+15.7.2・15.7.3・15.7.4から初回移行する場合は、`checkpoint=native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73` と `publish_reference=true` を指定し、`stage=backfill` の後で `stage=match` を実行する。両段階に同じcheckpointを指定する。通常の更新では在庫確認と不足分の補完を同じパイプライン内で行う。資料生成だけなら `stage=references` を使う。再実行では検証済みsidecarと、同じ入力・エンジン・手動判断で完成したSQLiteを再利用する。SQLite完成前に照合が中断した場合は、sidecarから照合をやり直す。
 
 checkpointにはGhidraプロジェクトを含めない。そのため未完了の再開時は元APKからプロジェクトを再解析する。以前と新しい索引を、実行パスや所要時間を除いた構造ハッシュで照合し、一致した場合だけ保存済み疑似コードを再利用する。不一致時は停止し、別ラベルで新規生成する。完了checkpointからの再開では、同じ解析IDの資料生成・反映から再試行できる。Actionsの結果と `ci-status.json` の `complete` で、関数処理と資料公開の状態を区別する。
 
-ジョブ上限は解析235分、資料作成30分、追跡90分で、合計355分。ジョブ待機時間は別途発生する。解析プロセスは60分、1関数は900秒。開始から210分を超えると次のバッチを控え、未完了の場合は再開を促す。中断時は最後に照合済みのcheckpointから、同じ入力・ラベル・ツールで再開する。追跡でバックフィルの時間が不足した場合も、先に保存した版のsidecarを再利用できる。[GitHub管理runnerの上限](https://docs.github.com/en/actions/reference/limits)
+ジョブ上限は解析235分、資料作成30分、追跡90分、初回を含む構造補完135分。全sidecarが揃う通常更新では、構造の在庫確認を資料作成と並行して実施し、合計6時間以内を目標にする。初回移行やジョブ待機の時間は別途発生する。解析プロセスは60分、1関数は900秒。開始から210分を超えると次のバッチを控え、未完了の場合は再開を促す。中断時は最後に検証済みのcheckpointとsidecarを再利用する。[GitHub管理runnerの上限](https://docs.github.com/en/actions/reference/limits)
 
 一時的な通信エラーは取得・公開とも最大3回の試行に抑える。認証エラーや原本ハッシュの不一致では停止する。アップロード応答が失われた場合はRelease側のsize/digestを照合し、完了済みならそのまま進む。片方しか届かなかった場合は別名で再送し、既存アセットを上書きしない。
 

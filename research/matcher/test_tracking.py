@@ -11,6 +11,7 @@ import unittest
 from collections import defaultdict
 from contextlib import closing, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from indexer.ci_structure import unpack
 from indexer.reference import function_path, reference_path
@@ -67,6 +68,20 @@ def make_elf(path, threshold, write=True):
 
 
 class TrackingTests(unittest.TestCase):
+    def test_preview_links_can_cross_local_drives(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            target = root / 'function name.md'
+            target.write_text('function')
+            preview = root / 'preview'
+            preview.mkdir()
+            page = preview / 'README.md'
+            with patch.object(tracking_pages.os.path, 'relpath', side_effect=ValueError('different drive')):
+                href = tracking_pages.link(target, page)
+            self.assertEqual(href, target.as_uri())
+            page.write_text(f'[function]({href})', encoding='utf-8')
+            self.assertEqual(tracking_pages.verify_links(preview, root, None, None), 1)
+
     def test_logic_scope_and_changes(self):
         a, b = '00010000', '00020000'
         before = record(a, [op('INT_LESS', 'register:0:8', 'const:5:8', output='unique:3:1'),
@@ -99,6 +114,88 @@ class TrackingTests(unittest.TestCase):
         rows[1]['refs'] = []
         self.assertEqual(logic.compare(*rows, {}, {})['status'], 'logic_change_candidate')
 
+    def test_reference_targets_position_access_and_indirect_resolution(self):
+        old = record('00010000', [op('COPY', 'const:1:8', output='register:4000:8')])
+        new = record('00020000', [op('COPY', 'const:1:8', output='register:4000:8')])
+        old['refs'] = [['00010000', '00030000', 'READ', 'ANALYSIS', None, 'same', 'int']]
+        new['refs'] = [['00020000', '00040000', 'WRITE', 'ANALYSIS', None, 'same', 'int']]
+        result = logic.compare(old, new, {}, {})
+        self.assertTrue(result['machine_equal'] and result['cfg_equal'])
+        self.assertEqual((result['reference_state'], result['importance']), ('changed', 'high'))
+        self.assertEqual(result['references']['removed'][0][2][1], '00030000')
+        new['refs'] = [['00020004', '00030000', 'READ', 'ANALYSIS', None, 'same', 'int']]
+        self.assertEqual(logic.reference_comparison(old, new, {}, {})['state'], 'changed')
+        new['refs'] = []
+        new['call_positions'] = [['00020000', 'COMPUTED_CALL']]
+        result = logic.compare(new, new, {}, {})
+        self.assertEqual((result['status'], result['reference_state']), ('reference_unresolved', 'unresolved'))
+        self.assertGreater(result['references']['unknown'][0], 0)
+
+    def test_function_pointer_relocation_keeps_raw_store_evidence(self):
+        def row(start, address):
+            result = record(start, [op('COPY', f'const:{int(address,16):x}:8', output='register:4000:8'),
+                op('STORE', 'const:1:8', 'register:4008:8', 'register:4000:8')])
+            result['instructions'][0][1] = 'adr'
+            result['refs'] = [[f'{int(start,16)+4:08x}', address, 'DATA', 'ANALYSIS', address, None, None]]
+            return result
+        old, new = row('00010000','00020000'), row('00030000','00040000')
+        matched = ({'00020000':'00040000'}, {'00040000':'00040000'})
+        moved = logic.compare(old,new,*matched)
+        self.assertEqual(moved['impact']['store_value'], 1)
+        self.assertEqual(moved['address_sensitive_impact']['store_value'], 1)
+        self.assertEqual(moved['importance'], 'high')
+        self.assertEqual(logic.compare(old,new,{'00020000':'00050000'},
+                                     {'00040000':'00040000'})['importance'], 'critical')
+
+    def test_observable_values_and_same_store_count(self):
+        address = '00010000'
+        copy = lambda value, reg: op('COPY', value, output=reg)
+        storage = ('register:4000:8', 'register:4008:8')
+        store = op('STORE', 'const:1:8', storage[1], storage[0])
+        old = record(address, [copy('const:0:8', storage[0]), copy('const:1000:8', storage[1]), store,
+                               op('CBRANCH', 'ram:10000:8', storage[0])])
+        new = record(address, [copy('const:1:8', storage[0]), copy('const:2000:8', storage[1]), store,
+                               op('CBRANCH', 'ram:10000:8', storage[0])])
+        result = logic.compare(old, new, {}, {})
+        self.assertNotIn('memory_write_count', result['changes'])
+        self.assertTrue({'store_value', 'store_destination', 'branch_value'} <= set(result['impact']))
+        self.assertEqual(result['importance'], 'critical')
+        self.assertEqual(next(e for e in result['effects'] if e['kind'] == 'store_value')['new']['definition_site'], address)
+
+        for row in (old, new):
+            row['instructions'][2], row['instructions'][3] = row['instructions'][3], row['instructions'][2]
+            row['instructions'][2][0], row['instructions'][3][0] = '00010008', '0001000c'
+            row['blocks'] = [[address, [[address, '0001000b']], [['CONDITIONAL_JUMP', '00010008', '0001000c'],
+                ['FALL_THROUGH', '00010008', '00010010']]], ['0001000c', [['0001000c','0001000f']], []]]
+        self.assertIn('store_condition', logic.compare(old, new, {}, {})['impact'])
+
+    def test_call_arguments_relocated_callee_and_return_registers(self):
+        def function(start, destination, value):
+            row = record(start, [op('COPY', f'const:{value}:8', output='register:4000:8'),
+                op('CALL', f'ram:{int(destination, 16):x}:8'),
+                op('COPY', f'const:{value}:8', output='register:4000:8'), op('RETURN', 'register:40f0:8')])
+            row['refs'] = [[f'{int(start, 16)+4:08x}', destination, 'UNCONDITIONAL_CALL', 'ANALYSIS', destination, None, None]]
+            return row
+        old, new = function('00010000', '00030000', 1), function('00020000', '00040000', 1)
+        targets = ({'00030000': '00040000'}, {'00040000': '00040000'})
+        moved = logic.compare(old, new, *targets, abi=True)
+        self.assertEqual(moved['reference_state'], 'equal')
+        self.assertFalse(moved.get('impact'))
+        updated = logic.compare(old, function('00020000', '00040000', 2), *targets, abi=True)
+        self.assertTrue({'call_argument_candidate', 'return_value_candidate'} <= set(updated['impact']))
+        self.assertEqual(updated['confidence'], 'limited')
+
+    def test_register_renaming_preserves_local_dependencies_only(self):
+        def function(reg, use):
+            return record('00010000', [op('INT_AND', 'register:4000:8', 'const:ff:8', output=reg),
+                op('STORE', 'const:1:8', 'register:4008:8', use)])
+        a, b = 'register:4050:8', 'register:4058:8'
+        old, renamed = function(a, a), function(b, b)
+        self.assertEqual(logic.compare(old, renamed, {}, {})['status'], 'register_renaming_candidate')
+        changed = logic.compare(old, function(b, 'register:4010:8'), {}, {})
+        self.assertIn('store_value', changed['impact'])
+        self.assertEqual(changed['importance'], 'critical')
+
     def test_same_count_insertion_deletion_reorder_and_duplicate_shapes(self):
         left = ['00000010', '00000020', '00000030', '00000040', '00000050']
         right = ['00000110', '00000120', '00000130', '00000140', '00000150']
@@ -118,7 +215,10 @@ class TrackingTests(unittest.TestCase):
         self.assertIn('reordered', {item[4] for item in layout})
         repeated = dict.fromkeys(left[:2], ('available', 'duplicate', 100, 'bytes', 'cfg'))
         targets = dict.fromkeys(right[:2], ('available', 'duplicate', 100, 'bytes', 'cfg'))
-        self.assertEqual(tracking_pair.refine({}, (repeated, targets), [defaultdict(set)]*4, None, set()), ({}, []))
+        hits, review, stats = tracking_pair.refine({}, (repeated, targets), [defaultdict(set)]*4, None, set())
+        self.assertFalse(hits)
+        self.assertEqual({row[2] for row in review}, {'shape_collision'})
+        self.assertEqual(stats['shape_collisions'], {'old': 2, 'new': 2})
 
     def test_split_merge_and_inline_fragments(self):
         whole = {('operation', i) for i in range(20)}
@@ -133,6 +233,10 @@ class TrackingTests(unittest.TestCase):
         hits = tracking_pair.residuals(0, 'a', {}, {}, {'caller': 'next'}, {'next'},
             defaultdict(set, a={'caller'}), lambda s, a: pieces.get((s, a), set()))
         self.assertEqual(hits[0][0], 'inline_candidate')
+        mixed = tracking_pair.residuals(0, 'a', {'a': {'b'}}, {'a': (['b', 'c'], ('a0','a1','b0','b1'))},
+            {'caller': 'next'}, {'next'}, defaultdict(set, a={'caller'}), lambda s, a: pieces.get((s, a), set()))
+        self.assertTrue({'split_candidate', 'inline_candidate', 'competing_candidates', 'deletion_candidate'} <=
+                        {item[0] for item in mixed})
 
     def test_structural_promotion_requires_strict_operands_and_anchors(self):
         left, right = '00001111', '00002222'
@@ -143,12 +247,33 @@ class TrackingTests(unittest.TestCase):
         known = {'a': ('x', 'symbol', {}), 'b': ('y', 'symbol', {})}
         graphs = [defaultdict(set, {left:{'a','b'}}), defaultdict(set),
                   defaultdict(set, {right:{'x','y'}}), defaultdict(set)]
-        hits, _ = tracking_pair.refine(known, shapes, graphs, lambda s, a: rows[s,a], set())
+        hits, _, _ = tracking_pair.refine(known, shapes, graphs, lambda s, a: rows[s,a], set())
         self.assertEqual(hits[left][0], right)
         rows[1,right] = record(right, [op('COPY', 'const:6:8', output='register:8:8')] * 24)
-        hits, review = tracking_pair.refine(known, shapes, graphs, lambda s, a: rows[s,a], set())
+        hits, review, _ = tracking_pair.refine(known, shapes, graphs, lambda s, a: rows[s,a], set())
         self.assertFalse(hits)
         self.assertEqual(review[0][2], 'structural_candidate')
+
+    def test_followup_rounds_require_independent_initial_support(self):
+        left = ['00001000','00001004','00001008','0000100c']
+        right = ['00002000','00002004','00002008','0000200c']
+        shapes = tuple({a: ('available', str(i), 24, '', 'graph') for i,a in enumerate(items)}
+                       for items in (left, right))
+        graph = []
+        for items, seeds in ((left, ('a','b')), (right, ('x','y'))):
+            outgoing = defaultdict(set, {items[0]: set(seeds), items[1]: {seeds[0],items[0]},
+                                          items[2]: {items[0],items[1]}})
+            incoming = defaultdict(set)
+            for address, targets in outgoing.items():
+                for target in targets:
+                    incoming[target].add(address)
+            graph.extend([outgoing, incoming])
+        hits, review, stats = tracking_pair.refine({'a': ('x','symbol',{}),'b': ('y','symbol',{})}, shapes, graph,
+            lambda side, address: record(address,[op('COPY','const:1:8',output='register:8:8')]*24), set())
+        self.assertEqual([round['accepted'] for round in stats['rounds']], [1, 1, 0])
+        self.assertEqual(hits[left[1]][2]['round'], 2)
+        self.assertNotIn(left[2], hits)
+        self.assertEqual({row[0] for row in review}, set(left[2:]))
 
     def test_structure_release_archive_rejects_wrong_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -198,25 +323,31 @@ class TrackingTests(unittest.TestCase):
                 write_json(cache / 'identity.json', identity)
                 address = f'{0x10000+i*0x1000:08x}'
                 row = record(address, [op('COPY', f'const:{i}:8', output='register:0:8')])
+                fixed, same = [record(f'{int(address,16)+offset:08x}',
+                                      [op('COPY', 'const:0:8', output='register:0:8')]) for offset in (4, 8)]
+                fixed['refs'] = [[fixed['address'], f'{0x30000+4*i:08x}', 'READ', 'ANALYSIS', None, 'shared', 'int']]
+                rows = [row, fixed, same]
                 header = {'type': 'program', 'schema': 1, 'sha256': sha, 'language': 'AARCH64:LE:64:v8A',
                           'image_base': '00000000'}
                 (cache / 'index.jsonl').write_text(structure.pack(header) + '\n', encoding='utf-8')
                 with closing(connect(cache / 'cache.sqlite')) as db, db:
-                    db.execute('INSERT INTO functions(address,name,size,external,thunk,confidence,status,error,file)'
-                               ' VALUES(?,?,4,0,0,?,?,?,?)', (address, 'entry', 'unreviewed', 'cached', '', 'entry.c'))
+                    db.executemany('INSERT INTO functions(address,name,size,external,thunk,confidence,status,error,file)'
+                                   ' VALUES(?,?,4,0,0,?,?,?,?)', ((entry['address'], 'entry', 'unreviewed',
+                                       'cached', '', 'entry.c') for entry in rows))
                 if i == 0:
                     export(archive, header, [row], complete=False)
                     with self.assertRaisesRegex(ValueError, 'Incomplete'):
                         structure.build_index(archive, cache, root / 'scratch')
-                export(archive, header, [row])
+                export(archive, header, rows)
                 source = digest(cache / 'cache.sqlite')
                 original.append((cache / 'cache.sqlite', source))
                 datasets.append(tracking.load_dataset(cache, binary, archive))
                 location = repository / 'research/reference' / reference_path(identity)
                 locations.append((location, address))
-                page = location / function_path(address)
-                page.parent.mkdir(parents=True)
-                page.write_text('# Entry\n\n## 関数情報\n\n疑似コード原本\n', encoding='utf-8-sig', newline='\n')
+                for entry in rows:
+                    page = location / function_path(entry['address'])
+                    page.parent.mkdir(parents=True, exist_ok=True)
+                    page.write_text('# Entry\n\n## 関数情報\n\n疑似コード原本\n', encoding='utf-8-sig', newline='\n')
                 (location / 'README.md').write_text('# 版資料\n\n## アドレス索引\n', encoding='utf-8-sig', newline='\n')
                 write_json(location / 'manifest.json', identity | {'source_database_sha256': source})
 
@@ -232,8 +363,11 @@ class TrackingTests(unittest.TestCase):
                         'decisions': [], 'validation': {'correct': 1, 'wrong': 0, 'abstained': 0}, 'coverage': []}
                     db.executemany('INSERT INTO metadata VALUES(?,?)', [(k, json.dumps(v)) for k, v in data.items()])
                     a, b = locations[i][1], locations[j][1]
-                    db.execute("INSERT INTO matches VALUES(?,?,'known','different','{}')", (a,b))
-                    db.executemany("INSERT INTO functions VALUES(?,?,'')", [('old',a),('new',b)])
+                    for offset in (0, 4, 8):
+                        first, second = (f'{int(x,16)+offset:08x}' for x in (a,b))
+                        db.execute("INSERT INTO matches VALUES(?,?,'known',?,'{}')",
+                                   (first, second, 'text_equal' if offset else 'different'))
+                        db.executemany("INSERT INTO functions VALUES(?,?,'')", [('old',first),('new',second)])
             old, new = locations[0], locations[2]
             for current, peer, direction in ((old, new, 'next'), (new, old, 'previous')):
                 identity = read_json(peer[0] / 'manifest.json')
@@ -249,6 +383,12 @@ class TrackingTests(unittest.TestCase):
             self.assertEqual(tracking.build(datasets[:3], root / 'out', pair_dbs=seeds), db)
             self.assertEqual(digest(db), first)
             result = read_json(db.with_name('summary.json'))
+            self.assertEqual(result['pairs']['0-1']['inspection'],
+                             {'detailed': 2, 'forced_by_references': 1, 'skipped': 1})
+            with structure.reader(db) as connection:
+                outcomes = dict(connection.execute("SELECT old,status FROM logic WHERE pair='0-1'"))
+            self.assertEqual(outcomes['00010004'], 'structure_or_reference_change')
+            self.assertEqual(outcomes['00010008'], 'detail_skipped')
             destination = result_root / result['run']
             self.assertEqual(tracking.show(db, '15.7.2', old[1], 5)['function']['address'], old[1])
             temporarily_missing = locations[1][0] / function_path(locations[1][1])
@@ -259,8 +399,11 @@ class TrackingTests(unittest.TestCase):
             self.assertTrue((new[0] / 'comparison.md').is_file())
             self.assertFalse(destination.exists())
             temporarily_missing.write_bytes(saved_page)
-            tracking_pages.render(db, repository, destination, 'manifest.json')
-            self.assertTrue((destination / '0-1/operands-0001.md').is_file())
+            original_url = 'https://example.invalid/original-commit/'
+            tracking_pages.render(db, repository, destination, 'manifest.json', original_url)
+            self.assertTrue((destination / '0-1/high-0001.md').is_file())
+            self.assertEqual(tracking_pages.render(db, repository, destination, 'manifest.json',
+                                                  'https://example.invalid/new-commit/')['run'], result['run'])
             tracking_pages.attach(repository, destination, result)
             self.assertFalse((new[0] / 'comparison.md').exists())
             self.assertFalse((new[0] / 'changes/README.md').exists())
@@ -268,7 +411,8 @@ class TrackingTests(unittest.TestCase):
             self.assertEqual(read_json(new[0] / 'manifest.json')['tracking_format'], 2)
             for page in destination.rglob('*.md'):
                 for link in re.findall(r'\]\(([^)]+)\)', page.read_text(encoding='utf-8-sig')):
-                    self.assertTrue((page.parent / link).is_file(), link)
+                    target = repository / link.removeprefix(original_url) if link.startswith(original_url) else page.parent / link
+                    self.assertTrue(target.is_file(), link)
             second = tracking.build(datasets[1:], root / 'out', pair_dbs={
                 '0-1': seeds['1-2'], '1-2': seeds['2-3'], '0-2': seeds['1-3']})
             trace = tracking.trace([db, second], '15.7.2', old[1], 10)

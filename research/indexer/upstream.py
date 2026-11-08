@@ -13,6 +13,7 @@ from indexer.store import LOCAL, read_json, write_json
 PACKAGE = 'jp.co.ponos.battlecats'
 ABI = 'arm64-v8a'
 LIBRARY = 'libnative-lib.so'
+TRACKING_POLICY = 'observed-effects-v1'
 SIGNER = 'baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1'
 
 
@@ -143,6 +144,18 @@ def tracking_sources(versions):
             for version in versions]
 
 
+def publication_state(data, manifest, repository):
+    if manifest is None:
+        return 'new'
+    state = manifest.get('comparison_state', 'pending')
+    if state in ('complete', 'no_baseline') and (
+            manifest.get('tracking_format') == 2 and manifest.get('tracking_policy') == TRACKING_POLICY):
+        expected = tracking_sources([*previous_references(data, repository), manifest])
+        if manifest.get('tracking_sources') == expected:
+            return state
+    return 'pending'
+
+
 def main():
     from indexer.ci import REPO, RESEARCH, public_only
 
@@ -155,11 +168,7 @@ def main():
     if data is None:
         return
     manifest = matching_publication(data, REPO, RESEARCH / 'inputs')
-    state = 'new' if manifest is None else manifest.get('comparison_state', 'complete')
-    if manifest and state != 'pending':
-        expected = tracking_sources([*previous_references(data, REPO), manifest])
-        if manifest.get('tracking_format') != 2 or manifest.get('tracking_sources') != expected:
-            state = 'pending'
+    state = publication_state(data, manifest, REPO)
     print(f"Assets {data['versionName']} / {data['versionCode']} at {commit}; state: {state}", flush=True)
     if args.check_only:
         return

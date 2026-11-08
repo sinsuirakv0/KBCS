@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from indexer import ci, memory, network, upstream
+from indexer import ci, ci_structure, ci_tracking, memory, network, upstream
 from indexer.store import connect
 
 
@@ -48,6 +48,42 @@ class CiTests(unittest.TestCase):
             self.assertIsNone(upstream.matching_publication(source | {'archiveSha256': 'a' * 64}, ci.REPO, ci.RESEARCH / 'inputs'))
             reference['comparison_state'] = 'pending'
             self.assertEqual(upstream.matching_publication(source, ci.REPO, ci.RESEARCH / 'inputs')['comparison_state'], 'pending')
+
+    def test_notification_and_daily_recovery_share_published_identity(self):
+        data = ci.load_input(ci.RESEARCH / 'inputs/jp-1507040.json')
+        current = {'version': data['versionName'], 'architecture': data['architecture'],
+                   'sha256': data['librarySha256'], 'analysis_revision': 'a' * 16}
+        previous = current | {'version': '15.7.3', 'analysis_revision': 'b' * 16}
+        self.assertEqual(upstream.publication_state(data, None, ci.REPO), 'new')
+        self.assertEqual(upstream.publication_state(data, current | {'comparison_state': 'complete'}, ci.REPO), 'pending')
+        published = current | {'comparison_state': 'complete', 'tracking_format': 2,
+                               'tracking_policy': upstream.TRACKING_POLICY,
+                               'tracking_sources': upstream.tracking_sources([previous, current])}
+        with patch.object(upstream, 'previous_references', return_value=[previous]):
+            self.assertEqual(upstream.publication_state(data, published, ci.REPO), 'complete')
+            self.assertEqual(upstream.publication_state(data, published, ci.REPO), 'complete')
+        with patch.object(upstream, 'previous_references', return_value=[previous | {'analysis_revision': 'c' * 16}]):
+            self.assertEqual(upstream.publication_state(data, published, ci.REPO), 'pending')
+
+    def test_backfill_reuses_verified_assets_and_rejects_wrong_hash(self):
+        tags = ['old', 'middle', 'new']
+        with (patch.object(ci_tracking, 'window_tags', return_value=tags),
+              patch.object(ci_tracking, 'asset_record', side_effect=[{}, None, {}, {}, {}, {}])):
+            self.assertEqual(ci_tracking.missing_structures('new'), ['middle'])
+            self.assertEqual(ci_tracking.missing_structures('new'), [])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            asset = root / 'structure.tar'
+            asset.write_bytes(b'structure')
+            record = {'name': asset.name, 'state': 'uploaded', 'size': asset.stat().st_size,
+                      'digest': 'sha256:' + hashlib.sha256(asset.read_bytes()).hexdigest()}
+            with (patch.object(ci_structure, 'release_state', return_value={'assets': [record]}),
+                  patch.object(ci_structure, 'download_asset') as download):
+                self.assertEqual(ci_structure.get_asset('tag', asset.name, root), asset)
+                download.assert_not_called()
+                record['digest'] = 'sha256:' + '0' * 64
+                with self.assertRaisesRegex(ValueError, 'SHA-256'):
+                    ci_structure.get_asset('tag', asset.name, root)
 
     def test_budget_identity_and_public_guard(self):
         data = ci.load_input(ci.RESEARCH / 'inputs/jp-1507021.json')

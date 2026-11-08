@@ -7,11 +7,11 @@ from functools import lru_cache
 from pathlib import Path
 
 from indexer.ci import REPO, RESEARCH, acquire_input, public_only, publish_worktree, reference_worktree
-from indexer.ci_delivery import restore_completed
-from indexer.ci_structure import deliver_asset, get_asset, structure_checkpoint
+from indexer.ci_delivery import checkpoint_key, restore_completed
+from indexer.ci_structure import asset_record, deliver_asset, get_asset, structure_asset_name, structure_checkpoint
 from indexer.reference import reference_path
 from indexer.store import LOCAL, digest, read_json, write_json
-from indexer.upstream import previous_references, tracking_sources
+from indexer.upstream import LIBRARY, TRACKING_POLICY, previous_references, tracking_sources
 from matcher import tracking, tracking_pages
 from matcher.structure import reader
 
@@ -20,6 +20,33 @@ def validate_cache(cache, manifest, identity):
     if (manifest['analysis_revision'], manifest['source_database_sha256'], reference_path(manifest)) != (
             identity['analysis_revision'], digest(cache / 'cache.sqlite'), reference_path(identity)):
         raise ValueError('Published reference and completed checkpoint disagree')
+
+
+def window_tags(tag):
+    version, architecture, _ = checkpoint_key(tag)
+    previous = previous_references({'versionName': version, 'architecture': architecture, 'library': LIBRARY}, REPO)
+    return [*(f"native-analysis-{entry['version']}-{entry['architecture']}-{entry['analysis_revision']}"
+              for entry in previous), tag]
+
+
+def missing_structures(tag):
+    name = structure_asset_name()
+    return [candidate for candidate in window_tags(tag) if asset_record(candidate, name) is None]
+
+
+def backfill(tag, publish):
+    public_only()
+    LOCAL.mkdir(exist_ok=True)
+    missing = missing_structures(tag)
+    if missing and not publish:
+        raise ValueError('Structure backfill requires publish_reference=true to preserve results between runners')
+    for release in missing:
+        with tempfile.TemporaryDirectory(prefix='ci-backfill-', dir=LOCAL) as temporary:
+            root = Path(temporary)
+            cache = root / 'cache'
+            data, identity = restore_completed(release, cache)
+            structure_checkpoint(cache, lambda: Path(acquire_input(data, Path(os.environ['JAVA_HOME']))['path']),
+                                 data, identity, release, root / 'delivery', publish=True)
 
 
 def restore_window(data, identity, cache, tag, root):
@@ -43,6 +70,17 @@ def verify_result(database, config_id):
     return result
 
 
+def retire_old_reports(work, versions):
+    paths = []
+    if {'15.7.2', '15.7.4'} <= set(versions):
+        for path in ('research/docs/native-comparison-15.7.2-15.7.4.md',
+                     'research/matcher/docs/results-15.7.2-15.7.4.md'):
+            if (work / path).is_file():
+                (work / path).unlink()
+                paths.append(path)
+    return paths
+
+
 def publish_tracking(tag, publish):
     public_only()
     LOCAL.mkdir(exist_ok=True)
@@ -60,7 +98,8 @@ def publish_tracking(tag, publish):
         entries = restore_window(data, identity, cache, tag, root)
         if len(entries) == 1:
             if publish:
-                manifest.update(comparison_state='no_baseline', tracking_format=2, tracking_sources=tracking_sources([identity]))
+                manifest.update(comparison_state='no_baseline', tracking_format=2, tracking_policy=TRACKING_POLICY,
+                                tracking_sources=tracking_sources([identity]))
                 write_json(manifest_path, manifest)
                 publish_worktree(work, f'Publish native tracking state {revision}')
             print('No earlier published reference for this ABI', flush=True)
@@ -73,8 +112,8 @@ def publish_tracking(tag, publish):
 
         datasets = []
         for number, (input_data, version, source, release) in enumerate(entries):
-            archive, metrics = structure_checkpoint(source, lambda number=number: binary(number), input_data, version, release,
-                                                     root / f'structure-{number}', publish=publish)
+            archive, metrics = structure_checkpoint(source, None, input_data, version, release,
+                                                     root / f'structure-{number}', extract=False)
             datasets.append({'cache': source, 'identity': version, 'archive': archive, 'metrics': metrics})
         decisions = RESEARCH / 'comparisons/decisions'
         config_id, _ = tracking.configuration(datasets, decisions)
@@ -96,15 +135,9 @@ def publish_tracking(tag, publish):
             source_url = f'https://github.com/{REPO}/blob/{git_revision}/'
             asset_url = f'https://github.com/{REPO}/releases/download/{tag}/{name}'
             destination = work / 'research/comparisons' / identity['architecture'] / result['run']
-            tracking_pages.render(database, work, destination, asset_url, source_url)
             deliver_asset(tag, database)
+            tracking_pages.render(database, work, destination, asset_url, source_url)
             tracking_pages.attach(work, destination, result)
-            retired = []
-            if {'15.7.2', '15.7.4'} <= {entry[1]['version'] for entry in entries}:
-                for path in ('research/docs/native-comparison-15.7.2-15.7.4.md',
-                             'research/matcher/docs/results-15.7.2-15.7.4.md'):
-                    if (work / path).is_file():
-                        (work / path).unlink()
-                        retired.append(path)
+            retired = retire_old_reports(work, [entry[1]['version'] for entry in entries])
             publish_worktree(work, f'Publish native tracking window {result["run"]}',
                              ('research/reference', 'research/comparisons', *retired))

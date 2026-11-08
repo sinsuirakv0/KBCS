@@ -469,7 +469,7 @@ def analyze(input_path, label, *, from_assets=False):
 def main():
     configure_output()
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('setup', 'setup-apk', 'run', 'references', 'match'))
+    parser.add_argument('action', choices=('setup', 'setup-apk', 'run', 'references', 'match', 'backfill-plan', 'backfill'))
     parser.add_argument('--manifest', type=Path, default=RESEARCH / 'inputs/jp-1507021.json')
     parser.add_argument('--label', default='ci-v1')
     parser.add_argument('--publish', action='store_true')
@@ -482,14 +482,29 @@ def main():
         from indexer.ci_delivery import publish_comparison, publish_materials
 
         if args.action == 'run':
+            from indexer.ci_tracking import backfill
+
             tag = analyze(args.manifest, args.label)
             publish_materials(tag, args.publish)
+            backfill(tag, args.publish)
             publish_comparison(tag, args.publish)
         else:
             if not args.checkpoint:
                 parser.error('--checkpoint is required')
-            operation = publish_materials if args.action == 'references' else publish_comparison
-            operation(args.checkpoint, args.publish)
+            if args.action in ('backfill-plan', 'backfill'):
+                from indexer.ci_tracking import backfill, missing_structures
+
+                if args.action == 'backfill':
+                    backfill(args.checkpoint, args.publish)
+                else:
+                    public_only()
+                    missing = missing_structures(args.checkpoint)
+                    print(json.dumps({'missing_structure_checkpoints': missing}), flush=True)
+                    with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+                        output.write(f'needed={str(bool(missing)).lower()}\n')
+            else:
+                operation = publish_materials if args.action == 'references' else publish_comparison
+                operation(args.checkpoint, args.publish)
 
 
 if __name__ == '__main__':

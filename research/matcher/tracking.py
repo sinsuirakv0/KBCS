@@ -42,6 +42,7 @@ CREATE TABLE candidates(pair TEXT,old TEXT,new TEXT,rank INTEGER,score REAL,elig
 CREATE INDEX candidates_new ON candidates(pair,new,rank);
 CREATE TABLE logic(pair TEXT,old TEXT,new TEXT,status TEXT,evidence TEXT,PRIMARY KEY(pair,old),
     FOREIGN KEY(pair) REFERENCES pairs(pair));
+CREATE INDEX logic_importance ON logic(pair,json_extract(evidence,'$.importance'));
 CREATE TABLE review(pair TEXT,side INTEGER,address TEXT,kind TEXT,targets TEXT,evidence TEXT,
     FOREIGN KEY(pair) REFERENCES pairs(pair));
 CREATE INDEX review_address ON review(pair,side,address);
@@ -74,7 +75,7 @@ def load_dataset(cache, binary, archive, metrics=None):
 
 
 def configuration(datasets, decisions):
-    modules = (structure, logic, tracking_pair, report, report.features, report.relations, report.engine)
+    modules = (structure, logic, logic.effects, tracking_pair, report, report.features, report.relations, report.engine)
     code = {Path(module.__file__).name: digest(Path(module.__file__)) for module in modules}
     code[Path(__file__).name] = digest(Path(__file__))
     code['tracking_pages.py'] = digest(Path(__file__).with_name('tracking_pages.py'))

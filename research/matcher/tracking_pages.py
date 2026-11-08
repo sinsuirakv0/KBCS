@@ -1,37 +1,42 @@
 ﻿import html
 import json
 import os
+import re
 import tempfile
 from collections import defaultdict
 from itertools import islice
 from pathlib import Path
+from urllib.parse import urlsplit
+from urllib.request import url2pathname
 
 from indexer.reference import fenced, reference_path
 from indexer.store import digest, read_json, write_json
-from indexer.upstream import tracking_sources
+from indexer.upstream import TRACKING_POLICY, tracking_sources
 from matcher.comparison_pages import COMPARISON_LINK, DIRECTIONS, catalog_path, disconnect, overlay
 from matcher.structure import reader
 
 
 PAGE_SIZE = 100
-GROUPS = {'structure_or_reference_change': '構造・参照差',
-          'register_sensitive': 'レジスタ割当差を含む候補', 'reference_sensitive': '参照アドレスに依存する差',
-          'machine_only_observed': '機械語差のみを観測',
-          'machine_cfg_equal': '命令バイト・CFG形状の一致', 'no_difference_in_scope': '検査範囲で差分なし',
-          'unavailable': '未検証・解析不能'}
-PRIORITY = """EXISTS (SELECT 1 FROM json_each(l.evidence,'$.changes') AS item
-    WHERE item.value IN ('operation_sequence','operation_order','branch_condition_or_target','call',
-                         'control_flow_count','memory_write_count','memory_read_count','comparison'))"""
+GROUPS = {'reference_unresolved': '未解決の参照', 'machine_only_observed': '機械語差のみを観測',
+          'detail_skipped': '機械語・CFG・記録された参照の一致で詳細検査を省略',
+          'no_difference_in_scope': '検査範囲で差分なし', 'unavailable': '未検証・解析不能'}
 
 
 def groups():
-    yield 'logic_change_candidate', 'priority', 'ロジック変更候補（優先確認）', f'AND {PRIORITY}'
-    yield 'logic_change_candidate', 'operands', '定数・オペランドの変更候補', f'AND NOT {PRIORITY}'
-    yield from ((status, status, heading, '') for status, heading in GROUPS.items())
+    yield 'priority', '最優先の変更候補', "json_extract(l.evidence,'$.importance')='critical'"
+    yield 'high', '高優先の変更候補', "json_extract(l.evidence,'$.importance')='high'"
+    yield 'inspection', '要調査の変更候補', (
+        "json_extract(l.evidence,'$.importance')='review' AND l.status NOT IN "
+        "('unavailable','reference_unresolved','machine_only_observed')")
+    yield from ((status, heading, f"l.status='{status}'") for status, heading in GROUPS.items())
 
 
 def link(target, page):
-    return Path(os.path.relpath(target, page.parent)).as_posix()
+    try:
+        return Path(os.path.relpath(target, page.parent)).as_posix()
+    except ValueError:
+        # Windowsで資料とローカルプレビューが別ドライブの場合は絶対ファイルURLを使う。
+        return target.resolve().as_uri()
 
 
 def write_page(path, lines):
@@ -43,17 +48,55 @@ def label(text):
     return html.escape(str(text)).replace('|', '&#124;').replace('[', '&#91;').replace(']', '&#93;').replace('\n', ' ')
 
 
+def verify_links(directory, repository, asset_url, reference_url):
+    validated = set()
+    checked = 0
+    for page in directory.rglob('*.md'):
+        fence = None
+        for line in page.read_text(encoding='utf-8-sig').splitlines():
+            marker = re.match(r'^(~{3,}|\x60{3,})', line)
+            if marker and (fence is None or marker[0] == fence):
+                fence = marker[0] if fence is None else None
+                continue
+            if fence:
+                continue
+            for href in re.findall(r'\]\(([^)]+)\)', line):
+                if href == asset_url:
+                    continue
+                if reference_url and href.startswith(reference_url):
+                    path = repository / href.removeprefix(reference_url)
+                elif href.startswith('file:///'):
+                    path = Path(url2pathname(urlsplit(href).path))
+                else:
+                    path = page.parent / href
+                key = os.path.normpath(path)
+                if key not in validated:
+                    if not Path(key).is_file():
+                        raise ValueError(f'Broken tracking link in {page}: {href}')
+                    validated.add(key)
+                checked += 1
+    return checked
+
+
 def render(database, repository, destination, asset_url, reference_url=None):
     if destination.exists():
         existing = read_json(destination / 'manifest.json')
-        if existing['database_sha256'] != digest(database) or not (destination / 'README.md').is_file():
+        if (existing['database_sha256'] != digest(database) or existing.get('asset_url') != asset_url
+                or not (destination / 'README.md').is_file()):
             raise ValueError('Published tracking directory belongs to a different or incomplete result')
+        # 再実行でmainが進んでも、既存ページは生成時の固定コミットを指す。
+        verify_links(destination, repository, asset_url, existing['reference_url'])
         return read_json(destination / 'summary.json')
     destination.parent.mkdir(parents=True, exist_ok=True)
     # 同じ深さの一時ディレクトリで、版資料への相対リンクを保ったまま生成する。
     with tempfile.TemporaryDirectory(prefix='.tracking-', dir=destination.parent) as temporary:
         staged = Path(temporary)
         result = render_pages(database, repository, staged, asset_url, reference_url)
+        checked = verify_links(staged, repository, asset_url, reference_url)
+        manifest = read_json(staged / 'manifest.json')
+        write_json(staged / 'manifest.json', manifest | {'verified_links': checked,
+                                                        'asset_url': asset_url, 'reference_url': reference_url})
+        print(f'Checked {checked:,} Markdown links', flush=True)
         staged.rename(destination)
     return result
 
@@ -112,17 +155,18 @@ def render_pages(database, repository, destination, asset_url, reference_url):
             page = destination / pair / 'README.md'
             indices.append(f'- [{title}]({link(page, root)})')
             pair_index = [f'# {title}', '', '[追跡の目次](../README.md)', '', '## 処理・構造の差と対応根拠', '']
-            for status, slug, heading, condition in groups():
+            for slug, heading, condition in groups():
                 rows = db.execute(f"""SELECT l.old,l.new,l.evidence,r.reason,
                         EXISTS (SELECT 1 FROM conflict_edges c WHERE c.pair=l.pair AND c.old=l.old AND c.new=l.new)
                     FROM logic l JOIN relations r ON l.pair=r.pair AND l.old=r.old AND l.new=r.new
-                    WHERE l.pair=? AND l.status=? AND r.verdict='accepted' {condition} ORDER BY l.old""", (pair, status))
+                    WHERE l.pair=? AND r.verdict='accepted' AND {condition} ORDER BY l.old""", (pair,))
 
                 def pair_row(row, detail):
                     a, b, raw, reason, conflict = row
                     record = json.loads(raw)
                     tags = ', '.join(record.get('changes', ()))
-                    extra = [f"`{record['scope']}`", *(f"`{value}`" for value in record.get('warnings', ())),
+                    extra = [f"`{record['scope']}`", f"`{record['confidence']}`",
+                             f"参照 `{record['reference_state']}`", *(f"`{value}`" for value in record.get('warnings', ())),
                              *([f"`{record['structural_candidate']}`"] if 'structural_candidate' in record else []),
                              *(['`reordered`'] if record.get('order_changed') else []),
                              *(['**経路矛盾あり**'] if conflict else [])]
@@ -131,6 +175,18 @@ def render_pages(database, repository, destination, asset_url, reference_url):
                              f'- 旧版 {call_context(i, a, detail)}', f'- 新版 {call_context(j, b, detail)}', '']
                     if tags:
                         lines.extend([f'変更の種類 {tags}', ''])
+                    for key, caption in (('priority_impact', '優先判定に残った影響'),
+                                         ('address_sensitive_impact', 'アドレスに依存する影響')):
+                        if record.get(key):
+                            counts = ', '.join(f'`{kind}` {count}件' for kind, count in sorted(record[key].items()))
+                            lines.extend([f'{caption} {counts}', ''])
+                    if record.get('effects'):
+                        lines.extend([fenced(json.dumps(record['effects'][:3], ensure_ascii=False, indent=2), 'json'), ''])
+                    if record.get('reference_changed'):
+                        reference = record['references']
+                        lines.extend(['参照の変更（関数入口からの相対位置）', '',
+                                      fenced(json.dumps({key: reference[key][:3] for key in ('removed', 'added')},
+                                                        ensure_ascii=False, indent=2), 'json'), ''])
                     sample = []
                     for change in record.get('details', ())[:3]:
                         sample.extend('- ' + label(site) + ' ' + json.dumps(op, ensure_ascii=False)
@@ -145,7 +201,7 @@ def render_pages(database, repository, destination, asset_url, reference_url):
             pair_index.extend(['', '## 競合・未確定と再調査の優先順', '',
                                '分割・統合・インライン化候補を先に並べています。詳細根拠と全参照はSQLiteで調べられます。', ''])
             reviews = db.execute("""SELECT side,address,kind,targets,evidence FROM review WHERE pair=?
-                ORDER BY CASE WHEN kind IN ('split_candidate','merge_candidate','inline_candidate','outline_candidate')
+                ORDER BY CASE WHEN kind IN ('split_candidate','merge_candidate','inline_candidate','outline_candidate','embedded_fragment_candidate')
                               THEN 0 WHEN kind='competing_candidates' THEN 1 ELSE 2 END,side,address""", (pair,))
 
             def review_row(row, detail):
@@ -200,6 +256,9 @@ def retire_legacy(reference, identities):
 
 def attach(repository, destination, result):
     reference = repository / 'research/reference'
+    publication = read_json(destination / 'manifest.json')
+    if publication['run'] != result['run'] or not publication.get('verified_links') or not (destination / 'README.md').is_file():
+        raise ValueError('Verify the replacement tracking pages before retiring old comparisons')
     for source in result['sources']:
         identity = source['identity']
         manifest = read_json(reference / reference_path(identity) / 'manifest.json')
@@ -214,7 +273,7 @@ def attach(repository, destination, result):
         overlay(page, 'tracking', f'[バージョン間の関数追跡]({link(destination / "README.md", page)})', '## アドレス索引\n')
         manifest = read_json(directory / 'manifest.json')
         manifest.update(comparison_state='complete' if i else manifest.get('comparison_state', 'no_baseline'),
-                        tracking_format=2, tracking_run=result['run'],
+                        tracking_format=2, tracking_policy=TRACKING_POLICY, tracking_run=result['run'],
                         tracking_page=(destination / 'README.md').relative_to(repository).as_posix(),
                         tracking_sources=tracking_sources(identities[:i + 1]))
         write_json(directory / 'manifest.json', manifest)
