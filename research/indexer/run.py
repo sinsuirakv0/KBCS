@@ -119,8 +119,12 @@ def headless(config, root, snapshot, mode, timeout, initialize=False, analyze_ex
                '-cp', str(ghidra / 'Ghidra/Framework/Utility/lib/Utility.jar'),
                'ghidra.Ghidra', 'ghidra.app.util.headless.AnalyzeHeadless',
                str(project), 'cache', *arguments, *analysis, '-max-cpu', '1',
-               '-scriptPath', str(script), '-postScript', 'ExportCache.java', str(root), mode, str(timeout)]
-    command.extend([config.get('decompiler_style', 'decompile'), str(config.get('script_batch_seconds', 0))])
+               '-scriptPath', str(script), '-postScript']
+    if mode == 'structure':
+        command.extend(['ExportStructure.java', str(root), mode, config['sha256']])
+    else:
+        command.extend(['ExportCache.java', str(root), mode, str(timeout),
+                        config.get('decompiler_style', 'decompile'), str(config.get('script_batch_seconds', 0))])
     log = root / ('full-analysis.log' if analyze_existing else 'initial-analysis.log' if initialize else f'{mode}.log')
     tick = time.perf_counter()
     peak = 0
@@ -151,7 +155,8 @@ def headless(config, root, snapshot, mode, timeout, initialize=False, analyze_ex
             process.wait()
     # Ghidraはスクリプト失敗でも終了値0を返すことがある。
     text = log.read_text(encoding='utf-8', errors='replace')
-    marker = 'Cache index:' if mode == 'index' else 'Cache decompilation complete'
+    marker = {'index': 'Cache index:', 'decompile': 'Cache decompilation complete',
+              'structure': 'Structure export complete:'}[mode]
     if marker not in text:
         raise RuntimeError(f'Export script did not complete; inspect {log}')
     return {'wall_seconds': time.perf_counter()-tick, 'jvm_peak_working_set_bytes': peak,

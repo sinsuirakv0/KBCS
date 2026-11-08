@@ -4,9 +4,11 @@ on:
   push:
     paths-ignore:
       - 'research/reference/**'
+      - 'research/comparisons/**'
   pull_request:
     paths-ignore:
       - 'research/reference/**'
+      - 'research/comparisons/**'
   workflow_dispatch:
     inputs:
       version:

@@ -1,4 +1,4 @@
-﻿# Ghidra解析キャッシュ基盤 v1
+﻿# Ghidra解析キャッシュとバージョン間追跡
 
 最新版の確認・取得、Ghidraの一括抽出、SQLite検索をローカルで実行します。
 初期版はユーザー指定の15.7.2、対象は統合APK内のARM64版 `libnative-lib.so` です。
@@ -8,10 +8,9 @@
 
 `python -m cli.match` で、完成済みの2つのキャッシュから関数対応を調べられます。前後の基準と並び順、疑似コードの指紋、呼出関係、文字列、シンボル等を合わせ、対応の根拠と未確定候補をSQLiteへ保存します。Ghidraの再解析は不要です。
 
-[実行・検索・判定の修正・設計](matcher/docs/README.md)を参照してください。生成物は `.local/matching/` に保存し、元の資料は変更しません。
-[15.7.2と15.7.4の実測](matcher/docs/results-15.7.2-15.7.4.md)では内部23,120組を自動採用し、残る候補・根拠・保留理由も記録しています。
+[2版の実行・検索・判定の修正](matcher/docs/README.md)を参照してください。生成物は `.local/matching/` に保存します。
 
-KBCSのActionsはassetsに公開されたJP検証済み最新版を定期確認し、新版の解析資料と直前の公開版との関数対応を作成できます。[自動更新と復旧手順](docs/actions-analysis.md)
+Actionsは新しいJP版の資料を作り、同じABIの直前2版を使って関数の由来・構造・処理の変更候補を追跡します。結果は `research/comparisons/` と解析Releaseに保存します。[追跡v2の検索・設計](matcher/docs/tracking-v2.md) · [自動更新と復旧手順](docs/actions-analysis.md)
 
 ## 全関数の参考資料を作成・再開
 

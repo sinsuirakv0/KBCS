@@ -118,7 +118,7 @@ def matching_publication(data, repository, inputs):
     return None
 
 
-def previous_reference(data, repository):
+def previous_references(data, repository, limit=2):
     def version_key(name):
         return tuple(map(int, name.split('.')))
 
@@ -128,11 +128,19 @@ def previous_reference(data, repository):
     versions = [entry['name'] for entry in entries if entry['type'] == 'dir'
                 and re.fullmatch(r'\d+\.\d+\.\d+', entry['name'])
                 and version_key(entry['name']) < current]
+    result = []
     for version in sorted(versions, key=version_key, reverse=True):
         previous = reference_at(repository, ref, version, data['architecture'], data['library'])
         if previous:
-            return previous
-    return None
+            result.append(previous)
+            if len(result) == limit:
+                break
+    return list(reversed(result))
+
+
+def tracking_sources(versions):
+    return [{key: version[key] for key in ('version', 'architecture', 'sha256', 'analysis_revision')}
+            for version in versions]
 
 
 def main():
@@ -148,6 +156,10 @@ def main():
         return
     manifest = matching_publication(data, REPO, RESEARCH / 'inputs')
     state = 'new' if manifest is None else manifest.get('comparison_state', 'complete')
+    if manifest and state != 'pending':
+        expected = tracking_sources([*previous_references(data, REPO), manifest])
+        if manifest.get('tracking_format') != 2 or manifest.get('tracking_sources') != expected:
+            state = 'pending'
     print(f"Assets {data['versionName']} / {data['versionCode']} at {commit}; state: {state}", flush=True)
     if args.check_only:
         return

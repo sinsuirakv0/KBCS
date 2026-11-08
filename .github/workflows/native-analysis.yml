@@ -56,7 +56,7 @@ jobs:
     # 標準Public実行だけを許可する。有料runnerへの切替は用意しない。
     if: github.repository == 'sinsuirakv0/KBCS' && github.event.repository.private == false && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 340
+    timeout-minutes: 235
     permissions:
       contents: write
     outputs:
@@ -127,7 +127,7 @@ jobs:
           if not os.environ.get('BATTLECATS_APK_READ_TOKEN'):
               raise RuntimeError('Set BATTLECATS_APK_READ_TOKEN with read-only source repository access')
           PY
-          python -m unittest indexer.test_store indexer.test_reference indexer.test_ci matcher.test_matching
+          python -m unittest indexer.test_store indexer.test_reference indexer.test_ci matcher.test_matching matcher.test_tracking
       - name: Install checksum-pinned analysis tools
         if: steps.source.outputs.needed == 'true'
         run: python -m indexer.ci setup
@@ -175,7 +175,7 @@ jobs:
     needs: analyze
     if: needs.analyze.outputs.checkpoint != '' && needs.analyze.outputs.match_only != 'true' && inputs.stage != 'analyze' && inputs.stage != 'match'
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 30
     permissions:
       contents: write
     env:
@@ -192,14 +192,14 @@ jobs:
           python3 -m indexer.ci references --checkpoint "$CHECKPOINT" "${args[@]}"
 
   match:
-    name: Match functions across versions
+    name: Track native functions across versions
     needs: [analyze, references]
     if: >-
       !cancelled() && needs.analyze.result == 'success' && needs.analyze.outputs.checkpoint != '' &&
       inputs.stage != 'analyze' && inputs.stage != 'references' &&
       (needs.references.result == 'success' || inputs.stage == 'match' || needs.analyze.outputs.match_only == 'true')
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: 90
     permissions:
       contents: write
     env:
@@ -212,9 +212,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '21.0.11+10.0.LTS'
-      - name: Install pinned APK verification tool
-        run: python3 -m indexer.ci setup-apk
-      - name: Compare verified indexes and publish results
+      - name: Install pinned analysis runtime
+        run: python3 -m indexer.ci setup
+      - name: Verify Ghidra extraction with independent ARM64 binaries
+        env:
+          KBCS_TEST_GHIDRA: '1'
+        run: python3 -m unittest matcher.test_tracking
+      - name: Track verified versions and publish results
         env:
           BATTLECATS_APK_READ_TOKEN: ${{ secrets.BATTLECATS_APK_READ_TOKEN }}
         shell: bash

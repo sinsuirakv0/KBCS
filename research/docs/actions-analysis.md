@@ -4,7 +4,7 @@
 
 最初の対象はJP15.7.2 / versionCode 1507021 / arm64-v8a / libnative-lib.so。入力の版・APK/アーカイブ/SO SHA-256は `research/inputs/jp-1507021.json` に固定する。2026-10-20に確認した原本の再生成であり、最新版の版番号を推測しない。上流の取得workflowは起動・変更しない。
 
-Python 3.13、Ghidra 12.1.2、Temurin JDK 21.0.11+10、apktool 2.12.1を使用する。Ghidra/apktoolの公式配布URLとSHA-256は `research/ghidra/runtime.json`。解析・抽出・資料生成はPython/Javaで実行し、AI APIは使わない。直前の公開版との関数対応は [matcher](../matcher/docs/README.md) で作成する。
+Python 3.13、Ghidra 12.1.2、Temurin JDK 21.0.11+10、apktool 2.12.1を使用する。Ghidra/apktoolの公式配布URLとSHA-256は `research/ghidra/runtime.json`。解析・抽出・資料生成はPython/Javaで実行し、AI APIは使わない。関数の由来と構造差は [追跡v2](../matcher/docs/tracking-v2.md) で作成する。
 
 2026-11-06に15.7.2の[GitHub Actions実行](https://github.com/sinsuirakv0/KBCS/actions/runs/42078163411)が正常終了した。対象はarm64-v8aの `libnative-lib.so`、解析IDは `5ed057380ac853a2`。取得・解析・検証・公開は92分06秒。検出25,525件のうち内部25,233件の疑似コードを保存し、失敗0件、外部292件。代替設定で抽出した3件は確度low。[チェックポイントのRelease](https://github.com/sinsuirakv0/KBCS/releases/tag/native-analysis-15.7.2-arm64-v8a-5ed057380ac853a2)
 
@@ -28,7 +28,7 @@ KBCSのActions Secret `BATTLECATS_APK_READ_TOKEN` は設定済み。Private `sin
 
 旧台帳（schemaVersion 1）は統合APKのアーカイブdigest・APK SHA-256・manifestのpackage/版・SO SHA-256を検証する。新台帳（schemaVersion 2）はアーカイブとbase/ABI Splitをそれぞれハッシュ照合し、baseのpackage/版とABI Splitのpackage/versionCode/split名を確認する。ABI Splitから取り出したSOはELF種別とSHA-256を確認する。署名は上流の検証記録に基づき、各原本のハッシュを照合する。
 
-Publicへ保存できるのは、疑似コード、逆アセンブル、索引、SQLiteの関数/参照/metadata、計測・状態・テキストログ。APK・SO・Ghidraプロジェクト・project ZIP・環境変数・認証情報はcheckpointに入れない。原本とGhidraプロジェクトは実行機内だけで使用する。Private APK保存先へは書き込まない。
+Publicへ保存する対象は、疑似コード、逆アセンブル、索引、CFG・raw P-code、SQLiteの関数・参照・追跡情報、計測・状態・テキストログ。APK、SO、Ghidraプロジェクト、認証情報は実行機内で扱う。
 
 ## 実行入力
 
@@ -48,7 +48,7 @@ workflowは `.github/workflows/native-analysis.yml`。
 
 KBCSのmainでも毎時23分にassetsを確認し、通知の未着や失敗を拾う。`current.json` と版別 `proof.json` は同じコミットから読む。全段階が済んだ原本はスキップし、資料公開済みで照合待ちの原本は `match` ジョブだけを再開する。GitHubの定期実行には遅延があり、定期実行は起動時点のcurrentを処理する。[GitHub Actionsのschedule仕様](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
 
-新規版では保全済みのPrivate Releaseを取得し、アーカイブ、署名検証記録、base/ABI SplitのSHA-256、実APKのmanifestを照合する。上流の記録にSO SHA-256がないため、検証済みABI Splitから抽出したSHA-256を解析計画に固定する。現在の15.7.4は既存の固定台帳と公開済みSOのSHA-256が一致するためスキップする。同じ版でも原本アーカイブが変われば新規入力として扱う。
+新規版では保全済みのPrivate Releaseを取得し、アーカイブ、署名検証記録、base/ABI SplitのSHA-256、実APKのmanifestを照合する。検証済みABI Splitから抽出したSOのSHA-256を解析計画に固定する。同じ版でも原本アーカイブが変われば新規入力として扱う。v1の結果しか存在しない場合や、直前2版の構成・リビジョンが変わった場合は、公開済みcheckpointから追跡を実行する。
 
 手動確認は `workflow_dispatch` の `check_only=true`、最新版をすぐ確認・処理するには入力台帳を空にして通常起動する。`repository_dispatch: native-analysis-request` は従来どおり同名のclient_payloadを受け取り、`publish_reference` 省略時はmainへ反映しない。定期実行では完成資料をmainへ公開する。解析中のジョブは後着の定期実行で中断しない。GitHubの同時実行制御で待機中のジョブが置き換わった場合は手動で再起動できる。
 
@@ -56,25 +56,25 @@ KBCSのmainでも毎時23分にassetsを確認し、通知の未着や失敗を�
 
 15.7.4を指定して再解析するときは `source_manifest=research/inputs/jp-1507040.json` を使う。公開済みの15.7.2は別リビジョンで保持する。ローカルで原本の検証とSO抽出だけをする場合は `python -m indexer.apk --manifest research/inputs/jp-1507040.json --apktool <apktool.jar> --java <java>` を使う（`PYTHONPATH=research`）。
 
-両版の既存キャッシュを使った照合の実測は [15.7.2と15.7.4の関数照合](native-comparison-15.7.2-15.7.4.md) を参照。
+初回の追跡対象は15.7.2・15.7.3・15.7.4。15.7.3の取得元は `research/inputs/jp-1507030.json` に固定した。
 
 ## 処理と再開
 
 1. Public条件と台帳を確認する。解析する場合だけSecretを利用し、テストとセットアップへ進む。
 2. 配布物のハッシュを確認する。Ghidraは一時領域に展開し、起動に必要なJARを確認してから配置する。
 3. 計画から16桁の解析IDを作る。同じIDの最新3組までを新しい順に確認する。Releaseのdigest・アーカイブと各ファイルのSHA-256・展開先を照合し、検証が完了した一式を作業領域へ移す。保存済みの組がすべて不正なら停止する。
-4. 未完了ならPrivate Releaseから対象APKを取得・検証する。Ghidraの独立プロジェクトを新規作成し、自動解析と全件索引を作る。
+4. 未完了ならPrivate Releaseから対象APKを取得・検証する。Ghidraの独立プロジェクトで自動解析と全件索引を作り、同じプロジェクトを読み取り専用で開いて構造・raw P-codeのsidecarを保存する。
 5. 1000関数以下を1バッチとして逐次デコンパイルする。プロセス中断時も、書き終えた関数があれば同期・保存して残りへ進む。進捗0の場合は時間に余裕があれば1回だけ再起動する。保存時はGitHub側のsize/digestも照合する。
 6. 標準→conservative→minimalの有限3設定で未保存分を処理する。過去に同じ設定で処理した失敗関数を自動反復しない。
 7. `analyze` は未処理0を確認して最終checkpointを保存し、Releaseタグを後続へ渡す。失敗関数は理由と逆アセンブルを残し、成功件数へ加算しない。
 8. `references` はそのcheckpointから資料を生成する。`publish_reference=true` ならmainの同じゲーム版・ABIを差し替え、manifestに `comparison_state=pending` を記録する。
-9. `match` は同じABIの直前の公開版と対象版を復元し、両SOのSHA-256と名前を隠した検証を通す。検索用SQLiteを今回のReleaseへ保存し、sizeとSHA-256を照合する。mainの両版の資料が照合に使ったcheckpointと一致すれば、`comparison.md`、対応した関数資料の相互リンク、本文差分と変更一覧を一つのコミットで公開する。比較元のない初回は `no_baseline`、比較公開後は `complete` をmanifestに記録する。
+9. `match` は対象と同じABIの直前2公開版を復元する。構造sidecarがない旧版だけ隔離プロジェクトでバックフィルする。連続比較と直接検証を集約し、SQLiteを解析Releaseに保存してsizeとSHA-256を照合する。全リンクの検査後、`research/comparisons/` の公開、版目次への導線、旧比較資料の廃止を同一コミットで行う。比較元がなければ `no_baseline`、追跡公開後は `complete` を版のmanifestに記録する。
 
-資料生成や照合だけをやり直す場合は `checkpoint` と `stage` を指定する。例えば15.7.4を共通化する初回確認には `checkpoint=native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73`、`stage=all` を指定できる。完成済み索引から資料を生成し、15.7.2との照合へ進む。比較が失敗しても公開済みの新版資料は利用できる。誤対応が検出された照合結果は保留し、修正後に `stage=match` で再実行できる。上流currentが進んだ後に旧版の未完了解析を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
+15.7.2・15.7.3・15.7.4の既存資料から初回追跡を実行する場合は、`checkpoint=native-analysis-15.7.4-arm64-v8a-6cf79e30b2bdfc73`、`stage=match`、`publish_reference=true` を指定する。資料生成だけなら `stage=references` を使う。追跡を再実行すると、検証済み構造sidecarと、同じ入力・エンジン・手動判断で完成した追跡SQLiteを再利用する。上流currentが進んだ後に旧版の未完了解析を再開する場合は、checkpointの `ci-plan.json` に記録された `input` を固定台帳として指定する。
 
 checkpointにはGhidraプロジェクトを含めない。そのため未完了の再開時は元APKからプロジェクトを再解析する。以前と新しい索引を、実行パスや所要時間を除いた構造ハッシュで照合し、一致した場合だけ保存済み疑似コードを再利用する。不一致時は停止し、別ラベルで新規生成する。完了checkpointからの再開では、同じ解析IDの資料生成・反映から再試行できる。Actionsの結果と `ci-status.json` の `complete` で、関数処理と資料公開の状態を区別する。
 
-ジョブは340分で上限、解析1プロセスは60分で保護、1関数900秒、スクリプトは約20分ごとの関数境界で終了する。関数実行分の超過はあり得る。実行開始から210分を超えた時点で次のバッチを控え、未完了なら再開が必要と表示して失敗終了する。[GitHub管理runnerの1ジョブ上限は6時間](https://docs.github.com/en/actions/reference/limits)。中止時は最後にアップロード・検証できたcheckpointまで戻る。再開は同じ入力・ラベル・ツールで行う。強制終了時は進行中のバッチを再処理する場合がある。
+ジョブ上限は解析235分、資料作成30分、追跡90分で、合計355分。ジョブ待機時間は別途発生する。解析プロセスは60分、1関数は900秒。開始から210分を超えると次のバッチを控え、未完了の場合は再開を促す。中断時は最後に照合済みのcheckpointから、同じ入力・ラベル・ツールで再開する。追跡でバックフィルの時間が不足した場合も、先に保存した版のsidecarを再利用できる。[GitHub管理runnerの上限](https://docs.github.com/en/actions/reference/limits)
 
 一時的な通信エラーは取得・公開とも最大3回の試行に抑える。認証エラーや原本ハッシュの不一致では停止する。アップロード応答が失われた場合はRelease側のsize/digestを照合し、完了済みならそのまま進む。片方しか届かなかった場合は別名で再送し、既存アセットを上書きしない。
 
@@ -86,7 +86,7 @@ JVMヒープ1GiB、native RSS上限は `min(8GiB, 実行機RAM−3GiB)`。実行
 Gitで閲覧する資料: `research/reference/<版>/<ABI>/<SO SHA>/`。1関数につきMarkdown 1ファイル。解析IDは `manifest.json` に記録する。
 Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと全ファイルのSHA-256一覧をバッチ単位で追記する。以前のcheckpointを上書き・削除しない。
 
-同じ版・ABIの公開ツリーには今回のSO SHAの資料一式を置く。同一checkpointから資料を再生成する場合、相互リンクと変更一覧を引き継ぐ。別の解析原本で差し替える場合は、隣接版の古いリンクも取り除く。差し替えた版を比較元とする新版は `pending` に戻り、照合段階を再実行できる。過去のGitコミット、Releaseのチェックポイント、ローカルのGhidraプロジェクトは保持する。資料は機械抽出結果で、追加設定で復旧したものはlowとして表示する。
+同じ版・ABIの公開ツリーには今回のSO SHAの資料一式を置く。同一checkpointから資料を再生成する場合は追跡資料への導線を引き継ぐ。過去の追跡ウィンドウから関数資料へのリンクは公開時のGitコミットに固定する。過去のGitコミット、解析Releaseのcheckpoint、ローカルのGhidraプロジェクトを保全する。
 
 資料だけのmain更新でアプリの版が上がらないよう、アプリbuildのpush/pull_requestに `research/reference/**` のpaths-ignoreを追加する。手動のアプリビルドや、解析ツール自体の変更時の従来ビルドは維持する。
 
@@ -102,8 +102,8 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 - `ci.index_digest/select_functions`：再解析時の一致確認と、処理済み試行の再実行防止。
 - `memory.linux_memory`：Linuxの所有子プロセスだけをRSS/空きRAMで保護する。
 - `ci_delivery.restore_completed/publish_materials/publish_comparison`：完成checkpointの版・ABI・解析ID・SOを確認し、資料と比較を独立して公開する。
-- `ci_comparison.build_comparison/deliver_database/write_comparison`：直前の公開版を復元し、既存matcherで検証して検索用SQLiteと比較資料を公開用に組み立てる。
-- `matcher.comparison_pages.publish_links`：検証済み照合DBと両版の索引を確認し、関数資料と版の目次に相互リンクを付ける。差分は新版の `changes/` に作成する。
+- `ci_structure.structure_checkpoint`：Ghidra構造エクスポートを解析Releaseの個別アセットに保存する。
+- `ci_tracking.publish_tracking`：復元、追跡DBの再利用、Markdown生成、旧資料の移行を管理する。
 - `reference.export_cache`：完成済みキャッシュから版・ABI・SO SHA配下へ1関数1ファイルで書き出す。
 - `reference.replace_reference`：新しい一式を準備してから対象を切り替え、入口を更新する。
 
@@ -113,4 +113,4 @@ Release: `native-analysis-<版>-<ABI>-<解析ID>`。checkpointアーカイブと
 
 3段階への分離後は、両版の実checkpointと保存済み照合結果を使って、資料公開、照合失敗時の `pending` 維持、照合だけの再実行、SQLite配布と `complete` 更新をローカルで確認した。GitHubへの送信は模擬した。
 
-相互リンクの追加時は、15.7.2と15.7.4のARM64資料で対応済み23,412組の両端がGitにあることを確認した。保存済み疑似コードから変更候補365組の差分を生成し、サンプルの相互リンクをローカルで開いた。移動したデータアドレスと、索引で裏付けられた分割アドレスの差を除けることも確認した。
+v2の検査範囲、結果の読み方、独立したARM64 ELFの試験は [追跡v2](../matcher/docs/tracking-v2.md) を参照。

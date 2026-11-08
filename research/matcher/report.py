@@ -162,8 +162,12 @@ def build(args):
         if target.exists():
             with closing(sqlite3.connect(target.as_uri() + '?mode=ro', uri=True)) as db:
                 previous = db.execute("SELECT value FROM metadata WHERE key='run_key'").fetchone()
-            if not previous or json.loads(previous[0]) != run_key:
-                raise ValueError('Output contains a different run; choose another directory')
+                if not previous or json.loads(previous[0]) != run_key:
+                    raise ValueError('Output contains a different run; choose another directory')
+                gate = db.execute("SELECT value FROM metadata WHERE key='quality_gate'").fetchone()
+                if (getattr(args, 'reuse', False) and gate and json.loads(gate[0]) == 'passed_named_holdout'
+                        and db.execute('PRAGMA quick_check').fetchone()[0] == 'ok'):
+                    return target
         old, new = (sources[side]['functions'] for side in ('old', 'new'))
         print(json.dumps({'matching': 'started', 'old': len(old), 'new': len(new)}), flush=True)
         match_started = time.monotonic()

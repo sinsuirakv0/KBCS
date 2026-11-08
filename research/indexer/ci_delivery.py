@@ -6,7 +6,8 @@ from pathlib import Path
 from indexer.ci import public_only, publish_worktree, reference_worktree, restore
 from indexer.reference import export_cache, reference_path, replace_reference
 from indexer.store import LOCAL, digest, read_json, write_json
-from matcher.comparison_pages import COMPARISON_LINK, DIRECTIONS, carry_links, disconnect, publish_links
+from matcher.comparison_pages import COMPARISON_LINK, DIRECTIONS, carry_links, disconnect, overlay
+from matcher.tracking_pages import link
 
 
 def restore_completed(tag, root):
@@ -58,7 +59,15 @@ def publish_materials(tag, publish):
             previous = read_json(manifest) if manifest.is_file() else None
             if previous and same_reference(previous, expected):
                 comparison = manifest.with_name('comparison.md')
-                if previous.get('comparison_state') == 'complete' and comparison.is_file():
+                if previous.get('tracking_format') == 2:
+                    keys = ('comparison_state', 'tracking_format', 'tracking_run', 'tracking_page', 'tracking_sources')
+                    report.update({key: previous[key] for key in keys if key in previous})
+                    if report.get('tracking_page'):
+                        target = work / report['tracking_page']
+                        overlay(source / 'README.md', 'tracking',
+                                f'[バージョン間の関数追跡]({link(target, manifest.with_name("README.md"))})',
+                                '## アドレス索引\n')
+                elif previous.get('comparison_state') == 'complete' and comparison.is_file():
                     shutil.copyfile(comparison, source / comparison.name)
                     link_comparison(source)
                     report['comparison_state'] = 'complete'
@@ -75,39 +84,5 @@ def publish_materials(tag, publish):
 
 
 def publish_comparison(tag, publish):
-    from indexer.ci_comparison import build_comparison
-
-    public_only()
-    LOCAL.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix='ci-match-', dir=LOCAL) as directory:
-        root = Path(directory) / 'cache'
-        data, identity = restore_completed(tag, root)
-        revision = identity['analysis_revision']
-        relative = reference_path(identity)
-        if publish:
-            work = reference_worktree(revision + '-match')
-            reference = work / 'research/reference'
-        else:
-            reference = Path(directory) / 'reference'
-        source = reference / relative
-        if publish:
-            manifest_path = source / 'manifest.json'
-            manifest = read_json(manifest_path)
-            expected = {'analysis_revision': revision, 'source_database_sha256': digest(root / 'cache.sqlite')}
-            if not same_reference(manifest, expected):
-                raise ValueError('Publish materials for this exact checkpoint before attaching a comparison')
-        else:
-            source.mkdir(parents=True)
-            (source / 'README.md').write_text('# Native references\n', encoding='utf-8')
-        comparison = build_comparison(data, root, source, tag)
-        if publish:
-            if comparison:
-                previous, database, old_cache = comparison
-                baseline = reference / reference_path(previous) / 'manifest.json'
-                if not baseline.is_file() or read_json(baseline) != previous:
-                    raise ValueError('Comparison baseline changed before publication; retry the match stage')
-                linked, changed = publish_links(reference, database, old_cache, root)
-                print(f'Linked {linked} function pairs; {changed} body change pages', flush=True)
-            manifest['comparison_state'] = 'complete' if comparison else 'no_baseline'
-            write_json(manifest_path, manifest)
-            publish_worktree(work, f'Publish native function comparison {revision}')
+    from indexer.ci_tracking import publish_tracking
+    publish_tracking(tag, publish)

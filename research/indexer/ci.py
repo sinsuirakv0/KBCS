@@ -126,9 +126,9 @@ def plan(data, label, java_version, total_mb):
     if total_mb < 6144:
         raise RuntimeError('At least 6 GiB RAM is required; no paid runner fallback')
     hashes = {str(path.relative_to(RESEARCH)): digest(path) for path in [
-        *sorted((RESEARCH / 'indexer').glob('*.py')), RESEARCH / 'ghidra/ExportCache.java',
+        *sorted((RESEARCH / 'indexer').glob('*.py')), *sorted((RESEARCH / 'ghidra').glob('Export*.java')),
         RESEARCH / 'ghidra/runtime.json'] if not path.name.startswith('test_')
-        and path.name not in ('upstream.py', 'ci_comparison.py', 'ci_delivery.py')}
+        and path.name not in ('upstream.py', 'ci_delivery.py', 'ci_tracking.py')}
     result = {'input': data, 'label': label, 'java': java_version, 'tools': hashes,
               'heap': '1024M', 'native_memory_limit_mb': min(8192, total_mb - 3072),
               'function_timeout_seconds': 900, 'script_batch_seconds': 1200, 'schema': 1}
@@ -338,10 +338,10 @@ def reference_worktree(revision):
     return work
 
 
-def publish_worktree(work, message):
+def publish_worktree(work, message, paths=('research/reference',)):
     public_only()
-    subprocess.run(['git', '-C', str(work), 'add', '--', 'research/reference'], check=True)
-    diff = subprocess.run(['git', '-C', str(work), 'diff', '--cached', '--quiet', '--', 'research/reference'])
+    subprocess.run(['git', '-C', str(work), 'add', '--', *paths], check=True)
+    diff = subprocess.run(['git', '-C', str(work), 'diff', '--cached', '--quiet', '--', *paths])
     if not diff.returncode:
         return
     if diff.returncode != 1:
@@ -439,6 +439,9 @@ def analyze(input_path, label, *, from_assets=False):
                     write_json(root / 'ci-status.json', {'complete': False})
                     checkpoint(root, tag, sequence)
                     sequence += 1
+                from indexer.ci_structure import structure_checkpoint
+                structure_checkpoint(root, binary, data, read_json(root / 'identity.json'), tag,
+                                     root / 'structure-delivery', config=config, publish=True)
                 for style in ('decompile', 'conservative', 'minimal'):
                     selected = select_functions(root, style)
                     while selected and time.monotonic() < deadline:
