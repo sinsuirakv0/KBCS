@@ -1,0 +1,60 @@
+﻿# 00aa5edc
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00aa5edc",
+  "name": "FUN_00aa5edc",
+  "size": 168,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "d62d938fba8691c991752a432803b326d7419080ad78f685f8bbf028d5569f07",
+  "source_text_sha256": "d62d938fba8691c991752a432803b326d7419080ad78f685f8bbf028d5569f07"
+}
+~~~
+
+## 呼び出し元
+
+- [009f1e64](../009f1/009f1e64.md)
+
+## 呼び出し先
+
+- [005c2710](../005c2/005c2710.md)
+- [0081f580](../0081f/0081f580.md)
+- [00a9f0e0](../00a9f/00a9f0e0.md)
+
+## 疑似コード / UTF-8 560 bytes
+
+~~~c
+
+int FUN_00aa5edc(int param_1,int param_2,int param_3)
+
+{
+  int iVar1;
+  int iVar2;
+  long lVar3;
+  ulong uVar4;
+  
+  lVar3 = FUN_0081f580();
+  uVar4 = FUN_005c2710(lVar3 + (long)param_1 * 0x1f0 + 0x2678);
+  lVar3 = FUN_0081f580();
+  if ((uVar4 & 1) == 0) {
+    iVar2 = *(int *)((long)__DT_JMPREL + lVar3 + ((long)param_2 + 2) * 0x1c4 + 0xa520);
+  }
+  else {
+    iVar1 = *(int *)(lVar3 + ((long)param_2 + 2) * 0x770 + (long)param_3 * 0x1dc + 0x9f054);
+    iVar2 = FUN_00a9f0e0(param_1,param_2,param_3,0x43,2);
+    iVar2 = iVar2 + iVar1;
+  }
+  return iVar2;
+}
+
+~~~

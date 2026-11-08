@@ -1,0 +1,70 @@
+﻿# 004dfccc
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "004dfccc",
+  "name": "FUN_004dfccc",
+  "size": 152,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "fe49bfc7e9446675dc343c02662826cd585e1e4cd6ac1c38e4bdac8d0035608e",
+  "source_text_sha256": "fe49bfc7e9446675dc343c02662826cd585e1e4cd6ac1c38e4bdac8d0035608e"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00bd6e50](../00bd6/00bd6e50.md)
+- [00bdafe0](../00bda/00bdafe0.md)
+- [00bdb010](../00bdb/00bdb010.md)
+
+## 疑似コード / UTF-8 734 bytes
+
+~~~c
+
+void FUN_004dfccc(undefined8 *param_1)
+
+{
+  long lVar1;
+  void *__ptr;
+  long *plVar2;
+  void *pvVar3;
+  void *pvVar4;
+  
+  pvVar3 = (void *)*param_1;
+  if (pvVar3 == (void *)0x0) {
+    return;
+  }
+  pvVar4 = (void *)param_1[1];
+  __ptr = pvVar3;
+  if (pvVar4 != pvVar3) {
+    do {
+      plVar2 = *(long **)((long)pvVar4 + -8);
+      if ((plVar2 != (long *)0x0) &&
+         (lVar1 = FUN_00bd6e50(0xffffffffffffffff,plVar2 + 1), lVar1 == 0)) {
+        (**(code **)(*plVar2 + 0x10))(plVar2);
+        _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar2);
+      }
+      pvVar4 = (void *)((long)pvVar4 + -0x10);
+    } while (pvVar4 != pvVar3);
+    __ptr = (void *)*param_1;
+  }
+  param_1[1] = pvVar3;
+  _ZdlPv(__ptr);
+  return;
+}
+
+~~~

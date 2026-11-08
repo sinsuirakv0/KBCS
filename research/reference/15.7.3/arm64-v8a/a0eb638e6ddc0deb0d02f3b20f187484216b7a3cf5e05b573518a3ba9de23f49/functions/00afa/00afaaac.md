@@ -1,0 +1,90 @@
+﻿# 00afaaac
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00afaaac",
+  "name": "_ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_mmRKS4_",
+  "size": 192,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "c906a5db1c4af231948b34723afa72e82bc52ea32b8da9a26d710f9c4c97a819",
+  "source_text_sha256": "c906a5db1c4af231948b34723afa72e82bc52ea32b8da9a26d710f9c4c97a819"
+}
+~~~
+
+## 呼び出し元
+
+- [00bde920](../00bde/00bde920.md)
+
+## 呼び出し先
+
+- [00bdaff0](../00bda/00bdaff0.md)
+- [00bdb160](../00bdb/00bdb160.md)
+- [00bde270](../00bde/00bde270.md)
+
+## 疑似コード / UTF-8 1385 bytes
+
+~~~c
+
+void _ZNSt6__ndk112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEC2ERKS5_mmRKS4_
+               (ulong *param_1,byte *param_2,ulong param_3,ulong param_4)
+
+{
+  ulong __n;
+  byte bVar1;
+  byte *pbVar2;
+  void *__dest;
+  ulong uVar3;
+  
+                    /* try { // try from 00afaab0 to 00bfaacf has its CatchHandler @ 00afff40 */
+  *param_1 = 0;
+  param_1[1] = 0;
+  param_1[2] = 0;
+  bVar1 = *param_2;
+  uVar3 = (ulong)(bVar1 >> 1);
+  if ((bVar1 & 1) != 0) {
+    uVar3 = *(ulong *)(param_2 + 8);
+  }
+  if (uVar3 < param_3) {
+LAB_00afab68:
+                    /* WARNING: Subroutine does not return */
+    abort();
+  }
+  pbVar2 = *(byte **)(param_2 + 0x10);
+  if ((bVar1 & 1) == 0) {
+    pbVar2 = param_2 + 1;
+  }
+  __n = uVar3 - param_3;
+  if (param_4 <= uVar3 - param_3) {
+    __n = param_4;
+  }
+  if (0xffffffffffffffef < __n) goto LAB_00afab68;
+  if (__n < 0x17) {
+    __dest = (void *)((long)param_1 + 1);
+    *(char *)param_1 = (char)((int)__n << 1);
+    if (__n == 0) goto LAB_00afab50;
+  }
+  else {
+    uVar3 = __n + 0x10 & 0xfffffffffffffff0;
+    __dest = (void *)_Znwm(uVar3);
+    param_1[1] = __n;
+    param_1[2] = (ulong)__dest;
+    *param_1 = uVar3 | 1;
+  }
+                    /* try { // try from 00afab48 to 00bfab4f has its CatchHandler @ 00aff51c */
+  memcpy(__dest,pbVar2 + param_3,__n);
+LAB_00afab50:
+  *(undefined1 *)((long)__dest + __n) = 0;
+  return;
+}
+
+~~~

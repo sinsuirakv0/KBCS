@@ -1,0 +1,61 @@
+﻿# 00aecad0
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00aecad0",
+  "name": "_ZN8firebase4util22parcel_file_descriptor15RegisterNativesEP7_JNIEnvPK15JNINativeMethodm",
+  "size": 156,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "73665d9f2dad8812cab32847fed062d9b55e15eade033ab459cba93ae390ab68",
+  "source_text_sha256": "73665d9f2dad8812cab32847fed062d9b55e15eade033ab459cba93ae390ab68"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 718 bytes
+
+~~~c
+
+bool _ZN8firebase4util22parcel_file_descriptor15RegisterNativesEP7_JNIEnvPK15JNINativeMethodm
+               (long *param_1,undefined8 param_2,undefined8 param_3)
+
+{
+  char cVar1;
+  bool bVar2;
+  int iVar3;
+  
+                    /* try { // try from 00aecae8 to 00becaef has its CatchHandler @ 00af1a38 */
+  if (DAT_010a0970 == '\0') {
+    iVar3 = (**(code **)(*param_1 + 0x6b8))(param_1,DAT_010a0968,param_2,param_3);
+    cVar1 = (**(code **)(*param_1 + 0x720))(param_1);
+    if (cVar1 != '\0') {
+      (**(code **)(*param_1 + 0x80))(param_1);
+      (**(code **)(*param_1 + 0x88))(param_1);
+    }
+    DAT_010a0970 = iVar3 == 0;
+    bVar2 = (bool)DAT_010a0970;
+  }
+  else {
+    bVar2 = false;
+  }
+  return bVar2;
+}
+
+~~~

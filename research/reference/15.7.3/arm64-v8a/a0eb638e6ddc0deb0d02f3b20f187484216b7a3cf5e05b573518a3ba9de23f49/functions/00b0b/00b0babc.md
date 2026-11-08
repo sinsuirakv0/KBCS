@@ -1,0 +1,184 @@
+﻿# 00b0babc
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b0babc",
+  "name": "_ZNK8firebase3fbs10ClientInfo6VerifyERN11flatbuffers8VerifierE",
+  "size": 580,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "ea7a91420ddb345ec1070474ff6f242e24c6cad1563ad2110efbf73267078ddc",
+  "source_text_sha256": "ea7a91420ddb345ec1070474ff6f242e24c6cad1563ad2110efbf73267078ddc"
+}
+~~~
+
+## 呼び出し元
+
+- [00bdea60](../00bde/00bdea60.md)
+
+## 呼び出し先
+
+- [00bdead0](../00bde/00bdead0.md)
+
+## 疑似コード / UTF-8 4471 bytes
+
+~~~c
+
+undefined4
+_ZNK8firebase3fbs10ClientInfo6VerifyERN11flatbuffers8VerifierE(int *param_1,long *param_2)
+
+{
+  uint uVar1;
+  ulong uVar2;
+  uint *puVar3;
+  ushort uVar4;
+  int iVar5;
+  uint uVar6;
+  long lVar7;
+  ulong uVar8;
+  ulong uVar9;
+  ulong uVar10;
+  ulong uVar11;
+  ushort *puVar12;
+  
+  lVar7 = *param_2;
+                    /* catch() { ... } // from try @ 00b0b8f8 with catch @ 00b0bacc */
+  uVar9 = (long)param_1 - lVar7;
+  if (((uVar9 & 3) == 0) || ((char)param_2[5] == '\0')) {
+    uVar8 = param_2[1];
+    if (uVar8 < 5) {
+      return 0;
+    }
+    uVar10 = uVar8 - 4;
+    if (uVar10 < uVar9) {
+      return 0;
+    }
+    iVar5 = *param_1;
+    uVar6 = (int)param_2[2] + 1;
+    uVar1 = (int)param_2[3] + 1;
+    *(uint *)(param_2 + 2) = uVar6;
+    *(uint *)(param_2 + 3) = uVar1;
+    if (((((uVar6 <= *(uint *)((long)param_2 + 0x14)) && (uVar1 <= *(uint *)((long)param_2 + 0x1c)))
+         && ((uVar11 = uVar9 - (long)iVar5, (uVar11 & 1) == 0 || ((char)param_2[5] == '\0')))) &&
+        (uVar11 <= uVar8 - 2)) &&
+       ((uVar4 = *(ushort *)(lVar7 + uVar11), (uVar4 & 1) == 0 || ((char)param_2[5] == '\0')))) {
+      if (uVar8 <= uVar4) {
+        return 0;
+      }
+      if (uVar8 - uVar4 < uVar11) {
+        return 0;
+      }
+      puVar12 = (ushort *)((long)param_1 - (long)*param_1);
+      if (4 < *puVar12) {
+        if ((ulong)puVar12[2] != 0) {
+          uVar11 = uVar9 + puVar12[2];
+          if ((uVar11 & 3) == 0) {
+            if (uVar10 < uVar11) {
+              return 0;
+            }
+          }
+          else {
+            if ((char)param_2[5] != '\0') {
+              return 0;
+            }
+            if (uVar10 < uVar11) {
+              return 0;
+            }
+          }
+          if ((int)*(uint *)(lVar7 + uVar11) < 1) {
+            return 0;
+          }
+                    /* try { // try from 00b0bbd8 to 00c0bcbb has its CatchHandler @ 00b0bbd8
+                       catch() { ... } // from try @ 00b0bbd8 with catch @ 00b0bbd8
+                       catch() { ... } // from try @ 00b0bcc4 with catch @ 00b0bbd8 */
+          if (uVar8 - 1 < uVar11 + *(uint *)(lVar7 + uVar11)) {
+            return 0;
+          }
+        }
+        if (((ulong)puVar12[2] != 0) &&
+           (puVar3 = (uint *)((long)param_1 + (ulong)puVar12[2]),
+           puVar3 = (uint *)((long)puVar3 + (ulong)*puVar3), puVar3 != (uint *)0x0)) {
+          uVar11 = (long)puVar3 - lVar7;
+          if ((uVar11 & 3) == 0) {
+            if (uVar10 < uVar11) {
+              return 0;
+            }
+          }
+          else {
+            if ((char)param_2[5] != '\0') {
+              return 0;
+            }
+            if (uVar10 < uVar11) {
+              return 0;
+            }
+          }
+          if (0x7ffffffe < *puVar3) {
+            return 0;
+          }
+          uVar2 = (ulong)*puVar3 + 4;
+          if (uVar8 - 1 < uVar2 + uVar11) {
+            return 0;
+          }
+          if (uVar8 <= uVar2) {
+            return 0;
+          }
+          if (uVar8 - uVar2 < uVar11) {
+            return 0;
+          }
+          if (*(char *)(lVar7 + uVar2 + uVar11) != '\0') {
+            return 0;
+          }
+        }
+        if (6 < *puVar12) {
+          if ((ulong)puVar12[3] != 0) {
+            uVar9 = uVar9 + puVar12[3];
+            if ((uVar9 & 3) == 0) {
+              if (uVar10 < uVar9) {
+                return 0;
+              }
+            }
+            else {
+              if ((char)param_2[5] != '\0') {
+                return 0;
+              }
+              if (uVar10 < uVar9) {
+                return 0;
+              }
+            }
+            if ((int)*(uint *)(lVar7 + uVar9) < 1) {
+              return 0;
+            }
+                    /* try { // try from 00b0bcbc to 00c0bcc3 has its CatchHandler @ 00b0be04 */
+            if (uVar8 - 1 < uVar9 + *(uint *)(lVar7 + uVar9)) {
+              return 0;
+            }
+          }
+                    /* try { // try from 00b0bcc4 to 00c0be2b has its CatchHandler @ 00b0bbd8 */
+          if (((ulong)puVar12[3] != 0) &&
+             (puVar3 = (uint *)((long)param_1 + (ulong)puVar12[3]),
+             lVar7 = (long)puVar3 + (ulong)*puVar3, lVar7 != 0)) {
+            uVar9 = _ZNK8firebase3fbs17AndroidClientInfo6VerifyERN11flatbuffers8VerifierE(lVar7);
+            if ((uVar9 & 1) == 0) {
+              return 0;
+            }
+            uVar6 = *(uint *)(param_2 + 2);
+          }
+        }
+      }
+      *(uint *)(param_2 + 2) = uVar6 - 1;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+~~~

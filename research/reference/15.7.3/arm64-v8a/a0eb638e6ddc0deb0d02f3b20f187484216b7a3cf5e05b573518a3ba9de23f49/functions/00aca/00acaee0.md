@@ -1,0 +1,111 @@
+﻿# 00acaee0
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00acaee0",
+  "name": "FUN_00acaee0",
+  "size": 328,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "0e87c586ccda3cde0e5cfce03e0c9676ec366ffd3c282a439a78d4b40c991adf",
+  "source_text_sha256": "0e87c586ccda3cde0e5cfce03e0c9676ec366ffd3c282a439a78d4b40c991adf"
+}
+~~~
+
+## 呼び出し元
+
+- [00abf52c](../00abf/00abf52c.md)
+
+## 呼び出し先
+
+- [00419064](../00419/00419064.md)
+- [005c3468](../005c3/005c3468.md)
+- [00bdaff0](../00bda/00bdaff0.md)
+- [00bdb040](../00bdb/00bdb040.md)
+
+## 疑似コード / UTF-8 1743 bytes
+
+~~~c
+
+long * FUN_00acaee0(long *param_1,int *param_2,undefined8 param_3,undefined8 *param_4)
+
+{
+  undefined4 uVar1;
+  long lVar2;
+  long *plVar3;
+  long *plVar4;
+  undefined8 uVar5;
+  long lVar6;
+  long *plVar7;
+  long *plVar8;
+  
+  lVar2 = tpidr_el0;
+  lVar6 = *(long *)(lVar2 + 0x28);
+  plVar7 = param_1 + 1;
+  plVar8 = plVar7;
+  if ((long *)*plVar7 != (long *)0x0) {
+    plVar3 = (long *)*plVar7;
+    do {
+      while (plVar4 = plVar3, plVar7 = plVar4, (int)plVar4[4] <= *param_2) {
+        if (*param_2 <= (int)plVar4[4]) {
+          uVar5 = 0;
+          goto LAB_00acaff4;
+        }
+        plVar3 = (long *)plVar4[1];
+        if ((long *)plVar4[1] == (long *)0x0) {
+          plVar8 = plVar4 + 1;
+          goto LAB_00acaf5c;
+        }
+      }
+      plVar3 = (long *)*plVar4;
+      plVar8 = plVar4;
+    } while ((long *)*plVar4 != (long *)0x0);
+  }
+LAB_00acaf5c:
+  plVar4 = (long *)_Znwm(0x60);
+  uVar1 = *(undefined4 *)*param_4;
+  plVar4[0xb] = 0;
+  *(undefined4 *)(plVar4 + 4) = uVar1;
+  plVar4[10] = 0;
+  plVar4[9] = 0;
+  plVar4[8] = 0;
+  plVar4[7] = 0;
+  plVar4[6] = 0;
+  plVar4[5] = 0;
+  FUN_005c3468((long)plVar4 + 0x2c);
+  *(undefined4 *)((long)plVar4 + 0x34) = 0;
+  FUN_005c3468();
+  plVar4[8] = 0;
+  plVar4[9] = 0;
+  plVar4[10] = 0;
+  *plVar4 = 0;
+  plVar4[1] = 0;
+  plVar4[2] = (long)plVar7;
+  *plVar8 = (long)plVar4;
+  plVar7 = plVar4;
+  if (*(long *)*param_1 != 0) {
+    *param_1 = *(long *)*param_1;
+    plVar7 = (long *)*plVar8;
+  }
+  plVar7 = (long *)FUN_00419064(param_1[1],plVar7);
+  uVar5 = 1;
+  param_1[2] = param_1[2] + 1;
+  param_1 = plVar7;
+LAB_00acaff4:
+  if (*(long *)(lVar2 + 0x28) == lVar6) {
+    return plVar4;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail(param_1,uVar5);
+}
+
+~~~

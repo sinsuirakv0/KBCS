@@ -1,0 +1,52 @@
+﻿# 00baaff8
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00baaff8",
+  "name": "_ZNKSt6__ndk112ctype_bynameIwE10do_tolowerEPwPKw",
+  "size": 92,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "9460ee0e26ff0bf6dfad04cfe5cef8e6b5ae00bd8b017952c92dae49be721d2a",
+  "source_text_sha256": "9460ee0e26ff0bf6dfad04cfe5cef8e6b5ae00bd8b017952c92dae49be721d2a"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00be1aa0](../00be1/00be1aa0.md)
+
+## 疑似コード / UTF-8 373 bytes
+
+~~~c
+
+wint_t * _ZNKSt6__ndk112ctype_bynameIwE10do_tolowerEPwPKw
+                   (long param_1,wint_t *param_2,wint_t *param_3)
+
+{
+  wint_t *pwVar1;
+  wint_t wVar2;
+  
+  pwVar1 = param_2;
+  for (; param_2 != param_3; param_2 = param_2 + 1) {
+    wVar2 = towlower_l(*param_2,*(__locale_t *)(param_1 + 0x10));
+    *param_2 = wVar2;
+    pwVar1 = param_3;
+  }
+  return pwVar1;
+}
+
+~~~

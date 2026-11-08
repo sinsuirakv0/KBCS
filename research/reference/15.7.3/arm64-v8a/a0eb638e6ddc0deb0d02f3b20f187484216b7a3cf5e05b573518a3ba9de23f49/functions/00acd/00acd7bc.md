@@ -1,0 +1,49 @@
+﻿# 00acd7bc
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00acd7bc",
+  "name": "FUN_00acd7bc",
+  "size": 20,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "b4b9f23269cb0bfdafd6566fd09963d0642fa1dd4ef370f2eb604cecbee376a2",
+  "source_text_sha256": "b4b9f23269cb0bfdafd6566fd09963d0642fa1dd4ef370f2eb604cecbee376a2"
+}
+~~~
+
+## 呼び出し元
+
+- [00acd5b8](../00acd/00acd5b8.md)
+
+## 呼び出し先
+
+- [00418c38](../00418/00418c38.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"vector"
+~~~
+
+## 疑似コード / UTF-8 119 bytes
+
+~~~c
+
+void FUN_00acd7bc(void)
+
+{
+                    /* WARNING: Subroutine does not return */
+  FUN_00418c38("vector");
+}
+
+~~~

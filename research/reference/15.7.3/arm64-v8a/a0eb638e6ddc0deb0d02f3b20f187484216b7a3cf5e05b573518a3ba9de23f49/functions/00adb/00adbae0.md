@@ -1,0 +1,109 @@
+﻿# 00adbae0
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00adbae0",
+  "name": "FUN_00adbae0",
+  "size": 260,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "7080f1de99dd0ecc88c187f0693d5e23386ea89516badc73f205fb248926e6b4",
+  "source_text_sha256": "7080f1de99dd0ecc88c187f0693d5e23386ea89516badc73f205fb248926e6b4"
+}
+~~~
+
+## 呼び出し元
+
+- [00adaf54](../00ada/00adaf54.md)
+- [00adb014](../00adb/00adb014.md)
+
+## 呼び出し先
+
+- [00bdb1b0](../00bdb/00bdb1b0.md)
+
+## 疑似コード / UTF-8 1664 bytes
+
+~~~c
+
+long * FUN_00adbae0(long param_1,byte *param_2)
+
+{
+  void *pvVar1;
+  long lVar2;
+  ulong uVar3;
+  size_t sVar4;
+  ulong uVar5;
+  byte *__s2;
+  bool bVar6;
+  int iVar7;
+  long *plVar8;
+  long *plVar9;
+  long *plVar10;
+  
+  plVar8 = (long *)(param_1 + 8);
+  plVar10 = (long *)*plVar8;
+  if (plVar10 != (long *)0x0) {
+    uVar5 = *(ulong *)(param_2 + 8);
+    __s2 = *(byte **)(param_2 + 0x10);
+    plVar9 = plVar8;
+    if ((*param_2 & 1) == 0) {
+      __s2 = param_2 + 1;
+      uVar5 = (ulong)(*param_2 >> 1);
+    }
+    do {
+      pvVar1 = (void *)((long)plVar10 + 0x21);
+      uVar3 = (ulong)(*(byte *)(plVar10 + 4) >> 1);
+      if ((*(byte *)(plVar10 + 4) & 1) != 0) {
+        pvVar1 = (void *)plVar10[6];
+        uVar3 = plVar10[5];
+      }
+      sVar4 = uVar5;
+      if (uVar3 <= uVar5) {
+        sVar4 = uVar3;
+      }
+      iVar7 = memcmp(pvVar1,__s2,sVar4);
+      bVar6 = uVar3 < uVar5;
+      if (iVar7 != 0) {
+        bVar6 = iVar7 < 0;
+      }
+      lVar2 = 8;
+      if (!bVar6) {
+        lVar2 = 0;
+        plVar9 = plVar10;
+      }
+      plVar10 = *(long **)((long)plVar10 + lVar2);
+    } while (plVar10 != (long *)0x0);
+    if (plVar9 != plVar8) {
+      uVar3 = (ulong)(*(byte *)(plVar9 + 4) >> 1);
+      pvVar1 = (void *)((long)plVar9 + 0x21);
+      if ((*(byte *)(plVar9 + 4) & 1) != 0) {
+        uVar3 = plVar9[5];
+        pvVar1 = (void *)plVar9[6];
+      }
+      sVar4 = uVar3;
+      if (uVar5 <= uVar3) {
+        sVar4 = uVar5;
+      }
+      iVar7 = memcmp(__s2,pvVar1,sVar4);
+      bVar6 = uVar5 < uVar3;
+      if (iVar7 != 0) {
+        bVar6 = iVar7 < 0;
+      }
+      if (!bVar6) {
+        plVar8 = plVar9;
+      }
+    }
+  }
+  return plVar8;
+}
+
+~~~

@@ -1,0 +1,143 @@
+﻿# 00af2edc
+
+版: 15.7.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00af2edc",
+  "name": "_ZN8firebase4util24JavaSetToStdStringVectorEP7_JNIEnvPNSt6__ndk16vectorINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEENS8_ISA_EEEEP8_jobject",
+  "size": 640,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "bbc98c11bc201ed65471e9f31285f1029082313d90861513a5121c34f2463fd1",
+  "source_text_sha256": "bbc98c11bc201ed65471e9f31285f1029082313d90861513a5121c34f2463fd1"
+}
+~~~
+
+## 呼び出し元
+
+- [00bde600](../00bde/00bde600.md)
+
+## 呼び出し先
+
+- [0047495c](../00474/0047495c.md)
+- [00474b70](../00474/00474b70.md)
+- [00bdaff0](../00bda/00bdaff0.md)
+- [00bdb010](../00bdb/00bdb010.md)
+- [00bdb040](../00bdb/00bdb040.md)
+- [00bdb160](../00bdb/00bdb160.md)
+- [00bde050](../00bde/00bde050.md)
+- [00bde270](../00bde/00bde270.md)
+- [00bde770](../00bde/00bde770.md)
+
+## 疑似コード / UTF-8 3046 bytes
+
+~~~c
+
+void _ZN8firebase4util24JavaSetToStdStringVectorEP7_JNIEnvPNSt6__ndk16vectorINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEENS8_ISA_EEEEP8_jobject
+               (long *param_1,long param_2,undefined8 param_3)
+
+{
+  ulong *puVar1;
+  long lVar2;
+  ulong __n;
+  void *__src;
+  char cVar3;
+  undefined8 uVar4;
+  undefined8 uVar5;
+  long lVar6;
+  ulong uVar7;
+  void *__dest;
+  byte local_80;
+  undefined7 uStack_7f;
+  ulong uStack_78;
+  void *local_70;
+  long local_68;
+  
+  lVar2 = tpidr_el0;
+  local_68 = *(long *)(lVar2 + 0x28);
+  uVar4 = FUN_0047495c(param_1,param_3,DAT_010a0998);
+  cVar3 = (**(code **)(*param_1 + 0x720))(param_1);
+  if (cVar3 != '\0') {
+    (**(code **)(*param_1 + 0x80))(param_1);
+    (**(code **)(*param_1 + 0x88))(param_1);
+  }
+  cVar3 = FUN_00474b70(param_1,uVar4,DAT_010a08c8);
+  lVar6 = *param_1;
+  do {
+    if (cVar3 == '\0') {
+      (**(code **)(lVar6 + 0xb8))(param_1,uVar4);
+      if (*(long *)(lVar2 + 0x28) == local_68) {
+        return;
+      }
+                    /* WARNING: Subroutine does not return */
+      __stack_chk_fail();
+    }
+    cVar3 = (**(code **)(lVar6 + 0x720))(param_1);
+    if (cVar3 != '\0') {
+      (**(code **)(*param_1 + 0x80))(param_1);
+      (**(code **)(*param_1 + 0x88))(param_1);
+    }
+    uVar5 = FUN_0047495c(param_1,uVar4,DAT_010a08d0);
+    cVar3 = (**(code **)(*param_1 + 0x720))(param_1);
+    if (cVar3 != '\0') {
+      (**(code **)(*param_1 + 0x80))(param_1);
+      (**(code **)(*param_1 + 0x88))(param_1);
+    }
+    _ZN8firebase4util15JStringToStringEP7_JNIEnvP8_jobject(&local_80,param_1,uVar5);
+    (**(code **)(*param_1 + 0xb8))(param_1,uVar5);
+    __src = local_70;
+    __n = uStack_78;
+    puVar1 = *(ulong **)(param_2 + 8);
+    if (puVar1 == *(ulong **)(param_2 + 0x10)) {
+      _ZNSt6__ndk16vectorINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEENS4_IS6_EEE21__push_back_slow_pathIRKS6_EEvOT_
+                (param_2,&local_80);
+    }
+    else {
+      *puVar1 = 0;
+      puVar1[1] = 0;
+      puVar1[2] = 0;
+      if ((local_80 & 1) == 0) {
+        puVar1[2] = (ulong)local_70;
+        puVar1[1] = uStack_78;
+        *puVar1 = CONCAT71(uStack_7f,local_80);
+      }
+      else {
+        if (0xffffffffffffffef < uStack_78) {
+                    /* WARNING: Subroutine does not return */
+          abort();
+        }
+        if (uStack_78 < 0x17) {
+          __dest = (void *)((long)puVar1 + 1);
+          *(char *)puVar1 = (char)((int)uStack_78 << 1);
+          if (uStack_78 != 0) goto LAB_00af30e0;
+        }
+        else {
+          uVar7 = uStack_78 + 0x10 & 0xfffffffffffffff0;
+          __dest = (void *)_Znwm(uVar7);
+          puVar1[1] = __n;
+          puVar1[2] = (ulong)__dest;
+          *puVar1 = uVar7 | 1;
+LAB_00af30e0:
+          memcpy(__dest,__src,__n);
+        }
+        *(undefined1 *)((long)__dest + __n) = 0;
+      }
+      *(ulong **)(param_2 + 8) = puVar1 + 3;
+    }
+    if ((local_80 & 1) != 0) {
+      _ZdlPv(local_70);
+    }
+    cVar3 = FUN_00474b70(param_1,uVar4,DAT_010a08c8);
+    lVar6 = *param_1;
+  } while( true );
+}
+
+~~~
