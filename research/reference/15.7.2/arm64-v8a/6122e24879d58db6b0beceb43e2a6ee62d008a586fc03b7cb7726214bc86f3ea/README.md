@@ -16,9 +16,9 @@ GitHub連携の検索結果が不十分なら、既知のファイルパスを�
 間接呼び出し・未解決参照・未発見の関数を推測で補完しない。外部関数の実装は対象SOにありません。
 各疑似コードブロックの末尾改行は表示用に補われる場合があります。厳密な元ファイルはReleaseの原本を使います。
 
-<!-- kbcs-version-next -->
-- [次の版への変更 · v15.7.4](../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/changes/README.md)
-<!-- /kbcs-version-next -->
+<!-- kbcs-version-tracking -->
+[バージョン間の関数追跡](../../../../comparisons/arm64-v8a/a05f9f4f481ae994718c5500/README.md)
+<!-- /kbcs-version-tracking -->
 
 ## アドレス索引
 

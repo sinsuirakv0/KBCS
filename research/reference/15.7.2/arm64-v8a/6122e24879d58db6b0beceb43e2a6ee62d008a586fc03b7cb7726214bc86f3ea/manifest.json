@@ -15,5 +15,18 @@
   "source_database_sha256": "82e5e6b5dd5fcc5983f16b10b0b3c304e6f99cd1695bc5deda8fa5fd10cfa900",
   "functions": 25525,
   "page_limit_bytes": 104857600,
-  "format": 2
+  "format": 2,
+  "comparison_state": "no_baseline",
+  "tracking_format": 2,
+  "tracking_policy": "observed-effects-v1",
+  "tracking_run": "a05f9f4f481ae994718c5500",
+  "tracking_page": "research/comparisons/arm64-v8a/a05f9f4f481ae994718c5500/README.md",
+  "tracking_sources": [
+    {
+      "version": "15.7.2",
+      "architecture": "arm64-v8a",
+      "sha256": "6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea",
+      "analysis_revision": "5ed057380ac853a2"
+    }
+  ]
 }
