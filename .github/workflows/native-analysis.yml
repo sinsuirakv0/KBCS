@@ -1,8 +1,6 @@
 ﻿name: Native analysis pipeline
 
 on:
-  schedule:
-    - cron: '23 * * * *'
   workflow_dispatch:
     inputs:
       source_manifest:
@@ -48,7 +46,7 @@ env:
   PYTHONPATH: ${{ github.workspace }}/research
   PYTHONUTF8: '1'
   GH_TOKEN: ${{ github.token }}
-  PUBLISH_REFERENCE: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish_reference) || (github.event_name == 'repository_dispatch' && github.event.client_payload.publish_reference == true) }}
+  PUBLISH_REFERENCE: ${{ (github.event_name == 'workflow_dispatch' && inputs.publish_reference) || (github.event_name == 'repository_dispatch' && github.event.client_payload.publish_reference == true) }}
 
 jobs:
   analyze:

@@ -76,7 +76,7 @@ def snapshot(assets_commit=None):
     if commit != latest:
         canonical = retry(lambda: read_public(f'https://raw.githubusercontent.com/{ASSETS}/{latest}/metadata/jp/current.json'), 'Latest assets current')
         if (current['versionName'], current['datasetId']) != (canonical['versionName'], canonical['datasetId']):
-            print(f'Assets event {commit} was superseded; the latest publication will be checked separately', flush=True)
+            print(f'Assets event {commit} was superseded by {latest}', flush=True)
             return None, commit
     proof = retry(lambda: read_public(f'{root}/versions/{code}.proof.json'), 'Assets proof')
     return source_input(current, proof), commit

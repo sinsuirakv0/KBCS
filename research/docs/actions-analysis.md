@@ -46,11 +46,11 @@ workflowは `.github/workflows/native-analysis.yml`。
 
 上流のPlay更新検知・APK取得・展開・検証が完了し、`metadata/jp/current.json` がassetsのmainへ公開された版を対象にする。assetsの `notify-native-analysis.yml` がコミットSHA付きでKBCSを起動し、受付応答で終了する。既存のZIP配布と通知は独立。即時起動にはassets側の `KBCS_ACTIONS_TOKEN` が必要で、権限はKBCSへの `Actions: write` に限定する。[GitHubのworkflow dispatch権限](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
 
-KBCSのmainでも毎時23分にassetsを確認し、通知の未着や失敗を拾う。`current.json` と版別 `proof.json` は同じコミットから読む。全段階が済んだ原本はスキップし、資料公開済みで照合待ちの原本は `match` ジョブだけを再開する。GitHubの定期実行には遅延があり、定期実行は起動時点のcurrentを処理する。[GitHub Actionsのschedule仕様](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
+KBCSはassetsの通知で受け取ったコミットから `current.json` と版別 `proof.json` を読む。全段階が済んだ原本はスキップし、資料公開済みで照合待ちの原本は `match` ジョブだけを再開する。通知が失敗した場合は、assetsの通知ジョブを再実行するか、KBCSで手動確認する。
 
 新規版では保全済みのPrivate Releaseを取得し、アーカイブ、署名検証記録、base/ABI SplitのSHA-256、実APKのmanifestを照合する。検証済みABI Splitから抽出したSOのSHA-256を解析計画に固定する。同じ版でも原本アーカイブが変われば新規入力として扱う。v1の結果しか存在しない場合や、直前2版の構成・リビジョンが変わった場合は、公開済みcheckpointから追跡を実行する。
 
-手動確認は `workflow_dispatch` の `check_only=true`、最新版をすぐ確認・処理するには入力台帳を空にして通常起動する。`repository_dispatch: native-analysis-request` は従来どおり同名のclient_payloadを受け取り、`publish_reference` 省略時はmainへ反映しない。定期実行では完成資料をmainへ公開する。解析中のジョブは後着の定期実行で中断しない。GitHubの同時実行制御で待機中のジョブが置き換わった場合は手動で再起動できる。
+手動確認は `workflow_dispatch` の `check_only=true`、最新版を確認・処理するには入力台帳を空にして通常起動する。`repository_dispatch: native-analysis-request` では、`publish_reference=true` を指定すると完成資料をmainへ公開する。解析中のジョブは後着の通知を受けても続行する。GitHubの同時実行制御で待機中のジョブが置き換わった場合は手動で再起動できる。
 
 同じ入力でも、ツール・スクリプト・JDK・メモリ設定・ラベルが変わると別の解析IDになる。台帳の誤りや未知の版を名前から補完して実行しない。
 
