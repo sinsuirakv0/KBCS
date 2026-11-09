@@ -29,7 +29,7 @@ export function selectUnitRows(database, state,calculateProfile) {
       if(state.exactTargets&&form.targets.some(key=>!state.targets.includes(key)))continue;
       const available=form.abilities.filter(ability=>(!state.guaranteed||ability.probability==null||ability.probability>=100)&&(!state.fullImmunity||!ability.key.endsWith('-immune')||ability.resistance>=100)).map(ability=>ability.key.endsWith('-immune')&&ability.resistance<100?ability.key.replace(/-immune$/,'-resist'):ability.key);
       // 本能の耐性を探す条件は、表示する数値への本能反映と分ける。
-      if(state.includeTalentResistance&&form.index>=2)for(const talent of unit.talents){const resistance=talent.values.at(-1)[0];if(talent.effect.kind==='ability'&&talent.effect.key?.endsWith('-immune')&&resistance>0&&resistance<100)available.push(talent.effect.key.replace(/-immune$/,'-resist'));}
+      if(state.includeTalentResistance&&form.index>=2)for(const talent of unit.talents){const resistance=talent.values.at(-1)?.[0];if(talent.effect.kind==='ability'&&talent.effect.key?.endsWith('-immune')&&resistance>0&&resistance<100)available.push(talent.effect.key.replace(/-immune$/,'-resist'));}
       if(state.abilities.length&&matchesGroup(available,state.abilities,state.abilityMode)===Boolean(state.negateAbilities))continue;
       if (state.attackType && form.attackType !== state.attackType) continue;
       const stats = {...(profile?.stats||calculateUnitStats(unit, form, database.growth[unit.growth], state)),maxLevel:unit.maxLevel+unit.plusLevel,targetCount:form.targets.length};

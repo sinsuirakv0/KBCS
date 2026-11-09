@@ -47,6 +47,7 @@ export function abilityIconHtml(database,ability,seconds,size=18) {
 }
 
 export function abilityText(ability, seconds) {
+  if(ability.support==='unsupported')return `${ability.label} ／ 原本値 ${ability.value}`;
   const values = [];
   if (ability.probability != null) values.push(ability.probability + "%");
   if (ability.duration != null) values.push(formatTime(ability.duration, seconds));

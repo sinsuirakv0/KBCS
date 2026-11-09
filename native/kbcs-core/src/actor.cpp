@@ -20,6 +20,29 @@ struct KbcsActorHits {
 };
 
 namespace {
+enum class OrbAggregation { Target, Highest, Sum, Invalid };
+
+constexpr OrbAggregation orbAggregation(int effect) {
+ switch(effect) {
+ case 0: case 1: case 2: case 3: case 4: return OrbAggregation::Target;
+ case 5: case 9: case 10: case 11: case 13: case 16: case 17: case 18:
+ case 19: case 22: case 24: return OrbAggregation::Highest;
+ case 6: case 7: case 8: case 12: case 14: case 15: case 20: case 21:
+ case 23: case 25: return OrbAggregation::Sum;
+ default: return OrbAggregation::Invalid;
+ }
+}
+
+// 00663c44は属性が複数一致しても、玉1個につき一度だけ加算する。
+void targetOrbs(const KbcsBattleOrb *orbs,int count,uint32_t mask,int32_t (&out)[5][2]) {
+ for (auto &effect : out) std::fill_n(effect,2,0);
+ for (int i=0;i<count;++i) {
+  const auto &orb=orbs[i];
+  if (orbAggregation(orb.effect)!=OrbAggregation::Target || !(uint32_t(orb.mask)&mask)) continue;
+  for (int j=0;j<2;++j) out[orb.effect][j]=int32_t(uint32_t(out[orb.effect][j])+uint32_t(orb.values[j]));
+ }
+}
+
 // 所有戦闘の同期更新だけへSE通知を接続する。単体APIの結果契約は保つ。
 thread_local std::vector<KbcsBattleSound> *activeSounds=nullptr;
 thread_local const int32_t *activeSoundFrame=nullptr;
@@ -206,9 +229,9 @@ int32_t n_0063c21c(Context &,int64_t){return 0;}
 int32_t n_0063c3a0(Context &,int64_t){return 0;}
 int32_t n_0068c30c(Context &c,int64_t,int32_t){if(!c.hit)throw std::out_of_range("base level");return 0;}
 int32_t n_005bce20(Context &c,int32_t,int32_t){if(!c.hit)throw std::out_of_range("hit form");return c.hit->form;}
-int32_t n_00663c44(Context &c,int64_t,int32_t,int32_t effect,int32_t parameter,int64_t,int32_t){
+int32_t n_00663c44(Context &c,int64_t,int32_t,int32_t effect,int32_t parameter,int64_t,int32_t initial){
  if(!c.hit||effect<0||effect>=5||parameter<0||parameter>1)throw std::out_of_range("targeted orb");
- return c.hit->targeted_orbs[effect][parameter];
+ return int32_t(uint32_t(initial)+uint32_t(c.hit->targeted_orbs[effect][parameter]));
 }
 int32_t n_0058b674(Context &c,int32_t index){if(!c.enemyDeath||index!=8)throw std::out_of_range("accounting level");return c.enemyDeath->accounting_level;}
 int32_t n_005bbba0(Context &c){if(!c.enemyDeath)throw std::out_of_range("score limit");return c.enemyDeath->limit;}
@@ -229,9 +252,18 @@ int32_t n_009d4e1c(Context &c,int64_t,int32_t type,int32_t count){
  if(activeRules){int32_t value=0;const auto code=kbcs_core_battle_bonus(activeRules,type,count,&value);if(code)throw AttackFailure{code};return value;}return index+1;
 }
 bool n_005c2ec0(Context &c,...){return c.orb();}
-int32_t n_0066398c(Context &c,int64_t,int32_t,int32_t effect,int32_t parameter,int32_t){return c.orbValue(effect,parameter);}
-int32_t n_00663af4(Context &c,int64_t,int32_t,int32_t effect,int32_t parameter,int32_t){return c.orbValue(effect,parameter);}
-bool n_0066367c(Context &c,int64_t,int32_t,int32_t effect){c.orbValue(effect,0);return (c.hit?c.hit->orb_present[effect]:c.definition.orb_present[effect])!=0;}
+bool n_0066367c(Context &c,int64_t,int32_t,int32_t effect){
+ if(effect<0||effect>=KBCS_ACTOR_ORBS)throw std::out_of_range("orb effect");
+ return (c.hit?c.hit->orb_present[effect]:c.definition.orb_present[effect])!=0;
+}
+int32_t n_0066398c(Context &c,int64_t,int32_t,int32_t effect,int32_t parameter,int32_t fallback){
+ if(orbAggregation(effect)!=OrbAggregation::Highest)throw std::out_of_range("highest orb");
+ return n_0066367c(c,0,0,effect)?c.orbValue(effect,parameter):fallback;
+}
+int32_t n_00663af4(Context &c,int64_t,int32_t,int32_t effect,int32_t parameter,int32_t initial){
+ if(orbAggregation(effect)!=OrbAggregation::Sum)throw std::out_of_range("additive orb");
+ return int32_t(uint32_t(initial)+uint32_t(c.orbValue(effect,parameter)));
+}
 int32_t n_0088f9e4(Context &c,int64_t,int32_t type,int32_t unit_id){return c.combo(type,unit_id);}
 int32_t n_00a9f0e0(Context &c,int32_t,int32_t,int32_t,int32_t effect,int32_t parameter){return c.talent(effect,parameter);}
 bool n_00aa2c2c(Context &c,int64_t,int32_t,int32_t,int32_t effect){return c.hasTalent(effect);}
@@ -822,6 +854,33 @@ extern "C" uint32_t kbcs_core_actor_load(const int32_t *raw,int32_t count,int32_
 #include "actor_points.inc"
 #include "actor_result.inc"
 #include "actor_ending.inc"
+
+extern "C" uint32_t kbcs_core_battle_equipment(const KbcsBattleOrb *orbs,const int32_t *grades,int32_t count,KbcsActorDefinition *definition){
+ if(!definition||count<0||count>8||(count&&(!orbs||!grades)))return 1;
+ int32_t values[KBCS_ACTOR_ORBS][4]{}, present[KBCS_ACTOR_ORBS]{};
+ int highest[KBCS_ACTOR_ORBS];
+ std::fill_n(highest,KBCS_ACTOR_ORBS,-1);
+ for(int i=0;i<count;++i){
+  const auto &orb=orbs[i];
+  const auto mode=orbAggregation(orb.effect);
+  if(mode==OrbAggregation::Invalid||grades[i]<0||grades[i]>4||
+     (mode==OrbAggregation::Target?orb.mask<=0||orb.mask>0xfff:orb.mask!=0))return 1;
+  const int effect=orb.effect;
+  present[effect]=1;
+  if(mode==OrbAggregation::Highest&&highest[effect]<grades[i]){
+   // 0066398cの厳密な等級比較。同等級は先の枠、採用した配列全体を使う。
+   highest[effect]=grades[i];
+   std::copy_n(orb.values,4,values[effect]);
+  }else if(mode==OrbAggregation::Sum){
+   for(int j=0;j<4;++j)values[effect][j]=int32_t(uint32_t(values[effect][j])+uint32_t(orb.values[j]));
+  }
+ }
+ std::copy_n(present,KBCS_ACTOR_ORBS,definition->orb_present);
+ for(int effect=0;effect<KBCS_ACTOR_ORBS;++effect)std::copy_n(values[effect],4,definition->orbs[effect]);
+ definition->orb_enabled=count>0;
+ return 0;
+}
+
 #include "actor_battle.inc"
 #include "actor_sniper.inc"
 

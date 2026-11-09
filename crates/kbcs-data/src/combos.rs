@@ -2,8 +2,9 @@
     import::read_asset,
     model::{csv_rows, numeric_rows, required},
     source::{Dataset, Source},
+    support::Support,
 };
-use anyhow::Result;
+use anyhow::{Context, Result, ensure};
 use rusqlite::{Connection, params};
 use serde::Serialize;
 
@@ -23,9 +24,26 @@ pub struct Combo {
     #[serde(rename = "groupName")]
     pub group_name: String,
     pub active: bool,
+    pub condition: i64,
+    pub support: Support,
+    pub unlock: Vec<Unlock>,
     pub name: String,
     pub effect: String,
     pub members: Vec<Member>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Unlock {
+    pub unit_id: u32,
+    pub talent_index: usize,
+    pub minimum_level: u32,
+}
+
+impl Combo {
+    pub fn unlocked(&self, mut purchased: impl FnMut(&Unlock) -> bool) -> bool {
+        self.support.is_supported() && (self.active || self.unlock.iter().any(&mut purchased))
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -169,30 +187,70 @@ pub fn read(connection: &Connection, region: &str) -> Result<Vec<Combo>> {
         [],
         |row| row.get(0),
     )?;
-    let groups = numeric_rows(&bytes)?
+    let source_rows = numeric_rows(&bytes)?
         .into_iter()
-        .map(|(_, row)| required(&row, 2))
+        .map(|(_, row)| Ok((required(&row, 1)?, required(&row, 2)?)))
         .collect::<Result<Vec<_>>>()?;
+    let mut unlocks = std::collections::BTreeMap::<i64, Vec<Unlock>>::new();
+    let mut units =
+        connection.prepare("SELECT DISTINCT unit_id FROM talent WHERE region=? AND skill_id=?")?;
+    for unit in units.query_map(params![region, crate::talents::COMBO_UNLOCK], |row| {
+        row.get::<_, u32>(0)
+    })? {
+        let unit_id = unit?;
+        if let Some(talent) = crate::talents::read(connection, region, unit_id)?
+            .into_iter()
+            .find(|talent| talent.combo_unlock.is_some())
+        {
+            if let Some(combo) = talent.combo_unlock {
+                ensure!(
+                    source_rows
+                        .get(combo as usize)
+                        .is_some_and(|(condition, _)| *condition == 7),
+                    "本能{}のコンボ解放先 {combo} が不正です",
+                    talent.id
+                );
+                unlocks.entry(combo).or_default().push(Unlock {
+                    unit_id,
+                    talent_index: talent.index,
+                    minimum_level: if talent.limit > 0 { 60 } else { 0 },
+                });
+            }
+        }
+    }
     let mut statement = connection
         .prepare("SELECT id,type,grade,name,effect FROM combo WHERE region=? ORDER BY id")?;
     let mut rows = statement.query([region])?;
     let mut result = Vec::new();
     while let Some(row) = rows.next()? {
         let id: i64 = row.get(0)?;
+        let kind: i64 = row.get(1)?;
+        let grade: i64 = row.get(2)?;
+        ensure!(
+            kind >= 0 && grade >= 0,
+            "コンボの効果IDまたは等級が不正です: {id}"
+        );
+        let &(condition, group) = source_rows.get(id as usize).context("コンボ原本行なし")?;
+        let support = if (0..=28).contains(&kind)
+            && (matches!(condition, 1 | 4 | 5 | 6 | 10001 | 10002 | 10003)
+                || condition == 7 && unlocks.contains_key(&id))
+        {
+            Support::Supported
+        } else {
+            Support::Unsupported
+        };
         let members=connection.prepare("SELECT unit_id,form_index FROM combo_member WHERE region=? AND combo_id=? ORDER BY position")?
             .query_map(params![region,id],|row|Ok(Member{id:row.get(0)?,form:row.get(1)?}))?.collect::<rusqlite::Result<_>>()?;
         result.push(Combo {
             id,
-            kind: row.get(1)?,
-            grade: row.get(2)?,
-            group: *groups
-                .get(id as usize)
-                .ok_or_else(|| anyhow::anyhow!("コンボ対象列なし"))?,
-            group_name: group_names
-                .get(groups.get(id as usize).unwrap_or(&-1))
-                .cloned()
-                .unwrap_or_default(),
-            active: true,
+            kind,
+            grade,
+            group,
+            group_name: group_names.get(&group).cloned().unwrap_or_default(),
+            active: support.is_supported() && condition != 7,
+            condition,
+            support,
+            unlock: unlocks.remove(&id).unwrap_or_default(),
             name: row.get(3)?,
             effect: row.get(4)?,
             members,

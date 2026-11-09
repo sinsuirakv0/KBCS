@@ -2,7 +2,7 @@
 use anyhow::Result;
 use rusqlite::OptionalExtension;
 use serde_json::Value;
-use std::sync::OnceLock;
+use std::{collections::BTreeMap, sync::OnceLock};
 
 pub fn settings() -> &'static Value {
     static SETTINGS: OnceLock<Value> = OnceLock::new();
@@ -25,6 +25,66 @@ pub fn source_matches(database: &Database, path: &str, expected: &str) -> Result
     Ok(sha.map(|sha| sha == expected))
 }
 
+pub fn parameters_match(database: &Database, expected: &Value) -> Result<bool> {
+    let bytes = database.source("Data/param.tsv")?.3;
+    let text = std::str::from_utf8(&bytes)?.trim_start_matches('\u{feff}');
+    let mut values = BTreeMap::new();
+    for (key, value) in text.lines().filter_map(|line| line.split_once('\t')) {
+        if expected.get(key).is_some() {
+            anyhow::ensure!(
+                values.insert(key, value.trim().parse::<i64>()?).is_none(),
+                "戦闘設定キーの重複: {key}"
+            );
+        }
+    }
+    Ok(expected
+        .as_object()
+        .expect("戦闘設定の参照定義")
+        .iter()
+        .all(|(key, value)| values.get(key.as_str()).copied() == value.as_i64()))
+}
+
+fn facility_rows_match(database: &Database, path: &str, settings: &Value) -> Result<bool> {
+    let rows = crate::model::csv_rows(&database.source(path)?.3)?;
+    for (position, facility) in settings["facilities"]
+        .as_array()
+        .expect("施設の参照定義")
+        .iter()
+        .enumerate()
+    {
+        let id = (60 + position).to_string();
+        if path == "res/GatyaitemName.csv" {
+            let Some(row) = rows.get(60 + position) else {
+                return Ok(false);
+            };
+            let description = row
+                .iter()
+                .skip(1)
+                .map(|cell| cell.trim())
+                .filter(|cell| !matches!(*cell, "" | "＠" | "@"))
+                .collect::<Vec<_>>()
+                .join("\n");
+            if row.first().map(String::as_str) != facility["name"].as_str()
+                || facility["description"] != description
+            {
+                return Ok(false);
+            }
+        } else {
+            let mut matches = rows.iter().filter(|row| row.get(3) == Some(&id));
+            let Some(row) = matches.next() else {
+                return Ok(false);
+            };
+            if matches.next().is_some()
+                || row.get(6).map(String::as_str) != Some("2")
+                || row.get(7).and_then(|v| v.parse::<usize>().ok()) != Some(position)
+            {
+                return Ok(false);
+            }
+        }
+    }
+    Ok(true)
+}
+
 pub fn calculation_version(database: &Database) -> Result<Option<String>> {
     let settings = settings();
     let version = settings["version"].as_str().expect("参照版");
@@ -37,12 +97,26 @@ pub fn calculation_version(database: &Database) -> Result<Option<String>> {
     }
     // 版番号だけを緩めず、施設・お宝の全採用元が同じ場合だけ既存定義を使う。
     for (path, source) in settings["sources"].as_object().expect("参照元") {
-        if source_matches(
+        let matches = source_matches(
             database,
             path,
             source["sha256"].as_str().unwrap_or_default(),
-        )? != Some(true)
-        {
+        )?;
+        if matches == Some(true) {
+            continue;
+        }
+        let compatible = if matches.is_none() {
+            false
+        } else {
+            match path.as_str() {
+                "Data/param.tsv" => parameters_match(database, &settings["combatParameters"])?,
+                "res/GatyaitemName.csv" | "Data/Gatyaitembuy.csv" => {
+                    facility_rows_match(database, path, settings)?
+                }
+                _ => false,
+            }
+        };
+        if !compatible {
             return Ok(None);
         }
     }

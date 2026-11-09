@@ -14,9 +14,9 @@ export function unitInfoInput(unit,member,manifest){
 export function unitDescription(form){const lines=Array.isArray(form?.description)?form.description:String(form?.description||'').split('\n'),result=[];for(const line of lines){if(!line||result.length===3)break;result.push(line);}return result;}
 export async function prepareBattleInfo(database,snapshot,signal){
  const [manifest,equipment]=await Promise.all([readBattleJson('/images/native-combo/manifest.json',{signal}),readBattleJson('/api/formation-equipment',{signal})]),units=new Map(database.units.map(unit=>[unit.id,unit]));
- const inputs=snapshot.formation.slots.map(member=>unitInfoInput(member&&units.get(member.unitId),member,manifest));
+ const orbs=new Map(equipment.items.filter(item=>item.support!=='unsupported').map(item=>[item.id,item.equipment])),images=new Map();
+ const inputs=snapshot.formation.slots.map(member=>unitInfoInput(member&&units.get(member.unitId),member&&{...member,orbs:member.orbs.filter(id=>orbs.has(id))},manifest));
  const layouts=await readBattleJson('/api/battle-info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(inputs),signal});
- const orbs=new Map(equipment.items.map(item=>[item.id,item.equipment])),images=new Map();
  if(inputs.some(input=>input.orbs))for(const stem of ['equipment_attribute','equipment_effect','equipment_grade','equipment_shadow']){const image=new Image();image.src=manifest.atlases[stem].url;await image.decode();signal.throwIfAborted();images.set(stem,image);}
  return {manifest,layouts,orbs,images};
 }

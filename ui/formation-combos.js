@@ -1,13 +1,15 @@
-﻿import {escapeHtml as esc} from './src/shared/game/database-view.js';
+﻿import {comboAvailable,isUnsupported} from './effect-support.js';
+import {escapeHtml as esc} from './src/shared/game/database-view.js';
 import {normalizeUnitQuery} from './src/features/units/model.js';
 import {createFormationMember,resolveFormationMember} from './formation-model.js';
 import {createNativeSprites} from './native-sprites.js';
 import {nativeFont,loadNativeFonts} from './native-font.js';
 
+
 const plain=value=>String(value??'').replace(/<br>/g,'\n').replace(/<[^>]*>/g,'');
 export function activeFormationCombos(database,slots){
  const team=new Map(slots.slice(0,5).filter(Boolean).map(member=>[member.unitId,member.form]));
- return database.combos.filter(combo=>combo.members.every(member=>team.has(member.id)&&team.get(member.id)>=member.form)).sort((a,b)=>a.members.length-b.members.length);
+ return database.combos.filter(combo=>comboAvailable(combo,slots)&&combo.members.every(member=>team.has(member.id)&&team.get(member.id)>=member.form)).sort((a,b)=>a.members.length-b.members.length);
 }
 // 00895118の10枠更新。既存キャラの個別設定を複製して、保存は既存の編成APIへ戻す。
 export function applyComboPlan(database,slots,plan){
@@ -62,7 +64,7 @@ export async function createFormationCombos(database,getDocument,onApply,request
    const r=layout.rows[Number(combo.group!==-1)][row],[x,y,w,h]=r.panel;
    html+=panel('img029_ja',31,32,x,y,w,h);
    if(active.has(combo.id)||locked&&selection===combo.id)html+='<g filter="url(#combo-flash)">'+panel('img029_ja',41,74,x,y,w,h,2)+'</g>';
-   html+=text(combo.name,...r.name,30)+text(combo.effect,...r.effect,20)+(combo.group!==-1?text(combo.groupName,...r.group,20):'');
+   html+=text(combo.name,...r.name,30)+text(combo.effect+(isUnsupported(combo)?'（未実装）':!comboAvailable(combo,effectiveSlots())?'（本能で解放）':''),...r.effect,20)+(combo.group!==-1?text(combo.groupName,...r.group,20):'');
    html+=hit('combo:'+combo.id,x,y,380,h,combo.name+'：ダブルタップで自動セット');
    for(let i=0;i<5;++i){const member=combo.members[i],[ix,iy,iw,ih]=r.icons[i];html+=icon(member?.id,member?.form,ix,iy,iw,ih);if(member)html+=hit('unit:'+combo.id+':'+i,ix,iy,iw,ih,units.get(member.id)?.forms.find(form=>form.index===member.form)?.name||'キャラ');}
    if(selectedUnit?.combo===combo.id){const [ix,iy,iw,ih]=r.icons[selectedUnit.index];for(let frame=0;frame<2;++frame)html+='<g data-combo-highlight="'+frame+'"'+(frame===Math.floor(flash/2)%2?'':' display="none"')+'>'+panel('img029_ja',9+frame,25+frame,ix,iy,iw,ih)+'</g>';}
@@ -128,7 +130,9 @@ export async function createFormationCombos(database,getDocument,onApply,request
   canvas.querySelector('svg')?.remove();canvas.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 1188 640" role="group" aria-label="にゃんコンボ図鑑">'+body+'</svg>');guide.hidden=!help;const frame=guide.querySelector('iframe');if(help&&!frame.src)frame.src='https://ponosgames.com/information/appli/battlecats/combo/index.html';search.disabled=filter||!!confirm||locked||help;
  }
  async function preview(id){
-  if(locked)return;locked=true;status.textContent='編成を確認中';
+  if(locked)return;
+  if(isUnsupported(combos.find(combo=>combo.id===id))){status.textContent='このコンボの効果は未実装です';return;}
+  locked=true;status.textContent='編成を確認中';
   try{await new Promise(resolve=>setTimeout(resolve,14*1000/30));const document=getDocument(),effective=effectiveSlots(),selected=combos.findIndex(combo=>combo.id===id),plan=await request('/api/combo-plan',{combos:definitions,selection:{team:effective.map(member=>member?.unitId??-1),forms:effective.map(member=>member?.form??0),locked:Array(10).fill(0),selected}});const next={...document,slots:applyComboPlan(database,document.slots,plan)};confirm={combo:combos[selected],document:next,before:activeFormationCombos(database,effective),after:activeFormationCombos(database,next.slots.map(member=>member&&resolveFormationMember(units.get(member.unitId),member)))};selectedEffect=null;popupPhase=0;}finally{locked=false;render();}
  }
  async function action(value,doubled=false){

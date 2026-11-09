@@ -1,4 +1,5 @@
-﻿import {catalog,normalizeSimulationProfile} from './simulation-profile.js';
+﻿import {comboAvailable} from './effect-support.js';
+import {catalog,normalizeSimulationProfile} from './simulation-profile.js';
 import {resolveFormationMember} from './formation-model.js';
 
 export const battleItems=[{id:0,key:'speedup',name:'スピードアップ'},{id:1,key:'radar',name:'トレジャーレーダー'},{id:2,key:'rich',name:'ネコボン'},{id:3,key:'computer',name:'ニャンピュータ'},{id:4,key:'okame',name:'おかめはちもく'},{id:5,key:'sniper',name:'スニャイパー'}];
@@ -13,12 +14,13 @@ export function battleFormation(database,document){
     const effective=resolveFormationMember(unit,member);if(!unit.forms.some(form=>form.index===effective.form))throw Error('キャラの形態が未収録です');return structuredClone(effective);
   }),profile:normalizeSimulationProfile(document.profile)};
 }
+
 export function castleHealthInput(database,document){
   if((database.calculationVersion??database.gameVersion)!==catalog.version)throw Error('城体力計算とDBの対応版が異なります');
   const profile=normalizeSimulationProfile(document.profile),facility=profile.facilities.castle;
   const treasureBonus=catalog.treasures.filter(item=>item.effectType===0&&!item.effectFlag).reduce((sum,item)=>sum+Math.trunc(item.maximumEffect*profile.treasures[item.id]/100),0);
   const team=new Map(document.slots.slice(0,5).filter(Boolean).map(member=>[member.unitId,member.form]));
-  const comboPercent=database.combos.filter(combo=>combo.type===10&&combo.members.every(member=>team.has(member.id)&&team.get(member.id)>=member.form)).reduce((sum,combo)=>sum+database.comboEffects[10].values[combo.grade],0);
+  const comboPercent=database.combos.filter(combo=>combo.type===10&&comboAvailable(combo,document.slots)&&combo.members.every(member=>team.has(member.id)&&team.get(member.id)>=member.form)).reduce((sum,combo)=>sum+database.comboEffects[10].values[combo.grade],0);
   return {facilityLevel:facility.level+facility.plus,developmentLevel:document.cannon.developmentLevel??30,treasureBonus,comboPercent};
 }
 export async function castleHealth(database,document){

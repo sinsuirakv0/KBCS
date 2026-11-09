@@ -1,6 +1,6 @@
 ﻿use anyhow::{Context, Result, ensure};
 use kbcs_bridge::{actor, battle, battle_screen, production, render, stage};
-use kbcs_data::{formations::Document, store::Database};
+use kbcs_data::{equipment, formations::Document, store::Database};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
@@ -14,6 +14,8 @@ pub struct Start {
     pub config: battle_screen::Config,
     pub state: battle_screen::State,
     pub scene: crate::scene::Input,
+    #[serde(default)]
+    pub require_exact: bool,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -69,35 +71,13 @@ pub struct Session {
     top_textures: [i32; 2],
     title_draw: Option<(render::Cut, i32)>,
     rules: battle::Rules,
+    precision: kbcs_data::support::Precision,
 }
 fn integer(value: &Value) -> Result<i32> {
     value
         .as_i64()
         .and_then(|n| i32::try_from(n).ok())
         .context("戦闘の整数入力がありません")
-}
-fn equipment_orb(entry: &Value, masks: &Value) -> Result<battle::Orb> {
-    let effect = integer(&entry["content"]).context("本能玉の効果種別なし")?;
-    ensure!((0..32).contains(&effect), "本能玉の効果種別が範囲外です");
-    let mut values = [0; 4];
-    let raw = entry["value"].as_array().context("本能玉効果なし")?;
-    ensure!(raw.len() <= values.len(), "本能玉列範囲外");
-    for (out, value) in values.iter_mut().zip(raw) {
-        *out = integer(value)?;
-    }
-    // 属性別の集計は0〜4だけ。撃破後強化・生産系などにはattribute自体が存在しない。
-    let mask = if effect < 5 {
-        let attribute =
-            usize::try_from(integer(&entry["attribute"]).context("属性別本能玉の属性なし")?)?;
-        integer(&masks[attribute]).context("本能玉の属性が範囲外です")?
-    } else {
-        0
-    };
-    Ok(battle::Orb {
-        effect,
-        mask,
-        values,
-    })
 }
 fn native<T>(value: std::result::Result<T, u32>) -> Result<T> {
     value.map_err(|code| anyhow::anyhow!("戦闘コア: {code}"))
@@ -251,6 +231,9 @@ fn motion(
     ))
 }
 impl Session {
+    pub fn active_combo_ids(&self) -> Vec<i64> {
+        self.combos.iter().map(|combo| combo.id).collect()
+    }
     pub fn new(
         root: &std::path::Path,
         region: &str,
@@ -271,7 +254,15 @@ impl Session {
                 path,
                 source["sha256"].as_str().context("入力SHAなし")?,
             )? {
-                ensure!(matches, "戦闘入力の原本SHAが一致しません: {path}");
+                ensure!(
+                    matches
+                        || path == "Data/param.tsv"
+                            && kbcs_data::compatibility::parameters_match(
+                                &database,
+                                &constants["parameters"]
+                            )?,
+                    "戦闘入力の原本SHAまたは参照値が一致しません: {path}"
+                );
             }
         }
         for source in constants["clocks"]
@@ -296,8 +287,12 @@ impl Session {
                 && snapshot["buildId"].as_str() == metadata.get("build_id").map(String::as_str),
             "戦闘入力とDBの版が一致しません"
         );
-        let document: Document = serde_json::from_value(snapshot["formation"].clone())?;
-        document.validate_with_database(region, &database)?;
+        let mut document: Document = serde_json::from_value(snapshot["formation"].clone())?;
+        let equipment = equipment::Catalog::read(&database)?;
+        document.validate_with_equipment(region, &equipment)?;
+        for member in document.slots.iter_mut().flatten() {
+            member.form = member.effective_form(&database, region)?.index as u8;
+        }
         let map_key = snapshot["map"]["key"].as_str().context("マップIDなし")?;
         let data = if let Some(path) = snapshot["stage"]["patternSource"].as_str() {
             kbcs_data::stages::variant(
@@ -317,6 +312,18 @@ impl Session {
             .iter()
             .find(|s| s["index"] == snapshot["stage"]["index"])
             .context("面が見つかりません")?;
+        let mut precision = kbcs_data::support::Precision::checked();
+        if metadata.get("version").map(String::as_str) != settings["version"].as_str() {
+            precision.note("ruleset", kbcs_bridge::ruleset_version().into());
+        }
+        for rule in map["rules"].as_array().into_iter().flatten() {
+            if rule["support"] == "unsupported" {
+                precision.note(
+                    "stageRule",
+                    rule["id"].as_i64().context("特殊ルールIDが不正です")?,
+                );
+            }
+        }
         ensure!(
             stage["source"] == snapshot["stage"]["source"],
             "ステージ原本が一致しません"
@@ -343,6 +350,7 @@ impl Session {
             orb_stage: match integer(&map["nativeKind"])? {
                 0 => 9,
                 -9 => 16,
+                -8 if map["number"] == 68 => 16,
                 _ => 0,
             },
             ..Default::default()
@@ -393,6 +401,22 @@ impl Session {
                     .flatten()
                     .any(|p| p.unit_id as i64 == m.id && p.form as i64 >= m.form)
             }) {
+                if !combo.support.is_supported() {
+                    precision.note("combo", combo.id);
+                    continue;
+                }
+                if !combo.unlocked(|unlock| {
+                    document.slots.iter().flatten().any(|member| {
+                        member.unit_id == unlock.unit_id
+                            && member.total_level() >= unlock.minimum_level
+                            && member
+                                .talents
+                                .get(&(unlock.talent_index as u32))
+                                .is_some_and(|&level| level > 0)
+                    })
+                }) {
+                    continue;
+                }
                 let effect = effects
                     .iter()
                     .find(|e| e.index == combo.kind)
@@ -748,7 +772,8 @@ impl Session {
             let texture = scene.texture(&format!("Number/nyankoCastle_001_{cannon_id:02}_00.png"));
             cannon_clips.insert(phase as i32, Clip { model, texture });
         }
-        let equipment: Value = serde_json::from_str(&text(&database, "Data/equipmentlist.json")?)?;
+        // 008cfcf0はマップ・冠・面が固定編成の行と一致する場合に集計値を抑止する。
+        let fixed_formation = stage["formation"]["selected"].as_i64() == Some(i64::from(crown) - 1);
         let mut members: Vec<_> = document
             .slots
             .iter()
@@ -797,22 +822,29 @@ impl Session {
                 member.level as i64 <= form.max_level && member.plus as i64 <= form.plus_level,
                 "キャラレベル範囲外"
             );
-            let mut definition =
-                native(actor::Definition::from_raw(&cells(&form.raw_cells)?, true))?;
+            for (column, _) in kbcs_data::support::extension_cells(&form.raw, 119) {
+                precision.note("unitColumn", column as i64);
+            }
+            let mut definition = native(actor::Definition::from_raw(
+                &cells(&form.raw_cells[..form.raw_cells.len().min(119)])?,
+                true,
+            ))?;
             for (target, rate) in definition.growth.iter_mut().zip(form.growth.iter()) {
                 *target = i32::try_from(rate.context("成長値なし")?)?;
             }
-            for talent in kbcs_data::talents::read(&database.connection, region, member.unit_id)? {
-                let level = member
-                    .talents
-                    .get(&(talent.index as u32))
-                    .copied()
-                    .unwrap_or(0) as usize;
-                if level == 0
-                    || form.rarity == 4
-                        && u32::from(member.level) + u32::from(member.plus) < 60
-                        && talent.limit > 0
+            let talents = kbcs_data::talents::read(&database.connection, region, member.unit_id)?;
+            for talent in &talents {
+                if !talent.support.is_supported()
+                    && form.index >= 2
+                    && member
+                        .talents
+                        .get(&(talent.index as u32))
+                        .is_some_and(|&level| level > 0)
                 {
+                    precision.note("talent", talent.id);
+                }
+                let level = member.active_talent_level(&form, talent);
+                if level == 0 {
                     continue;
                 }
                 ensure!(
@@ -824,33 +856,49 @@ impl Session {
                 for i in 0..4 {
                     definition.talents[id][i] = i32::try_from(talent.values[level - 1][i])?;
                 }
-                for target in &talent.targets {
-                    definition.added_targets |= 1
-                        << TARGETS
-                            .iter()
-                            .position(|v| v == target)
-                            .context("本能属性なし")?;
-                }
+                definition.added_targets |= equipment::target_mask(talent) as i32;
             }
             let mut orbs = [battle::Orb::default(); 8];
+            let mut grades = [0; 8];
             let mut orb_count = 0;
-            for id in member.orbs.iter().flatten() {
-                let entry = equipment["ID"]
-                    .get(id.checked_sub(30000).context("本能玉ID範囲外")? as usize)
-                    .context("本能玉なし")?;
-                {
-                    let orb = equipment_orb(entry, &constants["equipmentMasks"])?;
-                    let effect = orb.effect as usize;
-                    ensure!(orb_count < 8, "本能玉範囲外");
-                    for (out, value) in definition.orbs[effect].iter_mut().zip(orb.values) {
-                        *out += value;
+            if !fixed_formation && member.orbs.iter().any(Option::is_some) {
+                let eligible = equipment.eligibility(member, &form, &talents)?;
+                for (index, id) in member.orbs.iter().enumerate() {
+                    let Some(id) = id else { continue };
+                    let orb = equipment.get(*id)?;
+                    if form.index >= 2
+                        && let Some(condition) = eligible
+                            .slots
+                            .get(index)
+                            .and_then(|slot| slot.unsupported_condition)
+                    {
+                        precision.note("equipmentSlot", condition);
                     }
-                    definition.orb_present[effect] = 1;
-                    orbs[orb_count] = orb;
+                    if !orb.supported()
+                        && eligible.slots.get(index).is_some_and(|slot| slot.unlocked)
+                    {
+                        precision.note("equipment", i64::from(orb.content));
+                    }
+                    let mask = equipment.mask(orb);
+                    if !eligible.active(index, orb, mask) {
+                        continue;
+                    }
+                    let mut values = [0; 4];
+                    values[..orb.value.len()].copy_from_slice(&orb.value);
+                    orbs[orb_count] = battle::Orb {
+                        effect: i32::try_from(orb.content)?,
+                        mask: mask as i32,
+                        values,
+                    };
+                    grades[orb_count] = i32::try_from(orb.grade)?;
                     orb_count += 1;
                 }
             }
-            definition.orb_enabled = i32::from(orb_count > 0);
+            native(battle::equipment(
+                &orbs[..orb_count],
+                &grades[..orb_count],
+                &mut definition,
+            ))?;
             let (motion, boundary, death_body_frames, model) = motion(
                 &database,
                 &mut scene,
@@ -975,8 +1023,11 @@ impl Session {
                 .iter()
                 .find(|e| e.id == id as u32)
                 .context("敵原本なし")?;
+            for (column, _) in kbcs_data::support::extension_cells(&enemy.raw, 113) {
+                precision.note("enemyColumn", column as i64);
+            }
             let definition = native(actor::Definition::from_raw(
-                &cells(&enemy.raw_cells)?,
+                &cells(&enemy.raw_cells[..enemy.raw_cells.len().min(113)])?,
                 false,
             ))?;
             let (motion, boundary, death_body_frames, model) = motion(
@@ -1163,6 +1214,11 @@ impl Session {
             let phase = i32::from_str_radix(offset.trim_start_matches("0x"), 16)?;
             effects.insert((6, 0, phase), Clip { model, texture });
         }
+        ensure!(
+            !start.require_exact || precision.issues.is_empty(),
+            "精度指定により戦闘を開始できません: {}",
+            serde_json::to_string(&precision)?
+        );
         let mut core = native(battle::Battle::new(&config, &profiles, &rows))?;
         let hints = kbcs_data::model::csv_rows(&database.source("res/Lose_ja.csv")?.3)?;
         let groups: Vec<i32> = hints
@@ -1277,6 +1333,7 @@ impl Session {
             scene,
             core,
             rules,
+            precision,
             models,
             effects,
             key: start.scene.key(),
@@ -1650,7 +1707,7 @@ impl Session {
             json!({"side":value.side,"slot":value.slot,"profile":value.profile,"raw":a[0],"layer":a[5],"frame":a[2],"action":a[1],"hp":a[8],"maximum":a[7],"x":a[3],"y":a[4],"serial":a[240]})
         }).collect();
         Ok(
-            json!({"defeatHint":{"layout":hint,"lines":hint_lines},"ex":native(self.core.ex())?,"endCamera":native(self.core.end_camera())?,"music":native(self.core.music())?,"ending":native(self.core.ending())?,"receipt":self.receipt.saved,"receiptError":self.receipt.error,"rewardRolls":native(self.core.rewards())?,"units":count(0),"enemies":count(1),"castleHp":[actors[0][0].words[8],actors[1][0].words[8]],"wait":production.wait,"maximum":production.maximum,"costs":native(self.core.prices())?,"produced":production.produced,"extras":native(self.core.extras())?,"points":native(self.core.points())?,"lastCosts":production.last_cost,"seed":seed,"actors":units,"cannon":[actors[0][0].words[9],actors[0][0].words[10],actors[0][0].words[13]],"sniper":native(self.core.sniper_status())?,"computer":native(self.core.computer())?,"sounds":native(self.core.sounds())?,"result":native(self.core.outcome())?,"deployment":native(self.core.deployment())?,"rules":self.rules}),
+            json!({"defeatHint":{"layout":hint,"lines":hint_lines},"ex":native(self.core.ex())?,"endCamera":native(self.core.end_camera())?,"music":native(self.core.music())?,"ending":native(self.core.ending())?,"receipt":self.receipt.saved,"receiptError":self.receipt.error,"rewardRolls":native(self.core.rewards())?,"units":count(0),"enemies":count(1),"castleHp":[actors[0][0].words[8],actors[1][0].words[8]],"precision":self.precision,"wait":production.wait,"maximum":production.maximum,"costs":native(self.core.prices())?,"produced":production.produced,"extras":native(self.core.extras())?,"points":native(self.core.points())?,"lastCosts":production.last_cost,"seed":seed,"actors":units,"cannon":[actors[0][0].words[9],actors[0][0].words[10],actors[0][0].words[13]],"sniper":native(self.core.sniper_status())?,"computer":native(self.core.computer())?,"sounds":native(self.core.sounds())?,"result":native(self.core.outcome())?,"deployment":native(self.core.deployment())?,"rules":self.rules}),
         )
     }
     pub fn layout(&self, input: &crate::scene::Input) -> Result<render::Layout> {
@@ -1789,26 +1846,6 @@ fn paint_packets(
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn equipment_attributes_are_required_only_for_targeted_effects() {
-        let masks = super::inputs().unwrap()["equipmentMasks"].clone();
-        for effect in [5, 18, 19, 31] {
-            let orb = super::equipment_orb(
-                &serde_json::json!({"gradeID":4,"content":effect,"value":[20]}),
-                &masks,
-            )
-            .unwrap();
-            assert_eq!(
-                (orb.effect, orb.mask, orb.values),
-                (effect, 0, [20, 0, 0, 0])
-            );
-        }
-        let entry = serde_json::json!({"content":0,"attribute":3,"value":[20]});
-        assert_eq!(super::equipment_orb(&entry, &masks).unwrap().mask, 8);
-        assert!(
-            super::equipment_orb(&serde_json::json!({"content":0,"value":[20]}), &masks).is_err()
-        );
-    }
     #[test]
     fn native_effect_bindings() {
         let fixture: serde_json::Value = serde_json::from_str(

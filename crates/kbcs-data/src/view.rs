@@ -87,6 +87,7 @@ fn form_value(form: &Form) -> Value {
         .iter()
         .filter(|p| !p.key.starts_with("target-") || p.key == "target-only")
         .map(ability)
+        .chain(crate::support::extension_abilities(&form.raw, 119))
         .collect();
     let raw = |index| form.raw.get(index).copied().flatten();
     json!({"name":form.name,"description":form.description,"index":form.index,"code":(["f","c","s","u"][form.index]),"hp":form.hp,"knockbacks":form.knockbacks,"speed":form.speed,"attacks":form.attacks.iter().map(|a|a.damage).collect::<Vec<_>>(),"foreswings":form.attacks.iter().map(|a|a.foreswing).collect::<Vec<_>>(),"attackCycle":form.attack_cycle,"backswing":form.animation_length.zip(pre).map(|(length,pre)|(length-pre).max(0)),"range":form.range,"castleRange":if raw(45).is_some_and(|v|v!=0){raw(44)}else{Some(form.range)},"cost":form.cost,"respawn":form.respawn_raw*2,"attackInterval":form.interval_raw,"attackType":if form.area{"範囲"}else{"単体"},"targets":targets,"abilities":abilities,"icon":form.icon_path,"ranges":form.attacks.iter().filter_map(|a|a.range).filter(|[a,b]|a!=b).map(|[a,b]|[a.min(b),a.max(b)]).collect::<Vec<_>>(),"width":raw(9),"layers":[raw(14),raw(15)]})
@@ -229,7 +230,7 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
     .map(|(key, label)| json!({"key":key,"label":label}))
     .collect();
     Ok(
-        json!({"schemaVersion":9,"gameVersion":metadata.get("version"),"calculationVersion":crate::compatibility::calculation_version(database)?,"revision":metadata.get("revision"),"datasetId":metadata.get("dataset_id"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","propertyAtlas":atlas,"targets":targets,"abilities":abilities.into_values().collect::<Vec<_>>(),"growth":growth,"units":units,"combos":combos,"comboEffects":combo_effects,"native":{"talents":true}}),
+        json!({"schemaVersion":9,"gameVersion":metadata.get("version"),"calculationVersion":crate::compatibility::calculation_version(database)?,"revision":metadata.get("revision"),"datasetId":metadata.get("dataset_id"),"buildId":metadata.get("build_id"),"imageBase":"/api/asset/","propertyAtlas":atlas,"targets":targets,"abilities":abilities.into_values().collect::<Vec<_>>(),"growth":growth,"units":units,"combos":combos,"comboEffects":combo_effects,"pictureBookExtensions":crate::support::picture_book_extensions(database)?,"native":{"talents":true}}),
     )
 }
 

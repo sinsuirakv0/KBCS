@@ -125,10 +125,17 @@ fn run() -> Result<()> {
             );
         }
         Some("battle-replay") => {
-            let input: serde_json::Value = serde_json::from_str(
+            let mut input: serde_json::Value = serde_json::from_str(
                 std::fs::read_to_string(option("--input").context("--inputが必要です")?)?
                     .trim_start_matches('\u{feff}'),
             )?;
+            if arguments.iter().any(|arg| arg == "--require-exact") {
+                input
+                    .get_mut("start")
+                    .and_then(serde_json::Value::as_object_mut)
+                    .context("戦闘開始入力が不正です")?
+                    .insert("require_exact".into(), serde_json::Value::Bool(true));
+            }
             let mut service = service::Service::new(root, region, source);
             service.persist_rewards = false;
             let reply = service.handle(

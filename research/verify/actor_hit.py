@@ -103,7 +103,13 @@ records, count = [], 0
 cases=[(*value,None) for value in itertools.product([0,1],conditions,[0,1],range(4),[0,1])]
 cases.extend((side,condition,1,0,flags,combo) for side,condition,flags,combo in itertools.product([0,1],['massive','resistant','super-resistant','witch','eva'],[0,1],[0,99,100]))
 cases.append((0,'castle-compound',0,0,1,None))
+equipment = json.loads((ROOT/'native/kbcs-core/tests/equipment-vectors.json').read_text(encoding='utf-8-sig'))
+for side, condition, attack_type in itertools.product([0,1], ['strong','massive','resistant'], range(3)):
+    cases.append((side,'equipment-'+condition,1,attack_type,0,None))
 for side, condition, target, attack_type, flags_on, combo_override in cases:
+    equipment_case = condition.startswith('equipment-')
+    if equipment_case:
+        condition = condition.removeprefix('equipment-')
     pool, environment, context, clock, damage = Pool(), Environment(), HitContext(), Clock(), Damage()
     environment.unit_modes[:] = [1, 0]
     environment.castle_slot = -1
@@ -163,7 +169,7 @@ for side, condition, target, attack_type, flags_on, combo_override in cases:
     if condition == 'kill-strengthen':
         unit[241] = 15
         clock.kill_orb[1] = 1
-        context.orbs[18][0] = 37
+        context.orbs[18][0] = equipment['cases'][18*4]['results'][0][1][0]
         context.orb_present[18] = 1
     if condition == 'weaken':
         attacker[75], attacker[76], attacker[79] = 71, 10, 37
@@ -183,6 +189,10 @@ for side, condition, target, attack_type, flags_on, combo_override in cases:
     if condition in ['orbs', 'compound', 'kill-strengthen']:
         for orb in context.targeted_orbs:
             orb[:] = [17, 23]
+    if equipment_case:
+        for effect in range(5):
+            values = equipment['cases'][effect*4]['results'][0][1]
+            context.targeted_orbs[effect][:len(values)] = values
     if condition in ['all-effects', 'compound']:
         for word, value in [(51,101),(53,103),(69,107),(70,20),(136,47),(137,21),(138,101),(148,109),(247,113)]:
             attacker[word] = value

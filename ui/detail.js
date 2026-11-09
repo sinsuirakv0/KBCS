@@ -1,4 +1,5 @@
-﻿import {unitSheetHtml,unitInformationRow as information} from './src/features/units/sheet.js';
+﻿import {isUnsupported,partialCalculation,talentMaximum,unsupportedTalentHtml} from './effect-support.js';
+import {unitSheetHtml,unitInformationRow as information} from './src/features/units/sheet.js';
 import {loadUnitDatabase} from './src/shared/game/units.js';
 import {readUnitSettings,unitDetailUrl} from './src/shared/game/unit-stats.js';
 import {createNativeStatistics} from './native-calculation.js';
@@ -10,13 +11,14 @@ import {isStatCombo} from './src/features/units/combo-model.js';
 import {saveElementImage} from './src/shared/browser/capture.js';
 import {readGameSettings} from './src/shared/browser/game-settings.js';
 import {readPageParams,writePageParams,bindDetailNavigation} from './native-state.js';
-import {escapeHtml,formatNumber,formatTime,propertyIconHtml,handleUnitImages} from './src/features/units/view.js';
+import {escapeHtml,formatNumber,formatTime,propertyIconHtml,handleUnitImages,imageHtml} from './src/features/units/view.js';
 
 const element=id=>document.getElementById(id),params=readPageParams('unit-detail');
 const settings=readUnitSettings(params,readGameSettings());
 let database,unit,nativeStatistics,calculateTalentStats;
 let renderVersion=0;
 let damageCalculator;
+
 let talentLevels={};
 let growthPanel,growthForm,comboBuilder;
 const restore=key=>{try{const value=JSON.parse(params.get(key)||'{}');return value&&typeof value==='object'?value:{};}catch{return {};}};
@@ -49,8 +51,9 @@ function sheet(form){
 
 function talentFields(){
   element('unit-calc-talents').innerHTML=unit.talents.map(talent=>{
+    if(isUnsupported(talent))return unsupportedTalentHtml(talent);
     const icon=database.propertyAtlas.icons[talent.effect.key]?propertyIconHtml(database,talent.effect.key,talent.name,18,false):'';
-    return '<div class="unit-talent-entry"><div class="unit-talent-heading"><label>'+icon+'<strong>'+(talent.limit?'超本能：':'')+escapeHtml(talent.name)+'</strong><select data-talent="'+talent.index+'" aria-label="'+escapeHtml((talent.limit?'超本能：':'')+talent.name)+'のレベル">'+Array.from({length:talent.maxLevel+1},(_,level)=>'<option value="'+level+'"'+(level===talentLevels[talent.index]?' selected':'')+'>'+(level?'Lv'+level:'なし')+'</option>').join('')+'</select></label><span class="db-meta" data-talent-status="'+talent.index+'"></span></div><small data-talent-detail>'+escapeHtml(talent.description)+'</small><small data-np-cost>NP ('+talent.costs.join(',')+') / 最大 '+talent.costs.reduce((total,value)=>total+value,0)+' / 設定 <span data-talent-np="'+talent.index+'">0</span></small></div>';
+    return '<div class="unit-talent-entry"><div class="unit-talent-heading"><label>'+icon+'<strong>'+(talent.limit?'超本能：':'')+escapeHtml(talent.name)+'</strong><select data-talent="'+talent.index+'" aria-label="'+escapeHtml((talent.limit?'超本能：':'')+talent.name)+'のレベル">'+Array.from({length:talentMaximum(talent)+1},(_,level)=>'<option value="'+level+'"'+(level===talentLevels[talent.index]?' selected':'')+'>'+(Number.isInteger(talent.comboUnlock)?(level?'解放':'未解放'):(level?'Lv'+level:'なし'))+'</option>').join('')+'</select></label><span class="db-meta" data-talent-status="'+talent.index+'"></span></div><small data-talent-detail>'+escapeHtml(talent.description)+'</small>'+(Number.isInteger(talent.comboUnlock)?'':'<small data-np-cost>NP ('+talent.costs.join(',')+') / 最大 '+talent.costs.reduce((total,value)=>total+value,0)+' / 設定 <span data-talent-np="'+talent.index+'">0</span></small>')+'</div>';
   }).join('');
 }
 
@@ -59,11 +62,13 @@ function updateTalents(){
   const profile=calculateTalentStats(unit,unit.forms.at(-1),database.growth[unit.growth],displaySettings(),{talents:enabled,talentLevels});
   let selectedNp=0,appliedNp=0;
   for(const talent of unit.talents){
+    if(isUnsupported(talent))continue;
     const level=talentLevels[talent.index],applied=profile.applied.includes(talent.index);
     const cost=talent.costs.slice(0,level).reduce((total,value)=>total+value,0);
     selectedNp+=cost;if(applied)appliedNp+=cost;
-    element('unit-calc-talents').querySelector('[data-talent-status="'+talent.index+'"]').textContent=applied?'反映中':!enabled?'反映OFF':!level?'なし':talent.limit&&profile.stats.level<60?'Lv60以上':'第3形態以上';
-    element('unit-calc-talents').querySelector('[data-talent-np="'+talent.index+'"]').textContent=cost;
+    element('unit-calc-talents').querySelector('[data-talent-status="'+talent.index+'"]').textContent=applied?'反映中':enabled&&Number.isInteger(talent.comboUnlock)&&level&&profile.stats.level>=60?'解放済み':!enabled?'反映OFF':!level?'なし':talent.limit&&profile.stats.level<60?'Lv60以上':'第3形態以上';
+    const np=element('unit-calc-talents').querySelector('[data-talent-np="'+talent.index+'"]');
+    if(np)np.textContent=cost;
     const select=element('unit-calc-talents').querySelector('[data-talent="'+talent.index+'"]');
     select.disabled=!enabled;
     select.title=talent.description;
@@ -81,7 +86,9 @@ async function render(){
     const prepared=await nativeStatistics.prepare(displaySettings(),{talents:element('detail-apply-talents').checked,talentLevels,combos:comboBuilder?.state().combos});
     if(version!==renderVersion)return;
     calculateTalentStats=prepared.calculate;
-    element('unit-detail-status').hidden=true;
+    const partial=unit.forms.some(form=>form.abilities.some(isUnsupported))||element('detail-apply-talents').checked&&unit.talents.some(isUnsupported);
+    element('unit-detail-status').hidden=!partial;
+    if(partial)element('unit-detail-status').textContent=partialCalculation;
   } catch(error) {
     if(version!==renderVersion)return;
     element('unit-detail-status').hidden=false;element('unit-detail-status').textContent=error.message;return;
@@ -115,7 +122,7 @@ try{
   element('detail-time').value=settings.seconds?'seconds':'frames';
   element('table-treasure').checked=restored.treasureEnabled!==false;
   element('detail-apply-talents').checked=restored.talents!==false;
-  talentLevels=Object.fromEntries(unit.talents.map(talent=>[talent.index,Math.max(0,Math.min(talent.maxLevel,Math.trunc(Number(restored.talentLevels?.[talent.index]??talent.maxLevel)||0)))]));
+  talentLevels=Object.fromEntries(unit.talents.map(talent=>[talent.index,Math.max(0,Math.min(talentMaximum(talent),Math.trunc(Number(restored.talentLevels?.[talent.index]??talent.maxLevel)||0)))]));
   talentFields();
   element('unit-summary').textContent='上限Lv'+unit.maxLevel+'+'+unit.plusLevel;
   element('unit-form-tabs').innerHTML=unit.forms.map(form=>'<a href="#unit-sheet-'+form.code+'" data-form="'+form.index+'"'+(form.index===selected.index?' aria-current="true"':'')+'>'+imageHtml(database,form,32,25)+'<span>'+escapeHtml(form.name)+'<small>第'+(form.index+1)+'形態</small></span></a>').join('');
@@ -123,7 +130,7 @@ try{
   const combos=unit.combos.map(id=>database.combos.find(combo=>combo.id===id)).filter(Boolean);
   element('unit-combo-section').hidden=!combos.length;
   element('unit-combo-summary').textContent='にゃんコンボ（'+combos.length+'）';
-  element('unit-combo-list').innerHTML=combos.map(combo=>'<li><strong>'+escapeHtml(combo.name)+'</strong> / '+escapeHtml(combo.effect)+(isStatCombo(combo)?' <button type="button" data-build-combo="'+combo.id+'">編成に追加</button>':'')+'<div class="unit-combo-members">'+combo.members.map(member=>{
+  element('unit-combo-list').innerHTML=combos.map(combo=>'<li><strong>'+escapeHtml(combo.name)+'</strong> / '+escapeHtml(combo.effect)+(isUnsupported(combo)?'（未実装）':combo.active===false?'（本能で解放）':'')+(isStatCombo(combo)?' <button type="button" data-build-combo="'+combo.id+'">編成に追加</button>':'')+'<div class="unit-combo-members">'+combo.members.map(member=>{
     const peer=database.units.find(value=>value.id===member.id),form=peer?.forms[member.form];
     return form?'<a href="'+escapeHtml(unitDetailUrl(peer,form,settings))+'" title="'+escapeHtml(form.name)+'">'+imageHtml(database,form,40,31)+'<span>'+escapeHtml(form.name)+'・第'+(member.form+1)+'以上</span></a>':'<span>ID '+member.id+'・第'+(member.form+1)+'以上</span>';
   }).join('')+'</div></li>').join('');
@@ -142,14 +149,14 @@ try{
   element('unit-detail-settings').addEventListener('submit',event=>event.preventDefault());
   element('unit-talent-controls').addEventListener('input',event=>{
     if(event.target.id==='unit-show-np'){element('unit-talent-controls').classList.toggle('show-details',event.target.checked);return;}
-    if(event.target.dataset.talent!=null){talentLevels[event.target.dataset.talent]=Number(event.target.value);if(unit.talents[Number(event.target.dataset.talent)].limit&&Number(event.target.value)>0)raiseTalentLevel();}
+    if(event.target.dataset.talent!=null){const index=Number(event.target.dataset.talent),level=Number(event.target.value);talentLevels[index]=level;if(level>0&&unit.talents.find(talent=>talent.index===index)?.limit)raiseTalentLevel();}
     if(event.target.id==='detail-apply-talents'&&event.target.checked)raiseTalentLevel();
     const focused=document.activeElement;
     render();focused?.focus({preventScroll:true});
   });
   for(const [id,maximum] of [['unit-calc-talents-max',true],['unit-calc-talents-zero',false]])element(id).addEventListener('click',()=>{
     element('detail-apply-talents').checked=true;
-    for(const talent of unit.talents){talentLevels[talent.index]=maximum?talent.maxLevel:0;element('unit-calc-talents').querySelector('[data-talent="'+talent.index+'"]').value=talentLevels[talent.index];}
+    for(const talent of unit.talents){if(isUnsupported(talent))continue;talentLevels[talent.index]=maximum?talentMaximum(talent):0;element('unit-calc-talents').querySelector('[data-talent="'+talent.index+'"]').value=talentLevels[talent.index];}
     if(maximum)raiseTalentLevel();render();
   });
   element('unit-source-panel').addEventListener('toggle',async()=>{
