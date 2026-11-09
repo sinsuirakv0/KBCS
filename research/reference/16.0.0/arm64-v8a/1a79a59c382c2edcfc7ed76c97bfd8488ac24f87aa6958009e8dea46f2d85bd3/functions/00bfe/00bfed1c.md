@@ -1,0 +1,80 @@
+﻿# 00bfed1c
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfed1c",
+  "name": "_ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEElsEe",
+  "size": 300,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "eede71f3e83ba331485f612ff116f353327d0e167094fc8ad6e998bdd360d3c3",
+  "source_text_sha256": "eede71f3e83ba331485f612ff116f353327d0e167094fc8ad6e998bdd360d3c3"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c57e60](../00c57/00c57e60.md)
+- [00c57e70](../00c57/00c57e70.md)
+- [00c57e80](../00c57/00c57e80.md)
+- [00c57e90](../00c57/00c57e90.md)
+- [00c57ea0](../00c57/00c57ea0.md)
+- [00c57eb0](../00c57/00c57eb0.md)
+
+## 疑似コード / UTF-8 1574 bytes
+
+~~~c
+
+long * _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEElsEe(undefined8 param_1,long *param_2)
+
+{
+  uint uVar1;
+  long *plVar2;
+  long *plVar3;
+  long lVar4;
+  undefined8 uVar5;
+  char local_50 [16];
+  undefined1 auStack_28 [8];
+  
+  _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEE6sentryC1ERS3_(local_50,param_2);
+  if (local_50[0] != '\0') {
+    _ZNKSt6__ndk18ios_base6getlocEv(auStack_28,(long)param_2 + *(long *)(*param_2 + -0x18));
+    plVar2 = (long *)_ZNKSt6__ndk16locale9use_facetERNS0_2idE
+                               (auStack_28,
+                                PTR__ZNSt6__ndk17num_putIcNS_19ostreambuf_iteratorIcNS_11char_traitsIcEEEEE2idE_00c9b438
+                               );
+    _ZNSt6__ndk16localeD1Ev(auStack_28);
+    lVar4 = (long)param_2 + *(long *)(*param_2 + -0x18);
+    uVar5 = *(undefined8 *)(lVar4 + 0x28);
+    if (*(int *)(lVar4 + 0x90) == -1) {
+      _ZNKSt6__ndk18ios_base6getlocEv(auStack_28,lVar4);
+      plVar3 = (long *)_ZNKSt6__ndk16locale9use_facetERNS0_2idE
+                                 (auStack_28,PTR__ZNSt6__ndk15ctypeIcE2idE_00c9a830);
+      uVar1 = (**(code **)(*plVar3 + 0x38))(plVar3,0x20);
+      _ZNSt6__ndk16localeD1Ev(auStack_28);
+      *(uint *)(lVar4 + 0x90) = uVar1 & 0xff;
+    }
+    lVar4 = (**(code **)(*plVar2 + 0x48))(param_1,plVar2,uVar5,lVar4);
+    if (lVar4 == 0) {
+      lVar4 = (long)param_2 + *(long *)(*param_2 + -0x18);
+      _ZNSt6__ndk18ios_base5clearEj(lVar4,*(uint *)(lVar4 + 0x20) | 5);
+    }
+  }
+  _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEE6sentryD2Ev(local_50);
+  return param_2;
+}
+
+~~~

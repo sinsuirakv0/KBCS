@@ -1,0 +1,28 @@
+﻿# EXTERNAL:0000005c
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "EXTERNAL:0000005c",
+  "name": "<EXTERNAL>::AndroidBitmap_getInfo",
+  "size": 0,
+  "external": 1,
+  "thunk": 0,
+  "status": "external",
+  "confidence": "unreviewed",
+  "error": null
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。

@@ -1,0 +1,50 @@
+﻿# 005cdabc
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "005cdabc",
+  "name": "FUN_005cdabc",
+  "size": 56,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "cc27038fac49334efed3d06d0cc62f5911390438dc1766f3b4faf70c5af65b93",
+  "source_text_sha256": "cc27038fac49334efed3d06d0cc62f5911390438dc1766f3b4faf70c5af65b93"
+}
+~~~
+
+## 呼び出し元
+
+- [005cd620](../005cd/005cd620.md)
+
+## 呼び出し先
+
+- [00c57af0](../00c57/00c57af0.md)
+- [00c57b10](../00c57/00c57b10.md)
+- [00c5a3b0](../00c5a/00c5a3b0.md)
+
+## 疑似コード / UTF-8 357 bytes
+
+~~~c
+
+void FUN_005cdabc(void)
+
+{
+  undefined8 uVar1;
+  
+  uVar1 = __cxa_allocate_exception(0x18);
+  _ZNSt6__ndk111regex_errorC1ENS_15regex_constants10error_typeE(uVar1,0x11);
+                    /* WARNING: Subroutine does not return */
+  __cxa_throw(uVar1,PTR__ZTINSt6__ndk111regex_errorE_00c9afb0,
+              PTR__ZNSt6__ndk111regex_errorD1Ev_00c9afb8);
+}
+
+~~~

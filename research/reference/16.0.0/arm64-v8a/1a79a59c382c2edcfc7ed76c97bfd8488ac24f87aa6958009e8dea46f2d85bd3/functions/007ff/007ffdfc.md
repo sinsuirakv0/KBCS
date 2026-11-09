@@ -1,0 +1,219 @@
+﻿# 007ffdfc
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "007ffdfc",
+  "name": "_INIT_146",
+  "size": 708,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "8f2b95bd353a26f37677cd5d8778b0331386e900da221c8868cd78967155186f",
+  "source_text_sha256": "8f2b95bd353a26f37677cd5d8778b0331386e900da221c8868cd78967155186f"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [0043b7b8](../0043b/0043b7b8.md)
+- [00c57a30](../00c57/00c57a30.md)
+- [00c57ab0](../00c57/00c57ab0.md)
+- [00c57ae0](../00c57/00c57ae0.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"CgkIjM3y_ZQaEAIQAg"
+"CgkIjM3y_ZQaEAIQAw"
+"CgkIjM3y_ZQaEAIQBA"
+"CgkIjM3y_ZQaEAIQBQ"
+"CgkIjM3y_ZQaEAIQBg"
+"CgkIjM3y_ZQaEAIQBw"
+"CgkIjM3y_ZQaEAIQCA"
+~~~
+
+## 疑似コード / UTF-8 6130 bytes
+
+~~~c
+
+/* WARNING: Type propagation algorithm not settling */
+
+void _INIT_146(void)
+
+{
+  long lVar1;
+  undefined4 local_118 [2];
+  byte local_110;
+  char local_10f [8];
+  undefined7 uStack_107;
+  char cStack_100;
+  undefined2 uStack_ff;
+  undefined1 uStack_fd;
+  undefined4 uStack_fc;
+  undefined4 local_f8 [2];
+  byte local_f0;
+  char local_ef [8];
+  undefined7 uStack_e7;
+  char cStack_e0;
+  undefined2 uStack_df;
+  undefined1 uStack_dd;
+  undefined4 uStack_dc;
+  undefined4 local_d8 [2];
+  byte local_d0;
+  char local_cf [8];
+  undefined7 uStack_c7;
+  char cStack_c0;
+  undefined2 uStack_bf;
+  undefined1 uStack_bd;
+  undefined4 uStack_bc;
+  undefined4 local_b8 [2];
+  byte local_b0;
+  char local_af [8];
+  undefined7 uStack_a7;
+  char cStack_a0;
+  undefined2 uStack_9f;
+  undefined1 uStack_9d;
+  undefined4 uStack_9c;
+  undefined4 local_98 [2];
+  byte local_90;
+  char local_8f [8];
+  undefined7 uStack_87;
+  char cStack_80;
+  undefined2 uStack_7f;
+  undefined1 uStack_7d;
+  undefined4 uStack_7c;
+  undefined4 local_78 [2];
+  byte local_70;
+  char local_6f [8];
+  undefined7 uStack_67;
+  char cStack_60;
+  undefined2 uStack_5f;
+  undefined1 uStack_5d;
+  undefined4 uStack_5c;
+  undefined4 local_58 [2];
+  byte local_50;
+  char local_4f [8];
+  undefined7 uStack_47;
+  char cStack_40;
+  undefined2 uStack_3f;
+  undefined1 uStack_3d;
+  undefined4 uStack_3c;
+  long local_38;
+  
+  lVar1 = tpidr_el0;
+  local_38 = *(long *)(lVar1 + 0x28);
+  uStack_ff = 0x6741;
+  local_f8[0] = 1;
+  uStack_107 = (undefined7)s_CgkIjM3y_ZQaEAIQAg_002b7ee6._8_8_;
+  cStack_100 = SUB81(s_CgkIjM3y_ZQaEAIQAg_002b7ee6._8_8_,7);
+  local_10f = (char  [8])s_CgkIjM3y_ZQaEAIQAg_002b7ee6._0_8_;
+  uStack_df = 0x4142;
+  local_d8[0] = 2;
+  uStack_e7 = (undefined7)s_CgkIjM3y_ZQaEAIQBA_002b7ef9._8_8_;
+  cStack_e0 = SUB81(s_CgkIjM3y_ZQaEAIQBA_002b7ef9._8_8_,7);
+  local_ef = (char  [8])s_CgkIjM3y_ZQaEAIQBA_002b7ef9._0_8_;
+  uStack_bf = 0x6742;
+  local_b8[0] = 3;
+  uStack_c7 = (undefined7)s_CgkIjM3y_ZQaEAIQBg_002b8d82._8_8_;
+  cStack_c0 = SUB81(s_CgkIjM3y_ZQaEAIQBg_002b8d82._8_8_,7);
+  local_cf = (char  [8])s_CgkIjM3y_ZQaEAIQBg_002b8d82._0_8_;
+  uStack_9f = 0x7741;
+  local_98[0] = 4;
+  uStack_a7 = (undefined7)s_CgkIjM3y_ZQaEAIQAw_002a2e95._8_8_;
+  cStack_a0 = SUB81(s_CgkIjM3y_ZQaEAIQAw_002a2e95._8_8_,7);
+  local_af = (char  [8])s_CgkIjM3y_ZQaEAIQAw_002a2e95._0_8_;
+  uStack_7f = 0x5142;
+  local_78[0] = 5;
+  uStack_87 = (undefined7)s_CgkIjM3y_ZQaEAIQBQ_002ac592._8_8_;
+  cStack_80 = SUB81(s_CgkIjM3y_ZQaEAIQBQ_002ac592._8_8_,7);
+  local_8f = (char  [8])s_CgkIjM3y_ZQaEAIQBQ_002ac592._0_8_;
+  uStack_5f = 0x7742;
+  local_58[0] = 6;
+  uStack_67 = (undefined7)s_CgkIjM3y_ZQaEAIQBw_002a0e90._8_8_;
+  cStack_60 = SUB81(s_CgkIjM3y_ZQaEAIQBw_002a0e90._8_8_,7);
+  local_6f = (char  [8])s_CgkIjM3y_ZQaEAIQBw_002a0e90._0_8_;
+  local_110 = 0x24;
+  local_f0 = 0x24;
+  local_d0 = 0x24;
+  local_b0 = 0x24;
+  local_90 = 0x24;
+  local_70 = 0x24;
+  local_50 = 0x24;
+  local_118[0] = 0;
+  uStack_fd = 0;
+  uStack_dd = 0;
+  uStack_bd = 0;
+  uStack_9d = 0;
+  uStack_7d = 0;
+  uStack_5d = 0;
+  uStack_3f = 0x4143;
+  uStack_47 = (undefined7)s_CgkIjM3y_ZQaEAIQCA_002a3e3c._8_8_;
+  cStack_40 = SUB81(s_CgkIjM3y_ZQaEAIQCA_002a3e3c._8_8_,7);
+  local_4f = (char  [8])s_CgkIjM3y_ZQaEAIQCA_002a3e3c._0_8_;
+  uStack_3d = 0;
+  DAT_00ca7bf8 = 0;
+  DAT_00ca7bf0 = 0;
+  DAT_00ca7be8 = &DAT_00ca7bf0;
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_118,local_118);
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_f8,local_f8);
+                    /* try { // try from 007fff7c to 008fffc7 has its CatchHandler @ 007fff7c
+                       catch() { ... } // from try @ 007fff7c with catch @ 007fff7c
+                       catch() { ... } // from try @ 007fffd0 with catch @ 007fff7c
+                       catch() { ... } // from try @ 00800008 with catch @ 007fff7c */
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_d8,local_d8);
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_b8,local_b8);
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_98,local_98);
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_78,local_78);
+                    /* try { // try from 007fffc8 to 008fffcf has its CatchHandler @ 00800008 */
+                    /* try { // try from 007fffd0 to 008fffff has its CatchHandler @ 007fff7c */
+  FUN_0043b7b8(&DAT_00ca7be8,&DAT_00ca7bf0,local_58,local_58);
+  if ((local_50 & 1) != 0) {
+    _ZdlPv((void *)CONCAT44(uStack_3c,CONCAT13(uStack_3d,CONCAT21(uStack_3f,cStack_40))));
+  }
+  if ((local_70 & 1) != 0) {
+    _ZdlPv((void *)CONCAT44(uStack_5c,CONCAT13(uStack_5d,CONCAT21(uStack_5f,cStack_60))));
+                    /* try { // try from 00800070 to 00900077 has its CatchHandler @ 008000ac */
+  }
+  if ((local_90 & 1) != 0) {
+                    /* try { // try from 00800078 to 009000a3 has its CatchHandler @ 00800030 */
+    _ZdlPv((void *)CONCAT44(uStack_7c,CONCAT13(uStack_7d,CONCAT21(uStack_7f,cStack_80))));
+  }
+  if ((local_b0 & 1) != 0) {
+    _ZdlPv((void *)CONCAT44(uStack_9c,CONCAT13(uStack_9d,CONCAT21(uStack_9f,cStack_a0))));
+  }
+  if ((local_d0 & 1) != 0) {
+    _ZdlPv((void *)CONCAT44(uStack_bc,CONCAT13(uStack_bd,CONCAT21(uStack_bf,cStack_c0))));
+  }
+                    /* try { // try from 008000a4 to 009000ab has its CatchHandler @ 008000ac */
+  if ((local_f0 & 1) != 0) {
+                    /* catch() { ... } // from try @ 00800070 with catch @ 008000ac
+                       catch() { ... } // from try @ 008000a4 with catch @ 008000ac
+                       try { // try from 008000ac to 009000cb has its CatchHandler @ 00800030 */
+    _ZdlPv((void *)CONCAT44(uStack_dc,CONCAT13(uStack_dd,CONCAT21(uStack_df,cStack_e0))));
+  }
+  if ((local_110 & 1) != 0) {
+    _ZdlPv((void *)CONCAT44(uStack_fc,CONCAT13(uStack_fd,CONCAT21(uStack_ff,cStack_100))));
+  }
+                    /* catch() { ... } // from try @ 00800078 with catch @ 00800030
+                       catch() { ... } // from try @ 008000ac with catch @ 00800030 */
+  __cxa_atexit(FUN_0043ae30,&DAT_00ca7be8,&PTR_LOOP_00c62b90);
+  if (*(long *)(lVar1 + 0x28) == local_38) {
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

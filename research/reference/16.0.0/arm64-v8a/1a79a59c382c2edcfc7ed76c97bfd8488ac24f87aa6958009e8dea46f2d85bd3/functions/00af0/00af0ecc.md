@@ -1,0 +1,46 @@
+﻿# 00af0ecc
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00af0ecc",
+  "name": "FUN_00af0ecc",
+  "size": 28,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "abea9b533fb16d38409d1bbcabbe7bf5448ed95599398511b4b4bd5cafbb5df6",
+  "source_text_sha256": "abea9b533fb16d38409d1bbcabbe7bf5448ed95599398511b4b4bd5cafbb5df6"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 199 bytes
+
+~~~c
+
+long FUN_00af0ecc(long param_1,long param_2)
+
+{
+  param_1 = param_1 + 8;
+  if (*(char **)(param_2 + 8) != "ZN13MyApplication18UnitAdoptionUpdateEvE3$_6") {
+    param_1 = 0;
+  }
+  return param_1;
+}
+
+~~~

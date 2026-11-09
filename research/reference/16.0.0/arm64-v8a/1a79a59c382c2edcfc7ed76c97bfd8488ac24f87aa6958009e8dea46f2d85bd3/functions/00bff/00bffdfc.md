@@ -1,0 +1,43 @@
+﻿# 00bffdfc
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bffdfc",
+  "name": "_ZNSt6__ndk113basic_istreamIwNS_11char_traitsIwEEED1Ev",
+  "size": 12,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "fae5a536c38840cfa53e7df8160598f4c8072c4445c980b66165e51d69c93aae",
+  "source_text_sha256": "fae5a536c38840cfa53e7df8160598f4c8072c4445c980b66165e51d69c93aae"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c5cce0](../00c5c/00c5cce0.md)
+
+## 疑似コード / UTF-8 136 bytes
+
+~~~c
+
+void _ZNSt6__ndk113basic_istreamIwNS_11char_traitsIwEEED1Ev(long param_1)
+
+{
+  _ZNSt6__ndk18ios_baseD1Ev(param_1 + 0x10);
+  return;
+}
+
+~~~

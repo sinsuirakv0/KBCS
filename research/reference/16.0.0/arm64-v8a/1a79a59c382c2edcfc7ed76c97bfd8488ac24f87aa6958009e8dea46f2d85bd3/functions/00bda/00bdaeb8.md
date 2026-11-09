@@ -1,0 +1,61 @@
+﻿# 00bdaeb8
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bdaeb8",
+  "name": "_ZN8firebase4auth20JniAuthPhoneListener26nativeOnVerificationFailedEP7_JNIEnvP8_jobjectlP8_jstring",
+  "size": 116,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "d93ab2474287cb61559bc44b426d49ccdf348845488bd7852e51c18d33a477a8",
+  "source_text_sha256": "d93ab2474287cb61559bc44b426d49ccdf348845488bd7852e51c18d33a477a8"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c57ab0](../00c57/00c57ab0.md)
+- [00c57ae0](../00c57/00c57ae0.md)
+- [00c5ab20](../00c5a/00c5ab20.md)
+
+## 疑似コード / UTF-8 671 bytes
+
+~~~c
+
+void _ZN8firebase4auth20JniAuthPhoneListener26nativeOnVerificationFailedEP7_JNIEnvP8_jobjectlP8_jstring
+               (undefined8 param_1,undefined8 param_2,long *param_3,undefined8 param_4)
+
+{
+  long lVar1;
+  byte local_40 [16];
+  void *local_30;
+  long local_28;
+  
+  lVar1 = tpidr_el0;
+  local_28 = *(long *)(lVar1 + 0x28);
+  _ZN8firebase4util15JStringToStringEP7_JNIEnvP8_jobject(local_40,param_1,param_4);
+  (**(code **)(*param_3 + 0x18))(param_3,local_40);
+  if ((local_40[0] & 1) != 0) {
+    _ZdlPv(local_30);
+  }
+  if (*(long *)(lVar1 + 0x28) == local_28) {
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

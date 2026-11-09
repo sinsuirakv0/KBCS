@@ -1,0 +1,99 @@
+﻿# 007afefc
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "007afefc",
+  "name": "FUN_007afefc",
+  "size": 308,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "1b1500ac236955005b31f944d162f77346a482377c6b2d2d558f35cfd6572d22",
+  "source_text_sha256": "1b1500ac236955005b31f944d162f77346a482377c6b2d2d558f35cfd6572d22"
+}
+~~~
+
+## 呼び出し元
+
+- [007adedc](../007ad/007adedc.md)
+
+## 呼び出し先
+
+- [00597e90](../00597/00597e90.md)
+- [005b72fc](../005b7/005b72fc.md)
+- [00c538b0](../00c53/00c538b0.md)
+- [00c538e0](../00c53/00c538e0.md)
+- [00c57a80](../00c57/00c57a80.md)
+- [00c57a90](../00c57/00c57a90.md)
+- [00c57ae0](../00c57/00c57ae0.md)
+
+## 疑似コード / UTF-8 1499 bytes
+
+~~~c
+
+void FUN_007afefc(long *param_1,undefined8 param_2,undefined8 *param_3)
+
+{
+  long *plVar1;
+  long lVar2;
+  long *plVar3;
+  long *plVar4;
+  long lVar5;
+  long *local_50;
+  long local_48;
+  
+  lVar2 = tpidr_el0;
+  local_48 = *(long *)(lVar2 + 0x28);
+  plVar4 = (long *)_Znwm(0xb0);
+  *plVar4 = (long)&PTR_FUN_00c701c0;
+  local_50 = (long *)*param_3;
+  *param_3 = 0;
+  plVar1 = plVar4 + 4;
+  plVar4[2] = 0;
+  plVar4[1] = 0;
+  FUN_00597e90(plVar1,&local_50);
+  plVar3 = local_50;
+  local_50 = (long *)0x0;
+  if (plVar3 != (long *)0x0) {
+    (**(code **)(*plVar3 + 8))();
+  }
+  lVar5 = plVar4[6];
+  *param_1 = (long)plVar1;
+  param_1[1] = (long)plVar4;
+  if (lVar5 == 0) {
+    FUN_00c538b0(1,plVar4 + 1);
+    FUN_00c538b0(1,plVar4 + 2);
+    plVar4[5] = (long)plVar1;
+    plVar4[6] = (long)plVar4;
+  }
+  else {
+    if (*(long *)(lVar5 + 8) != -1) goto LAB_007b0004;
+    FUN_00c538b0(1,plVar4 + 1);
+    FUN_00c538b0(1,plVar4 + 2);
+    plVar4[5] = (long)plVar1;
+    plVar4[6] = (long)plVar4;
+    _ZNSt6__ndk119__shared_weak_count14__release_weakEv(lVar5);
+                    /* try { // try from 007affbc to 008b0043 has its CatchHandler @ 007b0128 */
+  }
+  lVar5 = FUN_00c538e0(0xffffffffffffffff,plVar4 + 1);
+  if (lVar5 == 0) {
+    (**(code **)(*plVar4 + 0x10))(plVar4);
+    _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar4);
+  }
+LAB_007b0004:
+  if (*(long *)(lVar2 + 0x28) == local_48) {
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

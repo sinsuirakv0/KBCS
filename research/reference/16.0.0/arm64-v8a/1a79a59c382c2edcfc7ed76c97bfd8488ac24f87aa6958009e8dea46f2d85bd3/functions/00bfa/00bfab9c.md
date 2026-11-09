@@ -1,0 +1,45 @@
+﻿# 00bfab9c
+
+版: 16.0.0 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfab9c",
+  "name": "_ZNSt6__ndk18ios_base7failureD0Ev",
+  "size": 44,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "dfdf5589674f079308e6f234ab2e4b0511fdbe200b44032b9f88c3e7cb49d9ff",
+  "source_text_sha256": "dfdf5589674f079308e6f234ab2e4b0511fdbe200b44032b9f88c3e7cb49d9ff"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c57ab0](../00c57/00c57ab0.md)
+- [00c5dec0](../00c5d/00c5dec0.md)
+
+## 疑似コード / UTF-8 129 bytes
+
+~~~c
+
+void _ZNSt6__ndk18ios_base7failureD0Ev(void *param_1)
+
+{
+  _ZNSt6__ndk18ios_base7failureD1Ev();
+  _ZdlPv(param_1);
+  return;
+}
+
+~~~
