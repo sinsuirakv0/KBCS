@@ -15,7 +15,7 @@ pub const SOURCES: &[&str] = &[
 // 報酬IDから本能玉の定義を選び、原本の名前と重ね描き用矩形を返す。
 pub fn decorate(database: &Database, rewards: &mut BTreeMap<String, Value>) -> Result<()> {
     if !database.connection.query_row(
-        "SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?)",
+        "SELECT EXISTS(SELECT 1 FROM source_file WHERE path=?1 UNION ALL SELECT 1 FROM asset_reference WHERE path=?1)",
         [SOURCES[0]],
         |r| r.get::<_, bool>(0),
     )? {
@@ -28,10 +28,16 @@ pub fn decorate(database: &Database, rewards: &mut BTreeMap<String, Value>) -> R
         .filter(|row| row.first().is_some_and(|v| v.trim().parse::<i64>().is_ok()))
         .collect::<Vec<_>>();
     let description = String::from_utf8(read(SOURCES[2])?)?;
-    let names = description
+    let explanations = description
         .trim_start_matches('\u{feff}')
         .lines()
-        .map(|l| l.split('\t').next().unwrap_or(""))
+        .map(|line| {
+            let mut fields = line.split('\t');
+            (
+                fields.next().unwrap_or_default(),
+                fields.next().unwrap_or_default(),
+            )
+        })
         .collect::<Vec<_>>();
     let mut atlases = Vec::new();
     for kind in ["attribute", "effect", "grade"] {
@@ -81,6 +87,16 @@ pub fn decorate(database: &Database, rewards: &mut BTreeMap<String, Value>) -> R
         let grade = item["gradeID"].as_u64().context("本能玉ランク欠測")? as usize;
         let effect = item["content"].as_u64().context("本能玉効果欠測")? as usize;
         let attribute = item["attribute"].as_u64().unwrap_or(12) as usize;
+        if effect >= crate::equipment::EFFECT_COUNT as usize || grade > 4 {
+            let name = format!("未実装の本能玉（効果ID {effect}・等級ID {grade}）");
+            reward["name"] = json!(name);
+            reward["kindName"] = json!(name);
+            reward["gradeName"] = json!(grade.to_string());
+            reward["description"] = json!("この効果は現在のKBCSでは未実装です。");
+            reward["support"] = json!(crate::support::Support::Unsupported);
+            reward["equipment"] = item.clone();
+            continue;
+        }
         let grade_name = grades
             .get(grade)
             .and_then(|r| r.get(3))
@@ -94,12 +110,22 @@ pub fn decorate(database: &Database, rewards: &mut BTreeMap<String, Value>) -> R
                 .1
                 .as_str()
         };
-        let name = names
-            .get(effect)
-            .context("本能玉効果名欠測")?
+        let (template, explanation) = explanations.get(effect).context("本能玉効果名欠測")?;
+        let name = template
             .replacen("%@", grade_name, 1)
             .replacen("%@", attribute_name, 1);
         reward["name"] = json!(format!("本能玉 {}", crate::model::plain_text(&name)));
+        reward["kindName"] = json!(crate::model::plain_text(
+            &template
+                .replacen("%@", "", 1)
+                .replacen("%@", attribute_name, 1)
+        ));
+        reward["gradeName"] = json!(grade_name);
+        reward["description"] = json!(crate::model::plain_text(&explanation.replacen(
+            "%@",
+            attribute_name,
+            1
+        )));
         reward["equipment"] = item.clone();
         reward["layers"] = json!(
             [

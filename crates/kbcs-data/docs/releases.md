@@ -18,7 +18,7 @@
 
 ## 版固定参照の接続
 
-本能玉枠はequipment::capacitiesが採用済みData/equipmentslot.csvを読む。DBに原本bytesがない場合もasset_referenceとsource::assetの検証済み原本へ戻れるため、旧snapshotの再構築を要求しない。viewのorbSlots、編成Storeの保存、戦闘Documentの検査が同じ表を使う。単独Document::validateは同版の旧組込み定義を維持し、公式DBがある呼出元はvalidate_with_databaseを使う。
+本能玉枠は採用済みData/equipmentslot.csvを読む。DBに原本bytesがない場合もasset_referenceとsource::assetの検証済み原本へ戻れるため、旧snapshotの再構築を要求しない。viewのorbSlots、編成Storeの保存、戦闘Documentの検査が同じ表を使う。公式DBがある場合の検証と実効値は[編成](formations.md)を参照。
 
 compatibility::calculation_versionはsettings-catalogの全27採用元SHAを公式索引と比較し、一致する場合だけ参照版15.7.2を返す。キャラ/ステージカタログはgameVersionとcalculationVersionを分離する。キャラ詳細・XP・城体力は後者で既存定義の適用可否を判断する。戦闘開始は現在buildId、（指定時の）snapshot.versionとDBを照合し、別途全戦闘入力・効果時計SHAを照合する。
 

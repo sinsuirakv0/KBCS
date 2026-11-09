@@ -1,4 +1,5 @@
-﻿use anyhow::{Context, Result, ensure};
+﻿use crate::{equipment, model::Form, store::Database, talents::Talent};
+use anyhow::{Context, Result, ensure};
 use rusqlite::{Connection, OptionalExtension, params};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -13,6 +14,38 @@ pub struct Member {
     pub plus: u16,
     pub talents: BTreeMap<u32, u16>,
     pub orbs: Vec<Option<u32>>,
+}
+impl Member {
+    pub fn total_level(&self) -> u32 {
+        u32::from(self.level) + u32::from(self.plus)
+    }
+
+    // 編成の選択を保持し、戦闘・装着候補では合計Lvに応じた形態を使う。
+    pub fn effective_form(&self, database: &Database, region: &str) -> Result<Form> {
+        ensure!(self.form <= 3 && self.level > 0, "キャラ設定が不正です");
+        let form = database.form(region, self.unit_id, usize::from(self.form))?;
+        ensure!(
+            i64::from(self.level) <= form.max_level && i64::from(self.plus) <= form.plus_level,
+            "キャラレベル範囲外"
+        );
+        if form.rarity == 4 && self.form == 3 && self.total_level() < 60 {
+            return database.form(region, self.unit_id, 2);
+        }
+        Ok(form)
+    }
+
+    pub fn active_talent_level(&self, form: &Form, talent: &Talent) -> usize {
+        if !talent.numeric()
+            || form.index < 2
+            || form.rarity == 4 && talent.limit > 0 && self.total_level() < 60
+        {
+            return 0;
+        }
+        self.talents
+            .get(&(talent.index as u32))
+            .copied()
+            .unwrap_or(0) as usize
+    }
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -44,19 +77,37 @@ impl Document {
             crate::equipment::capacity(&self.game_version, id)
         })
     }
-    pub fn validate_with_database(
+    pub fn validate_with_equipment(
         &self,
         region: &str,
-        database: &crate::store::Database,
+        catalog: &equipment::Catalog,
     ) -> Result<()> {
-        let equipment = crate::equipment::capacities(database)?;
-        self.validate_capacity(region, |id| Ok(equipment.get(&id).copied().unwrap_or(0)))
+        self.validate_capacity(region, |id| Ok(catalog.capacity(id)))?;
+        for id in self
+            .slots
+            .iter()
+            .flatten()
+            .flat_map(|member| member.orbs.iter().flatten())
+        {
+            catalog.get(*id)?;
+        }
+        Ok(())
     }
     fn validate_capacity(
         &self,
         region: &str,
         capacity: impl Fn(u32) -> Result<usize>,
     ) -> Result<()> {
+        self.validate_shape(region)?;
+        for member in self.slots.iter().flatten() {
+            ensure!(
+                member.orbs.len() <= capacity(member.unit_id)?,
+                "キャラの本能玉枠数が範囲外です"
+            );
+        }
+        Ok(())
+    }
+    fn validate_shape(&self, region: &str) -> Result<()> {
         ensure!(
             self.format == "kbcs-formation" && self.schema_version == 1,
             "未対応の編成ファイル形式です"
@@ -80,10 +131,7 @@ impl Document {
                 member.form <= 3 && member.level > 0 && ids.insert(member.unit_id),
                 "キャラ設定が不正、または同じキャラが重複しています"
             );
-            ensure!(
-                member.talents.len() <= 64 && member.orbs.len() <= capacity(member.unit_id)?,
-                "キャラの設定数が範囲外です"
-            );
+            ensure!(member.talents.len() <= 64, "キャラの設定数が範囲外です");
         }
         ensure!(
             self.profile["schemaVersion"] == 1 && self.profile["cannon"].is_object(),
@@ -210,15 +258,81 @@ impl Store {
             params![region, id],
             |r| r.get(0),
         )?;
+        let document: Document = serde_json::from_str(&text)?;
+        // 旧文書の過剰枠や欠測IDは編集画面で外せる。保存・出撃の際に原本と照合する。
+        document.validate_shape(region)?;
         Ok(
-            json!({"count":count,"index":index,"entry":{"id":id,"revision":revision,"updatedAt":updated,"document":serde_json::from_str::<Value>(&text)?}}),
+            json!({"count":count,"index":index,"entry":{"id":id,"revision":revision,"updatedAt":updated,"document":document}}),
         )
     }
     pub fn write(&self, region: &str, input: &WriteInput) -> Result<Value> {
+        self.write_inner(region, input, false)
+    }
+
+    // ファイル・一時枠からは装着記録を復元できる。実効値は常に出撃時に再判定する。
+    pub fn restore(&self, region: &str, input: &WriteInput) -> Result<Value> {
+        self.write_inner(region, input, true)
+    }
+
+    fn write_inner(&self, region: &str, input: &WriteInput, restore: bool) -> Result<Value> {
         if let Ok(database) = crate::store::Database::open(&self.1, region) {
-            input.document.validate_with_database(region, &database)?;
+            let catalog = equipment::Catalog::read(&database)?;
+            input.document.validate_with_equipment(region, &catalog)?;
+            let previous = input
+                .id
+                .map(|id| {
+                    self.0
+                        .query_row(
+                            "SELECT document FROM formation WHERE id=? AND region=? AND revision=?",
+                            params![id, region, input.revision],
+                            |row| row.get::<_, String>(0),
+                        )
+                        .optional()
+                })
+                .transpose()?
+                .flatten()
+                .map(|text| serde_json::from_str::<Document>(&text))
+                .transpose()?;
+            for member in input.document.slots.iter().flatten() {
+                let form = member.effective_form(&database, region)?;
+                if !member.orbs.iter().any(Option::is_some) {
+                    continue;
+                }
+                let talents = crate::talents::read(&database.connection, region, member.unit_id)?;
+                let eligible = catalog.eligibility(member, &form, &talents)?;
+                let existing = previous.as_ref().and_then(|doc| {
+                    doc.slots
+                        .iter()
+                        .flatten()
+                        .find(|old| old.unit_id == member.unit_id)
+                });
+                for (slot, id) in member
+                    .orbs
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(slot, id)| id.map(|id| (slot, id)))
+                {
+                    let orb = catalog.get(id)?;
+                    ensure!(
+                        restore
+                            || existing.and_then(|old| old.orbs.get(slot)) == Some(&Some(id))
+                            || eligible.active(slot, orb, catalog.mask(orb)),
+                        "本能玉ID {id} は現在の形態・本能・レベルで枠{}に装着できません",
+                        slot + 1
+                    );
+                }
+            }
         } else {
             input.document.validate(region)?;
+            ensure!(
+                input
+                    .document
+                    .slots
+                    .iter()
+                    .flatten()
+                    .all(|member| member.orbs.iter().all(Option::is_none)),
+                "本能玉の検証には公式DBが必要です"
+            );
         }
         let text = serde_json::to_string(&input.document)?;
         let id = if let Some(id) = input.id {

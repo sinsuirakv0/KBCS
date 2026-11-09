@@ -203,6 +203,17 @@ for probability in [0,50,100]:
     d.orb_enabled=1
     for effect in range(32):d.orbs[effect][:]=[probability,probability,probability,probability];d.orb_present[effect]=1
     cases.append(('orbs-'+str(probability),d,e,r,pool))
+equipment = json.loads((ROOT/'native/kbcs-core/tests/equipment-vectors.json').read_text(encoding='utf-8-sig'))
+for effect in range(5,26):
+    if effect in [18,19,22]:continue  # 撃破後の命中・生産専用の経路は別に照合する。
+    pair = equipment['cases'][effect*4]
+    _, values, _ = pair['results'][0]
+    for active in [0,1]:
+        d,e,r,pool=make(True,[v or 0 for v in unitrows[2]['cells']])
+        d.orb_enabled=active;d.orb_present[effect]=1
+        d.orbs[effect][:]=(values+[0]*4)[:4]
+        if effect in [9,16]:e.orb_stage=effect
+        cases.append((f'equipment-{effect}-{active}',d,e,r,pool))
 for boss in [0,1,2]:
     d,e,r,pool=make(False,[v or 0 for v in enemyrows[2]['cells']])
     e.castle_slot=1;e.spawn_row[8]=boss;e.spawn_row[12]=7;e.castle_offset=13;e.castle_scale=90

@@ -292,7 +292,8 @@ pub fn catalog(database: &Database, region: &str) -> Result<Value> {
         {
             attributes.push("base".into());
         }
-        let abilities = abilities(&enemy.raw);
+        let mut abilities = abilities(&enemy.raw);
+        abilities.extend(crate::support::extension_abilities(&enemy.raw, 113));
         for ability in &abilities {
             if !options.iter().any(|value| value["key"] == ability["key"]) {
                 options.push(json!({"key":ability["key"],"label":ability["label"]}));

@@ -1,8 +1,10 @@
 ﻿import { normalizeUnitQuery } from './model.js';
 
+import {comboAvailable} from '../../../effect-support.js';
+
 export const statComboTypes=[['attack',0],['health',1],['speed',2],['research',11],['strong',14],['massive',15],['resistant',16],['knockback',17],['slow',18],['stop',19],['weaken',20],['strengthen',21],['critical',24],['witch-killer',22],['eva-killer',23],['villain',25]];
 const typeKeys=new Map(statComboTypes.map(([key,type])=>[type,key]));
-export const isStatCombo=combo=>typeKeys.has(combo.type);
+export const isStatCombo=combo=>comboAvailable(combo)&&typeKeys.has(combo.type);
 
 export function buildComboTeam(database, selected, forms={}) {
   const team=new Map();
@@ -35,7 +37,7 @@ export function filterCombos(database, combos, query, type, team, fitOnly) {
   const known=new Map(database.units.map(unit=>[unit.id,unit]));
   return combos.filter(combo=> {
     if(type!==''&&combo.type!==Number(type))return false;
-    const text=normalizeUnitQuery([combo.name,combo.effect,...combo.members.flatMap(member=>[String(member.id),...known.get(member.id).forms.map(form=>form.name)])].join(' '));
+    const text=normalizeUnitQuery([combo.name,combo.effect,...combo.members.flatMap(member=>[String(member.id),...(known.get(member.id)?.forms||[]).map(form=>form.name)])].join(' '));
     if(!words.every(word=>/^\d+$/.test(word)?combo.members.some(member=>member.id===Number(word)):text.includes(word)))return false;
     return !fitOnly||new Set([...team.map(member=>member.id),...combo.members.map(member=>member.id)]).size<=5;
   });

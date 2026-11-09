@@ -8,6 +8,51 @@ fn fixture() -> Value {
     )
     .unwrap()
 }
+
+#[test]
+fn equipment_matches_arm64_grade_and_sum_witnesses() {
+    let fixture: Value = serde_json::from_str(
+        include_str!("../../../../native/kbcs-core/tests/equipment-vectors.json")
+            .trim_start_matches('\u{feff}'),
+    )
+    .unwrap();
+    let items = fixture["list"]["ID"].as_array().unwrap();
+    for case in fixture["cases"].as_array().unwrap() {
+        let (orbs, grades): (Vec<_>, Vec<_>) = case["ids"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|id| {
+                let item = &items[id.as_u64().unwrap() as usize - 30000];
+                let mut values = [0; 4];
+                for (out, value) in values.iter_mut().zip(item["value"].as_array().unwrap()) {
+                    *out = value.as_i64().unwrap() as i32;
+                }
+                (
+                    Orb {
+                        effect: item["content"].as_i64().unwrap() as i32,
+                        mask: item["attribute"].as_u64().map_or(0, |bit| 1 << bit),
+                        values,
+                    },
+                    item["gradeID"].as_i64().unwrap() as i32,
+                )
+            })
+            .unzip();
+        let mut definition = actor::Definition::from_raw(&[0; 119], true).unwrap();
+        equipment(&orbs, &grades, &mut definition).unwrap();
+        for result in case["results"].as_array().unwrap() {
+            let effect = result[0].as_u64().unwrap() as usize;
+            assert_eq!(
+                definition.orb_present[effect],
+                result[2].as_i64().unwrap() as i32
+            );
+            if effect >= 5 {
+                let values: Vec<i32> = serde_json::from_value(result[1].clone()).unwrap();
+                assert_eq!(definition.orbs[effect][..values.len()], values);
+            }
+        }
+    }
+}
 fn config() -> Config {
     // 全フィールドが整数/浮動小数点のC POD。必須の状態だけ明示する。
     let mut c: Config = unsafe { std::mem::zeroed() };

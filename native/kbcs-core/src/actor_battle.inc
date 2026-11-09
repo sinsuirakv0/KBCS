@@ -252,13 +252,12 @@ struct KbcsBattle {
    std::copy_n(p.raw_attack,3,context.raw_attack);
    std::copy_n(&p.definition.orbs[0][0],KBCS_ACTOR_ORBS*4,&context.orbs[0][0]);
    std::copy_n(p.definition.orb_present,KBCS_ACTOR_ORBS,context.orb_present);
-   for(auto &orb:context.targeted_orbs)std::fill_n(orb,2,0);
    const int enemy=hit.side?hit.slot:hit.target;
    const KbcsActorDefinition empty{};const KbcsSpawnRequest request{};
    Context adapter{empty,environment,actors,request,seed};
    const bool traits[]={n_00a96a38(adapter,1,enemy),n_00a96b18(adapter,1,enemy),n_00a96bf8(adapter,1,enemy),n_00a96cd8(adapter,1,enemy),n_00a96e38(adapter,1,enemy),n_00a96f18(adapter,1,enemy),n_00a96ff8(adapter,1,enemy),n_00a97148(adapter,1,enemy),n_00a96d58(adapter,1,enemy),n_00a97068(adapter,1,enemy),n_00a970d8(adapter,1,enemy),n_00a971b8(adapter,1,enemy)};
    uint32_t mask=0;for(int i=0;i<12;++i)if(traits[i])mask|=1U<<i;
-   for(int i=0;i<p.orb_count;++i){const auto &orb=p.orbs[i];if(orb.effect<0||orb.effect>=5||!(uint32_t(orb.mask)&mask))continue;for(int j=0;j<2;++j)context.targeted_orbs[orb.effect][j]+=orb.values[j];}
+   targetOrbs(p.orbs,p.orb_count,mask,context.targeted_orbs);
   }else{
    context.form=0;context.effects.target_count=1;std::fill_n(context.raw_attack,3,0);for(auto &orb:context.targeted_orbs)std::fill_n(orb,2,0);
   }

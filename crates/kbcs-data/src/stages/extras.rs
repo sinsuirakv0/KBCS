@@ -4,7 +4,7 @@ use crate::{
     model::{csv_rows, plain_text},
     source::{Dataset, Source},
 };
-use anyhow::Result;
+use anyhow::{Context, Result};
 use rusqlite::{Connection, params};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
@@ -297,7 +297,30 @@ impl Extras {
             ];
             result["ruleName"] = json!(self.label(&rule["RuleNameLabel"]));
             result["ruleDescription"] = json!(self.label(&rule["RuleExplanationLabel"]));
-            result["rules"]=json!(rule["RuleType"].as_object().map(|values|values.iter().map(|(key,v)|{let index=key.parse::<usize>().unwrap_or(usize::MAX);json!({"id":index,"label":labels.get(index).copied().unwrap_or("特殊ルール"),"parameters":v["Parameters"]})}).collect::<Vec<_>>()).unwrap_or_default());
+            let values = rule["RuleType"]
+                .as_object()
+                .context("特殊ルールの定義が不正です")?;
+            let mut rules = Vec::new();
+            for (key, value) in values {
+                let index = key.parse::<usize>().context("特殊ルールIDが不正です")?;
+                let label = labels.get(index).copied();
+                anyhow::ensure!(value.is_object(), "特殊ルール {index} の原本が不正です");
+                if label.is_some() {
+                    anyhow::ensure!(
+                        value["Parameters"]
+                            .as_array()
+                            .is_some_and(|list| list.iter().all(Value::is_i64)),
+                        "特殊ルール {index} のパラメータが不正です"
+                    );
+                }
+                let support = if label.is_some() {
+                    crate::support::Support::Supported
+                } else {
+                    crate::support::Support::Unsupported
+                };
+                rules.push(json!({"id":index,"label":label.map(str::to_owned).unwrap_or_else(|| format!("未実装の特殊ルール（ID: {index}）")),"parameters":value["Parameters"],"support":support,"raw":value}));
+            }
+            result["rules"] = json!(rules);
         }
         if let Some(bonus) = self
             .json("Data/ScoreBonusMap.json")

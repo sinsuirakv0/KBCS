@@ -192,4 +192,8 @@ assetsはキャッシュであり、原本は引き続きsnapshotのsource_file�
 
 0.1.27のunit catalogはorbSlotsを追加する。公式schema8を変更せず、採用元SHA付きData/equipmentslot.csvの同版組込み定義からキャラ別最大枠を得る。生成はscripts/sync-equipment.py、消費はequipment::capacity→view::catalog / formations::Document::validate。同版以外を推測して適用しない。
 
+現在の本能玉の装着・出撃判定は、公式DBが採用した枠・属性・玉の原本を共用する。編成の玉IDと空欄の保存形式、ロック時の保持、同版の組込み定義へ戻る条件は[ユーザー編成](../../crates/kbcs-data/docs/formations.md)を参照。
+
+未知IDの保持、JP 16.0.0のコンボ解放、参照コアとの精度区分は[16.0.0と未実装データ](../../crates/kbcs-data/docs/compatibility-16.md)を参照。
+
 2026-10-30: [変換器14と欠損・再生成の契約](../../crates/kbcs-data/docs/validation.md)。

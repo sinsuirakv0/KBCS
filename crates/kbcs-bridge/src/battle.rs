@@ -305,6 +305,24 @@ pub struct Orb {
     pub mask: i32,
     pub values: [i32; 4],
 }
+pub fn equipment(
+    orbs: &[Orb],
+    grades: &[i32],
+    definition: &mut actor::Definition,
+) -> Result<(), u32> {
+    if orbs.len() != grades.len() || orbs.len() > 8 {
+        return Err(1);
+    }
+    let code = unsafe {
+        kbcs_core_battle_equipment(
+            orbs.as_ptr(),
+            grades.as_ptr(),
+            orbs.len() as i32,
+            definition,
+        )
+    };
+    if code == 0 { Ok(()) } else { Err(code) }
+}
 #[repr(C)]
 pub struct Profile {
     pub definition: actor::Definition,
@@ -940,6 +958,12 @@ impl Drop for Battle {
     }
 }
 unsafe extern "C" {
+    fn kbcs_core_battle_equipment(
+        orbs: *const Orb,
+        grades: *const i32,
+        count: i32,
+        definition: *mut actor::Definition,
+    ) -> u32;
     fn kbcs_core_battle_inspection_sources(
         battle: *const RawBattle,
         id: i32,

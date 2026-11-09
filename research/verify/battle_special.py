@@ -17,7 +17,8 @@ with sqlite3.connect((n.cache/'cache.sqlite').as_uri()+'?mode=ro',uri=True) as d
   n.ends[start]=start+db.execute('SELECT size FROM functions WHERE address=?',(f'{start:08x}',)).fetchone()[0]
 runtime=os.add_dll_directory('D:/KBC/KBC-LINEbot-v2/.tools/llvm-mingw-20260922-ucrt-x86_64/bin') if os.name=='nt' else None
 lib=c.CDLL(str(a.library.resolve()))
-assert lib.kbcs_core_abi_version()==4,"ABI4のライブラリが必要"
+assert lib.kbcs_core_abi_version()==5,"ABI5のライブラリが必要"
+equipment=json.loads((ROOT/'native/kbcs-core/tests/equipment-vectors.json').read_text(encoding='utf-8-sig'))
 class Spawn(c.Structure):_fields_=[(k,c.c_int32) for k in ['side','raw','level_index','layer_min','layer_max','form','row']]
 class Production(c.Structure):_fields_=[('money',c.c_int32)]+[(k,c.c_int32*10) for k in ['wait','maximum','produced','last_cost']]+[('total',c.c_int32)]
 class Extra(c.Structure):_fields_=[('slot',c.c_int32),('wait',c.c_int32)]
@@ -68,6 +69,21 @@ for mask,rarity,amount,interval in itertools.product([2,16,63],[0,1,4,5],[0,1,2]
  assert size.value==length and bytes(out)[:length*8]==bytes(n.cpu.mem_read(queue,length*8)),(mask,rarity,amount,interval)
  assert get(economy+0x108+slot*4)==1 and money[0]==92500,(mask,rarity,amount,interval,money[0])
 counts['extra_plan']=216
+# 生成成功で生産数を増やした後の玉19と固有短縮の優先順を照合する。
+lib.kbcs_core_production_wait.argtypes=[c.c_int32,c.c_int32,c.POINTER(c.c_int32)]
+orb19=equipment['cases'][19*4]['results'][0][1][0]
+wait_cases=list(itertools.product([41,60,61,181],[0,17],[0,1]))
+for base,innate,periodic in wait_cases:
+ n.cpu.mem_write(g,bytes(0x400000));waits=[];generated=[];checked=[]
+ n.helpers.update({0x644304:0,0x9f1e64:lambda:generated.append(get(economy+0x108+slot*4)) or 1,
+  0x58c05c:base,0x5c2f88:lambda:checked.append(get(economy+0x108+slot*4)) or periodic,
+  0x6440f0:0,0xa99234:innate,0x5c2f30:1,0x66398c:orb19,
+  0x5c2d60:lambda:waits.append(reg(2)) or 0,0x5c2720:100000,0x5c2990:0})
+ n.call(0x9f4a74,g,0,slot,1)
+ wait=c.c_int32(-1);reduction=(innate or orb19) if periodic else -1
+ assert lib.kbcs_core_production_wait(base,reduction,c.byref(wait))==0
+ assert generated==[0] and checked==[1] and waits==[wait.value],(base,innate,periodic,waits,generated,checked)
+counts['equipment_wait']=len(wait_cases)
 # 実生成は捕捉し、生産数を1減らして呼ぶ時点・後ろからの順序・失敗時消費を検証。
 rng=random.Random(157208);queue=n.memory+0x4000
 for case in range(80):
@@ -98,7 +114,8 @@ class Cost(c.Structure):_fields_=[(k,c.c_int32) for k in ['enabled','raw','talen
 lib.kbcs_core_production_cost.argtypes=[c.POINTER(Cost),c.POINTER(c.c_int32)]
 fixed_node=n.memory+0x6000;rarity_node=n.memory+0x6020;fixed_values=n.memory+0x6100;rarity_values=n.memory+0x6140;combo_values=n.memory+0x6200
 pointer(fixed_node,fixed_values);pointer(fixed_node+8,fixed_values+4);pointer(rarity_node,rarity_values);pointer(rarity_node+8,rarity_values+24)
-price_cases=list(itertools.product([7500,91100,123450],[0,100],[0,1,2],[0,133],[-1,321],[50,100,133],[-1,0,20],[[],[20],[5,10]]))
+orb22=equipment['cases'][22*4]['results'][0][1][0]
+price_cases=list(itertools.product([7500,91100,123450],[0,100],[0,1,2],[0,133],[-1,321],[50,100,133],[-1,0,orb22],[[],[20],[5,10]]))
 for raw,talent,chapter,multiplier,fixed,rarity,orb,combos in price_cases:
  put(g+0x9fd80+2*0x770+2*0x1dc,raw);put(g+0x38fad8,chapter);put(fixed_values,fixed)
  n.cpu.mem_write(rarity_values,struct.pack('<6i',*[rarity]*6));n.cpu.mem_write(combo_values,struct.pack('<'+'i'*len(combos),*combos))

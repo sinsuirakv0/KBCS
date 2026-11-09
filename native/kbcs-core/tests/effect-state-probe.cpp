@@ -1,6 +1,21 @@
 ﻿// 解析専用DLL。所有者の非公開プールを検査し、配布バイナリには含めない。
 #include "../src/actor.cpp"
 
+extern "C" uint32_t kbcs_audit_equipment(const KbcsBattleOrb *orbs,const int32_t *grades,int32_t count,uint32_t traits,int32_t values[26][4],int32_t present[26]){
+ if(!values||!present)return 1;
+ KbcsActorDefinition definition{};
+ const auto code=kbcs_core_battle_equipment(orbs,grades,count,&definition);
+ if(code)return code;
+ int32_t targeted[5][2]{};
+ targetOrbs(orbs,count,traits,targeted);
+ for(int effect=0;effect<26;++effect){
+  std::copy_n(definition.orbs[effect],4,values[effect]);
+  if(effect<5)std::copy_n(targeted[effect],2,values[effect]);
+  present[effect]=definition.orb_present[effect];
+ }
+ return 0;
+}
+
 extern "C" uint32_t kbcs_audit_cannon_action(KbcsActorCannon *state,KbcsActor actors[2][51],const KbcsCannonRules *rules,int side,int mode,KbcsBattleSound *out,int *count){
  if(!out||!count)return 1;std::vector<KbcsBattleSound> sounds;const int frame=0;
  BattleSoundScope scope(sounds,frame);KbcsBattleRules battle_rules{};BattleRulesScope rules_scope(battle_rules,mode);

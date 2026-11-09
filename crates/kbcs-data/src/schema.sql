@@ -19,7 +19,7 @@ CREATE TABLE growth (
 ) STRICT;
 CREATE TABLE talent (
  region TEXT NOT NULL, unit_id INTEGER NOT NULL, talent_index INTEGER NOT NULL,
- skill_id INTEGER NOT NULL, max_level INTEGER NOT NULL CHECK(max_level > 0),
+ skill_id INTEGER NOT NULL, max_level INTEGER NOT NULL CHECK(max_level >= 0),
  description TEXT NOT NULL, level_limit INTEGER NOT NULL,
  target_mask INTEGER NOT NULL, add_targets INTEGER NOT NULL,
  source_path TEXT NOT NULL REFERENCES source_file(path), source_row INTEGER NOT NULL, source_column INTEGER NOT NULL,

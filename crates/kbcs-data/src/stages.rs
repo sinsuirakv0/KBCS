@@ -723,13 +723,15 @@ fn add_flag(stage: &mut Value, label: &str, common: bool) -> Result<()> {
 
 // 編成と報酬表示で、同じ原本の本能玉ID・名称・3層アイコンを使う。
 pub fn equipment_catalog(database: &Database) -> Result<Value> {
-    let raw: Value = serde_json::from_slice(&database.source("Data/equipmentlist.json")?.3)?;
-    let mut items = raw["ID"]
-        .as_array()
-        .context("本能玉の定義なし")?
+    let catalog = crate::equipment::Catalog::read(database)?;
+    let mut items = catalog
+        .items()
         .iter()
         .enumerate()
-        .map(|(index, _)| ((30000 + index).to_string(), json!({"id":30000+index})))
+        .map(|(index, _)| {
+            let id = crate::equipment::FIRST_ID + index as u32;
+            (id.to_string(), json!({"id":id}))
+        })
         .collect::<BTreeMap<_, _>>();
     rewards::decorate(database, &mut items)?;
     Ok(json!({"items":items.into_values().collect::<Vec<_>>()}))

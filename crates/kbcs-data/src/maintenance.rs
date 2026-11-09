@@ -30,7 +30,34 @@ pub fn summary(root: &Path, region: &str) -> Result<Value> {
     let database_error = opened.as_ref().err().map(|v| format!("{v:#}"));
     let database = opened.ok();
     let mut counts = serde_json::Map::new();
+    let mut unsupported = Vec::new();
     if let Some(db) = &database {
+        let mut talents = db.connection.prepare("SELECT skill_id,count(*),count(DISTINCT unit_id) FROM talent WHERE region=? GROUP BY skill_id ORDER BY skill_id")?;
+        for row in talents.query_map([region], |row| {
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, u32>(1)?,
+                row.get::<_, u32>(2)?,
+            ))
+        })? {
+            let (id, count, units) = row?;
+            if !crate::talents::support(id).is_supported() {
+                unsupported.push(json!({"domain":"talent","id":id,"records":count,"units":units}));
+            }
+        }
+        for entry in crate::support::picture_book_extensions(db)? {
+            if entry["support"] == "unsupported" {
+                unsupported.push(json!({"domain":"pictureBookAbility","id":entry["id"],"records":1,"raw":entry["raw"]}));
+            }
+        }
+        let roguelike: u32 = db.connection.query_row(
+            "SELECT count(*) FROM asset_reference WHERE path GLOB 'Data/Roguelike*'",
+            [],
+            |row| row.get(0),
+        )?;
+        if roguelike > 0 {
+            unsupported.push(json!({"domain":"roguelike","records":roguelike}));
+        }
         for table in [
             "unit",
             "form",
@@ -49,7 +76,7 @@ pub fn summary(root: &Path, region: &str) -> Result<Value> {
         }
     }
     Ok(
-        json!({"storage":crate::storage::space(root),"dataDir":root,"database":store::current_path(root,region).ok(),"databaseError":database_error,"metadata":database.as_ref().and_then(|db|db.metadata().ok()),"counts":counts,"schemaVersion":crate::SCHEMA_VERSION,"importerVersion":crate::IMPORTER_VERSION}),
+        json!({"storage":crate::storage::space(root),"dataDir":root,"database":store::current_path(root,region).ok(),"databaseError":database_error,"metadata":database.as_ref().and_then(|db|db.metadata().ok()),"counts":counts,"unsupportedEffects":unsupported,"schemaVersion":crate::SCHEMA_VERSION,"importerVersion":crate::IMPORTER_VERSION}),
     )
 }
 pub fn browse(root: &Path, relative: &str) -> Result<Value> {

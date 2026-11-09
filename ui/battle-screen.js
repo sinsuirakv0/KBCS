@@ -1,4 +1,5 @@
-﻿import {nativeFont,loadNativeFonts} from './native-font.js';
+﻿import {comboAvailable,partialCalculation} from './effect-support.js';
+import {nativeFont,loadNativeFonts} from './native-font.js';
 import {readBattleKeys,battleKeyAction,editableKeyTarget} from './keyboard.js';
 import {createSessionId} from './src/shared/browser/session-id.js';
 import {battleAspects,battleViewportWidth,battlePlaybackRate} from './battle-view.js';
@@ -20,24 +21,26 @@ export function battleScreenConfiguration(database,snapshot){
  const facility=id=>{const v=profile.facilities[id];return v.level+v.plus-1;};
  const treasure=type=>catalog.treasures.filter(v=>v.effectType===type&&!v.effectFlag).reduce((sum,v)=>sum+Math.trunc(v.maximumEffect*profile.treasures[v.id]/100),0);
  const team=new Map(formation.slots.slice(0,5).filter(Boolean).map(v=>[v.unitId,v.form]));
- const combo=type=>database.combos.filter(v=>v.type===type&&v.members.every(m=>team.has(m.id)&&team.get(m.id)>=m.form)).reduce((sum,v)=>sum+database.comboEffects[type].values[v.grade],0);
+ const combo=type=>database.combos.filter(v=>v.type===type&&comboAvailable(v,formation.slots)&&v.members.every(m=>team.has(m.id)&&team.get(m.id)>=m.form)).reduce((sum,v)=>sum+database.comboEffects[type].values[v.grade],0);
  const rule=(map.rules||[]).find(v=>v.id===0),fixed=sortieFixedMoney(map,snapshot.fixedMoney),mask=battleItems.reduce((bits,v,index)=>bits|(items[v.key]?1<<index:0),0);
  return {config:{worker_level:facility('worker'),wallet_level:facility('wallet'),attack_level:facility('cannonAttack'),charge_level:facility('cannonCharge'),chapter:['EOC','EOCZ'].includes(map.series)?map.number:3,income_treasure:treasure(3),wallet_treasure:treasure(4),charge_treasure:treasure(1),speed_treasure:treasure(17),income_combo:combo(8),wallet_combo:combo(9),charge_combo:combo(7),charge_start_combo:combo(3),items:mask,speed:snapshot.speed===3?3:2,fixed_money:rule?fixed*100:-1,costs:deployment.slots.map(v=>v.cost),present:formation.slots.map(v=>Number(!!v)),blocked:deployment.slots.map(v=>v.reasons)},worker:items.rich||rule?7:Math.min(7,combo(4)),money:rule?fixed*100:combo(5)*100};
 }
 export async function prepareBattleScreen(database,snapshot,assets,signal,report,enemies){
  await loadNativeFonts();
  const [atlas,options]=await Promise.all([readBattleJson('/images/native-battle/manifest.json',{signal}),readBattleJson('/api/battle-options',{signal})]);
+ let referencePresentation=false;
  if(atlas.buildId!==snapshot.buildId||atlas.version!==snapshot.version){
-  const sources=Object.values(atlas.atlases).flatMap(value=>Object.entries(value.sources)).concat([[atlas.soundSource.path,atlas.soundSource]]),paths=[...new Set(sources.map(([path])=>path))];
+  const sources=Object.values(atlas.atlases).flatMap(value=>Object.entries(value.sources)),paths=[...new Set([...sources.map(([path])=>path),atlas.soundSource.path])];
   const hashes=await readBattleJson('/api/asset-hashes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(paths),signal});
-  if(sources.some(([path,source])=>hashes[path]!==source.sha256))throw Error('戦闘UI素材とDBの原本が異なります');
+  if(hashes[atlas.soundSource.path]!==atlas.soundSource.sha256)throw Error('戦闘音声の設定とDBの原本が異なります');
+  referencePresentation=sources.some(([path,source])=>hashes[path]!==source.sha256);
  }
  const forms=snapshot.formation.slots.map(member=>member&&database.units.find(v=>v.id===member.unitId)?.forms.find(v=>v.index===member.form));
  const atlasUrls=new Map(Object.values(atlas.atlases).map(v=>[v.image,v.url]));
  const paths=[...new Set([...Object.values(atlas.atlases).map(v=>v.image),...forms.filter(Boolean).map(v=>v.icon)])];
  let count=0;
  const images=new Map();
- for(const path of paths){signal.throwIfAborted();const image=assets.images.get(path)||new Image();if(!image.src)image.src=atlasUrls.get(path)||'/api/asset/'+path;try{await image.decode();}catch{throw Error('戦闘UI画像を読み込めません：'+path);}signal.throwIfAborted();images.set(path,image);report('戦闘UI',++count,paths.length);}
+ for(const path of paths){signal.throwIfAborted();const url=atlasUrls.get(path);const image=(url?null:assets.images.get(path))||new Image();if(!image.src)image.src=url||'/api/asset/'+path;try{await image.decode();}catch{throw Error('戦闘UI画像を読み込めません：'+path);}signal.throwIfAborted();images.set(path,image);report('戦闘UI',++count,paths.length);}
  const values=battleScreenConfiguration(database,snapshot);values.config.description_lines=forms.map(form=>unitDescription(form).length);
  const info=await prepareBattleInfo(database,snapshot,signal);
  // 一覧の状態アイコンも幕が開く前にデコードする。
@@ -54,8 +57,9 @@ export async function prepareBattleScreen(database,snapshot,assets,signal,report
  catch(error){dispose();signal.removeEventListener('abort',dispose);throw error;}
  // 後の曲の取得は開始を待たせない。将来の切替入口は読込完了を確認する。
  Promise.all(tracks.slice(1).map(async track=>{try{await loadAudio(track);}catch(error){if(error.name!=='AbortError')audioErrors.set(track.id,error.message);}}));
- return {database,enemies,statusImages,atlas,options,forms,info,images,sceneImages:assets.images,audioUrls,audioErrors,dispose:()=>{signal.removeEventListener('abort',dispose);dispose();},...values};
+ return {database,enemies,statusImages,atlas,options,forms,info,images,sceneImages:assets.images,audioUrls,audioErrors,referencePresentation,dispose:()=>{signal.removeEventListener('abort',dispose);dispose();},...values};
 }
+
 export async function startBattleScreen(root,canvas,scene,snapshot,resources,onReturn){
  let screenWidth=960,camera=scene.layout,cameraVersion=0,drawnVersion=-1,drawnRows=0;
  const backgroundCanvas=root.querySelector('[data-battle-background]'),controls=document.getElementById('battle-controls'),session=createSessionId();
@@ -74,6 +78,9 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  const context=canvas.getContext('2d'),message=root.querySelector('[data-battle-message]'),menu=root.querySelector('[data-battle-menu]');
  const messageHome=message.parentElement;controls.querySelector('.battle-status-line').prepend(message);
  message.textContent='';
+ const precisionWarning=document.createElement('span');precisionWarning.setAttribute('role','status');message.after(precisionWarning);
+ const presentationWarning=resources.referencePresentation?'参照版の戦闘UI素材で表示しています。':'';
+ precisionWarning.textContent=presentationWarning;precisionWarning.hidden=!presentationWarning;
  const keyBindings=readBattleKeys();
  let state={frame:0,intro:12,rows:2,page:0,page_frame:0,page_direction:1,paused:0,money:resources.money,worker:resources.worker,cannon:0,holding:-1,hold_frames:0,hold_wait:0,pointer_down:0,pointer_x:0,pointer_y:0,guard:0,pending_control:-1,items_on:resources.config.items,request_slot:-1,request_cannon:0,ui_frame:0,speed_mode:(resources.config.items&1)?(snapshot.speed===3?2:1):0,wallet_flash:0,description_item:-1,description_wait:0,start_x:0,start_y:0,gesture:0,page_step:1,request_action:0,bgm_level:3,se_level:3,vibration_on:0,info_mode:0,info_slot:0,saved_rows:2,hud_frame:0};
  let runtime={wait:Array(10).fill(0),maximum:Array(10).fill(0)},sessionCreated=false,skipCombos=false,returnPending=false,inspector,inspectionDirty=false;
@@ -130,6 +137,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(stopped)return;appliedSettings=sentSettings;
   // 0tickキーの後に届いた同一Fの古い描画応答で、押下状態を巻き戻さない。
   if(sentKeys===keySerial||next.state.ui_frame>state.ui_frame||next.state.frame>state.frame){state=next.state;view=next.layout;}runtime=next.runtime;
+  if(runtime.precision?.status==='partial'&&!precisionWarning.title){precisionWarning.textContent=[partialCalculation,presentationWarning].filter(Boolean).join(' ');precisionWarning.title=runtime.precision.issues.map(issue=>issue.domain+' '+issue.id).join(' / ');precisionWarning.hidden=false;}
   persistOptions();
   results.update(runtime,screenWidth,resources.atlas);
   inspector?.update(runtime.inspection,state.frame);
@@ -332,7 +340,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(!error&&!stopped)raf=requestAnimationFrame(animate);
  }
  window.addEventListener('pagehide',stop);
- function stop(){if(stopped)return;inspector?.stop();inspector=null;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cameraMotion.clear();document.removeEventListener('visibilitychange',visibility);}
+ function stop(){if(stopped)return;inspector?.stop();inspector=null;results.stop();window.removeEventListener('pagehide',stop);stopped=true;if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});actorsInfo.remove();resultInfo.remove();limitInfo.remove();precisionWarning.remove();messageHome.append(message);cancelAnimationFrame(raf);requestController.abort();observer.disconnect();aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor.stop();controls.removeEventListener('click',command);gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);root.removeEventListener('click',command);window.removeEventListener('keydown',key);window.removeEventListener('keyup',keyup);window.removeEventListener('blur',blur);cameraMotion.clear();document.removeEventListener('visibilitychange',visibility);}
  try{resize();observer.observe(canvas.parentElement);
   const sceneInput={...stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session}),viewportWidth:screenWidth};
   const started=await readBattleJson('/api/battle-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot,config:resources.config,state,scene:sceneInput}),signal:requestController.signal});sessionCreated=true;

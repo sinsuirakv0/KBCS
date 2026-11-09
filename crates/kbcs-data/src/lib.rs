@@ -22,6 +22,7 @@ pub mod talents;
 pub mod view;
 
 pub const SCHEMA_VERSION: i32 = 8;
-pub const IMPORTER_VERSION: &str = "14";
+pub const IMPORTER_VERSION: &str = "15";
+pub mod support;
 
 pub const DEFAULT_SOURCE: &str = "https://github.com/sinsuirakv0/KBC-rakv0-assets";

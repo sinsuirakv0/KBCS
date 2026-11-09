@@ -1,4 +1,6 @@
-﻿// 本能適用と戦闘補正を分け、整数化する段階を一か所で管理する。
+﻿import {isUnsupported} from './effect-support.js';
+
+// 本能適用と戦闘補正を分け、整数化する段階を一か所で管理する。
 const integer = value => Math.floor(value + 1e-9);
 const percent = (value, rate) => integer(value * (100 + rate) / 100);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value) || 0));
@@ -8,6 +10,7 @@ export function applyUnitTalents(unit, original, levels, level, enabled = true) 
   const healthRates=[],attackRates=[];
   const applied = [], locked = [];
   for (const talent of unit.talents) {
+    if (isUnsupported(talent) || Number.isInteger(talent.comboUnlock)) continue;
     const selected = enabled ? clamp(levels[talent.index], 0, talent.maxLevel) : 0;
     if (form.index >= 2 && talent.effect.kind === 'target') form.targets = form.targets.filter(key => key !== talent.effect.key);
     if (!selected) continue;

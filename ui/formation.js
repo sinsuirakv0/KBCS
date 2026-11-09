@@ -6,6 +6,8 @@ import {createFormationDetails} from './formation-details.js';
 import {createFormationCombos} from './formation-combos.js';
 import {loadUnitDatabase} from './src/shared/game/units.js';
 import {createFormationMember,resolveFormationMember,formationDisplayName,formationAdvancedUnlocked} from './formation-model.js';
+import {chooseEquipment,equipmentKind,equipmentKinds,equipmentRows,setEquipment} from './formation-equipment.js';
+import {isUnsupported,talentMaximum,unsupportedTalentHtml} from './effect-support.js';
 import {createFormationView,fitFormationName} from './formation-view.js';
 import {formationStageContext,stageDeployment,battleFormation} from './battle-support.js';
 import {escapeHtml as escape} from './src/shared/game/database-view.js';
@@ -16,7 +18,7 @@ import {createSimulationSettings} from './simulation-settings.js';
 const node=id=>document.getElementById(id),clone=value=>structuredClone(value);
 const names=['にゃんこ砲','スロウ砲','鉄壁砲','かみなり砲','水鉄砲','エンジェル砲','キャノンブレイク砲','呪い砲'];
 const status=node('formation-status'),screen=node('formation-screen');status.textContent='読み込み中';
-let paintFormation,renderDetails,database,manifest,equipment=[],entry,count=0,index=0,selected=0,changed=false,saving=Promise.resolve(),timer,busy=false,reorder;
+let paintFormation,renderDetails,database,manifest,equipment,orbSelection,entry,count=0,index=0,selected=0,changed=false,saving=Promise.resolve(),timer,busy=false,reorder,restoring=false;
 const units=new Map();
 let stageContext=null,deployment=null,deployVersion=0,deployTimer;
 let tray=Array(5).fill(null),trayEntry=null,selectedTray=-1,trayDrag=null,trayDeployment=null,suppressTrayClick=false;
@@ -46,6 +48,7 @@ function draw(){
   if(entry.id){const route=new URLSearchParams(location.search);route.set('id',entry.id);history.replaceState(null,'','/pages/formation/?'+route);}
 }
 function mark(){deployment=null;trayDeployment=null;++deployVersion;storeTray();clearTimeout(deployTimer);deployTimer=setTimeout(updateRestrictions,180);changed=true;status.textContent='保存待ち';clearTimeout(timer);timer=setTimeout(()=>save().catch(showError),350);}
+function markTransfer(){restoring=true;mark();}
 function markMember(){if(selectedTray>=0){trayDeployment=null;++deployVersion;storeTray();clearTimeout(deployTimer);deployTimer=setTimeout(updateRestrictions,180);}else mark();}
 function showError(error){status.textContent=error.message;status.dataset.error='true';}
 async function save(){
@@ -54,9 +57,10 @@ async function save(){
   saving=saving.catch(()=>{}).then(async()=>{
     if(!changed)return;
     if(reorder?.active||trayDrag){timer=setTimeout(()=>save().catch(showError),100);return;}
-    const current=entry,snapshot=clone(current.document);snapshot.gameVersion=database.gameVersion;changed=false;status.textContent='保存中';
-    try{const result=await request('/api/formations',{id:current.id??null,revision:current.revision??null,document:snapshot});current.id=result.entry.id;current.revision=result.entry.revision;current.document.gameVersion=snapshot.gameVersion;count=result.count;index=result.index;status.textContent=changed?'保存待ち':'保存済み';delete status.dataset.error;try{localStorage.setItem('kbcs:formation-update',Date.now()+':'+current.id+':'+current.revision);}catch{}}
-    catch(error){changed=true;throw error;}
+    const current=entry,snapshot=clone(current.document),restore=restoring;
+    snapshot.gameVersion=database.gameVersion;changed=false;restoring=false;status.textContent='保存中';
+    try{const result=await request(restore?'/api/formations?restore=1':'/api/formations',{id:current.id??null,revision:current.revision??null,document:snapshot});current.id=result.entry.id;current.revision=result.entry.revision;current.document.gameVersion=snapshot.gameVersion;count=result.count;index=result.index;status.textContent=changed?'保存待ち':'保存済み';delete status.dataset.error;try{localStorage.setItem('kbcs:formation-update',Date.now()+':'+current.id+':'+current.revision);}catch{}}
+    catch(error){changed=true;restoring||=restore;throw error;}
   });return saving;
 }
 async function exclusive(task){
@@ -80,8 +84,31 @@ function renderSettings(){
   node('formation-cannon').value=entry.document.cannon.id;node('formation-cannon-level').value=entry.document.cannon.level;
   node('formation-development-level').value=entry.document.cannon.developmentLevel??30;
 }
-function orbRows(member){
-  return member.orbs.slice(0,units.get(member.unitId).orbSlots).map((id,index)=>'<label>玉'+(index+1)+'<select data-orb="'+index+'"><option value="">なし</option>'+equipment.map(item=>'<option value="'+item.id+'" '+(item.id===id?'selected':'')+'>'+escape(item.name)+'</option>').join('')+(id&&!equipment.some(item=>item.id===id)?'<option value="'+id+'" selected>未収録 ID '+id+'</option>':'')+'</select><button data-orb-remove="'+index+'" aria-label="玉'+(index+1)+'を外す">×</button></label>').join('');
+function equipmentKey(member){
+  return JSON.stringify([member.unitId,member.form,member.level,member.plus,member.talents]);
+}
+
+function renderEquipment(){
+  const host=node('formation-member').querySelector('[data-equipment-editor]'),member=activeMember();
+  if(!host||!member||!equipment)return;
+  const key=equipmentKey(member);
+  if(orbSelection?.key!==key){
+    const pending={key};
+    orbSelection=pending;
+    request('/api/formation-equipment',member).then(selection=>{
+      if(orbSelection!==pending)return;
+      pending.selection=selection;
+      pending.kinds=equipmentKinds(equipment,selection.allowed);
+      renderEquipment();
+    }).catch(error=>{
+      if(orbSelection!==pending)return;
+      pending.error=error.message;
+      renderEquipment();
+    });
+  }
+  const {selection,kinds,error}=orbSelection;
+  if(selection)host.innerHTML=equipmentRows(member,equipment,selection,kinds);
+  else host.textContent=error??'装着条件を確認中…';
 }
 function renderMember(){
   const member=activeMember(),unit=member&&units.get(member.unitId),host=node('formation-member');
@@ -89,10 +116,11 @@ function renderMember(){
   host.dataset.unitId=unit?String(unit.id):'';
   if(!unit){host.innerHTML='<h2>枠'+(selected+1)+'</h2>';return;}
   const effective=resolveFormationMember(unit,member),advancedLocked=!formationAdvancedUnlocked(unit,member),capacity=unit.orbSlots;
-  const talents=unit.talents.length?'<details data-member-panel="talents"><summary>本能・超本能</summary>'+unit.talents.map(talent=>'<label>'+escape((talent.limit?'超本能：':'')+talent.name)+'<select '+(advancedLocked&&talent.limit?'disabled':'')+' data-talent="'+talent.index+'">'+Array.from({length:talent.maxLevel+1},(_,level)=>'<option value="'+level+'" '+(level===(member.talents[talent.index]??0)?'selected':'')+'>'+level+'</option>').join('')+'</select></label>').join('')+'</details>':'';
-  const orbs=capacity?'<details data-member-panel="orbs"><summary>本能玉 '+Math.min(member.orbs.length,capacity)+' / '+capacity+'</summary>'+orbRows(member)+'<button data-orb-add '+(member.orbs.length>=capacity?'disabled':'')+'>玉を追加</button>'+(member.orbs.length>capacity?'<button data-orb-trim>上限を超えた設定を外す</button>':'')+'</details>':'';
+  const talents=unit.talents.length?'<details data-member-panel="talents"><summary>本能・超本能</summary>'+unit.talents.map(talent=>isUnsupported(talent)?unsupportedTalentHtml(talent):'<label>'+escape((talent.limit?'超本能：':'')+talent.name)+'<select '+(advancedLocked&&talent.limit?'disabled':'')+' data-talent="'+talent.index+'">'+Array.from({length:talentMaximum(talent)+1},(_,level)=>'<option value="'+level+'" '+(level===(member.talents[talent.index]??0)?'selected':'')+'>'+(Number.isInteger(talent.comboUnlock)?(level?'解放':'未解放'):level)+'</option>').join('')+'</select></label>').join('')+'</details>':'';
+  const orbs=capacity||member.orbs.length?'<details data-member-panel="orbs"><summary>本能玉 '+member.orbs.filter(id=>id!=null).length+' / '+capacity+'</summary><div data-equipment-editor>読込中…</div>'+(member.orbs.length>capacity?'<button data-orb-trim>上限を超えた設定を外す</button>':'')+'</details>':'';
   host.innerHTML='<h2>'+escape(unit.forms.find(form=>form.index===effective.form)?.name??'未収録キャラ')+'</h2><label>形態<select data-member="form">'+unit.forms.map(form=>'<option value="'+form.index+'" '+(form.index===effective.form?'selected':'')+' '+(advancedLocked&&form.index===3?'disabled':'')+'>'+escape(form.name)+'</option>').join('')+'</select></label>'+((advancedLocked&&(unit.forms.some(form=>form.index===3)||unit.talents.some(talent=>talent.limit)))?'<p class="formation-level-lock">超本能・第4形態は合計Lv60から有効</p>':'')+'<div class="formation-levels"><label>Lv<input type="number" min="1" max="'+unit.maxLevel+'" value="'+member.level+'" data-member="level"></label><label>＋<input type="number" min="0" max="'+(unit.plusLevel??0)+'" value="'+member.plus+'" data-member="plus"></label></div><button data-remove>枠から外す</button>'+talents+orbs+(selectedTray>=0?'<button data-tray-move '+(entry.document.slots.every(Boolean)?'disabled':'')+'>編成へ移す</button>':'<div class="formation-move"><button data-move="-1">◀ 枠移動</button><button data-move="1">枠移動 ▶</button></div>');
   for(const panel of host.querySelectorAll('details[data-member-panel]'))panel.open=(memberPanels.get(String(unit.id))||[]).includes(panel.dataset.memberPanel);
+  renderEquipment();
   host.insertAdjacentHTML('beforeend','<div class="formation-member-sheet" data-member-sheet></div>');renderMemberSheet();
 }
 
@@ -146,7 +174,7 @@ function finishTrayDrag(event){
  if(value.ticks>=5){
   suppressTrayClick=true;setTimeout(()=>{suppressTrayClick=false;},0);
   const target=dropTarget(event);
-  if(target?.group==='slots'&&swapTrayMember(entry.document.slots,tray,value.index,target.index)){selected=target.index;selectedTray=-1;mark();renderMember();}
+  if(target?.group==='slots'&&swapTrayMember(entry.document.slots,tray,value.index,target.index)){selected=target.index;selectedTray=-1;markTransfer();renderMember();}
   else if(target?.group==='tray'){
    [tray[value.index],tray[target.index]]=[tray[target.index],tray[value.index]];selectedTray=target.index;storeTray();updateRestrictions();renderMember();
   }else if(target?.group==='remove'){tray[value.index]=null;selectedTray=-1;storeTray();updateRestrictions();renderMember();}
@@ -175,12 +203,16 @@ try{
     onSelect:(slot,refresh=true)=>{selectedTray=-1;selected=slot;if(refresh)renderMember();},onDraw:draw,
     onCommit:()=>{mark();renderMember();},onDrop:(event,slot)=>{
       const target=dropTarget(event);
-      if(target?.group==='tray'&&swapTrayMember(entry.document.slots,tray,target.index,slot)){selectedTray=target.index;return true;}
+      if(target?.group==='tray'&&swapTrayMember(entry.document.slots,tray,target.index,slot)){selectedTray=target.index;restoring=true;return true;}
       if(target?.group==='remove'){entry.document.slots[slot]=null;return true;}
       return false;
     }
   });
-  render();status.textContent='保存済み';request('/api/formation-equipment').then(result=>{equipment=result.items;renderMember();}).catch(showError);
+  render();status.textContent='保存済み';
+  request('/api/formation-equipment').then(result=>{
+    equipment=new Map(result.items.map(item=>[item.id,item]));
+    renderEquipment();
+  }).catch(showError);
   createFormationCombos(database,()=>entry.document,async slots=>{if(busy||reorder?.active||trayDrag)throw Error('編成の操作が終わってからセットしてください');await save();entry.document.slots=slots;selectedTray=-1;selected=0;mark();await save();await updateRestrictions();draw();renderMember();},request).then(button=>trayArea.after(button)).catch(showError);
   screen.addEventListener('click',event=>{if(reorder.suppressClick||reorder.active)return;const slot=event.target.closest('[data-slot]');if(slot){selectedTray=-1;selected=Number(slot.dataset.slot);draw();renderMember();}else{const target=event.target.closest('[data-action]');if(target)action(target.dataset.action);}});
   screen.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
@@ -190,7 +222,7 @@ try{
     if(event.target.closest('[data-tray-clear]')){tray.fill(null);selectedTray=-1;storeTray();draw();renderMember();return;}
     const target=event.target.closest('[data-slot]');if(!target)return;const index=Number(target.dataset.slot);if(!tray[index])return;
     const moved=moveTrayMember(entry.document.slots,tray,index);
-    if(moved>=0){selected=moved;selectedTray=-1;mark();}else selectedTray=index;
+    if(moved>=0){selected=moved;selectedTray=-1;markTransfer();}else selectedTray=index;
     storeTray();draw();renderMember();
   });
   trayHost.addEventListener('pointerdown',startTrayDrag);
@@ -200,14 +232,58 @@ try{
   trayHost.addEventListener('lostpointercapture',()=>finishTrayDrag(null));
   window.addEventListener('blur',()=>finishTrayDrag(null));
   trayHost.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)&&event.target.hasAttribute('data-slot')){event.preventDefault();event.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
-  node('formation-member').addEventListener('change',event=>{const target=event.target,member=activeMember();if(!member||!target.checkValidity())return;if(target.dataset.member)member[target.dataset.member]=Number(target.value);if(target.dataset.talent)member.talents[target.dataset.talent]=Number(target.value);if(target.dataset.orb!==undefined)member.orbs[Number(target.dataset.orb)]=target.value?Number(target.value):null;markMember();draw();renderMember();});
-  node('formation-member').addEventListener('click',event=>{const button=event.target.closest('button'),member=activeMember();if(!button||!member||reorder?.active)return;if(button.hasAttribute('data-tray-move')){const moved=moveTrayMember(entry.document.slots,tray,selectedTray);if(moved>=0){selected=moved;selectedTray=-1;mark();draw();renderMember();}return;}if(button.hasAttribute('data-orb-add')){if(member.orbs.length<units.get(member.unitId).orbSlots){member.orbs.push(null);markMember();renderMember();}return;}if(button.hasAttribute('data-orb-trim')){member.orbs=member.orbs.slice(0,units.get(member.unitId).orbSlots);markMember();renderMember();return;}if(button.dataset.orbRemove!==undefined){member.orbs.splice(Number(button.dataset.orbRemove),1);markMember();renderMember();return;}if(button.dataset.move){const next=(selected+Number(button.dataset.move)+10)%10;insertMember(entry.document.slots,selected,next);selected=next;mark();draw();renderMember();return;}if(event.target.closest('[data-remove]')){if(selectedTray>=0){tray[selectedTray]=null;selectedTray=-1;storeTray();}else{entry.document.slots[selected]=null;mark();}draw();renderMember();}});
+  node('formation-member').addEventListener('change',event=>{
+    const target=event.target,member=activeMember();
+    if(!member||!target.checkValidity())return;
+    const {member:field,talent,orbKind,orbGrade}=target.dataset;
+    if(field)member[field]=Number(target.value);
+    else if(talent!==undefined)member.talents[talent]=Number(target.value);
+    else if(orbKind!==undefined||orbGrade!==undefined){
+      const slot=Number(orbKind??orbGrade);
+      if(orbSelection?.key!==equipmentKey(member)||!orbSelection.selection?.slots[slot]?.unlocked)return;
+      const previous=equipment.get(member.orbs[slot]);
+      let next;
+      if(orbKind!==undefined){
+        next=chooseEquipment(orbSelection.kinds.get(target.value),previous?.equipment.gradeID);
+        if(!next&&target.value!=='')return;
+      }else{
+        if(!previous)return;
+        next=orbSelection.kinds.get(equipmentKind(previous))?.find(item=>item.equipment.gradeID===Number(target.value));
+        if(!next)return;
+      }
+      setEquipment(member,slot,next?.id??null);
+    }else return;
+    markMember();
+    if(selectedTray<0&&(orbKind!==undefined||orbGrade!==undefined))save().catch(showError);
+    draw();renderMember();
+  });
+  node('formation-member').addEventListener('click',event=>{
+    const button=event.target.closest('button'),member=activeMember();
+    if(!button||!member||reorder?.active)return;
+    if(button.hasAttribute('data-tray-move')){
+      const moved=moveTrayMember(entry.document.slots,tray,selectedTray);
+      if(moved>=0){selected=moved;selectedTray=-1;markTransfer();draw();renderMember();}
+    }else if(button.hasAttribute('data-orb-trim')){
+      member.orbs=member.orbs.slice(0,units.get(member.unitId).orbSlots);
+      markMember();renderMember();
+    }else if(button.dataset.orbRemove!==undefined){
+      setEquipment(member,Number(button.dataset.orbRemove),null);
+      markMember();renderMember();
+    }else if(button.dataset.move){
+      const next=(selected+Number(button.dataset.move)+10)%10;
+      insertMember(entry.document.slots,selected,next);selected=next;mark();draw();renderMember();
+    }else if(button.hasAttribute('data-remove')){
+      if(selectedTray>=0){tray[selectedTray]=null;selectedTray=-1;storeTray();}
+      else{entry.document.slots[selected]=null;mark();}
+      draw();renderMember();
+    }
+  });
   node('formation-name').addEventListener('change',event=>{const name=event.target.value.trim();if(name){entry.document.name=name;entry.document.slotName=name;mark();draw();}else event.target.value=entry.document.name;});
   node('formation-new').addEventListener('click',()=>exclusive(async()=>{entry={document:blank()};changed=true;await save();render();}));
   for(const [id,key] of [['formation-cannon','id'],['formation-cannon-level','level'],['formation-development-level','developmentLevel']])node(id).addEventListener('change',event=>{if(event.target.checkValidity()){entry.document.cannon[key]=Number(event.target.value);mark();draw();}});
   node('formation-rename').addEventListener('click',()=>{const name=node('formation-slot-name').value.trim();if(!name)return;entry.document.slotName=name;entry.document.name=name;mark();draw();node('formation-menu').close();});
   node('formation-import').addEventListener('click',()=>action('import'));
   node('formation-export').addEventListener('click',()=>exclusive(async()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(entry.document,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download=formationDisplayName(entry.document,index).replace(/[<>:"/\\|?*]/g,'_')+'.kbcs.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);node('formation-menu').close();}));
-  node('formation-file').addEventListener('change',event=>exclusive(async()=>{const file=event.target.files[0];event.target.value='';if(!file)return;if(file.size>1_000_000)throw new Error('編成ファイルが大きすぎます');const document=JSON.parse(await file.text()),result=await request('/api/formations',{id:entry.id,revision:entry.revision,document});entry=result.entry;count=result.count;index=result.index;changed=false;render();node('formation-menu').close();status.textContent='読込・保存済み';}));
+  node('formation-file').addEventListener('change',event=>exclusive(async()=>{const file=event.target.files[0];event.target.value='';if(!file)return;if(file.size>1_000_000)throw new Error('編成ファイルが大きすぎます');const document=JSON.parse(await file.text()),result=await request('/api/formations?restore=1',{id:entry.id,revision:entry.revision,document});entry=result.entry;count=result.count;index=result.index;changed=false;render();node('formation-menu').close();status.textContent='読込・保存済み';}));
   window.addEventListener('beforeunload',event=>{if(changed){event.preventDefault();event.returnValue='';}});
 }catch(error){showError(error);}

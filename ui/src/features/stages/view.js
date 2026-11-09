@@ -39,6 +39,7 @@ function conditionHtml(condition,database){
   return values.join(' / ')+(condition.group?.count?'（'+condition.group.count+'条件以上）':'')+raw;
 }
 function ruleValueHtml(rule,seconds){
+  if(rule.support==='unsupported')return '<pre>'+escapeHtml(JSON.stringify(rule.raw,null,2))+'</pre>';
   const p=rule.parameters,rarities=values=>values.map((value,index)=>rarityNames[index]+' '+value).join(' / ');
   switch(rule.id){
     case 0:return '開始時のお金 '+formatNumber(p[0])+'円（通常の増加なし）';

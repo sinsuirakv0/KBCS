@@ -1,0 +1,31 @@
+﻿import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {chooseEquipment,equipmentKind,equipmentKinds,equipmentRows,setEquipment} from '../formation-equipment.js';
+
+const fixture=JSON.parse(readFileSync(new URL('../../native/kbcs-core/tests/equipment-vectors.json',import.meta.url),'utf8').replace(/^\uFEFF/,''));
+const items=new Map(fixture.list.ID.map((equipment,index)=>{
+  const id=30000+index;
+  return [id,{id,equipment,kindName:`玉 ${equipmentKind({equipment})}`,gradeName:'DCBAS'[equipment.gradeID],description:'効果の説明'}];
+}));
+const all=equipmentKinds(items,[...items.keys()]);
+assert.equal(all.size,62);
+assert.equal(all.get('0:0').length,5);
+assert.ok(!all.has('0:3')&&all.has('1:3'));
+const member=JSON.parse('{"orbs":[30004,30233]}');
+const selection={slots:[{unlocked:true},{unlocked:true}],allowed:[30004,30230,30233,30234,30308,30309]};
+const candidates=equipmentKinds(items,selection.allowed);
+assert.equal(chooseEquipment(candidates.get('10:-'),3).id,30233);
+assert.equal(chooseEquipment(candidates.get('10:-'),1).id,30234);
+assert.match(equipmentRows(member,items,selection,candidates),/value="3" selected>A/);
+assert.doesNotMatch(equipmentRows(member,items,selection,candidates),/value="2"/);
+setEquipment(member,0,30308);
+assert.deepEqual(member.orbs,[30308,30233]);
+const restricted=equipmentRows(member,items,{slots:[{unlocked:true},{unlocked:false,minimumLevel:60}]},equipmentKinds(items,[30308,30309]));
+assert.match(restricted,/data-orb-kind="1" disabled/);
+assert.match(restricted,/value="retained" selected disabled/);
+assert.match(restricted,/合計Lv60で解放・装着記録を保持/);
+assert.deepEqual(member.orbs,[30308,30233]);
+setEquipment(member,0,null);
+assert.deepEqual(JSON.parse(JSON.stringify(member)).orbs,[null,30233]);
+setEquipment(member,1,null);
+assert.deepEqual(member.orbs,[]);

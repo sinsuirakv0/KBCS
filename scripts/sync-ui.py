@@ -125,6 +125,15 @@ export async function loadStageMap(database,key){return database.stages.filter(s
         text=replace_once(text,"button.textContent='共通設定';button.addEventListener('click',()=>openSiteSettings('database'));","button.textContent='お宝・施設';button.addEventListener('click',()=>window.dispatchEvent(new Event('kbcs:open-simulation-settings')));")
     if name=='src/features/units/combo-model.js':
         text=replace_once(text,"['eva-killer',23]","['eva-killer',23],['villain',25]")
+        text="import {comboAvailable} from '../../../effect-support.js';\n"+text
+        text=replace_once(text,'combo=>typeKeys.has(combo.type)','combo=>comboAvailable(combo)&&typeKeys.has(combo.type)')
+        text=replace_once(text,'...known.get(member.id).forms.map','...(known.get(member.id)?.forms||[]).map')
+    if name=='src/features/units/model.js':
+        text=replace_once(text,'talent.values.at(-1)[0]','talent.values.at(-1)?.[0]')
+    if name=='src/shared/game/database-view.js':
+        text=replace_once(text,'export function abilityText(ability, seconds) {',"export function abilityText(ability, seconds) {\n  if(ability.support==='unsupported')return `${ability.label} ／ 原本値 ${ability.value}`;")
+    if name=='src/features/stages/view.js':
+        text=replace_once(text,'function ruleValueHtml(rule,seconds){',"function ruleValueHtml(rule,seconds){\n  if(rule.support==='unsupported')return '<pre>'+escapeHtml(JSON.stringify(rule.raw,null,2))+'</pre>';")
     if name=='src/features/units/growth.js':
         text=replace_once(text,'current.settings.attackTreasure,current.options.talents','current.settings.attackTreasure,current.settings.healthTreasureBonus,current.settings.attackTreasureBonus,current.options.combos,current.options.talents')
         text=replace_once(text,'属性倍率・コンボ・本能玉は含みません。','発動中の体力・攻撃力コンボを含みます。属性倍率・本能玉は含みません。')

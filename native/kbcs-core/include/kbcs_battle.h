@@ -6,6 +6,7 @@ extern "C" {
 
 /* DB・描画から独立した所有戦闘。生成時に入力を複製し、外部ポインタを保持しない。 */
 typedef struct { int32_t effect,mask,values[4]; } KbcsBattleOrb;
+uint32_t kbcs_core_battle_equipment(const KbcsBattleOrb*,const int32_t *grades,int32_t count,KbcsActorDefinition*);
 typedef struct {int32_t unit_id,values[32];} KbcsBattleUnitCombo;
 typedef struct {int32_t kind,rate,tier_count,tiers[32][2],fever_count,fever[10];} KbcsPointRules;
 typedef struct {int32_t score,origin,wait,frame,phase,ending,gauge;} KbcsBattlePoints;

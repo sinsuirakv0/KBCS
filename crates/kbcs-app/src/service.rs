@@ -419,6 +419,7 @@ impl Service {
             let stats = session.stats()?;
             let textures = session.scene.textures().to_vec();
             let title = session.title.clone();
+            let active_combos = session.active_combo_ids();
             let inspection_assets = session.inspection_assets()?;
             let mut battles = self
                 .battles
@@ -430,7 +431,7 @@ impl Service {
             );
             battles.insert(id.clone(), Arc::new(Mutex::new(session)));
             return Ok(Reply::json(
-                json!({"session":id,"runtime":stats,"textures":textures,"title":title,"inspectionAssets":inspection_assets}),
+                json!({"session":id,"runtime":stats,"textures":textures,"title":title,"inspectionAssets":inspection_assets,"activeComboIds":active_combos}),
             ));
         }
         if path == "/api/battle-session/input" {
@@ -744,6 +745,12 @@ impl Service {
             if method == "POST" {
                 ensure!(body.len() <= 1_000_000, "編成ファイルが大きすぎます");
                 let input: kbcs_data::formations::WriteInput = serde_json::from_slice(body)?;
+                if url
+                    .query_pairs()
+                    .any(|(key, value)| key == "restore" && value == "1")
+                {
+                    return Ok(Reply::json(store.restore(&self.region, &input)?));
+                }
                 return Ok(Reply::json(store.write(&self.region, &input)?));
             }
             ensure!(method == "GET", "未対応の編成操作です");
@@ -760,9 +767,22 @@ impl Service {
             return Ok(Reply::json(store.read(&self.region, current, direction)?));
         }
         if path == "/api/formation-equipment" {
+            let database = Database::open(&self.root, &self.region)?;
+            if method == "POST" {
+                ensure!(body.len() <= 8192, "キャラ設定が大きすぎます");
+                let member: kbcs_data::formations::Member = serde_json::from_slice(body)?;
+                let catalog = kbcs_data::equipment::Catalog::read(&database)?;
+                let form = member.effective_form(&database, &self.region)?;
+                let talents =
+                    kbcs_data::talents::read(&database.connection, &self.region, member.unit_id)?;
+                let eligible = catalog.eligibility(&member, &form, &talents)?;
+                return Ok(Reply::json(serde_json::to_value(
+                    catalog.selection(&eligible),
+                )?));
+            }
             ensure!(method == "GET", "GETが必要です");
             return Ok(Reply::json(kbcs_data::stages::equipment_catalog(
-                &Database::open(&self.root, &self.region)?,
+                &database,
             )?));
         }
         if path == "/api/calculate" {
