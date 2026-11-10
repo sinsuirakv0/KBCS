@@ -20,7 +20,7 @@
 
 RunnerのCPUは[GitHubの一覧](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)を確認した。macos-latestへの暗黙依存を避ける。Rust 1.98.1、WindowsのLLVM-MinGW 20260922を固定し、LLVM配布ZIPのSHA-256を照合する。C++20・ffp-contract=off・fwrapvは既存bridge/build.rsを共用する。MacのMACOSX_DEPLOYMENT_TARGETとInfo.plistは14.0を揃える。
 
-各OSのjobはCargo.lock固定のworkspace releaseテスト → release clippy → releaseビルドを行い、テスト用にコード生成した依存をclippyでも再利用する。配布物のCPU種別・単独help/WebView起動・SHA-256を確認する。C++の同じ原本照合ベクトルを全CPUで使う。UIの見た目やWKWebViewの実機操作まで検証したことにはしない。
+各OSのjobはCargo.lock固定でrelease Clippy → workspace releaseテスト → releaseビルドの順に実行する。Clippyの警告はエラーとして扱い、リリース用テストバイナリをリンクする前に検出する。配布物のCPU種別・単独help/WebView起動・SHA-256を確認する。C++の同じ原本照合ベクトルを全CPUで使う。UIの見た目やWKWebViewの実機操作まで検証したことにはしない。
 
 共通のJS/Python回帰はOSごとに繰り返さない。ccのparallel機能はCargoのjobserverに従い、C++20・ffp-contract=off・fwrapvを維持して並列コンパイルする。配布版のthin LTOは維持。Cargoのregistry/git/targetをOS/CPU/コンパイラ別に復元し、失敗後にも途中成果物を保存する。Cargoのtimings HTMLは7日、インストーラのZIP/SHA/情報JSONは14日保存する。
 

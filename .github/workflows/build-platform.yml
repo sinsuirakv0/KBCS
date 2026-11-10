@@ -65,12 +65,12 @@ jobs:
           restore-keys: |
             build-v2-${{ inputs.platform }}-rust1981-llvm20260922-${{ hashFiles('Cargo.lock') }}-
             build-v2-${{ inputs.platform }}-rust1981-llvm20260922-
-      - name: Test native calculations and data contracts
-        run: cargo test --workspace --release --locked --target "$TARGET" --timings
+      - name: Check Rust lints before building release tests
+        run: cargo clippy --workspace --all-targets --release --locked --target "$TARGET" -- -D warnings
         env:
           TARGET: ${{ inputs.target }}
-      - name: Check Rust using compiled test dependencies
-        run: cargo clippy --workspace --all-targets --release --locked --target "$TARGET" -- -D warnings
+      - name: Test native calculations and data contracts
+        run: cargo test --workspace --release --locked --target "$TARGET" --timings
         env:
           TARGET: ${{ inputs.target }}
       - name: Build app
