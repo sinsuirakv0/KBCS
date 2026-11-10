@@ -198,24 +198,22 @@ pub fn read(connection: &Connection, region: &str) -> Result<Vec<Combo>> {
         row.get::<_, u32>(0)
     })? {
         let unit_id = unit?;
-        if let Some(talent) = crate::talents::read(connection, region, unit_id)?
+        if let Some((combo, talent)) = crate::talents::read(connection, region, unit_id)?
             .into_iter()
-            .find(|talent| talent.combo_unlock.is_some())
+            .find_map(|talent| talent.combo_unlock.map(|combo| (combo, talent)))
         {
-            if let Some(combo) = talent.combo_unlock {
-                ensure!(
-                    source_rows
-                        .get(combo as usize)
-                        .is_some_and(|(condition, _)| *condition == 7),
-                    "本能{}のコンボ解放先 {combo} が不正です",
-                    talent.id
-                );
-                unlocks.entry(combo).or_default().push(Unlock {
-                    unit_id,
-                    talent_index: talent.index,
-                    minimum_level: if talent.limit > 0 { 60 } else { 0 },
-                });
-            }
+            ensure!(
+                source_rows
+                    .get(combo as usize)
+                    .is_some_and(|(condition, _)| *condition == 7),
+                "本能{}のコンボ解放先 {combo} が不正です",
+                talent.id
+            );
+            unlocks.entry(combo).or_default().push(Unlock {
+                unit_id,
+                talent_index: talent.index,
+                minimum_level: if talent.limit > 0 { 60 } else { 0 },
+            });
         }
     }
     let mut statement = connection

@@ -128,7 +128,7 @@ pub(crate) fn import(connection: &Connection, region: &str) -> Result<()> {
     {
         let unit_id = required(&row, 0)?;
         ensure!(
-            row.len() >= 2 && (row.len() - 2) % 14 == 0,
+            row.len() >= 2 && (row.len() - 2).is_multiple_of(14),
             "本能CSVの列数が不正です: {unit_id}"
         );
         let mut index: i64 = connection.query_row(
@@ -268,7 +268,7 @@ pub fn read(connection: &Connection, region: &str, unit_id: u32) -> Result<Vec<T
                 required(record, 0)? == i64::from(unit_id)
                     && required(record, column)? == id
                     && column >= 2
-                    && (column - 2) % 14 == 0,
+                    && (column - 2).is_multiple_of(14),
                 "未実装本能の原本参照が不正です"
             );
             let mut cells = [0; 14];
