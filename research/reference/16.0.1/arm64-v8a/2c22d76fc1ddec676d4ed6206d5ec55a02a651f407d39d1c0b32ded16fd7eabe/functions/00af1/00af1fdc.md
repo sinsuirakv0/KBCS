@@ -1,0 +1,54 @@
+﻿# 00af1fdc
+
+版: 16.0.1 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00af1fdc",
+  "name": "FUN_00af1fdc",
+  "size": 64,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "ec6e138fd382eb1a4b615121314a8dc3f6c504bdb2d90c146de797968d8d4051",
+  "source_text_sha256": "ec6e138fd382eb1a4b615121314a8dc3f6c504bdb2d90c146de797968d8d4051"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [0047acf4](../0047a/0047acf4.md)
+- [0047cdd4](../0047c/0047cdd4.md)
+- [008b9178](../008b9/008b9178.md)
+
+## 疑似コード / UTF-8 276 bytes
+
+~~~c
+
+void FUN_00af1fdc(undefined8 param_1,undefined8 *param_2,int *param_3)
+
+{
+  undefined8 uVar1;
+  undefined8 uVar2;
+  
+  if (*param_3 == 2) {
+    uVar2 = *param_2;
+    uVar1 = FUN_0047acf4();
+    FUN_0047cdd4(uVar1,0xb,0);
+    FUN_008b9178(uVar2);
+    return;
+  }
+  return;
+}
+
+~~~

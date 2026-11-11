@@ -1,0 +1,216 @@
+﻿# 00bbe9bc
+
+版: 16.0.1 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bbe9bc",
+  "name": "_ZNSt6__ndk16vectorIhNS_9allocatorIhEEE6assignIN11flatbuffers14VectorIteratorIhhPKhjEEEENS_9enable_ifIXaasr21__is_forward_iteratorIT_EE5valuesr16is_constructibleIhNS_15iterator_traitsISB_E9referenceEEE5valueEvE4typeESB_SB_",
+  "size": 608,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "d2352179e5f58277dee78c34a929d4ce7a032cb2ac735ba71cbb6478e1f6b727",
+  "source_text_sha256": "d2352179e5f58277dee78c34a929d4ce7a032cb2ac735ba71cbb6478e1f6b727"
+}
+~~~
+
+## 呼び出し元
+
+- [00c5d570](../00c5d/00c5d570.md)
+
+## 呼び出し先
+
+- [00c57e90](../00c57/00c57e90.md)
+- [00c57eb0](../00c57/00c57eb0.md)
+- [00c5ad10](../00c5a/00c5ad10.md)
+
+## 疑似コード / UTF-8 5174 bytes
+
+~~~c
+
+void _ZNSt6__ndk16vectorIhNS_9allocatorIhEEE6assignIN11flatbuffers14VectorIteratorIhhPKhjEEEENS_9enable_ifIXaasr21__is_forward_iteratorIT_EE5valuesr16is_constructibleIhNS_15iterator_traitsISB_E9referenceEEE5valueEvE4typeESB_SB_
+               (undefined8 *param_1,undefined8 *param_2,ulong *param_3)
+
+{
+  undefined8 *puVar1;
+  undefined1 *puVar2;
+  ulong uVar3;
+  undefined1 *puVar4;
+  undefined1 *puVar5;
+  undefined1 *puVar6;
+  undefined1 *puVar7;
+  ulong uVar8;
+  undefined8 *puVar9;
+  undefined8 *puVar10;
+  ulong uVar11;
+  ulong uVar12;
+  ulong uVar13;
+  undefined8 uVar14;
+  undefined8 uVar15;
+  undefined8 uVar16;
+  
+  puVar7 = (undefined1 *)*param_2;
+  uVar3 = param_1[2];
+  puVar2 = (undefined1 *)*param_1;
+  uVar13 = (long)*param_3 - (long)puVar7;
+  if (uVar3 - (long)puVar2 < uVar13) {
+    if (puVar2 != (undefined1 *)0x0) {
+      param_1[1] = puVar2;
+      _ZdlPv(puVar2);
+      uVar3 = 0;
+      *param_1 = 0;
+      param_1[1] = 0;
+      param_1[2] = 0;
+    }
+    if ((long)uVar13 < 0) {
+                    /* WARNING: Subroutine does not return */
+      _ZNKSt6__ndk120__vector_base_commonILb1EE20__throw_length_errorEv(param_1);
+    }
+    if (uVar3 < 0x3fffffffffffffff) {
+      if (uVar13 <= uVar3 << 1) {
+        uVar13 = uVar3 << 1;
+      }
+    }
+    else {
+      uVar13 = 0x7fffffffffffffff;
+    }
+    puVar7 = (undefined1 *)_Znwm(uVar13);
+    *param_1 = puVar7;
+    param_1[1] = puVar7;
+    param_1[2] = puVar7 + uVar13;
+    puVar2 = (undefined1 *)*param_2;
+    puVar4 = (undefined1 *)*param_3;
+    uVar13 = (long)puVar4 - (long)puVar2;
+    if (uVar13 != 0) {
+      puVar6 = puVar7;
+      if ((0x1f < uVar13) && ((puVar4 <= puVar7 || (puVar7 + uVar13 <= puVar2)))) {
+        uVar8 = uVar13 & 0xffffffffffffffe0;
+        puVar10 = (undefined8 *)(puVar2 + 0x10);
+        puVar6 = puVar7 + uVar8;
+        puVar2 = puVar2 + uVar8;
+        puVar9 = (undefined8 *)(puVar7 + 0x10);
+        uVar3 = uVar8;
+        do {
+          puVar1 = puVar10 + -1;
+          uVar14 = puVar10[-2];
+          uVar16 = puVar10[1];
+          uVar15 = *puVar10;
+          puVar10 = puVar10 + 4;
+          uVar3 = uVar3 - 0x20;
+          puVar9[-1] = *puVar1;
+          puVar9[-2] = uVar14;
+          puVar9[1] = uVar16;
+          *puVar9 = uVar15;
+          puVar9 = puVar9 + 4;
+        } while (uVar3 != 0);
+        puVar7 = puVar6;
+        if (uVar13 == uVar8) goto LAB_00bbeaf8;
+      }
+      do {
+        puVar5 = puVar2 + 1;
+        puVar7 = puVar6 + 1;
+        *puVar6 = *puVar2;
+        puVar2 = puVar5;
+        puVar6 = puVar7;
+      } while (puVar4 != puVar5);
+    }
+LAB_00bbeaf8:
+    param_1[1] = puVar7;
+    return;
+  }
+  uVar3 = param_1[1] - (long)puVar2;
+  puVar4 = puVar7 + (uVar3 & 0xffffffff);
+  if (uVar13 <= uVar3) {
+    puVar4 = (undefined1 *)*param_3;
+  }
+  uVar8 = (long)puVar4 - (long)puVar7;
+  if (uVar8 != 0) {
+    puVar6 = puVar2;
+    if ((0x1f < uVar8) && ((puVar4 <= puVar2 || (puVar4 + ((long)puVar2 - (long)puVar7) <= puVar7)))
+       ) {
+      uVar11 = uVar8 & 0xffffffffffffffe0;
+      puVar10 = (undefined8 *)(puVar2 + 0x10);
+      puVar2 = puVar2 + uVar11;
+      puVar9 = (undefined8 *)(puVar7 + 0x10);
+      uVar12 = uVar11;
+      do {
+        puVar1 = puVar9 + -1;
+        uVar14 = puVar9[-2];
+        uVar16 = puVar9[1];
+        uVar15 = *puVar9;
+        uVar12 = uVar12 - 0x20;
+        puVar9 = puVar9 + 4;
+        puVar10[-1] = *puVar1;
+        puVar10[-2] = uVar14;
+        puVar10[1] = uVar16;
+        *puVar10 = uVar15;
+        puVar10 = puVar10 + 4;
+                    /* try { // try from 00bbeb4c to 00cbeb67 has its CatchHandler @ 00bbf3e4 */
+      } while (uVar12 != 0);
+      puVar6 = puVar2;
+      puVar7 = puVar7 + uVar11;
+      if (uVar11 == uVar8) goto LAB_00bbeb68;
+    }
+    do {
+      puVar5 = puVar7 + 1;
+      puVar2 = puVar6 + 1;
+      *puVar6 = *puVar7;
+      puVar6 = puVar2;
+      puVar7 = puVar5;
+    } while (puVar4 != puVar5);
+  }
+LAB_00bbeb68:
+                    /* try { // try from 00bbeb68 to 00cbec2b has its CatchHandler @ 00bbe7f8 */
+  if (uVar13 <= uVar3) {
+    param_1[1] = puVar2;
+    return;
+  }
+  puVar6 = (undefined1 *)*param_3;
+  puVar7 = (undefined1 *)param_1[1];
+  uVar13 = (long)puVar6 - (long)puVar4;
+  puVar2 = puVar7;
+  if (uVar13 != 0) {
+    if ((0x1f < uVar13) && ((puVar6 <= puVar7 || (puVar7 + uVar13 <= puVar4)))) {
+      uVar8 = uVar13 & 0xffffffffffffffe0;
+      puVar10 = (undefined8 *)(puVar4 + 0x10);
+      puVar2 = puVar7 + uVar8;
+      puVar4 = puVar4 + uVar8;
+      puVar9 = (undefined8 *)(puVar7 + 0x10);
+      uVar3 = uVar8;
+      do {
+        puVar1 = puVar10 + -1;
+        uVar14 = puVar10[-2];
+        uVar16 = puVar10[1];
+        uVar15 = *puVar10;
+        puVar10 = puVar10 + 4;
+        uVar3 = uVar3 - 0x20;
+        puVar9[-1] = *puVar1;
+        puVar9[-2] = uVar14;
+        puVar9[1] = uVar16;
+        *puVar9 = uVar15;
+        puVar9 = puVar9 + 4;
+      } while (uVar3 != 0);
+      puVar7 = puVar2;
+      if (uVar8 == uVar13) goto LAB_00bbec00;
+    }
+    do {
+      puVar5 = puVar4 + 1;
+      puVar2 = puVar7 + 1;
+      *puVar7 = *puVar4;
+      puVar4 = puVar5;
+      puVar7 = puVar2;
+    } while (puVar6 != puVar5);
+  }
+LAB_00bbec00:
+  param_1[1] = puVar2;
+  return;
+}
+
+~~~

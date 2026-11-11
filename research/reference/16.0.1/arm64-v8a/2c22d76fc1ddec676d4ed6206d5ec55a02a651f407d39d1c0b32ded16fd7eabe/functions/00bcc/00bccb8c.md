@@ -1,0 +1,60 @@
+﻿# 00bccb8c
+
+版: 16.0.1 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bccb8c",
+  "name": "_ZN8firebase4auth11jnilistener14CacheMethodIdsEP7_JNIEnvP8_jobject",
+  "size": 112,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "a1674f5aa3a543abc54449c8d653db7691ec5949c69e86875846edb2879369ec",
+  "source_text_sha256": "a1674f5aa3a543abc54449c8d653db7691ec5949c69e86875846edb2879369ec"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c5af10](../00c5a/00c5af10.md)
+- [00c5af30](../00c5a/00c5af30.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"com/google/firebase/auth/internal/cpp/JniAuthStateListener"
+~~~
+
+## 疑似コード / UTF-8 934 bytes
+
+~~~c
+
+void _ZN8firebase4auth11jnilistener14CacheMethodIdsEP7_JNIEnvP8_jobject
+               (undefined8 param_1,undefined8 param_2)
+
+{
+  if (DAT_011267f0 == 0) {
+                    /* try { // try from 00bccbbc to 00cccbd3 has its CatchHandler @ 00bce904 */
+    DAT_011267f0 = _ZN8firebase4util15FindClassGlobalEP7_JNIEnvP8_jobjectPKNSt6__ndk16vectorINS_8internal12EmbeddedFileENS5_9allocatorIS8_EEEEPKcNS0_16ClassRequirementE
+                             (param_1,param_2,0,
+                              "com/google/firebase/auth/internal/cpp/JniAuthStateListener",0);
+  }
+                    /* try { // try from 00bccbd4 to 00cccc2f has its CatchHandler @ 00bcc5d0 */
+  _ZN8firebase4util15LookupMethodIdsEP7_JNIEnvP7_jclassPKNS0_19MethodNameSignatureEmPP10_jmethodIDPKc
+            (param_1,DAT_011267f0,&PTR_s_<init>_00c91b50,2,&DAT_01126800,
+             "com/google/firebase/auth/internal/cpp/JniAuthStateListener");
+  return;
+}
+
+~~~

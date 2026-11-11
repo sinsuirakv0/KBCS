@@ -1,0 +1,48 @@
+﻿# 00aee7ec
+
+版: 16.0.1 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00aee7ec",
+  "name": "FUN_00aee7ec",
+  "size": 28,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "609a628c1a14215f3e9c65c52ad92cab9614ae0e28fd0a1aca41e6bb39a8401d",
+  "source_text_sha256": "609a628c1a14215f3e9c65c52ad92cab9614ae0e28fd0a1aca41e6bb39a8401d"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 287 bytes
+
+~~~c
+
+long FUN_00aee7ec(long param_1,long param_2)
+
+{
+  param_1 = param_1 + 8;
+  if (*(char **)(param_2 + 8) !=
+      "ZZN13MyApplication16UnitAdoptioninitEvENK3$_3clEP9NewButton20NewButtonChangeStateEUlP9NewDialog20NewDialogChangeStateiE_"
+     ) {
+    param_1 = 0;
+  }
+  return param_1;
+}
+
+~~~

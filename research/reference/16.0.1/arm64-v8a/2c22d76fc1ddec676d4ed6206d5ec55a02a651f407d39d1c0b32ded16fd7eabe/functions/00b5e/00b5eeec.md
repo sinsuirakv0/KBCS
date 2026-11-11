@@ -1,0 +1,179 @@
+﻿# 00b5eeec
+
+版: 16.0.1 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b5eeec",
+  "name": "_ZN8firebase26ReferenceCountedFutureImpl13AllocInternalEiPvPFvS1_E",
+  "size": 796,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "f0d635067028b90e7d7377f8dfd9643c694de28f5e38c6e76b6b2396eda1ce46",
+  "source_text_sha256": "f0d635067028b90e7d7377f8dfd9643c694de28f5e38c6e76b6b2396eda1ce46"
+}
+~~~
+
+## 呼び出し元
+
+- [00c5ae40](../00c5a/00c5ae40.md)
+
+## 呼び出し先
+
+- [00c57e90](../00c57/00c57e90.md)
+- [00c57ee0](../00c57/00c57ee0.md)
+- [00c5aa00](../00c5a/00c5aa00.md)
+- [00c5aa10](../00c5a/00c5aa10.md)
+- [00c5aaa0](../00c5a/00c5aaa0.md)
+- [00c5ac00](../00c5a/00c5ac00.md)
+- [00c5ac10](../00c5a/00c5ac10.md)
+- [00c5ac70](../00c5a/00c5ac70.md)
+- [00c5b5e0](../00c5b/00c5b5e0.md)
+- [00c5bc50](../00c5b/00c5bc50.md)
+
+## 疑似コード / UTF-8 4301 bytes
+
+~~~c
+
+void _ZN8firebase26ReferenceCountedFutureImpl13AllocInternalEiPvPFvS1_E
+               (ulong *param_1,long *param_2,int param_3,undefined8 param_4,undefined8 param_5)
+
+{
+  long lVar1;
+  undefined4 *puVar2;
+  undefined8 *puVar3;
+  long lVar4;
+  ulong uVar5;
+  long *plVar6;
+  long *plVar7;
+  long *plVar8;
+  long *plVar9;
+  undefined1 auStack_a8 [40];
+  long *local_80;
+  ulong uStack_78;
+  long *local_70;
+  long local_68;
+  
+  lVar1 = tpidr_el0;
+  local_68 = *(long *)(lVar1 + 0x28);
+  puVar2 = (undefined4 *)_Znwm(0x70);
+  *(undefined8 *)(puVar2 + 10) = param_4;
+  *(undefined8 *)(puVar2 + 0xc) = param_5;
+  *(undefined8 *)(puVar2 + 0xe) = 0;
+  *(undefined8 *)(puVar2 + 0x10) = 0;
+  *(undefined8 *)(puVar2 + 0x18) = 0;
+  *(undefined8 *)(puVar2 + 0x1a) = 0;
+  *puVar2 = 1;
+  *(undefined8 *)(puVar2 + 3) = 0;
+  *(undefined8 *)(puVar2 + 1) = 0;
+  *(undefined8 *)(puVar2 + 7) = 0;
+  *(undefined8 *)(puVar2 + 5) = 0;
+  *(undefined8 *)(puVar2 + 0x12) = 0;
+  *(undefined4 **)(puVar2 + 0x14) = puVar2 + 0x14;
+  *(undefined4 **)(puVar2 + 0x16) = puVar2 + 0x14;
+  _ZN8firebase5Mutex7AcquireEv(param_2 + 1);
+  plVar6 = param_2 + 7;
+  plVar7 = (long *)*plVar6;
+  uVar5 = param_2[9];
+  lVar4 = uVar5 + 1;
+  if (uVar5 == 0xffffffffffffffff) {
+    lVar4 = 1;
+  }
+  param_2[9] = lVar4;
+  plVar9 = plVar6;
+  if (plVar7 != (long *)0x0) {
+    plVar6 = param_2 + 7;
+    do {
+      while (plVar8 = plVar7, plVar9 = plVar8, uVar5 < (ulong)plVar8[4]) {
+        plVar6 = plVar8;
+        plVar7 = (long *)*plVar8;
+        if ((long *)*plVar8 == (long *)0x0) {
+          lVar4 = *plVar8;
+          goto joined_r0x00b5efd4;
+        }
+      }
+      if (uVar5 <= (ulong)plVar8[4]) break;
+      plVar6 = plVar8 + 1;
+      plVar7 = (long *)*plVar6;
+    } while ((long *)*plVar6 != (long *)0x0);
+  }
+  lVar4 = *plVar6;
+  plVar8 = plVar6;
+joined_r0x00b5efd4:
+  if (lVar4 == 0) {
+    puVar3 = (undefined8 *)_Znwm(0x30);
+    puVar3[4] = uVar5;
+    puVar3[5] = puVar2;
+    *puVar3 = 0;
+    puVar3[1] = 0;
+    puVar3[2] = plVar9;
+    *plVar8 = (long)puVar3;
+    if (*(long *)param_2[6] != 0) {
+      param_2[6] = *(long *)param_2[6];
+      puVar3 = (undefined8 *)*plVar8;
+    }
+    _ZNSt6__ndk127__tree_balance_after_insertIPNS_16__tree_node_baseIPvEEEEvT_S5_(param_2[7],puVar3)
+    ;
+    param_2[8] = param_2[8] + 1;
+    *param_1 = uVar5;
+    param_1[1] = (ulong)param_2;
+  }
+  else {
+    *param_1 = uVar5;
+    param_1[1] = (ulong)param_2;
+    if (param_2 == (long *)0x0) goto joined_r0x00b5f07c;
+  }
+  (**(code **)(*param_2 + 0x10))(param_2,param_1);
+  _ZN8firebase15CleanupNotifier14RegisterObjectEPvPFvS1_E(param_1[1] + 200,param_1,FUN_00b60eac);
+joined_r0x00b5f07c:
+  if ((-1 < param_3) && (param_3 < (int)((ulong)(param_2[0xb] - param_2[10]) >> 6))) {
+    _ZN8firebase5MutexC1ENS0_4ModeE(auStack_a8,0);
+    uStack_78 = *param_1;
+    local_70 = (long *)param_1[1];
+    local_80 = param_2;
+    if (local_70 != (long *)0x0) {
+      (**(code **)(*local_70 + 0x10))(local_70,&uStack_78);
+      _ZN8firebase15CleanupNotifier14RegisterObjectEPvPFvS1_E
+                (local_70 + 0x19,&uStack_78,FUN_00b60eac);
+    }
+    (**(code **)(*local_80 + 0x10))(local_80,&uStack_78);
+    if (local_70 != (long *)0x0) {
+      _ZN8firebase15CleanupNotifier16UnregisterObjectEPv(local_70 + 0x19,&uStack_78);
+      (**(code **)(*local_70 + 0x18))(local_70,&uStack_78);
+      local_70 = (long *)0x0;
+    }
+    if (local_80 != (long *)0x0) {
+      (**(code **)(*local_80 + 0x58))(local_80,auStack_a8);
+    }
+    _ZN8firebase10FutureBaseaSEOS0_(param_2[10] + (long)param_3 * 0x40,auStack_a8);
+    _ZN8firebase5Mutex7AcquireEv(auStack_a8);
+    if (local_80 != (long *)0x0) {
+      (**(code **)(*local_80 + 0x60))(local_80,auStack_a8);
+      (**(code **)(*local_80 + 0x18))(local_80,&uStack_78);
+      local_80 = (long *)0x0;
+    }
+    _ZN8firebase5Mutex7ReleaseEv(auStack_a8);
+    if (local_70 != (long *)0x0) {
+      _ZN8firebase15CleanupNotifier16UnregisterObjectEPv(local_70 + 0x19,&uStack_78);
+      plVar6 = local_70;
+      local_70 = (long *)0x0;
+      (**(code **)(*plVar6 + 0x18))(plVar6,&uStack_78);
+    }
+    _ZN8firebase5MutexD1Ev(auStack_a8);
+  }
+  _ZN8firebase5Mutex7ReleaseEv(param_2 + 1);
+  if (*(long *)(lVar1 + 0x28) == local_68) {
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

@@ -1,0 +1,62 @@
+﻿# 00bfa4ac
+
+版: 16.0.1 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfa4ac",
+  "name": "_ZNSt6__ndk121recursive_timed_mutexD1Ev",
+  "size": 76,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "0f146dda18efd3a4c6f248475ebc93775163bb9847d8a0969c4aff79a05d2a02",
+  "source_text_sha256": "0f146dda18efd3a4c6f248475ebc93775163bb9847d8a0969c4aff79a05d2a02"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c57e60](../00c57/00c57e60.md)
+- [00c580d0](../00c58/00c580d0.md)
+- [00c58120](../00c58/00c58120.md)
+- [00c5b6a0](../00c5b/00c5b6a0.md)
+- [00c5b6b0](../00c5b/00c5b6b0.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"mutex lock failed"
+~~~
+
+## 疑似コード / UTF-8 428 bytes
+
+~~~c
+
+void _ZNSt6__ndk121recursive_timed_mutexD1Ev(pthread_mutex_t *param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = pthread_mutex_lock(param_1);
+  if (iVar1 == 0) {
+    pthread_mutex_unlock(param_1);
+    _ZNSt6__ndk118condition_variableD2Ev(param_1 + 1);
+    _ZNSt6__ndk15mutexD1Ev(param_1);
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+  _ZNSt6__ndk120__throw_system_errorEiPKc(iVar1,"mutex lock failed");
+}
+
+~~~

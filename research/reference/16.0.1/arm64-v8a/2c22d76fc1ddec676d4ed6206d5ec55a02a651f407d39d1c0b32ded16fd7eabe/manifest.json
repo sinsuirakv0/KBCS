@@ -1,0 +1,22 @@
+﻿{
+  "version": "16.0.1",
+  "architecture": "arm64-v8a",
+  "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+  "library": "libnative-lib.so",
+  "ghidra": "12.1.2",
+  "analysis_revision": "711084564ddd8b14",
+  "pages": 26792,
+  "page_bytes": 85433549,
+  "max_page_bytes": 551524,
+  "cached": 26364,
+  "failed": 0,
+  "external": 295,
+  "low_confidence": 2,
+  "source_database_sha256": "91208f1f0fe25c3385525d9a75f575849467031063a4aa958a4d5cc2f3091d88",
+  "functions": 26659,
+  "page_limit_bytes": 104857600,
+  "format": 2,
+  "source_archive_sha256": "10e0656c64fd5f767b866838d0e943f05f15d70a060f0242320f08dadf85b22e",
+  "source_version_code": 1600010,
+  "comparison_state": "pending"
+}
