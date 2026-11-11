@@ -1,0 +1,797 @@
+﻿{
+  "complete": true,
+  "configuration": "36c86d03017a729217bc7303",
+  "cycles": {
+    "consistent": 17879,
+    "gap_candidate": 38,
+    "partial": 113,
+    "temporary_change_candidate": 8
+  },
+  "engine": {
+    "effects.py": "af86a66ad489219f0e42d8d0c21fb65a12e52d2885f021375be74997f0673e2f",
+    "engine.py": "b8bee98e56983c3c5d52d7ee130df43e72df8d2b5b2d140681e6430df555e9d1",
+    "features.py": "f3f1bad69cf75e990dc335926c5242b598b745342edd38c701b2807eb4777219",
+    "logic.py": "f92770d3144c8d1d8157bfe8e0eaff394c44930be3856e0e43bae68f5569f25c",
+    "relations.py": "9a32a1fcdd29fdddd0e3f3bf6e8a00661310a8d7e2b95ccdfa1b0c54a9a5c90f",
+    "report.py": "a6c09f892e9214398d3ad1a4fa6a240dec658a42a4be4d51c9d5d22ed6b7ffa5",
+    "structure.py": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+    "tracking.py": "23b8d394e10626952e0a2c2dfafe07bc616a32a59303f439ac66062dec2fc042",
+    "tracking_pages.py": "542e74eec43219a38791c45dbe85fb5f31890c1ea256b9551b248d779b508e9d",
+    "tracking_pair.py": "d815f62f0ac0da216ae980ce1d600f44a930571231a6c172151c25fb127c47dd"
+  },
+  "format": 2,
+  "pairs": {
+    "0-1": {
+      "baseline_coverage": [
+        {
+          "count": 17677,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 7758,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 929,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 292,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3,
+          "external": 1,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 17677,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 7459,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 97,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 292,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_count": 68,
+        "branch_value": 3627,
+        "call_argument_candidate": 5480,
+        "call_count": 52,
+        "call_target": 2917,
+        "guard_count": 62,
+        "return_value_candidate": 790,
+        "store_condition": 1644,
+        "store_count": 62,
+        "store_destination": 3345,
+        "store_value": 4910
+      },
+      "importance": {
+        "critical": 9856,
+        "high": 1924,
+        "none": 1601,
+        "review": 4588
+      },
+      "initial_accepted": 17969,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 0,
+            "seconds": 25.95714062799999
+          },
+          "old": {
+            "reused": 0,
+            "seconds": 25.51495207800002
+          }
+        },
+        "matching_seconds": 172.21449068599998,
+        "total_before_export_seconds": 406.90096561300004,
+        "validation_seconds": 180.11343673599998
+      },
+      "inspection": {
+        "detailed": 16744,
+        "forced_by_references": 87,
+        "skipped": 657,
+        "unavailable": 568
+      },
+      "layout": {
+        "different_count": 154,
+        "equal_count": 2254,
+        "reordered": 74
+      },
+      "logic": {
+        "detail_skipped": 657,
+        "logic_change_candidate": 11062,
+        "machine_only_observed": 1857,
+        "no_difference_in_scope": 944,
+        "reference_sensitive": 2627,
+        "reference_unresolved": 98,
+        "register_sensitive": 1,
+        "structure_or_reference_change": 155,
+        "unavailable": 568
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.17580872011251758,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 0.43232468799988055
+        },
+        "pass2_structure": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 2.2015433030001077
+        },
+        "pass3_logic": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 187.0069162709999
+        },
+        "pass4_hypotheses": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 726.5960536920002
+        }
+      },
+      "reference_states": {
+        "changed": 9458,
+        "equal": 6511,
+        "not_tested": 568,
+        "unresolved": 1432
+      },
+      "refined_accepted": 0,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 0,
+            "candidates": 12,
+            "collisions": {
+              "new": 90,
+              "old": 76
+            },
+            "held": 12,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 90,
+          "old": 76
+        }
+      },
+      "review": {
+        "addition_candidate": 4677,
+        "competing_candidates": 15220,
+        "deletion_candidate": 4543,
+        "merge_candidate": 42,
+        "split_candidate": 30,
+        "unresolved": 918
+      },
+      "seconds": 916.2997895190001,
+      "unmatched": [
+        7556,
+        8690
+      ],
+      "validation": {
+        "abstained": 250,
+        "correct": 1172,
+        "hidden_symbols": 1422,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    },
+    "0-2": {
+      "baseline_coverage": [
+        {
+          "count": 17653,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 7786,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 925,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 292,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3,
+          "external": 1,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 17653,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 7482,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 98,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 292,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_count": 68,
+        "branch_value": 3643,
+        "call_argument_candidate": 5469,
+        "call_count": 51,
+        "call_target": 2884,
+        "guard_count": 62,
+        "return_value_candidate": 796,
+        "store_condition": 1650,
+        "store_count": 62,
+        "store_destination": 3367,
+        "store_value": 4918
+      },
+      "importance": {
+        "critical": 9831,
+        "high": 1937,
+        "none": 1599,
+        "review": 4578
+      },
+      "initial_accepted": 17945,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 26659,
+            "seconds": 4.2557016570000314
+          },
+          "old": {
+            "reused": 25525,
+            "seconds": 3.6964808989999938
+          }
+        },
+        "matching_seconds": 179.6985082340001,
+        "total_before_export_seconds": 376.609609011,
+        "validation_seconds": 186.14568425700008
+      },
+      "inspection": {
+        "detailed": 16830,
+        "forced_by_references": 74,
+        "skipped": 547,
+        "unavailable": 568
+      },
+      "layout": {
+        "different_count": 153,
+        "equal_count": 2226,
+        "reordered": 74
+      },
+      "logic": {
+        "detail_skipped": 547,
+        "logic_change_candidate": 11056,
+        "machine_only_observed": 1840,
+        "no_difference_in_scope": 1052,
+        "reference_sensitive": 2632,
+        "reference_unresolved": 99,
+        "structure_or_reference_change": 151,
+        "unavailable": 568
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.17580872011251758,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 0.493535236000298
+        },
+        "pass2_structure": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 2.122052093000093
+        },
+        "pass3_logic": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 188.60941522899975
+        },
+        "pass4_hypotheses": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 712.258775104
+        }
+      },
+      "reference_states": {
+        "changed": 9432,
+        "equal": 6515,
+        "not_tested": 568,
+        "unresolved": 1430
+      },
+      "refined_accepted": 0,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 0,
+            "candidates": 11,
+            "collisions": {
+              "new": 92,
+              "old": 76
+            },
+            "held": 11,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 92,
+          "old": 76
+        }
+      },
+      "review": {
+        "addition_candidate": 4637,
+        "competing_candidates": 15271,
+        "deletion_candidate": 4500,
+        "merge_candidate": 39,
+        "split_candidate": 27,
+        "unresolved": 918
+      },
+      "seconds": 903.5951136540002,
+      "unmatched": [
+        7580,
+        8714
+      ],
+      "validation": {
+        "abstained": 250,
+        "correct": 1172,
+        "hidden_symbols": 1422,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    },
+    "1-2": {
+      "baseline_coverage": [
+        {
+          "count": 22478,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3877,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 9,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 22478,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 3884,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 2,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_value": 2321,
+        "call_argument_candidate": 4647,
+        "call_target": 1936,
+        "return_value_candidate": 622,
+        "store_condition": 1153,
+        "store_destination": 2480,
+        "store_value": 5627
+      },
+      "importance": {
+        "critical": 10001,
+        "high": 2759,
+        "none": 2323,
+        "review": 7691
+      },
+      "initial_accepted": 22773,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 0,
+            "seconds": 26.29342388500004
+          },
+          "old": {
+            "reused": 26659,
+            "seconds": 3.902318164999997
+          }
+        },
+        "matching_seconds": 87.85158268500004,
+        "total_before_export_seconds": 213.22086030499997,
+        "validation_seconds": 91.92269388699992
+      },
+      "inspection": {
+        "detailed": 21215,
+        "forced_by_references": 103,
+        "skipped": 979,
+        "unavailable": 580
+      },
+      "layout": {
+        "different_count": 9,
+        "equal_count": 2000
+      },
+      "logic": {
+        "detail_skipped": 979,
+        "logic_change_candidate": 11714,
+        "machine_only_observed": 2338,
+        "no_difference_in_scope": 1344,
+        "reference_sensitive": 5657,
+        "reference_unresolved": 117,
+        "structure_or_reference_change": 45,
+        "unavailable": 580
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.09393737508327782,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 0.36602100799973414
+        },
+        "pass2_structure": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 2.3051055979999546
+        },
+        "pass3_logic": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 275.7759880900003
+        },
+        "pass4_hypotheses": {
+          "process_peak_rss_bytes": 1194766336,
+          "seconds": 438.74642762999974
+        }
+      },
+      "reference_states": {
+        "changed": 11458,
+        "equal": 9122,
+        "not_tested": 580,
+        "unresolved": 1614
+      },
+      "refined_accepted": 1,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 1,
+            "candidates": 27,
+            "collisions": {
+              "new": 92,
+              "old": 90
+            },
+            "held": 26,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 92,
+          "old": 90
+        }
+      },
+      "review": {
+        "addition_candidate": 3193,
+        "competing_candidates": 7759,
+        "deletion_candidate": 3190,
+        "merge_candidate": 4,
+        "split_candidate": 4,
+        "unresolved": 2
+      },
+      "seconds": 717.2591736449999,
+      "unmatched": [
+        3885,
+        3885
+      ],
+      "validation": {
+        "abstained": 141,
+        "correct": 1360,
+        "hidden_symbols": 1501,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    }
+  },
+  "peak_rss_bytes": 1194766336,
+  "run": "3592e49aae228b6db87210dc",
+  "seconds": 3675.1363096789996,
+  "sources": [
+    {
+      "cache_sha256": "3af4bd77de46d11a63d3ebff45a3f78916ba944d01368b2e9bd433e417a0b83e",
+      "identity": {
+        "analysis_revision": "6cf79e30b2bdfc73",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 173824000,
+          "archiveSha256": "1728369ea3304181769fbc8c55d1254844c2bf209423e0dab8ae87e790520158",
+          "archiveTag": "source-jp-1507040-506df7ed44ddcc9e",
+          "baseApk": {
+            "bytes": 25889348,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "7e828ca17e7ef3a8c37c21cfb3a19186608043fd1f1c80efec2beccbb69d4b7f"
+          },
+          "compactVersion": "150704",
+          "library": "libnative-lib.so",
+          "librarySha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
+          "nativeApk": {
+            "bytes": 15385466,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "d778543b63547ad67bd421a154ccc32cbdd9038cb908ffa4e7841bd50cea1ab2",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "provenance": "KBC-rakv0-assets metadata/jp/versions/1507040.proof.json (blob e2bea9a033ee2b025f9a88e73919241da0852df3)",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1507040,
+          "versionName": "15.7.4"
+        },
+        "version": "15.7.4",
+        "version_code": 1507040
+      },
+      "indexer_sha256": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+      "schema": 1,
+      "structure_sha256": "70a1dfbf438799592b95fba3fbcee89b838c89d21dc524836685daaf52c560dc"
+    },
+    {
+      "cache_sha256": "7a98d597b1ba39e635c2d21a2c3dbed44c32f975e12a051a396b3db432ebad80",
+      "identity": {
+        "analysis_revision": "70b5c9c0dcc036b2",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 181606400,
+          "archiveSha256": "ba91701ef502e3e5e026bf3f5f90ea21975f89ba74e2cc00834b7c78be1441a7",
+          "archiveTag": "source-jp-1600000-535d9a23d0aae4b5",
+          "baseApk": {
+            "bytes": 26315552,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "446a613bf489fa7350aa69ef4fad951dcd82a63740bec0891dd80848b63050e9"
+          },
+          "compactVersion": "160000",
+          "library": "libnative-lib.so",
+          "librarySha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+          "nativeApk": {
+            "bytes": 15909754,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "74716c083c2db51b89ec66e3c74801dc8f676a49d6e351515c6d407bc48cbcf5",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1600000,
+          "versionName": "16.0.0"
+        },
+        "version": "16.0.0",
+        "version_code": 1600000
+      },
+      "indexer_sha256": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+      "schema": 1,
+      "structure_sha256": "95107d0abf6ffc667fe4dd1a2eda0f7fbc47e0ada532ba767e3fa93d630cd875"
+    },
+    {
+      "cache_sha256": "91208f1f0fe25c3385525d9a75f575849467031063a4aa958a4d5cc2f3091d88",
+      "identity": {
+        "analysis_revision": "711084564ddd8b14",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 181606400,
+          "archiveSha256": "10e0656c64fd5f767b866838d0e943f05f15d70a060f0242320f08dadf85b22e",
+          "archiveTag": "source-jp-1600010-f2bad4ffefee25f1",
+          "baseApk": {
+            "bytes": 26315552,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "a334fe43af6e310ceb37dbf9e7937a0e83171f9384cc12f2496cd9a477f7e160"
+          },
+          "compactVersion": "160001",
+          "library": "libnative-lib.so",
+          "librarySha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+          "nativeApk": {
+            "bytes": 15909754,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "09111aa6f9640aa058c3a42975e8cdfd9e218e049c663eab32042acc00b79685",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1600010,
+          "versionName": "16.0.1"
+        },
+        "version": "16.0.1",
+        "version_code": 1600010
+      },
+      "indexer_sha256": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+      "schema": 1,
+      "structure_sha256": "1441e48132dd1b1fe18de0850d8e4490550ddef74a8563b078aa2eb13a39fedc"
+    }
+  ],
+  "structure": [
+    {
+      "coverage": {
+        "available": 24941,
+        "indirect_flows": 17779,
+        "missing_in_backfill": 0,
+        "no_instructions": 292,
+        "unresolved_indirect_flows": 13929
+      },
+      "export_seconds": 42.858300854,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1536M",
+        "jvm_peak_working_set_bytes": 1737834496,
+        "native_memory_limit_mb": 4096,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 1511485440,
+        "wall_seconds": 449.8765622179999
+      },
+      "program": {
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "schema": 1,
+        "sha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
+        "type": "program"
+      },
+      "source": {
+        "cache_sha256": "3af4bd77de46d11a63d3ebff45a3f78916ba944d01368b2e9bd433e417a0b83e",
+        "indexer_sha256": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+        "schema": 1,
+        "structure_sha256": "70a1dfbf438799592b95fba3fbcee89b838c89d21dc524836685daaf52c560dc"
+      }
+    },
+    {
+      "coverage": {
+        "available": 26069,
+        "indirect_flows": 18628,
+        "missing_in_backfill": 0,
+        "no_instructions": 295,
+        "unresolved_indirect_flows": 14678
+      },
+      "export_seconds": 39.338038056,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1024M",
+        "jvm_peak_working_set_bytes": 967389184,
+        "native_memory_limit_mb": 8192,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 0,
+        "wall_seconds": 44.80347816599999
+      },
+      "program": {
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "schema": 1,
+        "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+        "type": "program"
+      },
+      "source": {
+        "cache_sha256": "7a98d597b1ba39e635c2d21a2c3dbed44c32f975e12a051a396b3db432ebad80",
+        "indexer_sha256": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+        "schema": 1,
+        "structure_sha256": "95107d0abf6ffc667fe4dd1a2eda0f7fbc47e0ada532ba767e3fa93d630cd875"
+      }
+    },
+    {
+      "coverage": {
+        "available": 26069,
+        "indirect_flows": 18628,
+        "missing_in_backfill": 0,
+        "no_instructions": 295,
+        "unresolved_indirect_flows": 14678
+      },
+      "export_seconds": 26.239722306,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1024M",
+        "jvm_peak_working_set_bytes": 1024692224,
+        "native_memory_limit_mb": 8192,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 0,
+        "wall_seconds": 29.099621240999966
+      },
+      "program": {
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "schema": 1,
+        "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+        "type": "program"
+      },
+      "source": {
+        "cache_sha256": "91208f1f0fe25c3385525d9a75f575849467031063a4aa958a4d5cc2f3091d88",
+        "indexer_sha256": "fe4462884167cfea50bfebce0d4f78e5c58360abc65de1952d3039a225384459",
+        "schema": 1,
+        "structure_sha256": "1441e48132dd1b1fe18de0850d8e4490550ddef74a8563b078aa2eb13a39fedc"
+      }
+    }
+  ]
+}
