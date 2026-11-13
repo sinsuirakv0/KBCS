@@ -1,0 +1,67 @@
+﻿# 00bdf5fc
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bdf5fc",
+  "name": "_ZNK8firebase4auth22AndroidWrappedUserInfo9photo_urlEv",
+  "size": 132,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "fa0ffd51eb1094443e8b62212aa80d2183d3f25358881ec0a062fe78dec6aa94",
+  "source_text_sha256": "fa0ffd51eb1094443e8b62212aa80d2183d3f25358881ec0a062fe78dec6aa94"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00497874](../00497/00497874.md)
+- [00c5b030](../00c5b/00c5b030.md)
+- [00c5b150](../00c5b/00c5b150.md)
+- [00c5b3c0](../00c5b/00c5b3c0.md)
+
+## 疑似コード / UTF-8 936 bytes
+
+~~~c
+
+void _ZNK8firebase4auth22AndroidWrappedUserInfo9photo_urlEv(undefined8 *param_1,long param_2)
+
+{
+  long lVar1;
+  undefined8 uVar2;
+  long lVar3;
+  ulong uVar4;
+  
+  lVar1 = *(long *)(param_2 + 0xa0);
+                    /* try { // try from 00bdf610 to 00cdf61f has its CatchHandler @ 00be084c */
+  uVar2 = _ZNK8firebase3App9GetJNIEnvEv(**(undefined8 **)(param_2 + 0x98));
+  lVar3 = 0;
+  if (lVar1 != 0) {
+                    /* try { // try from 00bdf628 to 00cdf66b has its CatchHandler @ 00be0858 */
+    lVar3 = FUN_00497874(uVar2,lVar1,DAT_01126ee0);
+  }
+  uVar4 = _ZN8firebase4util26CheckAndClearJniExceptionsEP7_JNIEnv(uVar2);
+  if ((lVar3 != 0) && ((uVar4 & 1) == 0)) {
+    _ZN8firebase4util14JniUriToStringEP7_JNIEnvP8_jobject(param_1,uVar2,lVar3);
+    return;
+  }
+  *param_1 = 0;
+  param_1[1] = 0;
+  param_1[2] = 0;
+                    /* try { // try from 00bdf674 to 00cdf677 has its CatchHandler @ 00be07dc */
+  return;
+}
+
+~~~

@@ -1,0 +1,60 @@
+﻿# 00befaa4
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00befaa4",
+  "name": "_ZNSt6__ndk16chrono12steady_clock3nowEv",
+  "size": 84,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "f786a19d96d4d6bd97bfbe16c71d2c3731ce5e31e9fd9f46d8152ba90213d511",
+  "source_text_sha256": "f786a19d96d4d6bd97bfbe16c71d2c3731ce5e31e9fd9f46d8152ba90213d511"
+}
+~~~
+
+## 呼び出し元
+
+- [00c57f90](../00c57/00c57f90.md)
+
+## 呼び出し先
+
+- [00c58190](../00c58/00c58190.md)
+- [00c581f0](../00c58/00c581f0.md)
+- [00c597d0](../00c59/00c597d0.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"clock_gettime(CLOCK_MONOTONIC) failed"
+~~~
+
+## 疑似コード / UTF-8 429 bytes
+
+~~~c
+
+long _ZNSt6__ndk16chrono12steady_clock3nowEv(void)
+
+{
+  int iVar1;
+  undefined4 *puVar2;
+  timespec local_20;
+  
+  iVar1 = clock_gettime(1,&local_20);
+  if (iVar1 == 0) {
+    return local_20.tv_nsec + local_20.tv_sec * 1000000000;
+  }
+  puVar2 = (undefined4 *)__errno();
+                    /* WARNING: Subroutine does not return */
+  _ZNSt6__ndk120__throw_system_errorEiPKc(*puVar2,"clock_gettime(CLOCK_MONOTONIC) failed");
+}
+
+~~~

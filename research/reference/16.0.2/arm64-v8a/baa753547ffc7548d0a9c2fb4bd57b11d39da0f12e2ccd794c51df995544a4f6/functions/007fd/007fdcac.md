@@ -1,0 +1,42 @@
+﻿# 007fdcac
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "007fdcac",
+  "name": "FUN_007fdcac",
+  "size": 4,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "4c678e3668bd77f5ad63d8eb3dc0bd969fdf88329f97bd48c441868d8031921d",
+  "source_text_sha256": "4c678e3668bd77f5ad63d8eb3dc0bd969fdf88329f97bd48c441868d8031921d"
+}
+~~~
+
+## 呼び出し元
+
+- [007fd648](../007fd/007fd648.md)
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 41 bytes
+
+~~~c
+
+void FUN_007fdcac(void)
+
+{
+  return;
+}
+
+~~~

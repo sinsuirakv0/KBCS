@@ -1,0 +1,211 @@
+﻿# 008ebbcc
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "008ebbcc",
+  "name": "FUN_008ebbcc",
+  "size": 684,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "af46dc826c17eb065ec043a5570cec618bada9d5355cce2b6d4977fce0c5e51a",
+  "source_text_sha256": "af46dc826c17eb065ec043a5570cec618bada9d5355cce2b6d4977fce0c5e51a"
+}
+~~~
+
+## 呼び出し元
+
+- [008f67b8](../008f6/008f67b8.md)
+
+## 呼び出し先
+
+- [00440f00](../00440/00440f00.md)
+- [0048795c](../00487/0048795c.md)
+- [0048797c](../00487/0048797c.md)
+- [00487e60](../00487/00487e60.md)
+- [00488698](../00488/00488698.md)
+- [008f8a40](../008f8/008f8a40.md)
+- [00b11188](../00b11/00b11188.md)
+- [00c57f60](../00c57/00c57f60.md)
+- [00c57f80](../00c57/00c57f80.md)
+- [00c57fb0](../00c57/00c57fb0.md)
+- [00c58070](../00c58/00c58070.md)
+- [00c58080](../00c58/00c58080.md)
+- [00c58090](../00c58/00c58090.md)
+- [00c580d0](../00c58/00c580d0.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"nyankoPictureBookData_CharaGet.csv"
+~~~
+
+## 疑似コード / UTF-8 5320 bytes
+
+~~~c
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void FUN_008ebbcc(byte *param_1)
+
+{
+  ulong uVar1;
+  ulong *puVar2;
+  ulong *puVar3;
+  long lVar4;
+  undefined8 uVar5;
+  undefined8 uVar6;
+  undefined8 uVar7;
+  undefined8 uVar8;
+  undefined *puVar9;
+  ulong uVar10;
+  long lVar11;
+  void *__dest;
+  ulong uVar12;
+  ulong uVar13;
+  byte *pbVar14;
+  void *__src;
+  long lVar15;
+  ulong *puVar16;
+  ulong local_1e0;
+  undefined8 uStack_1d8;
+  char *local_1d0;
+  undefined **local_1c8;
+  void *local_1c0;
+  void *local_1b8;
+  byte local_1a8;
+  void *local_198;
+  long local_180;
+  undefined *local_178 [8];
+  byte local_138;
+  void *local_128;
+  undefined1 auStack_110 [160];
+  long local_70;
+  
+  lVar4 = tpidr_el0;
+  local_70 = *(long *)(lVar4 + 0x28);
+  if ((*param_1 & 1) == 0) {
+    *param_1 = 1;
+    FUN_00487e60(&local_1c8);
+    pbVar14 = param_1 + 8;
+    local_1c8 = &PTR_FUN_00c64e08;
+    *(undefined8 *)(param_1 + 0x10) = *(undefined8 *)pbVar14;
+                    /* try { // try from 008ebc34 to 009ebccb has its CatchHandler @ 008df140 */
+    local_1d0 = (char *)_Znwm(0x28);
+    uStack_1d8 = _UNK_002c32e8;
+    local_1e0 = _DAT_002c32e0;
+    uVar8 = s_nyankoPictureBookData_CharaGet_c_002a49e2._24_8_;
+    uVar7 = s_nyankoPictureBookData_CharaGet_c_002a49e2._16_8_;
+    uVar6 = s_nyankoPictureBookData_CharaGet_c_002a49e2._8_8_;
+    uVar5 = s_nyankoPictureBookData_CharaGet_c_002a49e2._0_8_;
+    local_1d0[0x20] = 's';
+    local_1d0[0x21] = 'v';
+    *(undefined8 *)(local_1d0 + 8) = uVar6;
+    *(undefined8 *)local_1d0 = uVar5;
+    *(undefined8 *)(local_1d0 + 0x18) = uVar8;
+    *(undefined8 *)(local_1d0 + 0x10) = uVar7;
+    local_1d0[0x22] = '\0';
+    uVar10 = FUN_00b11188(&local_1c8,&local_1e0,0,0);
+    if ((local_1e0 & 1) != 0) {
+      _ZdlPv(local_1d0);
+    }
+    if ((uVar10 & 1) != 0) {
+      while (uVar10 = FUN_0048795c(&local_1c8), (uVar10 & 1) != 0) {
+        uVar10 = FUN_0048797c(&local_1c8,0);
+                    /* try { // try from 008ebccc to 009ebcd3 has its CatchHandler @ 008ef2e8 */
+        lVar11 = FUN_0048797c(&local_1c8,1);
+        puVar3 = *(ulong **)(param_1 + 0x10);
+                    /* try { // try from 008ebcd4 to 009ebd9b has its CatchHandler @ 008df140 */
+        if (puVar3 < *(ulong **)(param_1 + 0x18)) {
+          *puVar3 = uVar10 & 0xffffffff | lVar11 << 0x20;
+          *(ulong **)(param_1 + 0x10) = puVar3 + 1;
+        }
+        else {
+          __src = *(void **)pbVar14;
+          lVar15 = (long)puVar3 - (long)__src >> 3;
+          uVar1 = lVar15 + 1;
+          if (uVar1 >> 0x3d != 0) {
+            if (*(long *)(lVar4 + 0x28) == local_70) {
+              FUN_008f8a40(pbVar14);
+LAB_008ebe5c:
+              if (*(long *)(lVar4 + 0x28) == local_70) {
+                    /* WARNING: Subroutine does not return */
+                FUN_00440f00();
+              }
+            }
+            goto LAB_008ebec4;
+          }
+          uVar12 = (long)*(ulong **)(param_1 + 0x18) - (long)__src;
+          uVar13 = (long)uVar12 >> 2;
+          if (uVar13 <= uVar1) {
+            uVar13 = uVar1;
+          }
+          if (0x7ffffffffffffff7 < uVar12) {
+            uVar13 = 0x1fffffffffffffff;
+          }
+          if (uVar13 == 0) {
+            __dest = (void *)0x0;
+          }
+          else {
+            if (uVar13 >> 0x3d != 0) goto LAB_008ebe5c;
+            __dest = (void *)_Znwm(uVar13 << 3);
+          }
+          puVar2 = (ulong *)((long)__dest + lVar15 * 8);
+          puVar16 = puVar2 + 1;
+          *puVar2 = uVar10 & 0xffffffff | lVar11 << 0x20;
+          memcpy(__dest,__src,(long)puVar3 - (long)__src);
+          *(void **)(param_1 + 8) = __dest;
+          *(ulong **)(param_1 + 0x10) = puVar16;
+          *(void **)(param_1 + 0x18) = (void *)((long)__dest + uVar13 * 8);
+          if (__src != (void *)0x0) {
+            _ZdlPv(__src);
+          }
+          *(ulong **)(param_1 + 0x10) = puVar16;
+        }
+      }
+      FUN_00488698(&local_1c8);
+    }
+    puVar9 = 
+    PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c9ac88;
+    local_180 = *(long *)
+                 PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c9ac88
+    ;
+    local_1c8 = (undefined **)(PTR_DAT_00c9ac80 + 0x10);
+                    /* try { // try from 008ebd9c to 009ebe8b has its CatchHandler @ 008ef2e4 */
+    *(undefined8 *)((long)&local_180 + *(long *)(local_180 + -0x18)) =
+         *(undefined8 *)
+          (PTR__ZTTNSt6__ndk119basic_ostringstreamIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c9ac88
+          + 0x18);
+    local_178[0] = PTR__ZTVNSt6__ndk115basic_stringbufIcNS_11char_traitsIcEENS_9allocatorIcEEEE_00c9ac90
+                   + 0x10;
+    if ((local_138 & 1) != 0) {
+      _ZdlPv(local_128);
+    }
+    _ZNSt6__ndk115basic_streambufIcNS_11char_traitsIcEEED2Ev(local_178);
+    _ZNSt6__ndk113basic_ostreamIcNS_11char_traitsIcEEED2Ev(&local_180,puVar9 + 8);
+    _ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEED1Ev(auStack_110);
+    if ((local_1a8 & 1) != 0) {
+      _ZdlPv(local_198);
+    }
+    if (local_1c0 != (void *)0x0) {
+      local_1b8 = local_1c0;
+      _ZdlPv(local_1c0);
+    }
+  }
+  if (*(long *)(lVar4 + 0x28) == local_70) {
+    return;
+  }
+LAB_008ebec4:
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+~~~

@@ -1,0 +1,50 @@
+﻿# 00a7beec
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00a7beec",
+  "name": "FUN_00a7beec",
+  "size": 52,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "fe7cac3ee3302b08252329a6f64231596d03ff7f561d9933725da8a372d392a1",
+  "source_text_sha256": "fe7cac3ee3302b08252329a6f64231596d03ff7f561d9933725da8a372d392a1"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c57f60](../00c57/00c57f60.md)
+
+## 疑似コード / UTF-8 321 bytes
+
+~~~c
+
+void FUN_00a7beec(long param_1)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  
+                    /* try { // try from 00a7bf00 to 00b7bf13 has its CatchHandler @ 00a7c2ac */
+  puVar1 = (undefined8 *)_Znwm(0x10);
+  uVar2 = *(undefined8 *)(param_1 + 8);
+  *puVar1 = &PTR_FUN_00c8bbd0;
+  puVar1[1] = uVar2;
+  return;
+}
+
+~~~

@@ -1,0 +1,42 @@
+﻿# 00c3ddac
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00c3ddac",
+  "name": "FUN_00c3ddac",
+  "size": 12,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "e0c7fd6a08e21198f8b5d03df4b41021f643bb4b2d71d471d2a00018ca341890",
+  "source_text_sha256": "e0c7fd6a08e21198f8b5d03df4b41021f643bb4b2d71d471d2a00018ca341890"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 49 bytes
+
+~~~c
+
+undefined8 FUN_00c3ddac(void)
+
+{
+  return 0;
+}
+
+~~~

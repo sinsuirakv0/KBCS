@@ -1,0 +1,66 @@
+﻿# 00bfcbd8
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfcbd8",
+  "name": "FUN_00bfcbd8",
+  "size": 192,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "d995be51563684b231b4154ed21656baee3503e2023dadc79f33e796e6fb9661",
+  "source_text_sha256": "d995be51563684b231b4154ed21656baee3503e2023dadc79f33e796e6fb9661"
+}
+~~~
+
+## 呼び出し元
+
+- [00bfcbd0](../00bfc/00bfcbd0.md)
+
+## 呼び出し先
+
+- [00c58340](../00c58/00c58340.md)
+- [00c58350](../00c58/00c58350.md)
+- [00c58360](../00c58/00c58360.md)
+- [00c58370](../00c58/00c58370.md)
+- [00c59ea0](../00c59/00c59ea0.md)
+
+## 疑似コード / UTF-8 1002 bytes
+
+~~~c
+
+long * FUN_00bfcbd8(long *param_1,undefined8 param_2)
+
+{
+  long lVar1;
+  long *plVar2;
+  undefined1 auStack_30 [8];
+  char local_28 [4];
+  uint local_24;
+  
+  local_24 = 0;
+  _ZNSt6__ndk113basic_istreamIcNS_11char_traitsIcEEE6sentryC1ERS3_b(local_28,param_1,0);
+  if (local_28[0] != '\0') {
+    _ZNKSt6__ndk18ios_base6getlocEv(auStack_30,(long)param_1 + *(long *)(*param_1 + -0x18));
+    plVar2 = (long *)_ZNKSt6__ndk16locale9use_facetERNS0_2idE
+                               (auStack_30,
+                                PTR__ZNSt6__ndk17num_getIcNS_19istreambuf_iteratorIcNS_11char_traitsIcEEEEE2idE_00c9bbe0
+                               );
+    lVar1 = (long)param_1 + *(long *)(*param_1 + -0x18);
+    (**(code **)(*plVar2 + 0x38))(plVar2,*(undefined8 *)(lVar1 + 0x28),0,lVar1,&local_24,param_2);
+    _ZNSt6__ndk16localeD1Ev(auStack_30);
+    lVar1 = (long)param_1 + *(long *)(*param_1 + -0x18);
+    _ZNSt6__ndk18ios_base5clearEj(lVar1,*(uint *)(lVar1 + 0x20) | local_24);
+  }
+  return param_1;
+}
+
+~~~

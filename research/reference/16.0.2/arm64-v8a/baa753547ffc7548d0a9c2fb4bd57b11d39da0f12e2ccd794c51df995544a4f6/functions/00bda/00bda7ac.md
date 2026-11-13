@@ -1,0 +1,50 @@
+﻿# 00bda7ac
+
+版: 16.0.2 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bda7ac",
+  "name": "_ZN8firebase4auth17PhoneAuthProvider19ForceResendingTokenC1ERKS2_",
+  "size": 56,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "8461a732894340cba5f93a8ee5041f79c84087c0df4d80f95179447bdb5d5cee",
+  "source_text_sha256": "8461a732894340cba5f93a8ee5041f79c84087c0df4d80f95179447bdb5d5cee"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c57f60](../00c57/00c57f60.md)
+- [00c5df10](../00c5d/00c5df10.md)
+
+## 疑似コード / UTF-8 337 bytes
+
+~~~c
+
+void _ZN8firebase4auth17PhoneAuthProvider19ForceResendingTokenC1ERKS2_
+               (undefined8 *param_1,undefined8 *param_2)
+
+{
+  undefined8 *puVar1;
+  
+  puVar1 = (undefined8 *)_Znwm(8);
+  *puVar1 = 0;
+  *param_1 = puVar1;
+  _ZN8firebase4auth23ForceResendingTokenData6SetRefEP8_jobject(puVar1,*(undefined8 *)*param_2);
+  return;
+}
+
+~~~
