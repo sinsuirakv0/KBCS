@@ -18,5 +18,29 @@
   "format": 2,
   "source_archive_sha256": "e93e1095e04368a91128b11e672b40d00097973e1d97862b3ab7e661dcf02b26",
   "source_version_code": 1600020,
-  "comparison_state": "pending"
+  "comparison_state": "complete",
+  "tracking_format": 2,
+  "tracking_policy": "observed-effects-v1",
+  "tracking_run": "9a70ab56d42846316c9fe233",
+  "tracking_page": "research/comparisons/arm64-v8a/9a70ab56d42846316c9fe233/README.md",
+  "tracking_sources": [
+    {
+      "version": "16.0.0",
+      "architecture": "arm64-v8a",
+      "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+      "analysis_revision": "70b5c9c0dcc036b2"
+    },
+    {
+      "version": "16.0.1",
+      "architecture": "arm64-v8a",
+      "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+      "analysis_revision": "711084564ddd8b14"
+    },
+    {
+      "version": "16.0.2",
+      "architecture": "arm64-v8a",
+      "sha256": "baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6",
+      "analysis_revision": "ea0159f06d493a87"
+    }
+  ]
 }

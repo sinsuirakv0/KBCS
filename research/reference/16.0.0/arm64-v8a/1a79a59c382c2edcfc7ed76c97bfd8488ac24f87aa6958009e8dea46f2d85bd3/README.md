@@ -17,7 +17,7 @@ GitHub連携の検索結果が不十分なら、既知のファイルパスを�
 各疑似コードブロックの末尾改行は表示用に補われる場合があります。厳密な元ファイルはReleaseの原本を使います。
 
 <!-- kbcs-version-tracking -->
-[バージョン間の関数追跡](../../../../comparisons/arm64-v8a/3592e49aae228b6db87210dc/README.md)
+[バージョン間の関数追跡](../../../../comparisons/arm64-v8a/9a70ab56d42846316c9fe233/README.md)
 <!-- /kbcs-version-tracking -->
 
 ## アドレス索引

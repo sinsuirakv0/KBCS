@@ -21,15 +21,9 @@
   "comparison_state": "complete",
   "tracking_format": 2,
   "tracking_policy": "observed-effects-v1",
-  "tracking_run": "3592e49aae228b6db87210dc",
-  "tracking_page": "research/comparisons/arm64-v8a/3592e49aae228b6db87210dc/README.md",
+  "tracking_run": "9a70ab56d42846316c9fe233",
+  "tracking_page": "research/comparisons/arm64-v8a/9a70ab56d42846316c9fe233/README.md",
   "tracking_sources": [
-    {
-      "version": "15.7.4",
-      "architecture": "arm64-v8a",
-      "sha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
-      "analysis_revision": "6cf79e30b2bdfc73"
-    },
     {
       "version": "16.0.0",
       "architecture": "arm64-v8a",
