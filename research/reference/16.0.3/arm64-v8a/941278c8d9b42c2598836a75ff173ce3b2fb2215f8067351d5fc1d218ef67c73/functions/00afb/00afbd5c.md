@@ -1,0 +1,46 @@
+﻿# 00afbd5c
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00afbd5c",
+  "name": "FUN_00afbd5c",
+  "size": 76,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "bea0ce25e12d3a40623d47e1bcc9270e0ed479562e495c2058a9898cc27210c6",
+  "source_text_sha256": "bea0ce25e12d3a40623d47e1bcc9270e0ed479562e495c2058a9898cc27210c6"
+}
+~~~
+
+## 呼び出し元
+
+- [00a50418](../00a50/00a50418.md)
+
+## 呼び出し先
+
+- [008524fc](../00852/008524fc.md)
+
+## 疑似コード / UTF-8 209 bytes
+
+~~~c
+
+void FUN_00afbd5c(int param_1,int param_2,uint param_3)
+
+{
+  long lVar1;
+  
+  lVar1 = FUN_008524fc();
+  *(uint *)(lVar1 + (long)param_1 * 0xc804 + (long)param_2 * 0x3ec + 0x84a30) = param_3 & 1;
+  return;
+}
+
+~~~

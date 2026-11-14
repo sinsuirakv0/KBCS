@@ -1,0 +1,125 @@
+﻿# 00baacb8
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00baacb8",
+  "name": "_ZNKSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers8FieldDefEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE4findIS7_EENS_21__tree_const_iteratorISB_PNS_11__tree_nodeISB_PvEElEERKT_",
+  "size": 276,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "10cb4109329cef5b1ccc26c0456d49d122c6a4e7cdd2452d1e53708019f7dbd9",
+  "source_text_sha256": "10cb4109329cef5b1ccc26c0456d49d122c6a4e7cdd2452d1e53708019f7dbd9"
+}
+~~~
+
+## 呼び出し元
+
+- [00c5db40](../00c5d/00c5db40.md)
+
+## 呼び出し先
+
+- [00c590f0](../00c59/00c590f0.md)
+
+## 疑似コード / UTF-8 2406 bytes
+
+~~~c
+
+long * _ZNKSt6__ndk16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPN11flatbuffers8FieldDefEEENS_19__map_value_compareIS7_SB_NS_4lessIS7_EELb1EEENS5_ISB_EEE4findIS7_EENS_21__tree_const_iteratorISB_PNS_11__tree_nodeISB_PvEElEERKT_
+                 (long param_1,byte *param_2)
+
+{
+  ulong uVar1;
+  size_t sVar2;
+  ulong uVar3;
+  byte *__s2;
+  byte bVar4;
+  uint uVar5;
+  int iVar6;
+  void *pvVar7;
+  long *plVar8;
+  long *plVar9;
+  long *plVar10;
+  
+  plVar8 = (long *)(param_1 + 8);
+  plVar10 = (long *)*plVar8;
+  if (plVar10 != (long *)0x0) {
+    uVar3 = *(ulong *)(param_2 + 8);
+    __s2 = *(byte **)(param_2 + 0x10);
+    plVar9 = plVar8;
+    if ((*param_2 & 1) == 0) {
+      __s2 = param_2 + 1;
+      uVar3 = (ulong)(*param_2 >> 1);
+    }
+    do {
+      bVar4 = *(byte *)(plVar10 + 4);
+      uVar1 = (ulong)(bVar4 >> 1);
+      if ((bVar4 & 1) != 0) {
+        uVar1 = plVar10[5];
+      }
+      sVar2 = uVar3;
+      if (uVar1 <= uVar3) {
+        sVar2 = uVar1;
+      }
+      if (sVar2 == 0) {
+LAB_00baacf8:
+        uVar5 = (uint)(uVar3 < uVar1);
+        if (uVar1 < uVar3) {
+          uVar5 = 0xffffffff;
+        }
+      }
+      else {
+        pvVar7 = (void *)plVar10[6];
+        if ((bVar4 & 1) == 0) {
+          pvVar7 = (void *)((long)plVar10 + 0x21);
+        }
+        uVar5 = memcmp(pvVar7,__s2,sVar2);
+        if (uVar5 == 0) goto LAB_00baacf8;
+      }
+      if ((int)uVar5 >= 0) {
+        plVar9 = plVar10;
+      }
+      plVar10 = (long *)plVar10[(int)uVar5 < 0];
+    } while (plVar10 != (long *)0x0);
+    if (plVar9 != plVar8) {
+      bVar4 = *(byte *)(plVar9 + 4);
+      uVar1 = (ulong)(bVar4 >> 1);
+      if ((bVar4 & 1) != 0) {
+        uVar1 = plVar9[5];
+      }
+      sVar2 = uVar1;
+      if (uVar3 <= uVar1) {
+        sVar2 = uVar3;
+      }
+      if (sVar2 != 0) {
+        pvVar7 = (void *)plVar9[6];
+                    /* try { // try from 00baad94 to 00caad9f has its CatchHandler @ 00bad07c */
+        if ((bVar4 & 1) == 0) {
+          pvVar7 = (void *)((long)plVar9 + 0x21);
+        }
+        iVar6 = memcmp(__s2,pvVar7,sVar2);
+        if (iVar6 != 0) {
+          if (iVar6 < 0) {
+            return plVar8;
+          }
+          return plVar9;
+        }
+      }
+      if (uVar1 <= uVar3) {
+        return plVar9;
+      }
+    }
+  }
+                    /* try { // try from 00baadb8 to 00caadc3 has its CatchHandler @ 00bad06c */
+  return plVar8;
+}
+
+~~~

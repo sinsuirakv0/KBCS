@@ -1,0 +1,47 @@
+﻿# 00aefac4
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00aefac4",
+  "name": "FUN_00aefac4",
+  "size": 20,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "bd85684c7987285c22cc3ef6a95fe26d855dc67ef5c7d1227ef88a8398b4edbf",
+  "source_text_sha256": "bd85684c7987285c22cc3ef6a95fe26d855dc67ef5c7d1227ef88a8398b4edbf"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 186 bytes
+
+~~~c
+
+void FUN_00aefac4(long param_1,undefined8 *param_2)
+
+{
+  undefined8 uVar1;
+  
+  uVar1 = *(undefined8 *)(param_1 + 8);
+  *param_2 = &PTR_FUN_00c8edf8;
+  param_2[1] = uVar1;
+  return;
+}
+
+~~~

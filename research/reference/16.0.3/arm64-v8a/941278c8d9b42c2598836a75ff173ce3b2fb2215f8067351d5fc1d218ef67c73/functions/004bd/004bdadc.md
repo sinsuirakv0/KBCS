@@ -1,0 +1,279 @@
+﻿# 004bdadc
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "004bdadc",
+  "name": "_ZN5Botan14CBC_Decryption7processEPhm",
+  "size": 596,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "09c41675575ff3f413e10b865e0b2a0708c8165d71795ff962682a08eb9e6d01",
+  "source_text_sha256": "09c41675575ff3f413e10b865e0b2a0708c8165d71795ff962682a08eb9e6d01"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c58fe0](../00c58/00c58fe0.md)
+- [00c596f0](../00c59/00c596f0.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"/Users/battlecats/.jenkins/workspace/Battlecats-Jp-Android/release_jp-android-16.0.3/Source/android_cpp/app/src/main/cpp/botan/botan_all.cpp"
+"Input is full blocks"
+"process"
+"sz % BS == 0"
+~~~
+
+## 疑似コード / UTF-8 12929 bytes
+
+~~~c
+
+ulong _ZN5Botan14CBC_Decryption7processEPhm(long param_1,byte *param_2,ulong param_3)
+
+{
+  ulong uVar1;
+  bool bVar2;
+  byte *pbVar3;
+  ulong __n;
+  byte *pbVar4;
+  ulong uVar5;
+  byte *pbVar6;
+  byte *pbVar7;
+  ulong uVar8;
+  ulong uVar9;
+  ulong __n_00;
+  ulong uVar10;
+  undefined8 uVar11;
+  undefined8 uVar12;
+  undefined8 uVar13;
+  undefined8 uVar14;
+  
+  __n_00 = *(long *)(param_1 + 0x20) - *(long *)(param_1 + 0x18);
+  uVar10 = 0;
+  if (__n_00 != 0) {
+    uVar10 = param_3 / __n_00;
+  }
+  if (param_3 != uVar10 * __n_00) {
+                    /* WARNING: Subroutine does not return */
+    _ZN5Botan17assertion_failureEPKcS1_S1_S1_i
+              ("sz % BS == 0","Input is full blocks","process",
+               "/Users/battlecats/.jenkins/workspace/Battlecats-Jp-Android/release_jp-android-16.0.3/Source/android_cpp/app/src/main/cpp/botan/botan_all.cpp"
+               ,0x153f);
+  }
+  if (__n_00 <= param_3) {
+    do {
+      __n = *(long *)(param_1 + 0x38) - *(long *)(param_1 + 0x30);
+      if (uVar10 * __n_00 <= __n) {
+        __n = uVar10 * __n_00;
+      }
+      uVar1 = 0;
+      if (__n_00 != 0) {
+        uVar1 = __n / __n_00;
+      }
+      (**(code **)(**(long **)(param_1 + 8) + 0x50))
+                (*(long **)(param_1 + 8),param_2,*(long *)(param_1 + 0x30),uVar1);
+      pbVar7 = *(byte **)(param_1 + 0x30);
+      pbVar6 = *(byte **)(param_1 + 0x18);
+      for (uVar5 = __n_00; 0xf < uVar5; uVar5 = uVar5 - 0x10) {
+        uVar13 = *(undefined8 *)(pbVar6 + 8);
+        uVar11 = *(undefined8 *)pbVar6;
+        uVar14 = *(undefined8 *)(pbVar7 + 8);
+        uVar12 = *(undefined8 *)pbVar7;
+        *(ulong *)(pbVar7 + 8) =
+             CONCAT17((byte)((ulong)uVar14 >> 0x38) ^ (byte)((ulong)uVar13 >> 0x38),
+                      CONCAT16((byte)((ulong)uVar14 >> 0x30) ^ (byte)((ulong)uVar13 >> 0x30),
+                               CONCAT15((byte)((ulong)uVar14 >> 0x28) ^
+                                        (byte)((ulong)uVar13 >> 0x28),
+                                        CONCAT14((byte)((ulong)uVar14 >> 0x20) ^
+                                                 (byte)((ulong)uVar13 >> 0x20),
+                                                 CONCAT13((byte)((ulong)uVar14 >> 0x18) ^
+                                                          (byte)((ulong)uVar13 >> 0x18),
+                                                          CONCAT12((byte)((ulong)uVar14 >> 0x10) ^
+                                                                   (byte)((ulong)uVar13 >> 0x10),
+                                                                   CONCAT11((byte)((ulong)uVar14 >>
+                                                                                  8) ^
+                                                                            (byte)((ulong)uVar13 >>
+                                                                                  8),(byte)uVar14 ^
+                                                                                     (byte)uVar13)))
+                                                ))));
+        *(ulong *)pbVar7 =
+             CONCAT17((byte)((ulong)uVar12 >> 0x38) ^ (byte)((ulong)uVar11 >> 0x38),
+                      CONCAT16((byte)((ulong)uVar12 >> 0x30) ^ (byte)((ulong)uVar11 >> 0x30),
+                               CONCAT15((byte)((ulong)uVar12 >> 0x28) ^
+                                        (byte)((ulong)uVar11 >> 0x28),
+                                        CONCAT14((byte)((ulong)uVar12 >> 0x20) ^
+                                                 (byte)((ulong)uVar11 >> 0x20),
+                                                 CONCAT13((byte)((ulong)uVar12 >> 0x18) ^
+                                                          (byte)((ulong)uVar11 >> 0x18),
+                                                          CONCAT12((byte)((ulong)uVar12 >> 0x10) ^
+                                                                   (byte)((ulong)uVar11 >> 0x10),
+                                                                   CONCAT11((byte)((ulong)uVar12 >>
+                                                                                  8) ^
+                                                                            (byte)((ulong)uVar11 >>
+                                                                                  8),(byte)uVar12 ^
+                                                                                     (byte)uVar11)))
+                                                ))));
+        pbVar7 = pbVar7 + 0x10;
+        pbVar6 = pbVar6 + 0x10;
+      }
+      if (uVar5 != 0) {
+        if ((7 < uVar5) && ((pbVar6 + uVar5 <= pbVar7 || (pbVar7 + uVar5 <= pbVar6)))) {
+          uVar9 = uVar5 & 8;
+          pbVar3 = pbVar7;
+          pbVar4 = pbVar6;
+          uVar8 = uVar9;
+          do {
+            uVar11 = *(undefined8 *)pbVar4;
+            uVar13 = *(undefined8 *)pbVar3;
+            uVar8 = uVar8 - 8;
+            *(ulong *)pbVar3 =
+                 CONCAT17((byte)((ulong)uVar13 >> 0x38) ^ (byte)((ulong)uVar11 >> 0x38),
+                          CONCAT16((byte)((ulong)uVar13 >> 0x30) ^ (byte)((ulong)uVar11 >> 0x30),
+                                   CONCAT15((byte)((ulong)uVar13 >> 0x28) ^
+                                            (byte)((ulong)uVar11 >> 0x28),
+                                            CONCAT14((byte)((ulong)uVar13 >> 0x20) ^
+                                                     (byte)((ulong)uVar11 >> 0x20),
+                                                     CONCAT13((byte)((ulong)uVar13 >> 0x18) ^
+                                                              (byte)((ulong)uVar11 >> 0x18),
+                                                              CONCAT12((byte)((ulong)uVar13 >> 0x10)
+                                                                       ^ (byte)((ulong)uVar11 >>
+                                                                               0x10),
+                                                                       CONCAT11((byte)((ulong)uVar13
+                                                                                      >> 8) ^
+                                                                                (byte)((ulong)uVar11
+                                                                                      >> 8),
+                                                                                (byte)uVar13 ^
+                                                                                (byte)uVar11)))))));
+            pbVar3 = pbVar3 + 8;
+            pbVar4 = pbVar4 + 8;
+          } while (uVar8 != 0);
+          bVar2 = uVar5 == uVar9;
+          uVar5 = uVar5 & 7;
+          pbVar6 = pbVar6 + uVar9;
+          pbVar7 = pbVar7 + uVar9;
+          if (bVar2) goto LAB_004bdbf0;
+        }
+        do {
+          uVar5 = uVar5 - 1;
+          *pbVar7 = *pbVar7 ^ *pbVar6;
+          pbVar6 = pbVar6 + 1;
+          pbVar7 = pbVar7 + 1;
+        } while (uVar5 != 0);
+      }
+LAB_004bdbf0:
+      pbVar7 = (byte *)(*(long *)(param_1 + 0x30) + __n_00);
+      pbVar6 = param_2;
+      for (uVar5 = __n - __n_00; 0xf < uVar5; uVar5 = uVar5 - 0x10) {
+        uVar13 = *(undefined8 *)(pbVar6 + 8);
+        uVar11 = *(undefined8 *)pbVar6;
+        uVar14 = *(undefined8 *)(pbVar7 + 8);
+        uVar12 = *(undefined8 *)pbVar7;
+        *(ulong *)(pbVar7 + 8) =
+             CONCAT17((byte)((ulong)uVar14 >> 0x38) ^ (byte)((ulong)uVar13 >> 0x38),
+                      CONCAT16((byte)((ulong)uVar14 >> 0x30) ^ (byte)((ulong)uVar13 >> 0x30),
+                               CONCAT15((byte)((ulong)uVar14 >> 0x28) ^
+                                        (byte)((ulong)uVar13 >> 0x28),
+                                        CONCAT14((byte)((ulong)uVar14 >> 0x20) ^
+                                                 (byte)((ulong)uVar13 >> 0x20),
+                                                 CONCAT13((byte)((ulong)uVar14 >> 0x18) ^
+                                                          (byte)((ulong)uVar13 >> 0x18),
+                                                          CONCAT12((byte)((ulong)uVar14 >> 0x10) ^
+                                                                   (byte)((ulong)uVar13 >> 0x10),
+                                                                   CONCAT11((byte)((ulong)uVar14 >>
+                                                                                  8) ^
+                                                                            (byte)((ulong)uVar13 >>
+                                                                                  8),(byte)uVar14 ^
+                                                                                     (byte)uVar13)))
+                                                ))));
+        *(ulong *)pbVar7 =
+             CONCAT17((byte)((ulong)uVar12 >> 0x38) ^ (byte)((ulong)uVar11 >> 0x38),
+                      CONCAT16((byte)((ulong)uVar12 >> 0x30) ^ (byte)((ulong)uVar11 >> 0x30),
+                               CONCAT15((byte)((ulong)uVar12 >> 0x28) ^
+                                        (byte)((ulong)uVar11 >> 0x28),
+                                        CONCAT14((byte)((ulong)uVar12 >> 0x20) ^
+                                                 (byte)((ulong)uVar11 >> 0x20),
+                                                 CONCAT13((byte)((ulong)uVar12 >> 0x18) ^
+                                                          (byte)((ulong)uVar11 >> 0x18),
+                                                          CONCAT12((byte)((ulong)uVar12 >> 0x10) ^
+                                                                   (byte)((ulong)uVar11 >> 0x10),
+                                                                   CONCAT11((byte)((ulong)uVar12 >>
+                                                                                  8) ^
+                                                                            (byte)((ulong)uVar11 >>
+                                                                                  8),(byte)uVar12 ^
+                                                                                     (byte)uVar11)))
+                                                ))));
+        pbVar7 = pbVar7 + 0x10;
+        pbVar6 = pbVar6 + 0x10;
+      }
+      if (uVar5 != 0) {
+        if ((7 < uVar5) && ((pbVar6 + uVar5 <= pbVar7 || (pbVar7 + uVar5 <= pbVar6)))) {
+          uVar9 = uVar5 & 8;
+          pbVar3 = pbVar7;
+          pbVar4 = pbVar6;
+          uVar8 = uVar9;
+          do {
+            uVar11 = *(undefined8 *)pbVar4;
+            uVar13 = *(undefined8 *)pbVar3;
+            uVar8 = uVar8 - 8;
+            *(ulong *)pbVar3 =
+                 CONCAT17((byte)((ulong)uVar13 >> 0x38) ^ (byte)((ulong)uVar11 >> 0x38),
+                          CONCAT16((byte)((ulong)uVar13 >> 0x30) ^ (byte)((ulong)uVar11 >> 0x30),
+                                   CONCAT15((byte)((ulong)uVar13 >> 0x28) ^
+                                            (byte)((ulong)uVar11 >> 0x28),
+                                            CONCAT14((byte)((ulong)uVar13 >> 0x20) ^
+                                                     (byte)((ulong)uVar11 >> 0x20),
+                                                     CONCAT13((byte)((ulong)uVar13 >> 0x18) ^
+                                                              (byte)((ulong)uVar11 >> 0x18),
+                                                              CONCAT12((byte)((ulong)uVar13 >> 0x10)
+                                                                       ^ (byte)((ulong)uVar11 >>
+                                                                               0x10),
+                                                                       CONCAT11((byte)((ulong)uVar13
+                                                                                      >> 8) ^
+                                                                                (byte)((ulong)uVar11
+                                                                                      >> 8),
+                                                                                (byte)uVar13 ^
+                                                                                (byte)uVar11)))))));
+            pbVar3 = pbVar3 + 8;
+            pbVar4 = pbVar4 + 8;
+          } while (uVar8 != 0);
+          bVar2 = uVar5 == uVar9;
+          uVar5 = uVar5 & 7;
+          pbVar6 = pbVar6 + uVar9;
+          pbVar7 = pbVar7 + uVar9;
+          if (bVar2) goto LAB_004bdc70;
+        }
+        do {
+          uVar5 = uVar5 - 1;
+          *pbVar7 = *pbVar7 ^ *pbVar6;
+          pbVar6 = pbVar6 + 1;
+          pbVar7 = pbVar7 + 1;
+        } while (uVar5 != 0);
+      }
+LAB_004bdc70:
+      memmove(*(void **)(param_1 + 0x18),param_2 + (__n - __n_00),__n_00);
+      if (__n != 0) {
+        memmove(param_2,*(void **)(param_1 + 0x30),__n);
+      }
+      uVar10 = uVar10 - uVar1;
+      param_2 = param_2 + __n;
+    } while (uVar10 != 0);
+  }
+  return param_3;
+}
+
+~~~

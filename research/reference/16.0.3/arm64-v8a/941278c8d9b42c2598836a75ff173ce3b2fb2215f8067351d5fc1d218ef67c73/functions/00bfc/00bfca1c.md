@@ -1,0 +1,105 @@
+﻿# 00bfca1c
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfca1c",
+  "name": "_ZNSt6__ndk18ios_base4swapERS0_",
+  "size": 284,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "7a46d2dd185159a3a076b8f579a6b9ffac1cf7de6ece5ee974fae821654f89d8",
+  "source_text_sha256": "7a46d2dd185159a3a076b8f579a6b9ffac1cf7de6ece5ee974fae821654f89d8"
+}
+~~~
+
+## 呼び出し元
+
+- [00c5f3c0](../00c5f/00c5f3c0.md)
+
+## 呼び出し先
+
+- [00c59330](../00c59/00c59330.md)
+- [00c5b870](../00c5b/00c5b870.md)
+- [00c5f380](../00c5f/00c5f380.md)
+
+## 疑似コード / UTF-8 2828 bytes
+
+~~~c
+
+void _ZNSt6__ndk18ios_base4swapERS0_(long param_1,long param_2)
+
+{
+  undefined8 uVar1;
+  undefined4 uVar2;
+  undefined4 uVar3;
+  undefined8 uVar4;
+  undefined8 uVar5;
+  undefined1 auStack_28 [8];
+  
+  uVar5 = *(undefined8 *)(param_2 + 0x10);
+  uVar2 = *(undefined4 *)(param_1 + 8);
+  *(undefined4 *)(param_1 + 8) = *(undefined4 *)(param_2 + 8);
+  uVar4 = *(undefined8 *)(param_1 + 0x10);
+  *(undefined8 *)(param_1 + 0x10) = uVar5;
+  *(undefined4 *)(param_2 + 8) = uVar2;
+  *(undefined8 *)(param_2 + 0x10) = uVar4;
+  uVar2 = *(undefined4 *)(param_2 + 0x20);
+  uVar4 = *(undefined8 *)(param_1 + 0x18);
+  *(undefined8 *)(param_1 + 0x18) = *(undefined8 *)(param_2 + 0x18);
+  uVar3 = *(undefined4 *)(param_1 + 0x20);
+  *(undefined4 *)(param_1 + 0x20) = uVar2;
+  *(undefined4 *)(param_2 + 0x20) = uVar3;
+  uVar2 = *(undefined4 *)(param_1 + 0x24);
+  *(undefined8 *)(param_2 + 0x18) = uVar4;
+  *(undefined4 *)(param_1 + 0x24) = *(undefined4 *)(param_2 + 0x24);
+  *(undefined4 *)(param_2 + 0x24) = uVar2;
+  _ZNSt6__ndk16localeC1ERKS0_(auStack_28,param_1 + 0x30);
+  _ZNSt6__ndk16localeaSERKS0_(param_1 + 0x30,param_2 + 0x30);
+  _ZNSt6__ndk16localeaSERKS0_(param_2 + 0x30,auStack_28);
+  _ZNSt6__ndk16localeD1Ev(auStack_28);
+  uVar4 = *(undefined8 *)(param_1 + 0x38);
+  *(undefined8 *)(param_1 + 0x38) = *(undefined8 *)(param_2 + 0x38);
+  *(undefined8 *)(param_2 + 0x38) = uVar4;
+  uVar5 = *(undefined8 *)(param_2 + 0x48);
+  uVar4 = *(undefined8 *)(param_1 + 0x40);
+  uVar1 = *(undefined8 *)(param_1 + 0x48);
+  *(undefined8 *)(param_1 + 0x40) = *(undefined8 *)(param_2 + 0x40);
+  *(undefined8 *)(param_1 + 0x48) = uVar5;
+  *(undefined8 *)(param_2 + 0x40) = uVar4;
+  *(undefined8 *)(param_2 + 0x48) = uVar1;
+  uVar5 = *(undefined8 *)(param_2 + 0x58);
+  uVar4 = *(undefined8 *)(param_1 + 0x50);
+  uVar1 = *(undefined8 *)(param_1 + 0x58);
+  *(undefined8 *)(param_1 + 0x50) = *(undefined8 *)(param_2 + 0x50);
+  *(undefined8 *)(param_1 + 0x58) = uVar5;
+  *(undefined8 *)(param_2 + 0x50) = uVar4;
+  uVar4 = *(undefined8 *)(param_1 + 0x60);
+  *(undefined8 *)(param_1 + 0x60) = *(undefined8 *)(param_2 + 0x60);
+  *(undefined8 *)(param_2 + 0x58) = uVar1;
+  *(undefined8 *)(param_2 + 0x60) = uVar4;
+  uVar5 = *(undefined8 *)(param_2 + 0x70);
+  uVar4 = *(undefined8 *)(param_1 + 0x68);
+  uVar1 = *(undefined8 *)(param_1 + 0x70);
+  *(undefined8 *)(param_1 + 0x68) = *(undefined8 *)(param_2 + 0x68);
+  *(undefined8 *)(param_1 + 0x70) = uVar5;
+  *(undefined8 *)(param_2 + 0x68) = uVar4;
+  uVar4 = *(undefined8 *)(param_1 + 0x78);
+  *(undefined8 *)(param_1 + 0x78) = *(undefined8 *)(param_2 + 0x78);
+  *(undefined8 *)(param_2 + 0x70) = uVar1;
+  *(undefined8 *)(param_2 + 0x78) = uVar4;
+  uVar4 = *(undefined8 *)(param_1 + 0x80);
+  *(undefined8 *)(param_1 + 0x80) = *(undefined8 *)(param_2 + 0x80);
+  *(undefined8 *)(param_2 + 0x80) = uVar4;
+  return;
+}
+
+~~~

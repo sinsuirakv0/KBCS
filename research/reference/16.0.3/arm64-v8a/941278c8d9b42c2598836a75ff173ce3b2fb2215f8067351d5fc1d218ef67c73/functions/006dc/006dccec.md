@@ -1,0 +1,44 @@
+﻿# 006dccec
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "006dccec",
+  "name": "FUN_006dccec",
+  "size": 32,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "63aa05c0f53c7bb1c41c5cd74935ee64c9886c82795447049f2cdd519475d8b5",
+  "source_text_sha256": "63aa05c0f53c7bb1c41c5cd74935ee64c9886c82795447049f2cdd519475d8b5"
+}
+~~~
+
+## 呼び出し元
+
+- [0063b0a4](../0063b/0063b0a4.md)
+- [0063b7a4](../0063b/0063b7a4.md)
+- [0064f0a8](../0064f/0064f0a8.md)
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 76 bytes
+
+~~~c
+
+int FUN_006dccec(long param_1)
+
+{
+  return *(int *)(param_1 + 4) / 100;
+}
+
+~~~

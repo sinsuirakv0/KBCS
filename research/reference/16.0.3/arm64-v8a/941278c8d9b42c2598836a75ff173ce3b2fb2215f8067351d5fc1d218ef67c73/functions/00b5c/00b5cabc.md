@@ -1,0 +1,107 @@
+﻿# 00b5cabc
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00b5cabc",
+  "name": "_ZN8firebase8callback18CallbackDispatcher14FlushCallbacksEv",
+  "size": 264,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "bd90d9d6525f8a9a7b4c96af723892f3b7a7f7c3f7be6411aec9e89ce27d4259",
+  "source_text_sha256": "bd90d9d6525f8a9a7b4c96af723892f3b7a7f7c3f7be6411aec9e89ce27d4259"
+}
+~~~
+
+## 呼び出し元
+
+- [00c5cbc0](../00c5c/00c5cbc0.md)
+
+## 呼び出し先
+
+- [00c58f20](../00c58/00c58f20.md)
+- [00c58f50](../00c58/00c58f50.md)
+- [00c5baa0](../00c5b/00c5baa0.md)
+- [00c5bab0](../00c5b/00c5bab0.md)
+
+## 疑似コード / UTF-8 1894 bytes
+
+~~~c
+
+int _ZN8firebase8callback18CallbackDispatcher14FlushCallbacksEv(long param_1)
+
+{
+  long *plVar1;
+  char cVar2;
+  bool bVar3;
+  long lVar4;
+  int iVar5;
+  long *plVar6;
+  long *plVar7;
+  
+  _ZN8firebase5Mutex7AcquireEv(param_1 + 0x18);
+  if (*(long *)(param_1 + 0x10) == 0) {
+    iVar5 = 0;
+  }
+  else {
+    iVar5 = 0;
+    do {
+      lVar4 = *(long *)(param_1 + 8);
+      plVar6 = *(long **)(lVar4 + 0x18);
+      *(undefined8 *)(lVar4 + 0x10) = 0;
+      *(undefined8 *)(lVar4 + 0x18) = 0;
+      if (plVar6 != (long *)0x0) {
+        plVar7 = plVar6 + 1;
+        do {
+          lVar4 = *plVar7;
+          cVar2 = '\x01';
+          bVar3 = (bool)ExclusiveMonitorPass(plVar7,0x10);
+          if (bVar3) {
+            *plVar7 = lVar4 + -1;
+            cVar2 = ExclusiveMonitorsStatus();
+          }
+        } while (cVar2 != '\0');
+        if (lVar4 == 0) {
+          (**(code **)(*plVar6 + 0x10))(plVar6);
+          _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar6);
+        }
+      }
+      plVar6 = *(long **)(param_1 + 8);
+      lVar4 = *plVar6;
+      *(long *)(lVar4 + 8) = plVar6[1];
+      *(long *)plVar6[1] = lVar4;
+      *(long *)(param_1 + 0x10) = *(long *)(param_1 + 0x10) + -1;
+      plVar7 = (long *)plVar6[3];
+      if (plVar7 != (long *)0x0) {
+        plVar1 = plVar7 + 1;
+        do {
+          lVar4 = *plVar1;
+          cVar2 = '\x01';
+          bVar3 = (bool)ExclusiveMonitorPass(plVar1,0x10);
+          if (bVar3) {
+            *plVar1 = lVar4 + -1;
+            cVar2 = ExclusiveMonitorsStatus();
+          }
+        } while (cVar2 != '\0');
+        if (lVar4 == 0) {
+          (**(code **)(*plVar7 + 0x10))(plVar7);
+          _ZNSt6__ndk119__shared_weak_count14__release_weakEv(plVar7);
+        }
+      }
+      _ZdlPv(plVar6);
+      iVar5 = iVar5 + 1;
+    } while (*(long *)(param_1 + 0x10) != 0);
+  }
+  _ZN8firebase5Mutex7ReleaseEv(param_1 + 0x18);
+  return iVar5;
+}
+
+~~~

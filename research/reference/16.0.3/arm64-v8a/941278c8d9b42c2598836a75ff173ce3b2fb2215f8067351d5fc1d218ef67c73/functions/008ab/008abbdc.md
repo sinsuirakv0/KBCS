@@ -1,0 +1,50 @@
+﻿# 008abbdc
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "008abbdc",
+  "name": "FUN_008abbdc",
+  "size": 52,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "416173823db69eb6e565bfda268bb04afd2d49599764125c7ad53f4356a3f034",
+  "source_text_sha256": "416173823db69eb6e565bfda268bb04afd2d49599764125c7ad53f4356a3f034"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c58f30](../00c58/00c58f30.md)
+
+## 疑似コード / UTF-8 321 bytes
+
+~~~c
+
+void FUN_008abbdc(long param_1)
+
+{
+  undefined8 *puVar1;
+  undefined8 uVar2;
+  
+  puVar1 = (undefined8 *)_Znwm(0x10);
+  uVar2 = *(undefined8 *)(param_1 + 8);
+                    /* try { // try from 008abc00 to 009abc03 has its CatchHandler @ 008ac07c */
+  *puVar1 = &PTR_FUN_00c844d0;
+  puVar1[1] = uVar2;
+  return;
+}
+
+~~~

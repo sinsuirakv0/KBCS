@@ -1,0 +1,48 @@
+﻿# 00afd4bc
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00afd4bc",
+  "name": "FUN_00afd4bc",
+  "size": 84,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "e4dbfea6bb6be3413bfb09ee8dd1335050ced57f419f3c56a255572e3c9520ce",
+  "source_text_sha256": "e4dbfea6bb6be3413bfb09ee8dd1335050ced57f419f3c56a255572e3c9520ce"
+}
+~~~
+
+## 呼び出し元
+
+- [00716f88](../00716/00716f88.md)
+
+## 呼び出し先
+
+- [008524fc](../00852/008524fc.md)
+
+## 疑似コード / UTF-8 345 bytes
+
+~~~c
+
+void FUN_00afd4bc(int param_1,int param_2,int param_3)
+
+{
+  long lVar1;
+  
+                    /* try { // try from 00afd4c4 to 00bfd543 has its CatchHandler @ 00afc44c */
+  lVar1 = FUN_008524fc();
+  lVar1 = lVar1 + (long)param_1 * 0xc804 + (long)param_2 * 0x3ec;
+  *(int *)(lVar1 + 0x84af4) = *(int *)(lVar1 + 0x84af4) + param_3;
+  return;
+}
+
+~~~

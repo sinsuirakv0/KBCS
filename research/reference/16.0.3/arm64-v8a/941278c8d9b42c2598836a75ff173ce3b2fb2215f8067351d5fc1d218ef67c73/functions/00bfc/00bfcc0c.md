@@ -1,0 +1,56 @@
+﻿# 00bfcc0c
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfcc0c",
+  "name": "_ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEE7copyfmtERKS3_",
+  "size": 124,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "efd482e09240dcf09da7687dffb4afb9ee63a852910ba2bbb76fec77137ddb6f",
+  "source_text_sha256": "efd482e09240dcf09da7687dffb4afb9ee63a852910ba2bbb76fec77137ddb6f"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c59340](../00c59/00c59340.md)
+- [00c5f370](../00c5f/00c5f370.md)
+- [00c5f3b0](../00c5f/00c5f3b0.md)
+
+## 疑似コード / UTF-8 674 bytes
+
+~~~c
+
+long _ZNSt6__ndk19basic_iosIcNS_11char_traitsIcEEE7copyfmtERKS3_(long param_1,long param_2)
+
+{
+  undefined4 uVar1;
+  
+  if (param_1 != param_2) {
+    _ZNSt6__ndk18ios_base16__call_callbacksENS0_5eventE(param_1,0);
+    _ZNSt6__ndk18ios_base7copyfmtERKS0_(param_1,param_2);
+    uVar1 = *(undefined4 *)(param_2 + 0x90);
+    *(undefined8 *)(param_1 + 0x88) = *(undefined8 *)(param_2 + 0x88);
+    *(undefined4 *)(param_1 + 0x90) = uVar1;
+    _ZNSt6__ndk18ios_base16__call_callbacksENS0_5eventE(param_1,2);
+    *(undefined4 *)(param_1 + 0x24) = *(undefined4 *)(param_2 + 0x24);
+    _ZNSt6__ndk18ios_base5clearEj(param_1,*(undefined4 *)(param_1 + 0x20));
+  }
+  return param_1;
+}
+
+~~~

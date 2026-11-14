@@ -1,0 +1,45 @@
+﻿# 00bfa1ac
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfa1ac",
+  "name": "FUN_00bfa1ac",
+  "size": 44,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "ff600d81d91f8d5e622e61ffafb48ec7a4915ade7a0bf9141ce06113120dc267",
+  "source_text_sha256": "ff600d81d91f8d5e622e61ffafb48ec7a4915ade7a0bf9141ce06113120dc267"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c58f50](../00c58/00c58f50.md)
+- [00c5ef90](../00c5e/00c5ef90.md)
+
+## 疑似コード / UTF-8 107 bytes
+
+~~~c
+
+void FUN_00bfa1ac(void *param_1)
+
+{
+  _ZNSt6__ndk114error_categoryD1Ev();
+  _ZdlPv(param_1);
+  return;
+}
+
+~~~

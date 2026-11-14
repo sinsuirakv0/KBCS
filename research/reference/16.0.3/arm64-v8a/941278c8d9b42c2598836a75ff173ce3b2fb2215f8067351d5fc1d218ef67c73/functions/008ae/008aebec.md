@@ -1,0 +1,46 @@
+﻿# 008aebec
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "008aebec",
+  "name": "FUN_008aebec",
+  "size": 36,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "8286fb1df866fcf2002d2ddf7cadd0689a190bcbe6265bdde78fab1bd7dd4b25",
+  "source_text_sha256": "8286fb1df866fcf2002d2ddf7cadd0689a190bcbe6265bdde78fab1bd7dd4b25"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c58f30](../00c58/00c58f30.md)
+
+## 疑似コード / UTF-8 135 bytes
+
+~~~c
+
+void FUN_008aebec(void)
+
+{
+  undefined8 *puVar1;
+  
+  puVar1 = (undefined8 *)_Znwm(0x10);
+  *puVar1 = &PTR_FUN_00c84c40;
+  return;
+}
+
+~~~

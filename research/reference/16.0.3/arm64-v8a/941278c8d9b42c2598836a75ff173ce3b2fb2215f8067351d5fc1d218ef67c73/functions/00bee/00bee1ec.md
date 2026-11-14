@@ -1,0 +1,264 @@
+﻿# 00bee1ec
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bee1ec",
+  "name": "FUN_00bee1ec",
+  "size": 764,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "14114138c4b0830956b1c148ba7f7e21b0f76a8495053972f9f7af57fd669b08",
+  "source_text_sha256": "14114138c4b0830956b1c148ba7f7e21b0f76a8495053972f9f7af57fd669b08"
+}
+~~~
+
+## 呼び出し元
+
+- [00be7370](../00be7/00be7370.md)
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 6830 bytes
+
+~~~c
+
+ulong * FUN_00bee1ec(ulong *param_1,ulong *param_2,ulong *param_3)
+
+{
+  ulong *puVar1;
+  bool bVar2;
+  ulong uVar3;
+  ulong *puVar4;
+  ulong uVar5;
+  long lVar6;
+  ulong *puVar7;
+  ulong uVar8;
+  long lVar9;
+  ulong *puVar10;
+  ulong *puVar11;
+  ulong uVar12;
+  ulong uVar13;
+  ulong uVar14;
+  ulong *puVar15;
+  ulong uVar16;
+  ulong uVar17;
+  
+  if (param_1 != param_2) {
+    lVar6 = (long)param_2 - (long)param_1 >> 3;
+    if (1 < lVar6) {
+      uVar8 = lVar6 - 2U >> 1;
+      uVar13 = uVar8;
+      do {
+        if ((long)uVar13 <= (long)uVar8) {
+          uVar12 = (uVar13 & 0x1fffffffffffffff) << 1 | 1;
+          uVar5 = (uVar13 & 0x1fffffffffffffff) * 2 + 2;
+          puVar10 = param_1 + uVar12;
+          if ((long)uVar5 < lVar6) {
+            uVar16 = *puVar10;
+            uVar3 = puVar10[1];
+            uVar14 = uVar16;
+            if (uVar16 <= uVar3) {
+              uVar14 = uVar3;
+            }
+            puVar11 = puVar10 + 1;
+            if (uVar3 <= uVar16) {
+              puVar11 = puVar10;
+              uVar5 = uVar12;
+            }
+          }
+          else {
+            uVar14 = *puVar10;
+            puVar11 = puVar10;
+            uVar5 = uVar12;
+          }
+          uVar12 = param_1[uVar13];
+          puVar10 = param_1 + uVar13;
+          if (uVar12 <= uVar14) {
+            do {
+              while( true ) {
+                puVar7 = puVar11;
+                *puVar10 = uVar14;
+                if ((long)uVar8 < (long)uVar5) goto LAB_00bee214;
+                uVar3 = uVar5 << 1 | 1;
+                uVar5 = uVar5 * 2 + 2;
+                puVar4 = param_1 + uVar3;
+                puVar10 = puVar7;
+                if ((long)uVar5 < lVar6) break;
+                uVar14 = *puVar4;
+                puVar11 = puVar4;
+                uVar5 = uVar3;
+                if (uVar14 < uVar12) goto LAB_00bee214;
+              }
+              uVar17 = *puVar4;
+              uVar16 = puVar4[1];
+              uVar14 = uVar17;
+              if (uVar17 <= uVar16) {
+                uVar14 = uVar16;
+              }
+              puVar11 = puVar4 + 1;
+              if (uVar16 <= uVar17) {
+                uVar5 = uVar3;
+                puVar11 = puVar4;
+              }
+            } while (uVar12 <= uVar14);
+LAB_00bee214:
+            *puVar7 = uVar12;
+          }
+        }
+        bVar2 = 0 < (long)uVar13;
+        uVar13 = uVar13 - 1;
+      } while (bVar2);
+    }
+    puVar10 = param_2;
+    if (param_2 != param_3) {
+      puVar11 = param_1 + 1;
+      puVar7 = param_2;
+      do {
+        uVar13 = *puVar7;
+        if (uVar13 < *param_1) {
+          *puVar7 = *param_1;
+                    /* catch() { ... } // from try @ 00bee16c with catch @ 00bee330 */
+          *param_1 = uVar13;
+          if (1 < lVar6) {
+            uVar8 = *puVar11;
+                    /* catch() { ... } // from try @ 00bee138 with catch @ 00bee340 */
+            if ((long)param_2 - (long)param_1 == 0x10) {
+              uVar5 = 1;
+                    /* catch() { ... } // from try @ 00bee178 with catch @ 00bee350 */
+              puVar10 = puVar11;
+            }
+            else {
+              uVar5 = param_1[2];
+              bVar2 = uVar5 <= uVar8;
+              if (uVar8 <= uVar5) {
+                uVar8 = uVar5;
+              }
+              puVar10 = param_1 + 2;
+              if (bVar2) {
+                puVar10 = puVar11;
+              }
+              uVar5 = 1;
+              if (!bVar2) {
+                uVar5 = 2;
+              }
+            }
+            puVar4 = param_1;
+            if (uVar13 <= uVar8) {
+              do {
+                while( true ) {
+                  puVar15 = puVar10;
+                  *puVar4 = uVar8;
+                  if ((long)(lVar6 - 2U >> 1) < (long)uVar5) goto LAB_00bee308;
+                  uVar12 = uVar5 << 1 | 1;
+                  uVar5 = uVar5 * 2 + 2;
+                  puVar1 = param_1 + uVar12;
+                  puVar4 = puVar15;
+                  if ((long)uVar5 < lVar6) break;
+                  uVar8 = *puVar1;
+                  uVar5 = uVar12;
+                  puVar10 = puVar1;
+                  if (uVar8 < uVar13) goto LAB_00bee308;
+                }
+                uVar3 = *puVar1;
+                uVar14 = puVar1[1];
+                uVar8 = uVar3;
+                if (uVar3 <= uVar14) {
+                  uVar8 = uVar14;
+                }
+                puVar10 = puVar1 + 1;
+                if (uVar14 <= uVar3) {
+                  uVar5 = uVar12;
+                  puVar10 = puVar1;
+                }
+              } while (uVar13 <= uVar8);
+LAB_00bee308:
+              *puVar15 = uVar13;
+            }
+          }
+        }
+        puVar7 = puVar7 + 1;
+        puVar10 = param_3;
+      } while (puVar7 != param_3);
+    }
+    param_3 = puVar10;
+    if (1 < lVar6) {
+      do {
+        uVar8 = *param_1;
+        uVar13 = 0;
+        puVar10 = param_1;
+        do {
+                    /* try { // try from 00bee44c to 00cee597 has its CatchHandler @ 00bee44c
+                       catch() { ... } // from try @ 00bee44c with catch @ 00bee44c
+                       catch() { ... } // from try @ 00bee5a4 with catch @ 00bee44c */
+          uVar12 = uVar13 << 1 | 1;
+          uVar5 = uVar13 * 2 + 2;
+          puVar11 = puVar10 + uVar13 + 1;
+          if ((long)uVar5 < lVar6) {
+            uVar3 = puVar10[uVar13 + 2];
+            uVar16 = puVar10[uVar13 + 1];
+            uVar14 = uVar16;
+            if (uVar16 <= uVar3) {
+              uVar14 = uVar3;
+            }
+            puVar7 = puVar10 + uVar13 + 2;
+            uVar13 = uVar5;
+            if (uVar3 <= uVar16) {
+              puVar7 = puVar11;
+              uVar13 = uVar12;
+            }
+          }
+          else {
+            uVar14 = *puVar11;
+            puVar7 = puVar11;
+            uVar13 = uVar12;
+          }
+          *puVar10 = uVar14;
+          puVar10 = puVar7;
+        } while ((long)uVar13 <= (long)(lVar6 - 2U >> 1));
+        param_2 = param_2 + -1;
+        if (puVar7 == param_2) {
+          *puVar7 = uVar8;
+        }
+        else {
+          lVar9 = (long)puVar7 + (8 - (long)param_1) >> 3;
+          *puVar7 = *param_2;
+          *param_2 = uVar8;
+          if (1 < lVar9) {
+            uVar13 = lVar9 - 2U >> 1;
+            uVar8 = *puVar7;
+            uVar5 = param_1[uVar13];
+            puVar10 = param_1 + uVar13;
+            if (uVar5 < uVar8) {
+              do {
+                puVar11 = puVar10;
+                *puVar7 = uVar5;
+                if (uVar13 == 0) break;
+                uVar13 = uVar13 - 1 >> 1;
+                uVar5 = param_1[uVar13];
+                puVar7 = puVar11;
+                puVar10 = param_1 + uVar13;
+              } while (uVar5 < uVar8);
+              *puVar11 = uVar8;
+            }
+          }
+        }
+        bVar2 = 2 < lVar6;
+        lVar6 = lVar6 + -1;
+      } while (bVar2);
+    }
+  }
+  return param_3;
+}
+
+~~~

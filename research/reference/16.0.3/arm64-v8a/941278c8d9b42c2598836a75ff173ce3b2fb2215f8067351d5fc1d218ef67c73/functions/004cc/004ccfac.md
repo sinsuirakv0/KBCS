@@ -1,0 +1,52 @@
+﻿# 004ccfac
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "004ccfac",
+  "name": "_ZNK5Botan4HMAC8key_specEv",
+  "size": 24,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "e8b116368ba39baff9f2ac6943fc77b3178affa605be413849706b673e67d761",
+  "source_text_sha256": "e8b116368ba39baff9f2ac6943fc77b3178affa605be413849706b673e67d761"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+解決済みの記録なし。
+
+## 疑似コード / UTF-8 309 bytes
+
+~~~c
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void _ZNK5Botan4HMAC8key_specEv(undefined8 *param_1)
+
+{
+  undefined8 uVar1;
+  undefined8 uVar2;
+  
+  uVar2 = _UNK_002c30e8;
+  uVar1 = _DAT_002c30e0;
+  param_1[2] = 1;
+  param_1[1] = uVar2;
+  *param_1 = uVar1;
+  return;
+}
+
+~~~

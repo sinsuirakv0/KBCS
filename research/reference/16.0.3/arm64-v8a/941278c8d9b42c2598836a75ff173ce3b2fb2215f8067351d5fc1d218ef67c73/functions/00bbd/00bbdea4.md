@@ -1,0 +1,145 @@
+﻿# 00bbdea4
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bbdea4",
+  "name": "_ZN8firebase9messaging11DeleteTokenEv",
+  "size": 468,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "668fdc6d5984dd876608a780fcb1b37d01f6718362593674e0e7e7a66e2b617e",
+  "source_text_sha256": "668fdc6d5984dd876608a780fcb1b37d01f6718362593674e0e7e7a66e2b617e"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00497b94](../00497/00497b94.md)
+- [00c58f50](../00c58/00c58f50.md)
+- [00c58f80](../00c58/00c58f80.md)
+- [00c5baa0](../00c5b/00c5baa0.md)
+- [00c5bab0](../00c5b/00c5bab0.md)
+- [00c5bb30](../00c5b/00c5bb30.md)
+- [00c5bc80](../00c5b/00c5bc80.md)
+- [00c5bd10](../00c5b/00c5bd10.md)
+- [00c5bd40](../00c5b/00c5bd40.md)
+- [00c5be40](../00c5b/00c5be40.md)
+- [00c5be70](../00c5b/00c5be70.md)
+- [00c5bea0](../00c5b/00c5bea0.md)
+- [00c5bee0](../00c5b/00c5bee0.md)
+- [00c5bfe0](../00c5b/00c5bfe0.md)
+- [00c5c000](../00c5c/00c5c000.md)
+- [00c5c010](../00c5c/00c5c010.md)
+- [00c5c0a0](../00c5c/00c5c0a0.md)
+- [00c5c120](../00c5c/00c5c120.md)
+- [00c5e310](../00c5e/00c5e310.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"Messaging"
+"Messaging not initialized."
+"internal::IsInitialized()"
+~~~
+
+## 疑似コード / UTF-8 3539 bytes
+
+~~~c
+
+void _ZN8firebase9messaging11DeleteTokenEv(long param_1)
+
+{
+  ulong uVar1;
+  void *pvVar2;
+  long lVar3;
+  undefined8 uVar4;
+  undefined8 uVar5;
+  long *plVar6;
+  undefined8 uVar7;
+  undefined1 auStack_88 [16];
+  byte local_78 [8];
+  ulong local_70;
+  void *local_68;
+  undefined8 local_60 [2];
+  undefined1 auStack_50 [8];
+  long local_48;
+  
+                    /* catch() { ... } // from try @ 00bbdbec with catch @ 00bbdea4 */
+  uVar4 = DAT_01127430;
+  lVar3 = tpidr_el0;
+                    /* catch() { ... } // from try @ 00bbd974 with catch @ 00bbdec0 */
+  local_48 = *(long *)(lVar3 + 0x28);
+                    /* catch() { ... } // from try @ 00bbdd40 with catch @ 00bbded0 */
+                    /* catch() { ... } // from try @ 00bbde40 with catch @ 00bbded4 */
+  if (DAT_01127420 == 0) {
+    _ZN8firebase8LogErrorEPKcz("internal::IsInitialized()");
+    _ZN8firebase9LogAssertEPKcz("Messaging not initialized.");
+    _ZN8firebase5MutexC1ENS0_4ModeE(param_1,0);
+    *(undefined8 *)(param_1 + 0x28) = 0;
+    _ZN8firebase12FutureHandleC1EmPNS_6detail18FutureApiInterfaceE(param_1 + 0x30,0,0);
+  }
+  else {
+                    /* catch() { ... } // from try @ 00bbde28 with catch @ 00bbded8 */
+                    /* catch() { ... } // from try @ 00bbdc34 with catch @ 00bbdedc */
+                    /* catch() { ... } // from try @ 00bbde0c with catch @ 00bbdee0
+                       catch() { ... } // from try @ 00bbde5c with catch @ 00bbdee0 */
+    _ZN8firebase5Mutex7AcquireEv(DAT_01127430);
+    uVar5 = _ZN8firebase9messaging10FutureData3GetEv();
+    _ZN8firebase26ReferenceCountedFutureImpl13AllocInternalEiPvPFvS1_E(local_78,uVar5,4,0,0);
+    _ZN8firebase12FutureHandleC1ERKS0_(local_60,local_78);
+    _ZN8firebase12FutureHandleD2Ev(local_78);
+    plVar6 = (long *)_ZNK8firebase3App9GetJNIEnvEv(DAT_01127420);
+    uVar7 = FUN_00497b94(plVar6,DAT_01127458,DAT_011273b8);
+    _ZN8firebase4util27GetAndClearExceptionMessageEP7_JNIEnv(local_78,plVar6);
+    uVar1 = (ulong)(local_78[0] >> 1);
+    if ((local_78[0] & 1) != 0) {
+      uVar1 = local_70;
+    }
+    if (uVar1 == 0) {
+      _ZN8firebase4util22RegisterCallbackOnTaskEP7_JNIEnvP8_jobjectPFvS2_S4_NS0_12FutureResultEPKcPvES8_S7_
+                (plVar6,uVar7,FUN_00bbd338,local_60[0],"Messaging");
+    }
+    else {
+      _ZN8firebase12FutureHandleC1ERKS0_(auStack_88,local_60);
+      pvVar2 = (void *)((ulong)local_78 | 1);
+      if ((local_78[0] & 1) != 0) {
+        pvVar2 = local_68;
+      }
+      _ZN8firebase26ReferenceCountedFutureImpl16CompleteInternalIvZNS0_16CompleteInternalIvEEvRKNS_12FutureHandleEiPKcEUlPvE_EEvS5_iS7_RKT0_
+                (uVar5,auStack_88,0xffffffff,pvVar2,auStack_50);
+      _ZN8firebase12FutureHandleD2Ev(auStack_88);
+    }
+    (**(code **)(*plVar6 + 0xb8))(plVar6,uVar7);
+    _ZN8firebase4util26CheckAndClearJniExceptionsEP7_JNIEnv(plVar6);
+    _ZN8firebase6FutureIvEC2EPNS_6detail18FutureApiInterfaceERKNS_12FutureHandleE
+              (param_1,uVar5,local_60);
+    if ((local_78[0] & 1) != 0) {
+      _ZdlPv(local_68);
+    }
+    _ZN8firebase12FutureHandleD2Ev(local_60);
+    _ZN8firebase5Mutex7ReleaseEv(uVar4);
+  }
+  if (*(long *)(lVar3 + 0x28) == local_48) {
+    return;
+  }
+                    /* WARNING: Subroutine does not return */
+                    /* try { // try from 00bbe074 to 00cbe29b has its CatchHandler @ 00bbe074
+                       catch() { ... } // from try @ 00bbe074 with catch @ 00bbe074
+                       catch() { ... } // from try @ 00bbe2c0 with catch @ 00bbe074 */
+  __stack_chk_fail();
+}
+
+~~~

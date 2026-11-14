@@ -1,0 +1,78 @@
+﻿# 00bfb3dc
+
+版: 16.0.3 / arm64-v8a / libnative-lib.so
+
+SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
+
+## 関数情報
+
+~~~json
+{
+  "address": "00bfb3dc",
+  "name": "_ZNSt6__ndk111timed_mutex4lockEv",
+  "size": 140,
+  "external": 0,
+  "thunk": 0,
+  "status": "cached",
+  "confidence": "unreviewed",
+  "error": "",
+  "source_sha256": "7d70b7dcaaeef944381f6fbfbe62dd59a057fe84765eb0022aa17f34dc3b2806",
+  "source_text_sha256": "7d70b7dcaaeef944381f6fbfbe62dd59a057fe84765eb0022aa17f34dc3b2806"
+}
+~~~
+
+## 呼び出し元
+
+解決済みの記録なし。
+
+## 呼び出し先
+
+- [00c591c0](../00c59/00c591c0.md)
+- [00c59520](../00c59/00c59520.md)
+- [00c5c740](../00c5c/00c5c740.md)
+- [00c5c750](../00c5c/00c5c750.md)
+
+## 関連文字列（未確認候補）
+
+~~~text
+"mutex lock failed"
+~~~
+
+## 疑似コード / UTF-8 884 bytes
+
+~~~c
+
+ulong _ZNSt6__ndk111timed_mutex4lockEv(pthread_mutex_t *param_1)
+
+{
+  int iVar1;
+  uint uVar2;
+  ulong uVar3;
+  pthread_mutex_t *local_30;
+  char local_28;
+  
+  local_28 = '\x01';
+  local_30 = param_1;
+  iVar1 = pthread_mutex_lock(param_1);
+  if (iVar1 != 0) {
+                    /* WARNING: Subroutine does not return */
+    _ZNSt6__ndk120__throw_system_errorEiPKc(iVar1,"mutex lock failed");
+  }
+  if ((*(byte *)((long)param_1 + 0x58) & 1) == 0) {
+    *(undefined1 *)((long)param_1 + 0x58) = 1;
+  }
+  else {
+    do {
+      uVar3 = _ZNSt6__ndk118condition_variable4waitERNS_11unique_lockINS_5mutexEEE
+                        (param_1 + 1,&local_30);
+    } while ((*(byte *)((long)param_1 + 0x58) & 1) != 0);
+    *(undefined1 *)((long)param_1 + 0x58) = 1;
+    if (local_28 == '\0') {
+      return uVar3;
+    }
+  }
+  uVar2 = pthread_mutex_unlock(local_30);
+  return (ulong)uVar2;
+}
+
+~~~
