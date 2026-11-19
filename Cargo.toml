@@ -16,3 +16,7 @@ sha2 = "0.10"
 [profile.release]
 lto = "thin"
 strip = true
+
+[profile.ci-test]
+inherits = "release"
+lto = "off"
