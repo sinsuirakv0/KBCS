@@ -4,16 +4,23 @@
 
 SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
 
+解析リビジョン `6cf79e30b2bdfc73` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.3**
   - 採用 · [関数詳細 `EXTERNAL:000000cf`](../../../../../15.7.3/arm64-v8a/a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49/functions/external/EXTERNAL-000000cf.md)
-  - [v15.7.3 → v15.7.4 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/1-2/unavailable-0005.md#compare-8470cca6a6fc2ac70dfbf89bc19d647a)
+  - [v15.7.3 → v15.7.4 当該関数比較](../../../../../../comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/1-2/unavailable-0005.md#compare-8470cca6a6fc2ac70dfbf89bc19d647a)
   - [v15.7.3の関数一覧](../../../../../15.7.3/arm64-v8a/a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49/README.md)
 
 - **次の公開版 v16.0.0**
-  - 構造資料不足
+  - 採用 · [関数詳細 `EXTERNAL:000000d5`](../../../../../16.0.0/arm64-v8a/1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3/functions/external/EXTERNAL-000000d5.md)
+  - [v15.7.4 → v16.0.0 当該関数比較](../../../../../../comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/2-3/unavailable-0005.md#compare-573317f89bca16a1f4b0ebb93c688f7f)
   - [v16.0.0の関数一覧](../../../../../16.0.0/arm64-v8a/1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -30,9 +37,17 @@ SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
   "thunk": 0,
   "status": "external",
   "confidence": "unreviewed",
-  "error": null
+  "error": null,
+  "structure_status": "not_exported",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": null,
+  "analysis_link": "legacy_program_id_unavailable"
 }
 ~~~
+
+外部関数。対象SO内の本体は未収録です。
 
 ## 呼び出し元
 
@@ -41,3 +56,19 @@ SO SHA-256: `669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590`
 ## 呼び出し先
 
 解決済みの記録なし。
+
+## 逆アセンブリ
+
+構造未収録。
+
+## 基本ブロックと分岐先
+
+構造未収録。
+
+## 命令位置別の参照
+
+構造未収録。
+
+<a id="pseudocode"></a>
+
+疑似コード未収録。

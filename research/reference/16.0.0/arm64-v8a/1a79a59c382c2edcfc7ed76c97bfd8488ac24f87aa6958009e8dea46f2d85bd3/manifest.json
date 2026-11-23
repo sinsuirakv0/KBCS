@@ -19,16 +19,30 @@
   "source_archive_sha256": "ba91701ef502e3e5e026bf3f5f90ea21975f89ba74e2cc00834b7c78be1441a7",
   "source_version_code": 1600000,
   "comparison_state": "complete",
-  "tracking_format": 2,
-  "tracking_policy": "observed-effects-v1",
-  "tracking_run": "9a70ab56d42846316c9fe233",
-  "tracking_page": "research/comparisons/arm64-v8a/9a70ab56d42846316c9fe233/README.md",
+  "tracking_format": 3,
+  "tracking_policy": "audited-interval-correspondence-v3",
+  "tracking_run": "a3b91f0e1be9445c739dcadd",
+  "tracking_page": "research/comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/README.md",
   "tracking_sources": [
+    {
+      "version": "15.7.3",
+      "architecture": "arm64-v8a",
+      "sha256": "a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49",
+      "analysis_revision": "45565ee9c155ae02"
+    },
+    {
+      "version": "15.7.4",
+      "architecture": "arm64-v8a",
+      "sha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
+      "analysis_revision": "6cf79e30b2bdfc73"
+    },
     {
       "version": "16.0.0",
       "architecture": "arm64-v8a",
       "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
       "analysis_revision": "70b5c9c0dcc036b2"
     }
-  ]
+  ],
+  "tracking_navigation_format": 2,
+  "validation_state": "validated"
 }

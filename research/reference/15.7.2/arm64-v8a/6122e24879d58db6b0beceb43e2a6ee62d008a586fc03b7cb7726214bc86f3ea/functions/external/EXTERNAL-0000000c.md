@@ -17,7 +17,7 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - **次の公開版 v15.7.3**
   - 採用 · [関数詳細 `EXTERNAL:0000000c`](../../../../../15.7.3/arm64-v8a/a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49/functions/external/EXTERNAL-0000000c.md)
-  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/0-1/unavailable-0003.md#compare-6161b46cc7a76633197c7fcaae1c05d3)
+  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/0-1/unavailable-0003.md#compare-6161b46cc7a76633197c7fcaae1c05d3)
   - [v15.7.3の関数一覧](../../../../../15.7.3/arm64-v8a/a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
