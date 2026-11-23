@@ -5,22 +5,42 @@
   "library": "libnative-lib.so",
   "ghidra": "12.1.2",
   "analysis_revision": "5ed057380ac853a2",
-  "pages": 25654,
-  "page_bytes": 82463062,
-  "max_page_bytes": 535121,
+  "pages": 25773,
+  "page_bytes": 665427891,
+  "max_page_bytes": 1048760,
   "cached": 25233,
   "failed": 0,
   "external": 292,
   "low_confidence": 3,
+  "disassembled": 24941,
+  "structure_unavailable": 292,
+  "instruction_count": 1846836,
+  "instruction_bytes": 7387344,
+  "legacy_boundary_unverified": 25233,
+  "structure_functions": 25233,
+  "structure_extra_functions": 0,
+  "verified_links": 3705388,
   "source_database_sha256": "82e5e6b5dd5fcc5983f16b10b0b3c304e6f99cd1695bc5deda8fa5fd10cfa900",
+  "source_index_sha256": "aacabc9363102954df2e28066fed6d5483fddd48e38b8b86b094a8cd39eb2f9e",
   "functions": 25525,
+  "source_structure_sha256": "33d484777f628372bc336037105d852859c9b47bfd64938f44d64e0dd988f8a4",
+  "reference_policy": "native-reference-v1",
+  "structure_provenance": "receipt_verified",
+  "structure_unavailable_reasons": {
+    "instruction_coverage_mismatch": 292
+  },
   "page_limit_bytes": 104857600,
   "format": 2,
-  "comparison_state": "no_baseline",
-  "tracking_format": 2,
-  "tracking_policy": "observed-effects-v1",
-  "tracking_run": "a05f9f4f481ae994718c5500",
-  "tracking_page": "research/comparisons/arm64-v8a/a05f9f4f481ae994718c5500/README.md",
+  "generator_signature": "92cb62eaf6b45a3db80d2de158c85335a0e89851dc3e60a0d00242cab999e361",
+  "source_archive_sha256": "c51fa2b1e4938b4f09833a5b8e2f9ca98258c7ae8f714a3e8b96385254099fa4",
+  "source_version_code": 1507021,
+  "comparison_state": "pending",
+  "tracking_format": 3,
+  "tracking_navigation_format": 2,
+  "tracking_policy": "audited-interval-correspondence-v3",
+  "tracking_run": "af8e2f5c5fc38f06774ff85c",
+  "validation_state": "validated",
+  "tracking_page": "research/comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/README.md",
   "tracking_sources": [
     {
       "version": "15.7.2",
@@ -28,5 +48,6 @@
       "sha256": "6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea",
       "analysis_revision": "5ed057380ac853a2"
     }
-  ]
+  ],
+  "migration_window": "e72319d967a7c2500509fddb21a788ffd71cd2ddb6da20c822ae874c52124ce3"
 }

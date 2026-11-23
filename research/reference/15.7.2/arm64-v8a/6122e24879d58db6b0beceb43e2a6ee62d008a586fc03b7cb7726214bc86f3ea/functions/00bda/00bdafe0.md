@@ -4,6 +4,25 @@
 
 SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
+解析リビジョン `5ed057380ac853a2` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
+<!-- kbcs-version-function-tracking -->
+## バージョン間の関数追跡
+
+- **前の公開版** 公開版なし
+
+- **次の公開版 v15.7.3**
+  - 採用 · [関数詳細 `00bdb090`](../../../../../15.7.3/arm64-v8a/a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49/functions/00bdb/00bdb090.md) · 移動量 `+0xb0`
+  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/0-1/high-0010.md#compare-a22c4ad649de6cacb3e342e9dee20766)
+  - [v15.7.3の関数一覧](../../../../../15.7.3/arm64-v8a/a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49/README.md)
+
+[版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
+<!-- /kbcs-version-function-tracking -->
+
 ## 関数情報
 
 ~~~json
@@ -17,7 +36,27 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "841dcc4a09116e37e70ddc4d3f9ae9bf85b6153d47c6f73563d3dc7d942c208e",
-  "source_text_sha256": "841dcc4a09116e37e70ddc4d3f9ae9bf85b6153d47c6f73563d3dc7d942c208e"
+  "source_text_sha256": "841dcc4a09116e37e70ddc4d3f9ae9bf85b6153d47c6f73563d3dc7d942c208e",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34410f235c7222fc",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "00bdafe0",
+        "00bdafef"
+      ]
+    ],
+    "bytes_sha256": "828d424895f59bdf7b50e662301b4fb4c6cfe2c57c1cd693f70d535ad41aa215",
+    "instruction_count": 4,
+    "instruction_bytes": 16,
+    "body_bytes": 16,
+    "indirect": 1,
+    "unresolved": 0
+  }
 }
 ~~~
 
@@ -32,6 +71,10 @@ SO SHA-256: `6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea`
 
 - [00b736a8](../00b73/00b736a8.md)
 
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
+
 ## 疑似コード / UTF-8 107 bytes
 
 ~~~c
@@ -43,4 +86,56 @@ void _ZNSt11logic_errorC1EPKc(void)
   return;
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-00bdafe0"></a> `00bdafe0` | `10 02 00 d0` | adrp x16,0xc1c000 | `FALL_THROUGH`
+<a id="insn-00bdafe4"></a> `00bdafe4` | `11 16 40 f9` | ldr x17,[x16, #0x28] | `FALL_THROUGH`
+<a id="insn-00bdafe8"></a> `00bdafe8` | `10 a2 00 91` | add x16,x16,#0x28 | `FALL_THROUGH`
+<a id="insn-00bdafec"></a> `00bdafec` | `20 02 1f d6` | br x17 | `COMPUTED_CALL_TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`00bdafe0`](#insn-00bdafe0) 範囲 `[['00bdafe0', '00bdafef']]`
+
+## 命令位置別の参照
+
+- [`00bdafe4`](#insn-00bdafe4) → `00c1c028`（関数外または未収録） · `READ` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `pointer`
+- [`00bdafec`](#insn-00bdafec) → [`00b736a8`](../00b73/00b736a8.md) · `COMPUTED_CALL` · `ANALYSIS` · 関数 `00b736a8` · 推定シンボル `_ZNSt11logic_errorC1EPKc` · 推定型 `None`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`00bdafe4`](#insn-00bdafe4)
+
+~~~json
+{
+  "source": "00bdafe4",
+  "target": "00c1c028",
+  "target_space": "ram",
+  "resolution": "defined_data",
+  "start": "00c1c028",
+  "offset": 0,
+  "size": 8,
+  "datatype": "pointer",
+  "capture_state": "pointer_requires_relocation_and_runtime_resolution"
+}
+~~~
+- 参照命令 [`00bdafec`](#insn-00bdafec)
+
+~~~json
+{
+  "source": "00bdafec",
+  "target": "00b736a8",
+  "target_space": "ram",
+  "resolution": "function"
+}
 ~~~

@@ -19,16 +19,24 @@
   "source_archive_sha256": "de22401e517e0a5822d4ccecf3535bda4eef4fef15d8b6812078cf5ff34243e9",
   "source_version_code": 1507030,
   "comparison_state": "complete",
-  "tracking_format": 2,
-  "tracking_policy": "observed-effects-v1",
-  "tracking_run": "fa9cbdc8303e1b3a86470d44",
-  "tracking_page": "research/comparisons/arm64-v8a/fa9cbdc8303e1b3a86470d44/README.md",
+  "tracking_format": 3,
+  "tracking_policy": "audited-interval-correspondence-v3",
+  "tracking_run": "af8e2f5c5fc38f06774ff85c",
+  "tracking_page": "research/comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/README.md",
   "tracking_sources": [
+    {
+      "version": "15.7.2",
+      "architecture": "arm64-v8a",
+      "sha256": "6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea",
+      "analysis_revision": "5ed057380ac853a2"
+    },
     {
       "version": "15.7.3",
       "architecture": "arm64-v8a",
       "sha256": "a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49",
       "analysis_revision": "45565ee9c155ae02"
     }
-  ]
+  ],
+  "tracking_navigation_format": 2,
+  "validation_state": "validated"
 }

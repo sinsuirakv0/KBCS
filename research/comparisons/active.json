@@ -1,0 +1,20 @@
+﻿{
+  "format": 1,
+  "intervals": [
+    {
+      "older": {
+        "version": "15.7.2",
+        "architecture": "arm64-v8a",
+        "sha256": "6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea",
+        "analysis_revision": "5ed057380ac853a2"
+      },
+      "newer": {
+        "version": "15.7.3",
+        "architecture": "arm64-v8a",
+        "sha256": "a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49",
+        "analysis_revision": "45565ee9c155ae02"
+      },
+      "page": "arm64-v8a/af8e2f5c5fc38f06774ff85c/0-1/README.md"
+    }
+  ]
+}
