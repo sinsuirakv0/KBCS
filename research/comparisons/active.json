@@ -14,7 +14,22 @@
         "sha256": "a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49",
         "analysis_revision": "45565ee9c155ae02"
       },
-      "page": "arm64-v8a/af8e2f5c5fc38f06774ff85c/0-1/README.md"
+      "page": "arm64-v8a/97ee0756e9de6c746e3ce399/0-1/README.md"
+    },
+    {
+      "older": {
+        "version": "15.7.3",
+        "architecture": "arm64-v8a",
+        "sha256": "a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49",
+        "analysis_revision": "45565ee9c155ae02"
+      },
+      "newer": {
+        "version": "15.7.4",
+        "architecture": "arm64-v8a",
+        "sha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
+        "analysis_revision": "6cf79e30b2bdfc73"
+      },
+      "page": "arm64-v8a/97ee0756e9de6c746e3ce399/1-2/README.md"
     }
   ]
 }

@@ -4,16 +4,23 @@
 
 SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
 
+解析リビジョン `45565ee9c155ae02` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.2**
   - 採用 · [関数詳細 `00aad204`](../../../../../15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/functions/00aad/00aad204.md) · 移動量 `+0xc8`
-  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/0-1/priority-0056.md#compare-457edb4a5fef5eece35717ffbedfde7f)
+  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/0-1/priority-0056.md#compare-457edb4a5fef5eece35717ffbedfde7f)
   - [v15.7.2の関数一覧](../../../../../15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/README.md)
 
 - **次の公開版 v15.7.4**
-  - 構造資料不足
+  - 採用 · [関数詳細 `00aad310`](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/functions/00aad/00aad310.md) · 移動量 `+0x44`
+  - [v15.7.3 → v15.7.4 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/1-2/priority-0059.md#compare-b02ba3c1098e03c409e0b6073515b942)
   - [v15.7.4の関数一覧](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -32,7 +39,27 @@ SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "6fb422a8a4e8b727437ac8a3729e20da7c388be63f650f1ce27aeb4a3a738a76",
-  "source_text_sha256": "6fb422a8a4e8b727437ac8a3729e20da7c388be63f650f1ce27aeb4a3a738a76"
+  "source_text_sha256": "6fb422a8a4e8b727437ac8a3729e20da7c388be63f650f1ce27aeb4a3a738a76",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34410fe8fa9e7c9c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "00aad2cc",
+        "00aad2eb"
+      ]
+    ],
+    "bytes_sha256": "ec63df81065103b78dc11fbd7c3b25d2d70d8e30abb1b64ec5c7e3744e5d2295",
+    "instruction_count": 8,
+    "instruction_bytes": 32,
+    "body_bytes": 32,
+    "indirect": 0,
+    "unresolved": 0
+  }
 }
 ~~~
 
@@ -43,6 +70,10 @@ SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
 ## 呼び出し先
 
 解決済みの記録なし。
+
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
 
 ## 疑似コード / UTF-8 319 bytes
 
@@ -63,4 +94,49 @@ void FUN_00aad2cc(long param_1,undefined8 *param_2)
   return;
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-00aad2cc"></a> `00aad2cc` | `08 0b 00 d0` | adrp x8,0xc0f000 | `FALL_THROUGH`
+<a id="insn-00aad2d0"></a> `00aad2d0` | `08 e1 0d 91` | add x8,x8,#0x378 | `FALL_THROUGH`
+<a id="insn-00aad2d4"></a> `00aad2d4` | `28 00 00 f9` | str x8,[x1] | `FALL_THROUGH`
+<a id="insn-00aad2d8"></a> `00aad2d8` | `08 0c 40 f9` | ldr x8,[x0, #0x18] | `FALL_THROUGH`
+<a id="insn-00aad2dc"></a> `00aad2dc` | `00 80 c0 3c` | ldur q0,[x0, #0x8] | `FALL_THROUGH`
+<a id="insn-00aad2e0"></a> `00aad2e0` | `28 0c 00 f9` | str x8,[x1, #0x18] | `FALL_THROUGH`
+<a id="insn-00aad2e4"></a> `00aad2e4` | `20 80 80 3c` | stur q0,[x1, #0x8] | `FALL_THROUGH`
+<a id="insn-00aad2e8"></a> `00aad2e8` | `c0 03 5f d6` | ret | `TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`00aad2cc`](#insn-00aad2cc) 範囲 `[['00aad2cc', '00aad2eb']]`
+
+## 命令位置別の参照
+
+- [`00aad2d4`](#insn-00aad2d4) → `00c0f378`（関数外または未収録） · `DATA` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `undefined *`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`00aad2d4`](#insn-00aad2d4)
+
+~~~json
+{
+  "source": "00aad2d4",
+  "target": "00c0f378",
+  "target_space": "ram",
+  "resolution": "defined_data",
+  "start": "00c0f378",
+  "offset": 0,
+  "size": 8,
+  "datatype": "undefined *",
+  "capture_state": "pointer_requires_relocation_and_runtime_resolution"
+}
 ~~~

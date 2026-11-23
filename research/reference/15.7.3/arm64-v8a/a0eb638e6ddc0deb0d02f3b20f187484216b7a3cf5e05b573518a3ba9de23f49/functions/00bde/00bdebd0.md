@@ -4,16 +4,23 @@
 
 SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
 
+解析リビジョン `45565ee9c155ae02` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.2**
   - 採用 · [関数詳細 `00bdeb20`](../../../../../15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/functions/00bde/00bdeb20.md) · 移動量 `+0xb0`
-  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/0-1/high-0019.md#compare-d4d627fa327efb46f7e54e3c8aa01deb)
+  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/0-1/high-0019.md#compare-d4d627fa327efb46f7e54e3c8aa01deb)
   - [v15.7.2の関数一覧](../../../../../15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/README.md)
 
 - **次の公開版 v15.7.4**
-  - 構造資料不足
+  - 採用 · [関数詳細 `00bdec20`](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/functions/00bde/00bdec20.md) · 移動量 `+0x50`
+  - [v15.7.3 → v15.7.4 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/1-2/high-0020.md#compare-0672f0da31d9cea10baaccb5a4245110)
   - [v15.7.4の関数一覧](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -32,7 +39,27 @@ SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "58f405ea1f2c2e7e92083bb8cf8524794308621717d0f024a4300430271c610c",
-  "source_text_sha256": "58f405ea1f2c2e7e92083bb8cf8524794308621717d0f024a4300430271c610c"
+  "source_text_sha256": "58f405ea1f2c2e7e92083bb8cf8524794308621717d0f024a4300430271c610c",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34410fe8fa9e7c9c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "00bdebd0",
+        "00bdebdf"
+      ]
+    ],
+    "bytes_sha256": "31acf98b160fbf98f11ab70e9d77a4b1e785b536e10b06ab3b4011f8d3c0e5d4",
+    "instruction_count": 4,
+    "instruction_bytes": 16,
+    "body_bytes": 16,
+    "indirect": 1,
+    "unresolved": 0
+  }
 }
 ~~~
 
@@ -44,6 +71,10 @@ SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
 ## 呼び出し先
 
 - [00b0ad40](../00b0a/00b0ad40.md)
+
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
 
 ## 疑似コード / UTF-8 285 bytes
 
@@ -59,4 +90,56 @@ void _ZNSt6__ndk16vectorIPN11flatbuffers9NamespaceENS_9allocatorIS3_EEE21__push_
   return;
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-00bdebd0"></a> `00bdebd0` | `f0 01 00 f0` | adrp x16,0xc1d000 | `FALL_THROUGH`
+<a id="insn-00bdebd4"></a> `00bdebd4` | `11 3e 47 f9` | ldr x17,[x16, #0xe78] | `FALL_THROUGH`
+<a id="insn-00bdebd8"></a> `00bdebd8` | `10 e2 39 91` | add x16,x16,#0xe78 | `FALL_THROUGH`
+<a id="insn-00bdebdc"></a> `00bdebdc` | `20 02 1f d6` | br x17 | `COMPUTED_CALL_TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`00bdebd0`](#insn-00bdebd0) 範囲 `[['00bdebd0', '00bdebdf']]`
+
+## 命令位置別の参照
+
+- [`00bdebd4`](#insn-00bdebd4) → `00c1de78`（関数外または未収録） · `READ` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `pointer`
+- [`00bdebdc`](#insn-00bdebdc) → [`00b0ad40`](../00b0a/00b0ad40.md) · `COMPUTED_CALL` · `ANALYSIS` · 関数 `00b0ad40` · 推定シンボル `_ZNSt6__ndk16vectorIPN11flatbuffers9NamespaceENS_9allocatorIS3_EEE21__push_back_slow_pathIRKS3_EEvOT_` · 推定型 `None`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`00bdebd4`](#insn-00bdebd4)
+
+~~~json
+{
+  "source": "00bdebd4",
+  "target": "00c1de78",
+  "target_space": "ram",
+  "resolution": "defined_data",
+  "start": "00c1de78",
+  "offset": 0,
+  "size": 8,
+  "datatype": "pointer",
+  "capture_state": "pointer_requires_relocation_and_runtime_resolution"
+}
+~~~
+- 参照命令 [`00bdebdc`](#insn-00bdebdc)
+
+~~~json
+{
+  "source": "00bdebdc",
+  "target": "00b0ad40",
+  "target_space": "ram",
+  "resolution": "function"
+}
 ~~~

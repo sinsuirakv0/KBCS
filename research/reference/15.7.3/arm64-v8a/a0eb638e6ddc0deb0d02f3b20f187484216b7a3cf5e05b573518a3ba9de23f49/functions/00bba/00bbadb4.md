@@ -4,16 +4,23 @@
 
 SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
 
+解析リビジョン `45565ee9c155ae02` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.2**
   - 採用 · [関数詳細 `00bbacec`](../../../../../15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/functions/00bba/00bbacec.md) · 移動量 `+0xc8`
-  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/0-1/high-0010.md#compare-d530fc52e88af9a6b1d541f63a4120cb)
+  - [v15.7.2 → v15.7.3 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/0-1/high-0010.md#compare-d530fc52e88af9a6b1d541f63a4120cb)
   - [v15.7.2の関数一覧](../../../../../15.7.2/arm64-v8a/6122e24879d58db6b0beceb43e2a6ee62d008a586fc03b7cb7726214bc86f3ea/README.md)
 
 - **次の公開版 v15.7.4**
-  - 構造資料不足
+  - 採用 · [関数詳細 `00bbadf8`](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/functions/00bba/00bbadf8.md) · 移動量 `+0x44`
+  - [v15.7.3 → v15.7.4 当該関数比較](../../../../../../comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/1-2/high-0011.md#compare-5d341b15bfada6d92d315fa23b77882c)
   - [v15.7.4の関数一覧](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -32,7 +39,27 @@ SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "458ec627df26c73102f8dca166fa0a81494999bd41199f497a8dc808005d0d1c",
-  "source_text_sha256": "458ec627df26c73102f8dca166fa0a81494999bd41199f497a8dc808005d0d1c"
+  "source_text_sha256": "458ec627df26c73102f8dca166fa0a81494999bd41199f497a8dc808005d0d1c",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34410fe8fa9e7c9c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "00bbadb4",
+        "00bbadc3"
+      ]
+    ],
+    "bytes_sha256": "a40733d0c4964ba8484193d9b7187500d55a044fa3c051b0e8ed656d61b45bd7",
+    "instruction_count": 4,
+    "instruction_bytes": 16,
+    "body_bytes": 16,
+    "indirect": 0,
+    "unresolved": 0
+  }
 }
 ~~~
 
@@ -50,6 +77,10 @@ SO SHA-256: `a0eb638e6ddc0deb0d02f3b20f187484216b7a3cf5e05b573518a3ba9de23f49`
 "std::bad_alloc"
 ~~~
 
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
+
 ## 疑似コード / UTF-8 332 bytes
 
 ~~~c
@@ -63,4 +94,54 @@ char * _ZNKSt9bad_alloc4whatEv(void)
   return "std::bad_alloc";
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-00bbadb4"></a> `00bbadb4` | `5f 24 03 d5` | bti c | `FALL_THROUGH`
+<a id="insn-00bbadb8"></a> `00bbadb8` | `00 b7 ff 90` | adrp x0,0x29a000 | `FALL_THROUGH`
+<a id="insn-00bbadbc"></a> `00bbadbc` | `00 d0 2a 91` | add x0,x0,#0xab4 | `FALL_THROUGH`
+<a id="insn-00bbadc0"></a> `00bbadc0` | `c0 03 5f d6` | ret | `TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`00bbadb4`](#insn-00bbadb4) 範囲 `[['00bbadb4', '00bbadb7']]`
+  - `FALL_THROUGH` [`00bbadb4`](#insn-00bbadb4) → [`00bbadb8`](#insn-00bbadb8)
+- ブロック [`00bbadb8`](#insn-00bbadb8) 範囲 `[['00bbadb8', '00bbadbb']]`
+  - `FALL_THROUGH` [`00bbadb8`](#insn-00bbadb8) → [`00bbadbc`](#insn-00bbadbc)
+- ブロック [`00bbadbc`](#insn-00bbadbc) 範囲 `[['00bbadbc', '00bbadbf']]`
+  - `FALL_THROUGH` [`00bbadbc`](#insn-00bbadbc) → [`00bbadc0`](#insn-00bbadc0)
+- ブロック [`00bbadc0`](#insn-00bbadc0) 範囲 `[['00bbadc0', '00bbadc3']]`
+
+## 命令位置別の参照
+
+- [`00bbadbc`](#insn-00bbadbc) → `0029aab4`（関数外または未収録） · `DATA` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `string`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`00bbadbc`](#insn-00bbadbc)
+
+~~~json
+{
+  "source": "00bbadbc",
+  "target": "0029aab4",
+  "target_space": "ram",
+  "resolution": "defined_data",
+  "start": "0029aab4",
+  "offset": 0,
+  "size": 15,
+  "datatype": "string",
+  "bytes": "7374643a3a6261645f616c6c6f6300",
+  "capture_start": "0029aab4",
+  "capture_bytes": 15,
+  "capture_state": "complete_static_bytes"
+}
 ~~~

@@ -5,24 +5,42 @@
   "library": "libnative-lib.so",
   "ghidra": "12.1.2",
   "analysis_revision": "45565ee9c155ae02",
-  "pages": 25650,
-  "page_bytes": 82598383,
-  "max_page_bytes": 535374,
+  "pages": 25770,
+  "page_bytes": 664410908,
+  "max_page_bytes": 1048747,
   "cached": 25229,
   "failed": 0,
   "external": 292,
   "low_confidence": 2,
+  "disassembled": 24937,
+  "structure_unavailable": 292,
+  "instruction_count": 1841415,
+  "instruction_bytes": 7365660,
+  "legacy_boundary_unverified": 25229,
+  "structure_functions": 25229,
+  "structure_extra_functions": 0,
+  "verified_links": 3697755,
   "source_database_sha256": "63cda1a35f6b965f2efc20b1e0908da969835bdc4effcd267bf799128180ec90",
+  "source_index_sha256": "9eeac47a5a7cd53989492c2526397d7ba0f5d6222cdbd2164094213a89324db2",
   "functions": 25521,
+  "source_structure_sha256": "449854502ea2c7f77bcd0241c76024a60f76932cb1121cabca1d209f63d2a70a",
+  "reference_policy": "native-reference-v1",
+  "structure_provenance": "receipt_verified",
+  "structure_unavailable_reasons": {
+    "instruction_coverage_mismatch": 292
+  },
   "page_limit_bytes": 104857600,
   "format": 2,
+  "generator_signature": "92cb62eaf6b45a3db80d2de158c85335a0e89851dc3e60a0d00242cab999e361",
   "source_archive_sha256": "de22401e517e0a5822d4ccecf3535bda4eef4fef15d8b6812078cf5ff34243e9",
   "source_version_code": 1507030,
   "comparison_state": "complete",
   "tracking_format": 3,
+  "tracking_navigation_format": 2,
   "tracking_policy": "audited-interval-correspondence-v3",
-  "tracking_run": "af8e2f5c5fc38f06774ff85c",
-  "tracking_page": "research/comparisons/arm64-v8a/af8e2f5c5fc38f06774ff85c/README.md",
+  "tracking_run": "97ee0756e9de6c746e3ce399",
+  "validation_state": "validated",
+  "tracking_page": "research/comparisons/arm64-v8a/97ee0756e9de6c746e3ce399/README.md",
   "tracking_sources": [
     {
       "version": "15.7.2",
@@ -37,6 +55,5 @@
       "analysis_revision": "45565ee9c155ae02"
     }
   ],
-  "tracking_navigation_format": 2,
-  "validation_state": "validated"
+  "migration_window": "d4fdb16a32193f892c802225cd920181b95b024ef7a7b3bf35256d1e77206e8e"
 }
