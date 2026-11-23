@@ -29,7 +29,7 @@
         "sha256": "669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590",
         "analysis_revision": "6cf79e30b2bdfc73"
       },
-      "page": "arm64-v8a/a3b91f0e1be9445c739dcadd/1-2/README.md"
+      "page": "arm64-v8a/af8902ef9a3f2de12eeaa7fe/0-1/README.md"
     },
     {
       "older": {
@@ -44,7 +44,22 @@
         "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
         "analysis_revision": "70b5c9c0dcc036b2"
       },
-      "page": "arm64-v8a/a3b91f0e1be9445c739dcadd/2-3/README.md"
+      "page": "arm64-v8a/af8902ef9a3f2de12eeaa7fe/1-2/README.md"
+    },
+    {
+      "older": {
+        "version": "16.0.0",
+        "architecture": "arm64-v8a",
+        "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+        "analysis_revision": "70b5c9c0dcc036b2"
+      },
+      "newer": {
+        "version": "16.0.1",
+        "architecture": "arm64-v8a",
+        "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+        "analysis_revision": "711084564ddd8b14"
+      },
+      "page": "arm64-v8a/af8902ef9a3f2de12eeaa7fe/2-3/README.md"
     }
   ]
 }

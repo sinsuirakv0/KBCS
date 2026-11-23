@@ -4,16 +4,23 @@
 
 SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 
+解析リビジョン `70b5c9c0dcc036b2` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.4**
   - 要確認
-  - [v15.7.4 → v16.0.0 候補と検査根拠](../../../../../../comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/2-3/review-0176.md#review-1b1730f5e5533ca91c5510cbcbca52b5)
+  - [v15.7.4 → v16.0.0 候補と検査根拠](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/1-2/review-0176.md#review-1b1730f5e5533ca91c5510cbcbca52b5)
   - [v15.7.4の関数一覧](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/README.md)
 
 - **次の公開版 v16.0.1**
-  - 構造資料不足
+  - 要確認
+  - [v16.0.0 → v16.0.1 候補と検査根拠](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/2-3/review-0045.md#review-1b1730f5e5533ca91c5510cbcbca52b5)
   - [v16.0.1の関数一覧](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -32,7 +39,27 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "b17d18cea9e3d03da7fe64cff4717d00687135fcd893ad9e57f028f18bd0f236",
-  "source_text_sha256": "b17d18cea9e3d03da7fe64cff4717d00687135fcd893ad9e57f028f18bd0f236"
+  "source_text_sha256": "b17d18cea9e3d03da7fe64cff4717d00687135fcd893ad9e57f028f18bd0f236",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34411a6fd886ea7c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "00c4fbfc",
+        "00c4fc2b"
+      ]
+    ],
+    "bytes_sha256": "2adc177e901ead08072a45d97e0a7f1963c9e22a327ab05a538ce699dbeb2d9c",
+    "instruction_count": 12,
+    "instruction_bytes": 48,
+    "body_bytes": 48,
+    "indirect": 1,
+    "unresolved": 1
+  }
 }
 ~~~
 
@@ -43,6 +70,10 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 ## 呼び出し先
 
 解決済みの記録なし。
+
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
 
 ## 疑似コード / UTF-8 447 bytes
 
@@ -64,4 +95,52 @@ ulong FUN_00c4fbfc(long param_1)
   return (ulong)(bVar1 < 0x40);
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-00c4fbfc"></a> `00c4fbfc` | `5f 24 03 d5` | bti c | `FALL_THROUGH`
+<a id="insn-00c4fc00"></a> `00c4fc00` | `00 08 40 f9` | ldr x0,[x0, #0x10] | `FALL_THROUGH`
+<a id="insn-00c4fc04"></a> `00c4fc04` | `08 24 40 39` | ldrb w8,[x0, #0x9] | `FALL_THROUGH`
+<a id="insn-00c4fc08"></a> `00c4fc08` | `09 05 1a 12` | and w9,w8,#0xc0 | `FALL_THROUGH`
+<a id="insn-00c4fc0c"></a> `00c4fc0c` | `3f 01 02 71` | cmp w9,#0x80 | `FALL_THROUGH`
+<a id="insn-00c4fc10"></a> `00c4fc10` | `81 00 00 54` | b.ne 0x00c4fc20 | `CONDITIONAL_JUMP`
+<a id="insn-00c4fc14"></a> `00c4fc14` | `08 00 40 f9` | ldr x8,[x0] | `FALL_THROUGH`
+<a id="insn-00c4fc18"></a> `00c4fc18` | `10 01 40 f9` | ldr x16,[x8] | `FALL_THROUGH`
+<a id="insn-00c4fc1c"></a> `00c4fc1c` | `00 02 1f d6` | br x16 | `COMPUTED_JUMP`
+<a id="insn-00c4fc20"></a> `00c4fc20` | `1f 01 01 71` | cmp w8,#0x40 | `FALL_THROUGH`
+<a id="insn-00c4fc24"></a> `00c4fc24` | `e0 27 9f 1a` | cset w0,cc | `FALL_THROUGH`
+<a id="insn-00c4fc28"></a> `00c4fc28` | `c0 03 5f d6` | ret | `TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`00c4fbfc`](#insn-00c4fbfc) 範囲 `[['00c4fbfc', '00c4fc13']]`
+  - `CONDITIONAL_JUMP` [`00c4fc10`](#insn-00c4fc10) → [`00c4fc20`](#insn-00c4fc20)
+  - `FALL_THROUGH` [`00c4fc10`](#insn-00c4fc10) → [`00c4fc14`](#insn-00c4fc14)
+- ブロック [`00c4fc14`](#insn-00c4fc14) 範囲 `[['00c4fc14', '00c4fc1f']]`
+- ブロック [`00c4fc20`](#insn-00c4fc20) 範囲 `[['00c4fc20', '00c4fc2b']]`
+
+## 命令位置別の参照
+
+- [`00c4fc10`](#insn-00c4fc10) → [`00c4fc20`](#insn-00c4fc20) · `CONDITIONAL_JUMP` · `DEFAULT` · 関数 `None` · 推定シンボル `None` · 推定型 `None`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`00c4fc10`](#insn-00c4fc10)
+
+~~~json
+{
+  "source": "00c4fc10",
+  "target": "00c4fc20",
+  "target_space": "ram",
+  "resolution": "boundary_unknown"
+}
 ~~~

@@ -1,0 +1,19 @@
+﻿{
+  "format": 3,
+  "run": "af8902ef9a3f2de12eeaa7fe",
+  "database_sha256": "d1a7b87d646467baf466fb71b5809174629ba7618fbccadc8d5995c275591e14",
+  "verified_links": 889435,
+  "asset_url": "https://github.com/sinsuirakv0/KBCS/releases/download/native-analysis-16.0.0-arm64-v8a-70b5c9c0dcc036b2/native-tracking-1688bc2c2fa91324b446a495.sqlite.gz",
+  "reference_url": null,
+  "navigation_format": 2,
+  "validation_state": "validated",
+  "navigation_sha256": "9f24c55c1712d10db0f0c88ccd3bf067c2cc318ae1ef3d6a7d224b7e868044a6",
+  "publication_check": {
+    "function_pages": 104364,
+    "confirmed_links": 151693,
+    "reference_links": 12264953,
+    "comparison_links": 889435,
+    "seconds": 138.766,
+    "process_peak_rss_bytes": 1823744000
+  }
+}

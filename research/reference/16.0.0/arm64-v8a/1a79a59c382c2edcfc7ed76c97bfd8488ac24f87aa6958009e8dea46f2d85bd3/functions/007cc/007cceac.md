@@ -4,16 +4,23 @@
 
 SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 
+解析リビジョン `70b5c9c0dcc036b2` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.4**
   - 要確認
-  - [v15.7.4 → v16.0.0 候補と検査根拠](../../../../../../comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/2-3/review-0129.md#review-003c60fa7ac991890310b9ee34b23850)
+  - [v15.7.4 → v16.0.0 候補と検査根拠](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/1-2/review-0129.md#review-003c60fa7ac991890310b9ee34b23850)
   - [v15.7.4の関数一覧](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/README.md)
 
 - **次の公開版 v16.0.1**
-  - 構造資料不足
+  - 要確認
+  - [v16.0.0 → v16.0.1 候補と検査根拠](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/2-3/review-0024.md#review-003c60fa7ac991890310b9ee34b23850)
   - [v16.0.1の関数一覧](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -32,7 +39,31 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "0e95551741e62c46da48068a318bf144b854d801039be4e2350874de49790ec6",
-  "source_text_sha256": "0e95551741e62c46da48068a318bf144b854d801039be4e2350874de49790ec6"
+  "source_text_sha256": "0e95551741e62c46da48068a318bf144b854d801039be4e2350874de49790ec6",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34411a6fd886ea7c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "007cceac",
+        "007db287"
+      ],
+      [
+        "007dced8",
+        "007dcedb"
+      ]
+    ],
+    "bytes_sha256": "94f80d3a9dbe8f09933c8a08a53a8991d02007829686a827845b2e24be76aa1b",
+    "instruction_count": 14584,
+    "instruction_bytes": 58336,
+    "body_bytes": 58336,
+    "indirect": 78,
+    "unresolved": 32
+  }
 }
 ~~~
 
@@ -578,6 +609,10 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 "w@"
 "year"
 ~~~
+
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
 
 ## 疑似コード / UTF-8 470051 bytes
 
@@ -10011,3 +10046,37 @@ LAB_007cfe7c:
 }
 
 ~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+- [007cceac〜007d830c](../../assembly/007cc/007cceac-007cceac-007d830c.md) · 11545命令
+
+- [007d8310〜007dced8](../../assembly/007cc/007cceac-007d8310-007dced8.md) · 3039命令
+
+## 基本ブロックと分岐先
+
+全2786件を参照元の命令範囲ごとに収録。
+
+- [007cceac〜007da120](../../blocks/007cc/007cceac-007cceac-007da120-0001.md) · 2547件
+- [007da140〜007dced8](../../blocks/007cc/007cceac-007da140-007dced8-0002.md) · 239件
+
+## 命令位置別の参照
+
+全8001件を参照元の命令範囲ごとに収録。
+
+- [007cceac〜007d51c0](../../references/007cc/007cceac-007cceac-007d51c0-0001.md) · 4379件
+- [007d51cc〜007dced8](../../references/007cc/007cceac-007d51cc-007dced8-0002.md) · 3622件
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+全8001件を参照元の命令範囲ごとに収録。
+
+- [007cceac〜007d434c](../../data/007cc/007cceac-007cceac-007d434c-0001.md) · 3875件
+- [007d4354〜007db274](../../data/007cc/007cceac-007d4354-007db274-0002.md) · 4122件
+- [007db27c〜007dced8](../../data/007cc/007cceac-007db27c-007dced8-0003.md) · 4件

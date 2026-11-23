@@ -4,16 +4,23 @@
 
 SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 
+解析リビジョン `70b5c9c0dcc036b2` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v15.7.4**
   - 採用 · [関数詳細 `00897f34`](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/functions/00897/00897f34.md) · 移動量 `+0x33e98`
-  - [v15.7.4 → v16.0.0 当該関数比較](../../../../../../comparisons/arm64-v8a/a3b91f0e1be9445c739dcadd/2-3/priority-0043.md#compare-0f0599989022b22a74856b99bd88932b)
+  - [v15.7.4 → v16.0.0 当該関数比較](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/1-2/priority-0043.md#compare-0f0599989022b22a74856b99bd88932b)
   - [v15.7.4の関数一覧](../../../../../15.7.4/arm64-v8a/669438f86b41c10c7a387b96eb1ab5ca82a350bacc89ec06c05f699ec3727590/README.md)
 
 - **次の公開版 v16.0.1**
-  - 構造資料不足
+  - 採用 · [関数詳細 `008cbf68`](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/functions/008cb/008cbf68.md) · 移動量 `+0x19c`
+  - [v16.0.0 → v16.0.1 当該関数比較](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/2-3/priority-0049.md#compare-4b5959e52b2e2a9702ae18f63af02cca)
   - [v16.0.1の関数一覧](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -32,7 +39,27 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "287d59069088103b92afd2352f13a43e2466ed80eba93d089db1750c18fa2845",
-  "source_text_sha256": "287d59069088103b92afd2352f13a43e2466ed80eba93d089db1750c18fa2845"
+  "source_text_sha256": "287d59069088103b92afd2352f13a43e2466ed80eba93d089db1750c18fa2845",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "34411a6fd886ea7c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "008cbdcc",
+        "008cbddf"
+      ]
+    ],
+    "bytes_sha256": "6a90b82c72af4cca8bf7037ce98cc82d1cb3d4d4690f3cc25b74bf3f313bf70f",
+    "instruction_count": 5,
+    "instruction_bytes": 20,
+    "body_bytes": 20,
+    "indirect": 0,
+    "unresolved": 0
+  }
 }
 ~~~
 
@@ -43,6 +70,10 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 ## 呼び出し先
 
 解決済みの記録なし。
+
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
 
 ## 疑似コード / UTF-8 186 bytes
 
@@ -59,4 +90,46 @@ void FUN_008cbdcc(long param_1,undefined8 *param_2)
   return;
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-008cbdcc"></a> `008cbdcc` | `08 04 40 f9` | ldr x8,[x0, #0x8] | `FALL_THROUGH`
+<a id="insn-008cbdd0"></a> `008cbdd0` | `c9 1d 00 90` | adrp x9,0xc83000 | `FALL_THROUGH`
+<a id="insn-008cbdd4"></a> `008cbdd4` | `29 a1 29 91` | add x9,x9,#0xa68 | `FALL_THROUGH`
+<a id="insn-008cbdd8"></a> `008cbdd8` | `29 20 00 a9` | stp x9,x8,[x1] | `FALL_THROUGH`
+<a id="insn-008cbddc"></a> `008cbddc` | `c0 03 5f d6` | ret | `TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`008cbdcc`](#insn-008cbdcc) 範囲 `[['008cbdcc', '008cbddf']]`
+
+## 命令位置別の参照
+
+- [`008cbdd8`](#insn-008cbdd8) → `00c83a68`（関数外または未収録） · `DATA` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `undefined *`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`008cbdd8`](#insn-008cbdd8)
+
+~~~json
+{
+  "source": "008cbdd8",
+  "target": "00c83a68",
+  "target_space": "ram",
+  "resolution": "defined_data",
+  "start": "00c83a68",
+  "offset": 0,
+  "size": 8,
+  "datatype": "undefined *",
+  "capture_state": "pointer_requires_relocation_and_runtime_resolution"
+}
 ~~~

@@ -5,10 +5,19 @@
 SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
 
 <!-- kbcs-version-function-tracking -->
-## 連続バージョンの比較
+## バージョン間の関数追跡
 
-- [v16.0.1 → v16.0.2](../../../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/0-1/priority-0070.md#compare-d10a3194665eb7d82360fcc035bfa1ad)
-- [v16.0.2 → v16.0.3](../../../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/1-2/priority-0078.md#compare-b948f771072fda64dfff406029899ade)
+- **前の公開版 v16.0.0**
+  - 採用 · [関数詳細 `00af1bb4`](../../../../../16.0.0/arm64-v8a/1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3/functions/00af1/00af1bb4.md) · 移動量 `+0x428`
+  - [v16.0.0 → v16.0.1 当該関数比較](../../../../../../comparisons/arm64-v8a/af8902ef9a3f2de12eeaa7fe/2-3/priority-0065.md#compare-74f20207e38b028a00dfbf82f3bd0457)
+  - [v16.0.0の関数一覧](../../../../../16.0.0/arm64-v8a/1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3/README.md)
+
+- **次の公開版 v16.0.2**
+  - 対応先詳細の検証待ち
+  - [v16.0.1 → v16.0.2 当該関数比較](../../../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/0-1/priority-0070.md#compare-d10a3194665eb7d82360fcc035bfa1ad)
+  - [v16.0.2の関数一覧](../../../../../16.0.2/arm64-v8a/baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6/README.md)
+
+[版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
 <!-- /kbcs-version-function-tracking -->
 
 ## 関数情報
