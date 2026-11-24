@@ -31,14 +31,16 @@
   },
   "page_limit_bytes": 104857600,
   "format": 2,
-  "generator_signature": "9dd4569b2d1f962f0ca79c15923290577f0412600735449162d5ec2641410746",
+  "generator_signature": "92cb62eaf6b45a3db80d2de158c85335a0e89851dc3e60a0d00242cab999e361",
   "source_archive_sha256": "a160e1a410d36d8b75ad992330790c1dc60e8c7c254898f5d7334b7aae7857be",
   "source_version_code": 1600030,
   "comparison_state": "complete",
   "tracking_format": 3,
+  "tracking_navigation_format": 2,
   "tracking_policy": "audited-interval-correspondence-v3",
-  "tracking_run": "6bf8de28d08f0f4f0e3c832d",
-  "tracking_page": "research/comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/README.md",
+  "tracking_run": "d102850eb939af4f4bb0eaf5",
+  "validation_state": "validated",
+  "tracking_page": "research/comparisons/arm64-v8a/d102850eb939af4f4bb0eaf5/README.md",
   "tracking_sources": [
     {
       "version": "16.0.1",
@@ -59,6 +61,5 @@
       "analysis_revision": "9afc4f9e264e1fda"
     }
   ],
-  "tracking_navigation_format": 2,
-  "validation_state": "validated"
+  "migration_window": "230a9f12ec515f7fd8e05c11e48e766f235433e6d4182040f236261b2a370774"
 }

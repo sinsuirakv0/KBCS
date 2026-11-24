@@ -22,7 +22,7 @@ GitHub連携の検索結果が不十分なら、既知のファイルパスを�
 <!-- /kbcs-version-tracking -->
 
 <!-- kbcs-version-tracking-neighbors -->
-[前の公開版との比較 v16.0.2](../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/2-3/README.md)
+[前の公開版との比較 v16.0.2](../../../../comparisons/arm64-v8a/d102850eb939af4f4bb0eaf5/1-2/README.md)
 <!-- /kbcs-version-tracking-neighbors -->
 
 ## アドレス索引
