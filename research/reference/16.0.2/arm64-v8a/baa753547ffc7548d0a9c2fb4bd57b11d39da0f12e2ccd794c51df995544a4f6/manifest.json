@@ -19,11 +19,17 @@
   "source_archive_sha256": "e93e1095e04368a91128b11e672b40d00097973e1d97862b3ab7e661dcf02b26",
   "source_version_code": 1600020,
   "comparison_state": "complete",
-  "tracking_format": 2,
-  "tracking_policy": "block-correspondence-v1",
-  "tracking_run": "c6e4dfc940403d119ed8b991",
-  "tracking_page": "research/comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/README.md",
+  "tracking_format": 3,
+  "tracking_policy": "audited-interval-correspondence-v3",
+  "tracking_run": "9801c0f5b635b1292885b4ed",
+  "tracking_page": "research/comparisons/arm64-v8a/9801c0f5b635b1292885b4ed/README.md",
   "tracking_sources": [
+    {
+      "version": "16.0.0",
+      "architecture": "arm64-v8a",
+      "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+      "analysis_revision": "70b5c9c0dcc036b2"
+    },
     {
       "version": "16.0.1",
       "architecture": "arm64-v8a",
@@ -37,5 +43,6 @@
       "analysis_revision": "ea0159f06d493a87"
     }
   ],
-  "tracking_navigation_format": 1
+  "tracking_navigation_format": 2,
+  "validation_state": "validated"
 }

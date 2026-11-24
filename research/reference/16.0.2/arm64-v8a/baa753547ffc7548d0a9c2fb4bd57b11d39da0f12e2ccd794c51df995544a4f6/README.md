@@ -17,13 +17,13 @@ GitHub連携の検索結果が不十分なら、既知のファイルパスを�
 各疑似コードブロックの末尾改行は表示用に補われる場合があります。厳密な元ファイルはReleaseの原本を使います。
 
 <!-- kbcs-version-tracking -->
-[バージョン間の関数追跡](../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/README.md)
+[バージョン間の関数追跡](../../../../comparisons/README.md)
 <!-- /kbcs-version-tracking -->
 
 <!-- kbcs-version-tracking-neighbors -->
-[前の版との比較 v16.0.1](../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/0-1/README.md)
+[前の公開版との比較 v16.0.1](../../../../comparisons/arm64-v8a/9801c0f5b635b1292885b4ed/2-3/README.md)
 
-[次の版との比較 v16.0.3](../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/1-2/README.md)
+[次の公開版との比較 v16.0.3](../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/1-2/README.md)
 <!-- /kbcs-version-tracking-neighbors -->
 
 ## アドレス索引
