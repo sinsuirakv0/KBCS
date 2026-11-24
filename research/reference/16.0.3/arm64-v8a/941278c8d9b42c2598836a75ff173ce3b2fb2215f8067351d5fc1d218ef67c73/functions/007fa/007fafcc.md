@@ -11,10 +11,16 @@ SO SHA-256: `941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73`
 [擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
 
 <!-- kbcs-version-function-tracking -->
-## 連続バージョンの比較
+## バージョン間の関数追跡
 
-- [v16.0.1 → v16.0.2](../../../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/0-1/priority-0043.md#compare-7b0ab8609c597b4b6d79fb018d8a22d8)
-- [v16.0.2 → v16.0.3](../../../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/1-2/priority-0047.md#compare-4da52d8e458ca524d552dc08b20b669f)
+- **前の公開版 v16.0.2**
+  - 採用 · [関数詳細 `007fa068`](../../../../../16.0.2/arm64-v8a/baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6/functions/007fa/007fa068.md) · 移動量 `+0xf64`
+  - [v16.0.2 → v16.0.3 当該関数比較](../../../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/2-3/priority-0042.md#compare-4da52d8e458ca524d552dc08b20b669f)
+  - [v16.0.2の関数一覧](../../../../../16.0.2/arm64-v8a/baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6/README.md)
+
+- **次の公開版** 公開版なし
+
+[版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
 <!-- /kbcs-version-function-tracking -->
 
 ## 関数情報

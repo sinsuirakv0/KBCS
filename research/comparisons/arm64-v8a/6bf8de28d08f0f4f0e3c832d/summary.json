@@ -1,0 +1,1418 @@
+﻿{
+  "complete": true,
+  "configuration": "b928dc5730e8250d133a246b",
+  "cpu_seconds": 9215.325941324,
+  "cycles": {
+    "consistent": 44990,
+    "gap_candidate": 355,
+    "partial": 497,
+    "temporary_change_candidate": 6
+  },
+  "engine": {
+    "blocks.py": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+    "comparison_pages.py": "230300948e6b1641cc8995239a0bea91c148c33d6f0ad4d5dd58d465609a284c",
+    "effects.py": "b6697a95bfbc70d010935da96b99f0641e33f9c98a98bca50d5d272c94288f91",
+    "engine.py": "b8bee98e56983c3c5d52d7ee130df43e72df8d2b5b2d140681e6430df555e9d1",
+    "features.py": "f3f1bad69cf75e990dc335926c5242b598b745342edd38c701b2807eb4777219",
+    "instruction_matcher.py": "32fa2741d70c60ea8377a058263c87bb1c392f9e310c584bc6519e6edf014aa6",
+    "interval_alignment.py": "789b2a0c090648fb762bea37e76878d1357aeb13208748731bbfe97cc72c07b4",
+    "logic.py": "5b665f23e981c73b3c4f945cb6fbac0c7a505f1d763f9794e289dc20d758094c",
+    "matching-policy.json": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+    "publication_gate.py": "cfc5318bcfff49b9b3c4120799fe771a6155d14b5e48723a54a3e3a5a9a69584",
+    "relations.py": "9a32a1fcdd29fdddd0e3f3bf6e8a00661310a8d7e2b95ccdfa1b0c54a9a5c90f",
+    "report.py": "166bc6cd01fa5eb0959ada5e116e2b10abeb40568c05e53d8f1edc31c62695c6",
+    "structure.py": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+    "tracking.py": "865b8127b4276c66f1b3c8bf68ecb5321345448a2cd2c0192bdc22636cf46212",
+    "tracking_pages.py": "711402e27497b5fd128d782f8adc609703d6b7330fd6b39ab46a2bfac5797f09",
+    "tracking_pair.py": "baccb0df3978a2551da00e3fa84c6aa3644386782a84e654a7ca8cefacf0b91a"
+  },
+  "format": 3,
+  "pairs": {
+    "0-1": {
+      "baseline_coverage": [
+        {
+          "count": 22478,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3877,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 9,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 22478,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 3884,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 2,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_value": 1035,
+        "call_argument_candidate": 4296,
+        "call_target": 1467,
+        "return_value_candidate": 384,
+        "store_condition": 843,
+        "store_destination": 1038,
+        "store_value": 4712,
+        "unresolved_branch_alignment": 1466,
+        "unresolved_call_alignment": 1169,
+        "unresolved_return_alignment": 788,
+        "unresolved_store_alignment": 2063
+      },
+      "importance": {
+        "critical": 10047,
+        "high": 2897,
+        "none": 2151,
+        "review": 7523
+      },
+      "initial_accepted": 22773,
+      "initial_held": 156,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 0,
+            "seconds": 17.062548514000127
+          },
+          "old": {
+            "reused": 0,
+            "seconds": 16.99706256100012
+          }
+        },
+        "matching_seconds": 67.58276904800005,
+        "total_before_export_seconds": 173.667730528,
+        "validation_seconds": 69.761579493
+      },
+      "inspection": {
+        "detailed": 21175,
+        "forced_by_references": 103,
+        "skipped": 863,
+        "unavailable": 580
+      },
+      "instruction_matching": {
+        "accepted": 0,
+        "candidate_pairs": 12857,
+        "data_anchors": 1188,
+        "policy": {
+          "cfg_rounds": 4,
+          "format": 1,
+          "maximum_alignment_product": 262144,
+          "maximum_assignment_component": 8,
+          "maximum_candidates": 24,
+          "maximum_posting_functions": 8,
+          "maximum_search_keys": 128,
+          "maximum_window_keys": 64,
+          "minimum_assignment_gap": 4,
+          "minimum_block_instructions": 4,
+          "minimum_cfg_coverage": 0.98,
+          "minimum_instruction_coverage": 0.98,
+          "minimum_mapped_references": 2,
+          "minimum_rank_margin": 4,
+          "window_instructions": 4
+        },
+        "size_budget_skipped": 4146
+      },
+      "layout": {
+        "different_count": 9,
+        "equal_count": 2082
+      },
+      "logic": {
+        "alignment_unresolved": 1048,
+        "data_change_candidate": 12,
+        "detail_skipped": 863,
+        "logic_change_candidate": 10732,
+        "machine_only_observed": 2337,
+        "no_difference_in_scope": 1288,
+        "reference_sensitive": 5596,
+        "reference_unresolved": 117,
+        "structure_or_reference_change": 45,
+        "unavailable": 580
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.09393737508327782,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "cpu_seconds": 0.2790184639998188,
+          "process_peak_rss_bytes": 1201659904,
+          "seconds": 0.2790370660000008
+        },
+        "pass2_structure": {
+          "cpu_seconds": 701.142593417,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 701.2387295120002
+        },
+        "pass3_logic": {
+          "cpu_seconds": 378.93596800900013,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 378.9598762789997
+        },
+        "pass4_hypotheses": {
+          "cpu_seconds": 566.6772707959999,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 566.7081784060001
+        }
+      },
+      "reference_states": {
+        "changed": 12312,
+        "equal": 8282,
+        "not_tested": 580,
+        "unresolved": 1444
+      },
+      "refined_accepted": 1,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 1,
+            "candidates": 27,
+            "collisions": {
+              "new": 92,
+              "old": 90
+            },
+            "held": 26,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 92,
+          "old": 90
+        }
+      },
+      "review": {
+        "competing_candidates": 8072,
+        "initial_match_conflict": 312,
+        "merge_candidate": 240,
+        "split_candidate": 247,
+        "unresolved": 8076
+      },
+      "seconds": 1647.3485958830001,
+      "unmatched": [
+        4041,
+        4041
+      ],
+      "validation": {
+        "abstained": 141,
+        "correct": 1360,
+        "hidden_symbols": 1501,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    },
+    "0-2": {
+      "baseline_coverage": [
+        {
+          "count": 22503,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3861,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 2,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 22503,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 3859,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 2,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_value": 1024,
+        "call_argument_candidate": 4503,
+        "call_target": 1368,
+        "return_value_candidate": 390,
+        "store_condition": 937,
+        "store_destination": 1015,
+        "store_value": 4594,
+        "unresolved_branch_alignment": 1835,
+        "unresolved_call_alignment": 1482,
+        "unresolved_return_alignment": 946,
+        "unresolved_store_alignment": 2504
+      },
+      "importance": {
+        "critical": 10351,
+        "high": 2823,
+        "none": 2137,
+        "review": 7327
+      },
+      "initial_accepted": 22798,
+      "initial_held": 161,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 26661,
+            "seconds": 2.361037468999939
+          },
+          "old": {
+            "reused": 26659,
+            "seconds": 2.061731118000125
+          }
+        },
+        "matching_seconds": 64.17406180800003,
+        "total_before_export_seconds": 137.118435588,
+        "validation_seconds": 66.26655294000011
+      },
+      "inspection": {
+        "detailed": 21454,
+        "forced_by_references": 82,
+        "skipped": 604,
+        "unavailable": 580
+      },
+      "instruction_matching": {
+        "accepted": 0,
+        "candidate_pairs": 13190,
+        "data_anchors": 1185,
+        "policy": {
+          "cfg_rounds": 4,
+          "format": 1,
+          "maximum_alignment_product": 262144,
+          "maximum_assignment_component": 8,
+          "maximum_candidates": 24,
+          "maximum_posting_functions": 8,
+          "maximum_search_keys": 128,
+          "maximum_window_keys": 64,
+          "minimum_assignment_gap": 4,
+          "minimum_block_instructions": 4,
+          "minimum_cfg_coverage": 0.98,
+          "minimum_instruction_coverage": 0.98,
+          "minimum_mapped_references": 2,
+          "minimum_rank_margin": 4,
+          "window_instructions": 4
+        },
+        "size_budget_skipped": 4147
+      },
+      "layout": {
+        "different_count": 14,
+        "equal_count": 2060
+      },
+      "logic": {
+        "alignment_unresolved": 1265,
+        "data_change_candidate": 11,
+        "detail_skipped": 604,
+        "logic_change_candidate": 10856,
+        "machine_only_observed": 2341,
+        "no_difference_in_scope": 1533,
+        "reference_sensitive": 5278,
+        "reference_unresolved": 116,
+        "structure_or_reference_change": 54,
+        "unavailable": 580
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.09393737508327782,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "cpu_seconds": 0.262291310999899,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 0.2623174549999021
+        },
+        "pass2_structure": {
+          "cpu_seconds": 619.1321581490001,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 619.2072783700005
+        },
+        "pass3_logic": {
+          "cpu_seconds": 321.5792889969998,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 321.5956204240001
+        },
+        "pass4_hypotheses": {
+          "cpu_seconds": 525.488082283,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 525.5141664189996
+        }
+      },
+      "reference_states": {
+        "changed": 12504,
+        "equal": 8143,
+        "not_tested": 580,
+        "unresolved": 1411
+      },
+      "refined_accepted": 1,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 1,
+            "candidates": 29,
+            "collisions": {
+              "new": 91,
+              "old": 90
+            },
+            "held": 28,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 91,
+          "old": 90
+        }
+      },
+      "review": {
+        "competing_candidates": 8042,
+        "initial_match_conflict": 322,
+        "merge_candidate": 313,
+        "split_candidate": 328,
+        "unresolved": 8037
+      },
+      "seconds": 1466.76674654,
+      "unmatched": [
+        4021,
+        4023
+      ],
+      "validation": {
+        "abstained": 141,
+        "correct": 1360,
+        "hidden_symbols": 1501,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    },
+    "1-2": {
+      "baseline_coverage": [
+        {
+          "count": 22699,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3664,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 3,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 22699,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 3664,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 1,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_value": 1075,
+        "call_argument_candidate": 4368,
+        "call_target": 1287,
+        "return_value_candidate": 396,
+        "store_condition": 917,
+        "store_destination": 1091,
+        "store_value": 4843,
+        "unresolved_branch_alignment": 1540,
+        "unresolved_call_alignment": 1178,
+        "unresolved_return_alignment": 747,
+        "unresolved_store_alignment": 2051
+      },
+      "importance": {
+        "critical": 10068,
+        "high": 2956,
+        "none": 2235,
+        "review": 7580
+      },
+      "initial_accepted": 22994,
+      "initial_held": 156,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 0,
+            "seconds": 17.029940246000024
+          },
+          "old": {
+            "reused": 26659,
+            "seconds": 2.0588564619999943
+          }
+        },
+        "matching_seconds": 68.60075502099994,
+        "total_before_export_seconds": 160.25329595300013,
+        "validation_seconds": 70.564258268
+      },
+      "inspection": {
+        "detailed": 21359,
+        "forced_by_references": 104,
+        "skipped": 900,
+        "unavailable": 580
+      },
+      "instruction_matching": {
+        "accepted": 0,
+        "candidate_pairs": 12241,
+        "data_anchors": 1186,
+        "policy": {
+          "cfg_rounds": 4,
+          "format": 1,
+          "maximum_alignment_product": 262144,
+          "maximum_assignment_component": 8,
+          "maximum_candidates": 24,
+          "maximum_posting_functions": 8,
+          "maximum_search_keys": 128,
+          "maximum_window_keys": 64,
+          "minimum_assignment_gap": 4,
+          "minimum_block_instructions": 4,
+          "minimum_cfg_coverage": 0.98,
+          "minimum_instruction_coverage": 0.98,
+          "minimum_mapped_references": 2,
+          "minimum_rank_margin": 4,
+          "window_instructions": 4
+        },
+        "size_budget_skipped": 3908
+      },
+      "layout": {
+        "different_count": 10,
+        "equal_count": 1993,
+        "reordered": 3
+      },
+      "logic": {
+        "alignment_unresolved": 1074,
+        "data_change_candidate": 13,
+        "detail_skipped": 900,
+        "logic_change_candidate": 10866,
+        "machine_only_observed": 2348,
+        "no_difference_in_scope": 1335,
+        "reference_sensitive": 5574,
+        "reference_unresolved": 117,
+        "structure_or_reference_change": 32,
+        "unavailable": 580
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.09393737508327782,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "cpu_seconds": 0.23604430400018828,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 0.23686016499959806
+        },
+        "pass2_structure": {
+          "cpu_seconds": 664.3557709399997,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 664.42434727
+        },
+        "pass3_logic": {
+          "cpu_seconds": 364.966580582,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 364.98521094399985
+        },
+        "pass4_hypotheses": {
+          "cpu_seconds": 558.7353279360004,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 558.7674312270001
+        }
+      },
+      "reference_states": {
+        "changed": 12420,
+        "equal": 8391,
+        "not_tested": 580,
+        "unresolved": 1448
+      },
+      "refined_accepted": 1,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 1,
+            "candidates": 28,
+            "collisions": {
+              "new": 91,
+              "old": 92
+            },
+            "held": 27,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 91,
+          "old": 92
+        }
+      },
+      "review": {
+        "competing_candidates": 7640,
+        "initial_match_conflict": 312,
+        "merge_candidate": 321,
+        "split_candidate": 308,
+        "unresolved": 7634
+      },
+      "seconds": 1588.575525287,
+      "unmatched": [
+        3820,
+        3822
+      ],
+      "validation": {
+        "abstained": 141,
+        "correct": 1360,
+        "hidden_symbols": 1501,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    },
+    "1-3": {
+      "baseline_coverage": [
+        {
+          "count": 22604,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3759,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 8,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 22604,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 3758,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 2,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_value": 1063,
+        "call_argument_candidate": 5255,
+        "call_target": 1086,
+        "return_value_candidate": 452,
+        "store_condition": 1248,
+        "store_destination": 1016,
+        "store_value": 4056,
+        "unresolved_branch_alignment": 2788,
+        "unresolved_call_alignment": 2052,
+        "unresolved_return_alignment": 1318,
+        "unresolved_store_alignment": 3774
+      },
+      "importance": {
+        "critical": 11250,
+        "high": 2695,
+        "none": 2154,
+        "review": 6646
+      },
+      "initial_accepted": 22899,
+      "initial_held": 155,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 26666,
+            "seconds": 2.386813544000006
+          },
+          "old": {
+            "reused": 26659,
+            "seconds": 2.162051636999877
+          }
+        },
+        "matching_seconds": 74.33218387900001,
+        "total_before_export_seconds": 159.80036573899997,
+        "validation_seconds": 78.8951637099999
+      },
+      "inspection": {
+        "detailed": 21546,
+        "forced_by_references": 82,
+        "skipped": 619,
+        "unavailable": 580
+      },
+      "instruction_matching": {
+        "accepted": 0,
+        "candidate_pairs": 13909,
+        "data_anchors": 1185,
+        "policy": {
+          "cfg_rounds": 4,
+          "format": 1,
+          "maximum_alignment_product": 262144,
+          "maximum_assignment_component": 8,
+          "maximum_candidates": 24,
+          "maximum_posting_functions": 8,
+          "maximum_search_keys": 128,
+          "maximum_window_keys": 64,
+          "minimum_assignment_gap": 4,
+          "minimum_block_instructions": 4,
+          "minimum_cfg_coverage": 0.98,
+          "minimum_instruction_coverage": 0.98,
+          "minimum_mapped_references": 2,
+          "minimum_rank_margin": 4,
+          "window_instructions": 4
+        },
+        "size_budget_skipped": 4262
+      },
+      "layout": {
+        "different_count": 9,
+        "equal_count": 1999,
+        "reordered": 6
+      },
+      "logic": {
+        "alignment_unresolved": 1905,
+        "data_change_candidate": 11,
+        "detail_skipped": 619,
+        "logic_change_candidate": 11184,
+        "machine_only_observed": 2335,
+        "no_difference_in_scope": 1535,
+        "reference_sensitive": 4381,
+        "reference_unresolved": 116,
+        "structure_or_reference_change": 79,
+        "unavailable": 580
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.09460359760159893,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "cpu_seconds": 0.2826936800001931,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 0.2827198109989695
+        },
+        "pass2_structure": {
+          "cpu_seconds": 606.4235405500003,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 606.5240072710003
+        },
+        "pass3_logic": {
+          "cpu_seconds": 418.03320740599884,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 418.0661382950002
+        },
+        "pass4_hypotheses": {
+          "cpu_seconds": 626.1577341780012,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 626.1953133610004
+        }
+      },
+      "reference_states": {
+        "changed": 13091,
+        "equal": 7834,
+        "not_tested": 580,
+        "unresolved": 1240
+      },
+      "refined_accepted": 1,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 1,
+            "candidates": 28,
+            "collisions": {
+              "new": 93,
+              "old": 93
+            },
+            "held": 27,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 93,
+          "old": 93
+        }
+      },
+      "review": {
+        "competing_candidates": 7829,
+        "initial_match_conflict": 310,
+        "merge_candidate": 362,
+        "split_candidate": 337,
+        "unresolved": 7824
+      },
+      "seconds": 1651.276993468,
+      "unmatched": [
+        3914,
+        3921
+      ],
+      "validation": {
+        "abstained": 142,
+        "correct": 1359,
+        "hidden_symbols": 1501,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    },
+    "2-3": {
+      "baseline_coverage": [
+        {
+          "count": 22619,
+          "external": 0,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 3744,
+          "external": 0,
+          "side": "new",
+          "status": "review"
+        },
+        {
+          "count": 8,
+          "external": 0,
+          "side": "new",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "new",
+          "status": "accepted"
+        },
+        {
+          "count": 22619,
+          "external": 0,
+          "side": "old",
+          "status": "accepted"
+        },
+        {
+          "count": 3745,
+          "external": 0,
+          "side": "old",
+          "status": "review"
+        },
+        {
+          "count": 2,
+          "external": 0,
+          "side": "old",
+          "status": "unresolved"
+        },
+        {
+          "count": 295,
+          "external": 1,
+          "side": "old",
+          "status": "accepted"
+        }
+      ],
+      "impacts": {
+        "branch_value": 1177,
+        "call_argument_candidate": 4881,
+        "call_target": 1153,
+        "return_value_candidate": 491,
+        "store_condition": 1227,
+        "store_destination": 1352,
+        "store_value": 4252,
+        "unresolved_branch_alignment": 1671,
+        "unresolved_call_alignment": 1222,
+        "unresolved_return_alignment": 832,
+        "unresolved_store_alignment": 2428
+      },
+      "importance": {
+        "critical": 10306,
+        "high": 2974,
+        "none": 2222,
+        "review": 7262
+      },
+      "initial_accepted": 22914,
+      "initial_held": 151,
+      "initial_timing": {
+        "features": {
+          "new": {
+            "reused": 0,
+            "seconds": 16.99855581299994
+          },
+          "old": {
+            "reused": 26661,
+            "seconds": 2.074231886000007
+          }
+        },
+        "matching_seconds": 77.49342613099998,
+        "total_before_export_seconds": 178.97023796100007,
+        "validation_seconds": 80.14585910999995
+      },
+      "inspection": {
+        "detailed": 21296,
+        "forced_by_references": 102,
+        "skipped": 888,
+        "unavailable": 580
+      },
+      "instruction_matching": {
+        "accepted": 0,
+        "candidate_pairs": 13816,
+        "data_anchors": 1187,
+        "policy": {
+          "cfg_rounds": 4,
+          "format": 1,
+          "maximum_alignment_product": 262144,
+          "maximum_assignment_component": 8,
+          "maximum_candidates": 24,
+          "maximum_posting_functions": 8,
+          "maximum_search_keys": 128,
+          "maximum_window_keys": 64,
+          "minimum_assignment_gap": 4,
+          "minimum_block_instructions": 4,
+          "minimum_cfg_coverage": 0.98,
+          "minimum_instruction_coverage": 0.98,
+          "minimum_mapped_references": 2,
+          "minimum_rank_margin": 4,
+          "window_instructions": 4
+        },
+        "size_budget_skipped": 4173
+      },
+      "layout": {
+        "different_count": 14,
+        "equal_count": 1985,
+        "reordered": 3
+      },
+      "logic": {
+        "alignment_unresolved": 1313,
+        "data_change_candidate": 14,
+        "detail_skipped": 888,
+        "logic_change_candidate": 10914,
+        "machine_only_observed": 2327,
+        "no_difference_in_scope": 1334,
+        "reference_sensitive": 5222,
+        "reference_unresolved": 118,
+        "structure_or_reference_change": 54,
+        "unavailable": 580
+      },
+      "named_holdout_rates": {
+        "abstention_rate": 0.0966022651565623,
+        "correct_among_answered": 1.0
+      },
+      "passes": {
+        "pass1_load": {
+          "cpu_seconds": 0.231898418000128,
+          "process_peak_rss_bytes": 1730027520,
+          "seconds": 0.23190774099930422
+        },
+        "pass2_structure": {
+          "cpu_seconds": 671.6283421640001,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 671.693431533
+        },
+        "pass3_logic": {
+          "cpu_seconds": 329.6440250780006,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 329.6586697020002
+        },
+        "pass4_hypotheses": {
+          "cpu_seconds": 514.2663134889999,
+          "process_peak_rss_bytes": 2217684992,
+          "seconds": 514.2926573530003
+        }
+      },
+      "reference_states": {
+        "changed": 12521,
+        "equal": 8298,
+        "not_tested": 580,
+        "unresolved": 1365
+      },
+      "refined_accepted": 1,
+      "refinement": {
+        "rounds": [
+          {
+            "accepted": 1,
+            "candidates": 24,
+            "collisions": {
+              "new": 95,
+              "old": 92
+            },
+            "held": 23,
+            "round": 1
+          }
+        ],
+        "shape_collisions": {
+          "new": 95,
+          "old": 92
+        }
+      },
+      "review": {
+        "competing_candidates": 7793,
+        "initial_match_conflict": 302,
+        "merge_candidate": 281,
+        "split_candidate": 312,
+        "unresolved": 7790
+      },
+      "seconds": 1516.0394467429996,
+      "unmatched": [
+        3897,
+        3902
+      ],
+      "validation": {
+        "abstained": 145,
+        "correct": 1356,
+        "hidden_symbols": 1501,
+        "scope": "Named functions only; not a proof for unnamed functions",
+        "wrong": 0,
+        "wrong_examples": []
+      }
+    }
+  },
+  "peak_rss_bytes": 2217684992,
+  "run": "6bf8de28d08f0f4f0e3c832d",
+  "seconds": 9216.727490882,
+  "sources": [
+    {
+      "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+      "cache_sha256": "7a98d597b1ba39e635c2d21a2c3dbed44c32f975e12a051a396b3db432ebad80",
+      "identity": {
+        "analysis_revision": "70b5c9c0dcc036b2",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 181606400,
+          "archiveSha256": "ba91701ef502e3e5e026bf3f5f90ea21975f89ba74e2cc00834b7c78be1441a7",
+          "archiveTag": "source-jp-1600000-535d9a23d0aae4b5",
+          "baseApk": {
+            "bytes": 26315552,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "446a613bf489fa7350aa69ef4fad951dcd82a63740bec0891dd80848b63050e9"
+          },
+          "compactVersion": "160000",
+          "library": "libnative-lib.so",
+          "librarySha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+          "nativeApk": {
+            "bytes": 15909754,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "74716c083c2db51b89ec66e3c74801dc8f676a49d6e351515c6d407bc48cbcf5",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1600000,
+          "versionName": "16.0.0"
+        },
+        "version": "16.0.0",
+        "version_code": 1600000
+      },
+      "index_sha256": "2ae98f9545332f2cb10f6af5496e6c05c812ee63f6518946c3c3063084bbf3c3",
+      "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+      "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+      "provenance": "receipt_verified",
+      "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+      "schema": 1,
+      "structure_sha256": "0ed1acc46d7f4f1db8ddd8181222fa3fbd1e4528a33dcdfc3ff7b19f884ae94b"
+    },
+    {
+      "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+      "cache_sha256": "91208f1f0fe25c3385525d9a75f575849467031063a4aa958a4d5cc2f3091d88",
+      "identity": {
+        "analysis_revision": "711084564ddd8b14",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 181606400,
+          "archiveSha256": "10e0656c64fd5f767b866838d0e943f05f15d70a060f0242320f08dadf85b22e",
+          "archiveTag": "source-jp-1600010-f2bad4ffefee25f1",
+          "baseApk": {
+            "bytes": 26315552,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "a334fe43af6e310ceb37dbf9e7937a0e83171f9384cc12f2496cd9a477f7e160"
+          },
+          "compactVersion": "160001",
+          "library": "libnative-lib.so",
+          "librarySha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+          "nativeApk": {
+            "bytes": 15909754,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "09111aa6f9640aa058c3a42975e8cdfd9e218e049c663eab32042acc00b79685",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1600010,
+          "versionName": "16.0.1"
+        },
+        "version": "16.0.1",
+        "version_code": 1600010
+      },
+      "index_sha256": "e81b04ac75b4441cfab379fe2a0e2b71f17fad36806f7a19761d408a462335ea",
+      "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+      "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+      "provenance": "receipt_verified",
+      "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+      "schema": 1,
+      "structure_sha256": "0b09757bcc1f5df419d2e901aaf588f84a7d78b422442ad43f7d6360dc3014ef"
+    },
+    {
+      "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+      "cache_sha256": "0d352b65d553ceb3dd7ee63d32463b2914b6418bdb9f818c62d3391673b23398",
+      "identity": {
+        "analysis_revision": "ea0159f06d493a87",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 181606400,
+          "archiveSha256": "e93e1095e04368a91128b11e672b40d00097973e1d97862b3ab7e661dcf02b26",
+          "archiveTag": "source-jp-1600020-3b4ac196114b54e4",
+          "baseApk": {
+            "bytes": 26315552,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "2769ff3308dcbc54fe887442ad416a9359a5e6f54e6982f39eea9ba4f9ed179a"
+          },
+          "compactVersion": "160002",
+          "library": "libnative-lib.so",
+          "librarySha256": "baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6",
+          "nativeApk": {
+            "bytes": 15909754,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "4ca44aa279715d3ae22e36f7911c6fe4bc2973d5ae46413acac9001abd794a52",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1600020,
+          "versionName": "16.0.2"
+        },
+        "version": "16.0.2",
+        "version_code": 1600020
+      },
+      "index_sha256": "445800ab520333a430d3df295aaba73be7df9d8a69f2cb71aee6c39e1ce06cb2",
+      "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+      "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+      "provenance": "receipt_verified",
+      "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+      "schema": 1,
+      "structure_sha256": "47bd0f53516855f6c206cb2c4db2c746b95e1201cc132bb73f5a1c13f94e5b59"
+    },
+    {
+      "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+      "cache_sha256": "84acc58a0616af1476985d2ca03eac5f2afd29c14960021f938b7373d14c2de0",
+      "identity": {
+        "analysis_revision": "9afc4f9e264e1fda",
+        "analysis_timed_out": false,
+        "architecture": "arm64-v8a",
+        "library": "libnative-lib.so",
+        "sha256": "941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73",
+        "snapshot_format": "ephemeral_project",
+        "source_manifest": {
+          "architecture": "arm64-v8a",
+          "archiveBytes": 181606400,
+          "archiveSha256": "a160e1a410d36d8b75ad992330790c1dc60e8c7c254898f5d7334b7aae7857be",
+          "archiveTag": "source-jp-1600030-3f1fecfdfc1e6ba3",
+          "baseApk": {
+            "bytes": 26315552,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.apk",
+            "sha256": "61eb5e31ff7fce3cb69d1cd617030c09da4f030e69855baa1d2d4a78d57456b8"
+          },
+          "compactVersion": "160003",
+          "library": "libnative-lib.so",
+          "librarySha256": "941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73",
+          "nativeApk": {
+            "bytes": 15909754,
+            "member": "./jp.co.ponos.battlecats/jp.co.ponos.battlecats.config.arm64_v8a.apk",
+            "sha256": "74d33716fea7454a3b2f4f73c3975bb2cad3cface83016a88bed10a7e533ff3f",
+            "split": "config.arm64_v8a"
+          },
+          "packageName": "jp.co.ponos.battlecats",
+          "schemaVersion": 2,
+          "signingCertificateSha256": "baf876d554213331c6fe5f6bbf9ae9af2f95c20e82b14bc232b0ac3a77680cb1",
+          "source": "google-play",
+          "versionCode": 1600030,
+          "versionName": "16.0.3"
+        },
+        "version": "16.0.3",
+        "version_code": 1600030
+      },
+      "index_sha256": "a4f8ba407d8820740963fc046921429605beaed6ae9000f61ffadf30e205ee72",
+      "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+      "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+      "provenance": "receipt_verified",
+      "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+      "schema": 1,
+      "structure_sha256": "0aee5d68dfde8f260846a79a9c791bb57dfa889e5a2e868110cd9bcdf751013e"
+    }
+  ],
+  "structure": [
+    {
+      "coverage": {
+        "available": 26069,
+        "indirect_flows": 18628,
+        "missing_in_backfill": 0,
+        "no_instructions": 295,
+        "unresolved_indirect_flows": 14678
+      },
+      "export_seconds": 55.187741668,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1536M",
+        "jvm_peak_working_set_bytes": 1816043520,
+        "native_memory_limit_mb": 4096,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 1547821056,
+        "wall_seconds": 394.51756872499993
+      },
+      "program": {
+        "disassembly": true,
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "program_id": "34411a6fd886ea7c",
+        "reference_format": 1,
+        "schema": 1,
+        "sha256": "1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3",
+        "type": "program"
+      },
+      "source": {
+        "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+        "cache_sha256": "7a98d597b1ba39e635c2d21a2c3dbed44c32f975e12a051a396b3db432ebad80",
+        "index_sha256": "2ae98f9545332f2cb10f6af5496e6c05c812ee63f6518946c3c3063084bbf3c3",
+        "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+        "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+        "provenance": "receipt_verified",
+        "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+        "schema": 1,
+        "structure_sha256": "0ed1acc46d7f4f1db8ddd8181222fa3fbd1e4528a33dcdfc3ff7b19f884ae94b"
+      }
+    },
+    {
+      "coverage": {
+        "available": 26069,
+        "indirect_flows": 18628,
+        "missing_in_backfill": 0,
+        "no_instructions": 295,
+        "unresolved_indirect_flows": 14678
+      },
+      "export_seconds": 52.698067143,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1536M",
+        "jvm_peak_working_set_bytes": 1761300480,
+        "native_memory_limit_mb": 4096,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 1548279808,
+        "wall_seconds": 365.33503502
+      },
+      "program": {
+        "disassembly": true,
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "program_id": "3440b53909337d9c",
+        "reference_format": 1,
+        "schema": 1,
+        "sha256": "2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe",
+        "type": "program"
+      },
+      "source": {
+        "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+        "cache_sha256": "91208f1f0fe25c3385525d9a75f575849467031063a4aa958a4d5cc2f3091d88",
+        "index_sha256": "e81b04ac75b4441cfab379fe2a0e2b71f17fad36806f7a19761d408a462335ea",
+        "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+        "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+        "provenance": "receipt_verified",
+        "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+        "schema": 1,
+        "structure_sha256": "0b09757bcc1f5df419d2e901aaf588f84a7d78b422442ad43f7d6360dc3014ef"
+      }
+    },
+    {
+      "coverage": {
+        "available": 26071,
+        "indirect_flows": 18627,
+        "missing_in_backfill": 0,
+        "no_instructions": 295,
+        "unresolved_indirect_flows": 14677
+      },
+      "export_seconds": 54.017791415,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1536M",
+        "jvm_peak_working_set_bytes": 1834852352,
+        "native_memory_limit_mb": 4096,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 1548357632,
+        "wall_seconds": 373.81686828600004
+      },
+      "program": {
+        "disassembly": true,
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "program_id": "3440b5f9d13f8b5c",
+        "reference_format": 1,
+        "schema": 1,
+        "sha256": "baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6",
+        "type": "program"
+      },
+      "source": {
+        "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+        "cache_sha256": "0d352b65d553ceb3dd7ee63d32463b2914b6418bdb9f818c62d3391673b23398",
+        "index_sha256": "445800ab520333a430d3df295aaba73be7df9d8a69f2cb71aee6c39e1ce06cb2",
+        "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+        "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+        "provenance": "receipt_verified",
+        "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+        "schema": 1,
+        "structure_sha256": "47bd0f53516855f6c206cb2c4db2c746b95e1201cc132bb73f5a1c13f94e5b59"
+      }
+    },
+    {
+      "coverage": {
+        "available": 26076,
+        "indirect_flows": 18628,
+        "missing_in_backfill": 0,
+        "no_instructions": 295,
+        "unresolved_indirect_flows": 14678
+      },
+      "export_seconds": 54.108803578,
+      "process_metrics": {
+        "decompiler_child_memory_included": false,
+        "decompiler_style": "decompile",
+        "heap_limit": "1536M",
+        "jvm_peak_working_set_bytes": 1828712448,
+        "native_memory_limit_mb": 4096,
+        "native_memory_measurement": "rss",
+        "native_observed_peak_private_bytes": 1548873728,
+        "wall_seconds": 385.320492629
+      },
+      "program": {
+        "disassembly": true,
+        "ghidra": "12.1.2",
+        "image_base": "00100000",
+        "language": "AARCH64:LE:64:v8A",
+        "program_id": "3440b6bda0ebc7fc",
+        "reference_format": 1,
+        "schema": 1,
+        "sha256": "941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73",
+        "type": "program"
+      },
+      "source": {
+        "block_engine_sha256": "b9fc3beedee1985d9b64eb9f61295f4031983dc25cdd34af7ce78ea6d2661006",
+        "cache_sha256": "84acc58a0616af1476985d2ca03eac5f2afd29c14960021f938b7373d14c2de0",
+        "index_sha256": "a4f8ba407d8820740963fc046921429605beaed6ae9000f61ffadf30e205ee72",
+        "indexer_sha256": "c7c4100a522f7403c721292bef56e034f8c2ee858dd848618633b9ed2ab85b59",
+        "policy_sha256": "e1295c23002a519e5181d898991df9d9c8a8359325ccb3fb5a24c6eaf4116263",
+        "provenance": "receipt_verified",
+        "reference_validator_sha256": "2c3f712a3c5e6866777ce03b778775969f0897f7d6c69468d51989854b558428",
+        "schema": 1,
+        "structure_sha256": "0aee5d68dfde8f260846a79a9c791bb57dfa889e5a2e868110cd9bcdf751013e"
+      }
+    }
+  ]
+}

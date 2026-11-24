@@ -15,12 +15,12 @@ SO SHA-256: `2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe`
 
 - **前の公開版 v16.0.0**
   - 採用 · [関数詳細 `00af2bd4`](../../../../../16.0.0/arm64-v8a/1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3/functions/00af2/00af2bd4.md) · 移動量 `+0x428`
-  - [v16.0.0 → v16.0.1 当該関数比較](../../../../../../comparisons/arm64-v8a/9801c0f5b635b1292885b4ed/1-2/inspection-0035.md#compare-9ef4c23d1661ff85536ec4860c692a7c)
+  - [v16.0.0 → v16.0.1 当該関数比較](../../../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/0-1/inspection-0035.md#compare-9ef4c23d1661ff85536ec4860c692a7c)
   - [v16.0.0の関数一覧](../../../../../16.0.0/arm64-v8a/1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3/README.md)
 
 - **次の公開版 v16.0.2**
   - 採用 · [関数詳細 `00af3098`](../../../../../16.0.2/arm64-v8a/baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6/functions/00af3/00af3098.md) · 移動量 `+0x9c`
-  - [v16.0.1 → v16.0.2 当該関数比較](../../../../../../comparisons/arm64-v8a/9801c0f5b635b1292885b4ed/2-3/inspection-0035.md#compare-9c7ac0b59c0a0718f8e0115ad07ba7e1)
+  - [v16.0.1 → v16.0.2 当該関数比較](../../../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/1-2/inspection-0035.md#compare-9c7ac0b59c0a0718f8e0115ad07ba7e1)
   - [v16.0.2の関数一覧](../../../../../16.0.2/arm64-v8a/baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)

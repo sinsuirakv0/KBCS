@@ -20,7 +20,7 @@ SO SHA-256: `1a79a59c382c2edcfc7ed76c97bfd8488ac24f87aa6958009e8dea46f2d85bd3`
 
 - **次の公開版 v16.0.1**
   - 採用 · [関数詳細 `EXTERNAL:000000d3`](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/functions/external/EXTERNAL-000000d3.md)
-  - [v16.0.0 → v16.0.1 当該関数比較](../../../../../../comparisons/arm64-v8a/9801c0f5b635b1292885b4ed/1-2/unavailable-0005.md#compare-ead653c46c62314e1b6b964f7b13b85e)
+  - [v16.0.0 → v16.0.1 当該関数比較](../../../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/0-1/unavailable-0005.md#compare-ead653c46c62314e1b6b964f7b13b85e)
   - [v16.0.1の関数一覧](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)

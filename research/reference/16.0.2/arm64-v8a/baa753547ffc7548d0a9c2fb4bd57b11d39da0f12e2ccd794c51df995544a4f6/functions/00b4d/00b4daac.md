@@ -4,17 +4,23 @@
 
 SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
 
+解析リビジョン `ea0159f06d493a87` · Ghidra `12.1.2`
+
+<a id="comparisons"></a>
+
+[擬似コード](#pseudocode) · [逆アセンブリ](#逆アセンブリ) · [分岐](#基本ブロックと分岐先) · [参照](#命令位置別の参照) · [比較](#comparisons)
+
 <!-- kbcs-version-function-tracking -->
 ## バージョン間の関数追跡
 
 - **前の公開版 v16.0.1**
   - 採用 · [関数詳細 `00b4da10`](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/functions/00b4d/00b4da10.md) · 移動量 `+0x9c`
-  - [v16.0.1 → v16.0.2 当該関数比較](../../../../../../comparisons/arm64-v8a/9801c0f5b635b1292885b4ed/2-3/priority-0074.md#compare-92f7a325387887e1ee0758f6c2e097d8)
+  - [v16.0.1 → v16.0.2 当該関数比較](../../../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/1-2/priority-0074.md#compare-92f7a325387887e1ee0758f6c2e097d8)
   - [v16.0.1の関数一覧](../../../../../16.0.1/arm64-v8a/2c22d76fc1ddec676d4ed6206d5ec55a02a651f407d39d1c0b32ded16fd7eabe/README.md)
 
 - **次の公開版 v16.0.3**
-  - 対応先詳細の検証待ち
-  - [v16.0.2 → v16.0.3 当該関数比較](../../../../../../comparisons/arm64-v8a/c6e4dfc940403d119ed8b991/1-2/priority-0088.md#compare-b14fe5955a9a5cffb79c750bfacc2b26)
+  - 採用 · [関数詳細 `00b4eaa0`](../../../../../16.0.3/arm64-v8a/941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73/functions/00b4e/00b4eaa0.md) · 移動量 `+0xff4`
+  - [v16.0.2 → v16.0.3 当該関数比較](../../../../../../comparisons/arm64-v8a/6bf8de28d08f0f4f0e3c832d/2-3/priority-0076.md#compare-b14fe5955a9a5cffb79c750bfacc2b26)
   - [v16.0.3の関数一覧](../../../../../16.0.3/arm64-v8a/941278c8d9b42c2598836a75ff173ce3b2fb2215f8067351d5fc1d218ef67c73/README.md)
 
 [版の関数一覧](../../README.md) · [全バージョン一覧](../../../../../README.md)
@@ -33,7 +39,27 @@ SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
   "confidence": "unreviewed",
   "error": "",
   "source_sha256": "98a86e275bae98329551bc926e08aa45a9aa5cf98de718cda20859b2dc918e2a",
-  "source_text_sha256": "98a86e275bae98329551bc926e08aa45a9aa5cf98de718cda20859b2dc918e2a"
+  "source_text_sha256": "98a86e275bae98329551bc926e08aa45a9aa5cf98de718cda20859b2dc918e2a",
+  "structure_status": "available",
+  "structure_provenance": "receipt_verified",
+  "index_boundary_verification": "legacy_boundary_unverified",
+  "index_program_id": null,
+  "structure_program_id": "3440b5f9d13f8b5c",
+  "analysis_link": "legacy_program_id_unavailable",
+  "structure": {
+    "ranges": [
+      [
+        "00b4daac",
+        "00b4dae7"
+      ]
+    ],
+    "bytes_sha256": "becbaaffdf2bad328d33f350ff5dd56dfc228a7dbd59747c94fdda3674151b8e",
+    "instruction_count": 15,
+    "instruction_bytes": 60,
+    "body_bytes": 60,
+    "indirect": 0,
+    "unresolved": 0
+  }
 }
 ~~~
 
@@ -51,6 +77,10 @@ SO SHA-256: `baa753547ffc7548d0a9c2fb4bd57b11d39da0f12e2ccd794c51df995544a4f6`
 "field < kFieldCount"
 ~~~
 
+<a id="pseudocode"></a>
+
+Ghidraによる復元。型・変数名・制御構造は推定です。
+
 ## 疑似コード / UTF-8 229 bytes
 
 ~~~c
@@ -64,4 +94,130 @@ undefined8 _ZN8firebase4util6string10GetFieldIdENS1_5FieldE(uint param_1)
   return *(undefined8 *)(&DAT_01125de8 + (ulong)param_1 * 8);
 }
 
+~~~
+
+## 逆アセンブリ
+
+命令アドレス、生バイト（メモリ順）、オペランド、フロー。
+
+| アドレス | 生バイト | 命令・オペランド | フロー |
+| --- | --- | --- | --- |
+<a id="insn-00b4daac"></a> `00b4daac` | `f3 0f 1e f8` | str x19,[sp, #-0x20]! | `FALL_THROUGH`
+<a id="insn-00b4dab0"></a> `00b4dab0` | `fd 7b 01 a9` | stp x29,x30,[sp, #0x10] | `FALL_THROUGH`
+<a id="insn-00b4dab4"></a> `00b4dab4` | `fd 43 00 91` | add x29,sp,#0x10 | `FALL_THROUGH`
+<a id="insn-00b4dab8"></a> `00b4dab8` | `f3 03 00 2a` | mov w19,w0 | `FALL_THROUGH`
+<a id="insn-00b4dabc"></a> `00b4dabc` | `1f 04 00 71` | cmp w0,#0x1 | `FALL_THROUGH`
+<a id="insn-00b4dac0"></a> `00b4dac0` | `8b 00 00 54` | b.lt 0x00b4dad0 | `CONDITIONAL_JUMP`
+<a id="insn-00b4dac4"></a> `00b4dac4` | `e0 ba ff 90` | adrp x0,0x2a9000 | `FALL_THROUGH`
+<a id="insn-00b4dac8"></a> `00b4dac8` | `00 34 15 91` | add x0,x0,#0x54d | `FALL_THROUGH`
+<a id="insn-00b4dacc"></a> `00b4dacc` | `81 35 04 94` | bl 0x00c5b0d0 | `UNCONDITIONAL_CALL`
+<a id="insn-00b4dad0"></a> `00b4dad0` | `c8 2e 00 90` | adrp x8,0x1125000 | `FALL_THROUGH`
+<a id="insn-00b4dad4"></a> `00b4dad4` | `08 a1 37 91` | add x8,x8,#0xde8 | `FALL_THROUGH`
+<a id="insn-00b4dad8"></a> `00b4dad8` | `00 59 73 f8` | ldr x0,[x8, w19, UXTW #0x3] | `FALL_THROUGH`
+<a id="insn-00b4dadc"></a> `00b4dadc` | `fd 7b 41 a9` | ldp x29,x30,[sp, #0x10] | `FALL_THROUGH`
+<a id="insn-00b4dae0"></a> `00b4dae0` | `f3 07 42 f8` | ldr x19,[sp], #0x20 | `FALL_THROUGH`
+<a id="insn-00b4dae4"></a> `00b4dae4` | `c0 03 5f d6` | ret | `TERMINATOR`
+
+## 基本ブロックと分岐先
+
+- ブロック [`00b4daac`](#insn-00b4daac) 範囲 `[['00b4daac', '00b4dac3']]`
+  - `CONDITIONAL_JUMP` [`00b4dac0`](#insn-00b4dac0) → [`00b4dad0`](#insn-00b4dad0)
+  - `FALL_THROUGH` [`00b4dac0`](#insn-00b4dac0) → [`00b4dac4`](#insn-00b4dac4)
+- ブロック [`00b4dac4`](#insn-00b4dac4) 範囲 `[['00b4dac4', '00b4dacf']]`
+  - `FALL_THROUGH` [`00b4dacc`](#insn-00b4dacc) → [`00b4dad0`](#insn-00b4dad0)
+- ブロック [`00b4dad0`](#insn-00b4dad0) 範囲 `[['00b4dad0', '00b4dae7']]`
+
+## 命令位置別の参照
+
+- [`00b4daac`](#insn-00b4daac) → `Stack[-0x20]`（関数外または未収録） · `WRITE` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `None`
+- [`00b4dab0`](#insn-00b4dab0) → `Stack[-0x10]`（関数外または未収録） · `WRITE` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `None`
+- [`00b4dac0`](#insn-00b4dac0) → [`00b4dad0`](#insn-00b4dad0) · `CONDITIONAL_JUMP` · `DEFAULT` · 関数 `None` · 推定シンボル `None` · 推定型 `None`
+- [`00b4dac8`](#insn-00b4dac8) → `002a954d`（関数外または未収録） · `PARAM` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `string`
+- [`00b4dacc`](#insn-00b4dacc) → [`00c5b0d0`](../00c5b/00c5b0d0.md) · `UNCONDITIONAL_CALL` · `DEFAULT` · 関数 `00c5b0d0` · 推定シンボル `None` · 推定型 `None`
+- [`00b4dad8`](#insn-00b4dad8) → `01125de8`（関数外または未収録） · `DATA` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `None`
+- [`00b4dadc`](#insn-00b4dadc) → `Stack[-0x10]`（関数外または未収録） · `DATA` · `ANALYSIS` · 関数 `None` · 推定シンボル `None` · 推定型 `None`
+
+## 読み取り専用データの取得範囲
+
+Ghidraが定義した境界から先頭32バイトまで取得。型は推定値です。ポインタ、再配置、書込可能領域は取得理由を別記します。
+
+## 読み取り専用データ
+
+- 参照命令 [`00b4daac`](#insn-00b4daac)
+
+~~~json
+{
+  "source": "00b4daac",
+  "target": "Stack[-0x20]",
+  "target_space": "stack",
+  "resolution": "boundary_unknown"
+}
+~~~
+- 参照命令 [`00b4dab0`](#insn-00b4dab0)
+
+~~~json
+{
+  "source": "00b4dab0",
+  "target": "Stack[-0x10]",
+  "target_space": "stack",
+  "resolution": "boundary_unknown"
+}
+~~~
+- 参照命令 [`00b4dac0`](#insn-00b4dac0)
+
+~~~json
+{
+  "source": "00b4dac0",
+  "target": "00b4dad0",
+  "target_space": "ram",
+  "resolution": "boundary_unknown"
+}
+~~~
+- 参照命令 [`00b4dac8`](#insn-00b4dac8)
+
+~~~json
+{
+  "source": "00b4dac8",
+  "target": "002a954d",
+  "target_space": "ram",
+  "resolution": "defined_data",
+  "start": "002a954d",
+  "offset": 0,
+  "size": 20,
+  "datatype": "string",
+  "bytes": "6669656c64203c206b4669656c64436f756e7400",
+  "capture_start": "002a954d",
+  "capture_bytes": 20,
+  "capture_state": "complete_static_bytes"
+}
+~~~
+- 参照命令 [`00b4dacc`](#insn-00b4dacc)
+
+~~~json
+{
+  "source": "00b4dacc",
+  "target": "00c5b0d0",
+  "target_space": "ram",
+  "resolution": "function"
+}
+~~~
+- 参照命令 [`00b4dad8`](#insn-00b4dad8)
+
+~~~json
+{
+  "source": "00b4dad8",
+  "target": "01125de8",
+  "target_space": "ram",
+  "resolution": "boundary_unknown"
+}
+~~~
+- 参照命令 [`00b4dadc`](#insn-00b4dadc)
+
+~~~json
+{
+  "source": "00b4dadc",
+  "target": "Stack[-0x10]",
+  "target_space": "stack",
+  "resolution": "boundary_unknown"
+}
 ~~~
