@@ -3,7 +3,7 @@ import {nativeFont} from './native-font.js';
 import {prepareNativeText} from './native-text.js';
 import {readBattleKeys,defaultBattleKeys,battleKeyAction,editableKeyTarget} from './keyboard.js';
 import {createSessionId} from './src/shared/browser/session-id.js';
-import {battleAspects,battleViewportWidth,phoneCanvasSize,phoneHudPoint,battleCameraView,battlePlaybackRate,battleFpsLimits,battlePresentationClock,accumulateBattleTicks} from './battle-view.js';
+import {battleAspects,battleViewportWidth,phoneCanvasSize,phoneHudInsets,phoneHudPoint,battleCameraView,battlePlaybackRate,battleFpsLimits,battlePresentationClock,accumulateBattleTicks} from './battle-view.js';
 import {audioBlobUrl} from './src/shared/browser/audio-preview.js';
 import {createBattleResults} from './battle-results.js';
 import {createBattleSounds} from './battle-audio.js';
@@ -146,9 +146,9 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   const choice=large?'auto':aspect.value;
   const box=canvas.parentElement.getBoundingClientRect(),width=battleViewportWidth(choice,box.width,box.height);
   if(phone){
-   const safe=window.top.getComputedStyle(window.top.document.documentElement),scale=640/Math.max(1,box.height);
-   leftInset=Math.round((parseFloat(safe.getPropertyValue('--phone-safe-left'))||0)*scale);
-   rightInset=Math.round((parseFloat(safe.getPropertyValue('--phone-safe-right'))||0)*scale);
+   const safe=window.top.getComputedStyle(window.top.document.documentElement);
+   const [left,right]=phoneHudInsets(width,box,parseFloat(safe.getPropertyValue('--phone-safe-left'))||0,parseFloat(safe.getPropertyValue('--phone-safe-right'))||0);
+   if(left!==leftInset||right!==rightInset){leftInset=left;rightInset=right;++cameraVersion;}
   }
   document.dispatchEvent(new CustomEvent('kbcs:battle-view',{detail:{ratio:choice==='auto'?null:width/640}}));
   const [pixels,height]=phone?phoneCanvasSize(width,box,window.devicePixelRatio||1):[width,640];
@@ -214,7 +214,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(ticks||immediate)pointer.phase=0;control=0;
   const version=cameraVersion,sentSettings=settingsVersion,sentKeys=keySerial;
   const sceneInput=stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session});
-  const {value:next,timing:measured}=await frames.load({session,input,cheats,skipCombos,compact:true,inspection:inspector?.query(performance.now(),stepping||immediate),focusActor:details?.focus(),phoneStats:phoneStats(),scene:{...sceneInput,viewportWidth:screenWidth}},requestController.signal);
+  const {value:next,timing:measured}=await frames.load({session,input,cheats,skipCombos,compact:true,inspection:inspector?.query(performance.now(),stepping||immediate),focusActor:details?.focus(),phoneStats:phoneStats(),scene:{...sceneInput,viewportWidth:screenWidth,safeLeft:leftInset}},requestController.signal);
   if(phone&&next.scene&&!next.scene.textures.length)next.scene.textures=phoneTextures;
   Object.assign(timing,measured);timing.coreMs=next.coreMs;
   if(stopped)return;appliedSettings=sentSettings;
@@ -316,10 +316,12 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   context.restore();
   const [pauseX,pauseY,pauseW,pauseH]=view.pause_icon;
   sprite('img002_ja',2,leftInset+pauseX-slide,pauseY,pauseW,pauseH);
-  const hud=runtime.hud,scale=hud.scale;
+  const hud=runtime.hud,scale=hud.scale,hpCuts=resources.atlas.atlases.img001_ja.rects;
   for(let side=0;side<2;++side){
-   const [x,y]=hud.anchors[side],[hp,maximum,unknown]=hud.health[side];
-   if(unknown){const cut=resources.atlas.atlases.img001_ja.rects[108];for(let i=0;i<7;++i){sprite('img001_ja',108,x-(7-i)*cut[2]*scale,y,cut[2]*scale,cut[3]*scale);sprite('img001_ja',108,x+(18+i*cut[2])*scale,y,cut[2]*scale,cut[3]*scale);}}
+   const [anchor,y]=hud.anchors[side],[hp,maximum,unknown]=hud.health[side];
+   // 0070af68〜0070b028。特殊敵城の基準は斜線の位置でなく、分母の桁数を加える前の左端。
+   const x=side&&hud.specialEnemyCastle?anchor+(unknown?7*hpCuts[108][2]:String(maximum).length*hpCuts[57][2])*scale:anchor;
+   if(unknown){const cut=hpCuts[108];for(let i=0;i<7;++i){sprite('img001_ja',108,x-(7-i)*cut[2]*scale,y,cut[2]*scale,cut[3]*scale);sprite('img001_ja',108,x+(18+i*cut[2])*scale,y,cut[2]*scale,cut[3]*scale);}}
    else{number(hp,57,x,y,0,scale);number(maximum,57,x+18*scale,y,0,scale,true);}
    sprite('img001_ja',67,x,y,18*scale,18*scale);
   }

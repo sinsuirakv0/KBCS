@@ -813,6 +813,7 @@ impl Battle {
         fever: &[render::Cut],
         textures: [i32; 2],
         title: Option<(render::Cut, i32)>,
+        safe_left: u16,
     ) -> Result<Vec<render::Command>, u32> {
         let mut out = vec![render::Command::default(); 64];
         let mut count = 0;
@@ -835,6 +836,9 @@ impl Battle {
         out.truncate(count as usize);
         for command in &mut out {
             command.texture = if command.texture == 2 {
+                for point in command.points[..8].chunks_exact_mut(2) {
+                    point[0] += f64::from(safe_left);
+                }
                 title.as_ref().ok_or(1u32)?.1
             } else {
                 textures[command.texture as usize]

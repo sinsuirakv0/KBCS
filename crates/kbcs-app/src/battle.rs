@@ -73,7 +73,6 @@ pub struct MotionSet {
     pub character: Value,
 }
 pub struct Session {
-    pub database: Database,
     pub scene: crate::scene::Scene,
     pub core: battle::Battle,
     pub models: Vec<MotionSet>,
@@ -1432,8 +1431,9 @@ impl Session {
                 top_textures[i] = scene.texture(&format!("Image/{stem}.png"));
             }
         }
+        // 出撃時に背景演出の画像索引まで確定し、戦闘フレームからDB参照を外す。
+        scene.prepare_effects(&database, &start.scene)?;
         Ok(Self {
-            database,
             scene,
             core,
             rules,
@@ -1481,7 +1481,7 @@ impl Session {
         let references = native(self.core.active_actors())?;
         let mut frame = self
             .scene
-            .draw_with_castle_state(&self.database, input, actors[0][0].words[1])
+            .draw_with_castle_state(input, actors[0][0].words[1])
             .context("戦闘背景の描画")?;
         let mut order = Vec::new();
         for side in [1, 0] {
@@ -1785,6 +1785,7 @@ impl Session {
                 &self.top_cuts[1],
                 self.top_textures,
                 self.title_draw,
+                input.safe_left,
             ))?);
         } else {
             // 通常ステージも終了帯の乗算を背景と同じ描画先へ適用する。
@@ -1793,14 +1794,16 @@ impl Session {
                 &[],
                 self.sniper_textures,
                 self.title_draw,
+                input.safe_left,
             ))?);
         }
         frame.animated = true;
         Ok(frame)
     }
     pub fn settle(&mut self) -> Result<()> {
+        let outcome = native(self.core.outcome())?;
         if let Some((_, insufficient)) = &self.continue_text
-            && native(self.core.outcome())?.mode == 2
+            && outcome.mode == 2
         {
             match native(self.core.ending())?.phase {
                 0..=2 => return Ok(()),
@@ -1837,9 +1840,8 @@ impl Session {
         }
         self.continue_balance = None;
         self.continue_error = None;
-        let first = self.receipt.saved.is_none();
-        self.receipt.settle(&self.core);
-        if first
+        // 保存側へは戦闘ハンドルを渡さず、確定した数値だけを渡す。
+        if self.receipt.settle(&outcome, || native(self.core.rewards()))
             && let Some(notifications) = self
                 .receipt
                 .saved
@@ -2011,6 +2013,9 @@ impl Session {
             .flatten()
             .unwrap_or([0; 2]);
         let mut value = serde_json::to_value(native(self.core.hud(layout, point))?)?;
+        if self.castle_slot > 0 {
+            value["specialEnemyCastle"] = json!(true);
+        }
         value["warning"] = json!(native(self.core.warning())?);
         if self.orb_icons.iter().any(|icons| !icons.is_empty()) {
             let masks = native(self.core.orb_visibility())?;

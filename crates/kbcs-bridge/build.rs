@@ -1,5 +1,10 @@
-fn main() {
-    cc::Build::new()
+﻿fn main() {
+    let mut build = cc::Build::new();
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("emscripten") {
+        // RustのEmscripten標準ライブラリと戦闘コアの例外処理方式を揃える。
+        build.flag("-fwasm-exceptions");
+    }
+    build
         .cpp(true)
         .std("c++20")
         .include("../../native/kbcs-core/include")

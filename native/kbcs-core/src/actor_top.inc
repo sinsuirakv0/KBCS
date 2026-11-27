@@ -34,8 +34,8 @@ extern "C" uint32_t kbcs_core_battle_top_draw(const KbcsBattle *battle,const Kbc
  if(!battle||!cuts||count<0||!out||capacity<0||!written||fever_count<0||(!fever&&fever_count))return 1;
  try{
   TopDraw d{cuts,count,out,capacity};const auto &r=battle->result;const auto &rules=battle->config.rules;const int center=battle->config.screen.viewport_width/2;
-  // 006e11ac。タイトルをスコア枠より先に描く。PCの安全領域は0。
-  if(title){d.texture=2;d.rect(*title,62,10,title->width,title->height);d.texture=0;}
+  // 16.0.3の0070b4b4。左の安全領域はホストで加え、縦位置には終了時の移動量を反映する。
+  if(title){d.texture=2;d.rect(*title,62,10-battle->battleSlide(),title->width,title->height);d.texture=0;}
   if(rules.score_type!=1&&rules.score_type!=3){*written=d.count;return 0;}
   if(count<160)return 1;
   d.y_offset=-battle->battleSlide();

@@ -1,9 +1,15 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {accumulateBattleTicks,battlePresentationClock} from '../battle-view.js';
+import {accumulateBattleTicks,battlePresentationClock,phoneCanvasSize,phoneHudInsets} from '../battle-view.js';
 import {adjustCaptureRectangle,captureRectangle,recordingVideoSize,recordingVideoBitrate,saveBattleRecording} from '../battle-recording.js';
 import {observedActorChanges} from '../battle-details.js';
 import {decodeBattleFrame} from '../battle-frame.js';
+
+test('スマホは物理解像度で描画し、余白の内側だけをHUDの安全幅にする',()=>{
+ assert.deepEqual(phoneCanvasSize(1422,{width:960,height:432},2.5),[2400,1080]);
+ assert.deepEqual(phoneHudInsets(1280,{width:950,height:400},95,20),[32,0]);
+ assert.deepEqual(phoneHudInsets(1280,{width:800,height:460},12.5,0),[20,0]);
+});
 
 test('スマホのフレームは使用する頂点を倍精度のまま復元する',()=>{
  const metadata=new TextEncoder().encode('{"scene":{}}'),offset=Math.ceil((32+metadata.length)/8)*8;

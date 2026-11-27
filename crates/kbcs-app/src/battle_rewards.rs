@@ -337,26 +337,25 @@ impl Receipt {
     pub fn spend_continue_cat_food(&self) -> Result<bool> {
         self.store.spend_continue_cat_food()
     }
-    pub fn settle(&mut self, core: &battle::Battle) {
-        if self.saved.is_some() || self.retry.is_some_and(|t| t.elapsed().as_secs() < 2) {
-            return;
+    pub fn settle(
+        &mut self,
+        outcome: &battle::Outcome,
+        rewards: impl FnOnce() -> Result<battle::Rewards>,
+    ) -> bool {
+        if outcome.mode == 0
+            || self.saved.is_some()
+            || self.retry.is_some_and(|t| t.elapsed().as_secs() < 2)
+        {
+            return false;
         }
-        let result = self.finish(core);
+        let result = rewards().and_then(|rewards| self.finish(outcome, &rewards));
         if let Err(error) = result {
             self.error = Some(format!("{error:#}"));
             self.retry = Some(std::time::Instant::now());
         }
+        self.saved.is_some()
     }
-    fn finish(&mut self, core: &battle::Battle) -> Result<()> {
-        let outcome = core
-            .outcome()
-            .map_err(|c| anyhow::anyhow!("勝敗取得: {c}"))?;
-        if outcome.mode == 0 {
-            return Ok(());
-        }
-        let rewards = core
-            .rewards()
-            .map_err(|c| anyhow::anyhow!("報酬取得: {c}"))?;
+    fn finish(&mut self, outcome: &battle::Outcome, rewards: &battle::Rewards) -> Result<()> {
         ensure!(rewards.ready != 0, "報酬計算が完了していません");
         let mut grants = Vec::new();
         let mut records = Vec::new();
@@ -376,7 +375,10 @@ impl Receipt {
                 .stages[4];
             push(6, xp, "experience", None);
             if rewards.winner >= 0 {
-                let (id, count) = self.items[rewards.winner as usize];
+                let &(id, count) = self
+                    .items
+                    .get(rewards.winner as usize)
+                    .context("報酬の選択番号が不正です")?;
                 push(
                     id,
                     count,

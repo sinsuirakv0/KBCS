@@ -8,9 +8,17 @@ export function battleViewportWidth(choice,width,height){
 
 // ネイティブの座標系と、スマホ画面へ出力する物理画素数を分ける。
 export function phoneCanvasSize(width,box,dpr){
- const scale=Math.min(box.width/width*dpr,box.height/640*dpr,1600/width,720/640);
- const pixels=Math.max(1,Math.round(width*scale));
- return [pixels,Math.max(1,Math.round(640*pixels/width))];
+ const scale=phoneContentScale(width,box)*dpr;
+ return [Math.max(1,Math.round(width*scale)),Math.max(1,Math.round(640*scale))];
+}
+
+const phoneContentScale=(width,box)=>Math.min(box.width/width,box.height/640);
+
+export function phoneHudInsets(width,box,left,right){
+ const scale=phoneContentScale(width,box);
+ if(scale<=0)return [0,0];
+ const gutter=(box.width-width*scale)/2;
+ return [left,right].map(inset=>Math.ceil(Math.max(0,inset-gutter)/scale));
 }
 
 // 005d2408・005d1f2cは左右の安全幅を別々に使う。入力だけ逆変換して原本の矩形へ渡す。

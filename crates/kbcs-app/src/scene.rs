@@ -40,6 +40,8 @@ pub struct Input {
     #[serde(default)]
     pub viewport_width: i32,
     #[serde(default)]
+    pub safe_left: u16,
+    #[serde(default)]
     pub battle_rows: i32,
     #[serde(skip)]
     pub battle_slide: i32,
@@ -274,7 +276,7 @@ impl Scene {
         }
         Ok(scene)
     }
-    fn prepare_effects(&mut self, database: &Database, input: &Input) -> Result<()> {
+    pub(crate) fn prepare_effects(&mut self, database: &Database, input: &Input) -> Result<()> {
         if self.runtime.is_some() {
             return Ok(());
         }
@@ -381,15 +383,18 @@ impl Scene {
             )
             .map_err(core)?,
         );
+        self.source = Value::Null;
         Ok(())
     }
     pub fn draw(&mut self, database: &Database, input: &Input) -> Result<Frame<'_>> {
-        self.draw_with_castle_state(database, input, 0)
+        if input.show_effects {
+            self.prepare_effects(database, input)?;
+        }
+        self.draw_with_castle_state(input, 0)
     }
 
     pub(crate) fn draw_with_castle_state(
         &mut self,
-        database: &Database,
         input: &Input,
         player_castle_state: i32,
     ) -> Result<Frame<'_>> {
@@ -483,7 +488,6 @@ impl Scene {
             commands.splice(index..index, actor_commands.drain(..));
         }
         if input.show_effects {
-            self.prepare_effects(database, input)?;
             let particles = self
                 .runtime
                 .as_mut()
