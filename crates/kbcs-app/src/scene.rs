@@ -130,7 +130,8 @@ impl Scene {
         base: i32,
         decoration: i32,
     ) -> Result<()> {
-        for (index, part, id) in [(2, 3, decoration), (3, 2, base), (4, 0, i32::from(cannon))] {
+        // 土台（003）、装飾（002）、主砲（000）の順に重ねる。
+        for (index, part, id) in [(2, 3, base), (3, 2, decoration), (4, 0, i32::from(cannon))] {
             let path = format!("Number/nyankoCastle_{part:03}_{id:02}.png");
             self.sizes[index] = stage_media::image_size(database, &path)?;
             self.textures[index] = Some(path);

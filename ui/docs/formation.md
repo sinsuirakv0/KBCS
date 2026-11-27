@@ -55,6 +55,8 @@ GUI制御はformation.js、挿入と数値更新はformation-layout.js。キャ�
 
 出陣スロットのコピーはJSON書出し、置き換えはPCファイル選択。createSimulationSettingsのprofile指定はグローバル設定と同期せず編成専用に保存する。本能玉は原本equipment IDを保持する。戦闘適用・暗転中の素材ロードは後続作業。
 
+共通の`createSimulationSettings`で装飾、土台の順に設定する。`profile.cannon.decoration`は装飾（`nyankoCastle_002`）、`profile.cannon.base`は土台（`nyankoCastle_003`）を表す。戦闘開始時の`Scene::player_parts`はこのIDをそれぞれの画像系列へ渡し、土台、装飾、主砲の順で重ねる。
+
 ## 今回の最低限の検証
 
 JavaScript構文、前後への挿入、拡大・透明度の整数列、負の座標の切捨てを確認する。これは式の回帰確認であり、ARM64の画面全体を実行した照合ではない。リリースビルドと起動確認に留め、詳細な見た目の確認はユーザーが行う。

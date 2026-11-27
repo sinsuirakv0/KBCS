@@ -22,7 +22,7 @@ export function createSimulationSettings(host,options={}){
   host.append(root);
   const cannon=document.createElement('details');cannon.className='simulation-section simulation-cannon';
   const cannonNames=['なし','スロウ砲','鉄壁砲','かみなり砲','水鉄砲','エンジェル砲','キャノンブレイク砲','呪い砲'];
-  cannon.innerHTML='<summary>土台・装飾</summary>'+[['base','土台'],['decoration','装飾']].map(([part,label])=>'<div class="simulation-cannon-row"><label>'+label+'<select data-cannon="'+part+'" data-part="id" aria-label="'+label+'">'+cannonNames.map((name,index)=>'<option value="'+index+'">'+name+'</option>').join('')+'</select></label><label>Lv<input type="number" min="0" max="20" step="1" data-cannon="'+part+'" data-part="level" aria-label="'+label+'Lv"></label></div>').join('');
+  cannon.innerHTML='<summary>装飾・土台</summary>'+[['decoration','装飾'],['base','土台']].map(([part,label])=>'<div class="simulation-cannon-row"><label>'+label+'<select data-cannon="'+part+'" data-part="id" aria-label="'+label+'">'+cannonNames.map((name,index)=>'<option value="'+index+'">'+name+'</option>').join('')+'</select></label><label>Lv<input type="number" min="0" max="20" step="1" data-cannon="'+part+'" data-part="level" aria-label="'+label+'Lv"></label></div>').join('');
   root.querySelector('#simulation-facilities').after(cannon);
   const status=root.querySelector('.simulation-save-state');
   const visible=selector=>[...root.querySelectorAll(selector)].filter(row=>!row.hidden&&!row.closest('.simulation-chapter[hidden]'));
