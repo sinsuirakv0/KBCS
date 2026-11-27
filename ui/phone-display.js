@@ -4,14 +4,21 @@ const standby=document.getElementById('phone-standby'),viewport=document.getElem
 const status=document.getElementById('phone-status');
 let current=null,checksFailed=0;
 const fullscreen=document.getElementById('phone-fullscreen'),displayError=document.getElementById('phone-display-error');
-let noticeTimer;
+const fullscreenHint=document.getElementById('phone-fullscreen-hint');
+let noticeTimer,fullscreenHintTimer;
 fullscreen.onclick=async()=>{
  const message=await enterPhoneFullscreen();
  clearTimeout(noticeTimer);
  displayError.textContent=message;displayError.hidden=!message;
  if(message)noticeTimer=setTimeout(()=>{displayError.hidden=true;},5000);
 };
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)displayError.hidden=true;});
+document.addEventListener('fullscreenchange',()=>{
+ clearTimeout(fullscreenHintTimer);
+ fullscreenHint.hidden=document.fullscreenElement!==document.documentElement;
+ // Chrome側の案内が閉じたことはページから取得できないため、表示時間を区切る。
+ if(!fullscreenHint.hidden)fullscreenHintTimer=setTimeout(()=>{fullscreenHint.hidden=true;},4000);
+ if(!document.fullscreenElement)displayError.hidden=true;
+});
 window.screen.orientation?.addEventListener('change',()=>{if(window.matchMedia('(orientation: landscape)').matches)displayError.hidden=true;});
 function show(route,message){
  if(route!==current){
