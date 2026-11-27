@@ -8,7 +8,13 @@ async function request(path,body,method='POST'){
  const response=await fetch(path,body===undefined?{}:{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),value=await response.json();if(!response.ok)throw Error(value.error||'処理に失敗しました');return value;
 }
 function showError(error){element('import-error').hidden=false;element('import-error').textContent=error.message;}
-function cards(container,values){container.replaceChildren();for(const [label,value] of values){const node=document.createElement('div');node.className='settings-stat';const name=document.createElement('span'),output=document.createElement('strong');name.textContent=label;output.textContent=value??'—';node.append(name,output);container.append(node);}}
+function renderStats(container,values){
+ container.replaceChildren(...values.map(([label,value])=>{
+  const row=document.createElement('tr'),heading=document.createElement('th'),cell=document.createElement('td');
+  heading.scope='row';heading.textContent=label;cell.textContent=value??'—';row.append(heading,cell);
+  return row;
+ }));
+}
 function selectSection(){
  listening=null;const next=location.hash.slice(1)||'appearance';section=['appearance','data','keyboard','system'].includes(next)?next:'appearance';
  for(const node of document.querySelectorAll('[data-settings-section]'))node.hidden=node.dataset.settingsSection!==section;
@@ -35,7 +41,7 @@ async function refreshStatus(){
 }
 async function refreshData(){
  const value=await request('/api/data/summary');
- cards(element('database-summary'),[['保存先の空き容量',bytes(value.storage?.available)],['キャラ',value.counts.unit],['形態',value.counts.form],['敵キャラ',value.counts.enemy],['ステージ',value.counts.stage_entry],['素材索引',value.counts.asset_reference],['変換器',(value.metadata?.importer_version??'未導入')+' → '+value.importerVersion]]);
+ renderStats(element('database-summary'),[['保存先の空き容量',bytes(value.storage?.available)],['キャラ',value.counts.unit],['形態',value.counts.form],['敵キャラ',value.counts.enemy],['ステージ',value.counts.stage_entry],['素材索引',value.counts.asset_reference],['変換器',(value.metadata?.importer_version??'未導入')+' → '+value.importerVersion]]);
  element('database-metadata').textContent=JSON.stringify({database:value.database,metadata:value.metadata,error:value.databaseError},null,2);
  await refreshStatus();
 }
@@ -64,9 +70,23 @@ const previous=document.createElement('button'),next=document.createElement('but
 async function loadFiles(path){const value=await request('/api/storage?'+new URLSearchParams({path}));folder=path;entries=value.entries;page=0;renderFiles();}
 element('storage-parent').onclick=()=>loadFiles(folder.split('/').slice(0,-1).join('/')).catch(showError);element('storage-refresh').onclick=()=>loadFiles(folder).catch(showError);
 function renderKeys(){
- const list=element('keyboard-bindings');list.replaceChildren();let group;
- for(const action of battleKeyActions){if(action.group!==group){group=action.group;const heading=document.createElement('h2');heading.textContent=group;heading.className='keyboard-group';list.append(heading);}
-  const row=document.createElement('div');row.className='keyboard-row';const label=document.createElement('span'),key=document.createElement('button'),clear=document.createElement('button');label.textContent=action.label;key.textContent=keyLabel(keys[action.id]);key.className='keyboard-key';key.dataset.action=action.id;key.setAttribute('aria-label',action.label+'：'+key.textContent+' を変更');key.onclick=()=>{listening=action.id;for(const button of list.querySelectorAll('[data-action]'))button.dataset.listening=String(button===key);element('keyboard-status').textContent='割り当てるキーを押してください。';};clear.textContent='解除';clear.onclick=()=>{keys=saveBattleKeys({...keys,[action.id]:''});listening=null;renderKeys();};row.append(label,key,clear);list.append(row);
+ const list=element('keyboard-bindings');list.replaceChildren();let group,rows;
+ for(const action of battleKeyActions){
+  if(action.group!==group){
+   group=action.group;
+   const table=document.createElement('table'),heading=document.createElement('th');
+   table.className='data-sheet keyboard-table';
+   table.innerHTML='<colgroup><col><col class="keyboard-value"><col class="keyboard-action"></colgroup>';
+   heading.colSpan=3;heading.textContent=group;
+   table.createTHead().insertRow().append(heading);rows=table.createTBody();list.append(table);
+  }
+  const row=rows.insertRow(),label=document.createElement('th'),key=document.createElement('button'),clear=document.createElement('button');
+  label.scope='row';label.textContent=action.label;row.append(label);
+  key.type=clear.type='button';key.textContent=keyLabel(keys[action.id]);key.className='keyboard-key';key.dataset.action=action.id;
+  key.setAttribute('aria-label',action.label+'：'+key.textContent+' を変更');
+  key.onclick=()=>{listening=action.id;for(const button of list.querySelectorAll('[data-action]'))button.dataset.listening=String(button===key);element('keyboard-status').textContent='割り当てるキーを押してください。';};
+  clear.textContent='解除';clear.onclick=()=>{keys=saveBattleKeys({...keys,[action.id]:''});listening=null;renderKeys();};
+  row.insertCell().append(key);row.insertCell().append(clear);
  }
 }
 document.addEventListener('keydown',event=>{
@@ -84,7 +104,7 @@ async function refreshSystem(){
  diagnostics=await request('/api/system');
  diagnostics.browser={userAgent:navigator.userAgent,language:navigator.language,logicalProcessors:navigator.hardwareConcurrency,memoryGiB:navigator.deviceMemory,viewport:[innerWidth,innerHeight],pixelRatio:devicePixelRatio,jsHeap:performance.memory?{used:performance.memory.usedJSHeapSize,total:performance.memory.totalJSHeapSize,limit:performance.memory.jsHeapSizeLimit}:null,gpu:gpuInfo};
  const runtime=diagnostics.runtime;
- cards(element('system-overview'),[['保存先の空き容量',bytes(diagnostics.data.storage?.available)],['KBCS','v'+diagnostics.version],['OS / CPU',diagnostics.platform.os+' / '+diagnostics.platform.architecture],['稼働時間',Math.floor(diagnostics.uptimeSeconds/60)+'分'],['CPU使用率',runtime.cpuPercent==null?'計測中':runtime.cpuPercent.toFixed(1)+'%'],['メモリ使用',bytes((runtime.memoryTotal!=null&&runtime.memoryAvailable!=null)?runtime.memoryTotal-runtime.memoryAvailable:null)+' / '+bytes(runtime.memoryTotal)],['KBCS本体メモリ（WebView除外）',bytes(runtime.hostWorkingSet)],['戦闘セッション',diagnostics.activeBattles],['ABI / ルール版',diagnostics.abi+' / '+diagnostics.ruleset]]);
+ renderStats(element('system-overview'),[['保存先の空き容量',bytes(diagnostics.data.storage?.available)],['KBCS','v'+diagnostics.version],['OS / CPU',diagnostics.platform.os+' / '+diagnostics.platform.architecture],['稼働時間',Math.floor(diagnostics.uptimeSeconds/60)+'分'],['CPU使用率',runtime.cpuPercent==null?'計測中':runtime.cpuPercent.toFixed(1)+'%'],['メモリ使用',bytes((runtime.memoryTotal!=null&&runtime.memoryAvailable!=null)?runtime.memoryTotal-runtime.memoryAvailable:null)+' / '+bytes(runtime.memoryTotal)],['KBCS本体メモリ（WebView除外）',bytes(runtime.hostWorkingSet)],['戦闘セッション',diagnostics.activeBattles],['ABI / ルール版',diagnostics.abi+' / '+diagnostics.ruleset]]);
  element('system-details').textContent=JSON.stringify(diagnostics,null,2);element('settings-version').textContent='KBCS v'+diagnostics.version;
 }
 element('system-copy').onclick=()=>{if(!diagnostics)return;return copyText(JSON.stringify(diagnostics,null,2)).then(()=>element('system-status').textContent='コピーしました').catch(()=>element('system-status').textContent='コピーできませんでした');};

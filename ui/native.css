@@ -1,4 +1,5 @@
 ﻿@import url('./startup.css');
+@import url('./src/shared/ui/data-sheet.css');
 @font-face{font-family:"KBCS Roboto";src:url('/fonts/Roboto.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:block}
 @font-face{font-family:"KBCS Noto CJK JP";src:url('/fonts/NotoSansCJKJP.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}
 :root{--font-body:"KBCS Roboto","KBCS Noto CJK JP",sans-serif}
@@ -93,7 +94,6 @@ body:has(.workspace) { height:100dvh; min-height:0; overflow:hidden; background:
 .workspace-search > .db-table-wrap, .workspace-search #enemy-table-wrap { flex:1; min-height:0; overflow:auto; }
 .workspace-search #enemy-results:not([hidden]) { display:flex; flex-direction:column; flex:1; min-height:0; }
 .workspace .db-table thead { position:sticky; top:0; z-index:2; background:var(--color-surface); box-shadow:0 1px var(--color-border); }
-.workspace .db-table th, .workspace .db-table td { padding:3px 5px; }
 .workspace .db-search-table .db-name a { min-width:110px; max-width:210px; }
 .workspace .db-pagination { flex-shrink:0; padding-top:5px; border-top:1px solid var(--color-border); }
 .workspace .unit-list-meta { margin:0 0 5px; }

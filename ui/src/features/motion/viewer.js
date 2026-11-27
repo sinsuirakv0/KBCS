@@ -111,7 +111,7 @@ function inspect(){
   const base=p.model.parts[state.selected],instance=frameInstances().find(v=>v.p===p);
   const part=instance?evaluateMotion(p,instance.key,instance.frame,{loop:false,facing:el('flip').getAttribute('aria-pressed')==='true'?-1:1}).find(v=>v.index===state.selected)||base:base;if(!part)return;
   const rows=[['番号',base.index],['名前',base.name||'—'],['親',part.parent],['画像',part.imageIndex],['Z順',part.zIndex],['座標',part.x+', '+part.y],['ピボット',part.pivotX+', '+part.pivotY],['拡縮',part.scaleX+', '+part.scaleY],['角度',part.angle+' / '+p.model.angleUnit],['不透明度',part.opacity+' / '+p.model.opacityUnit],['合成',['通常','加算','乗算','スクリーン'][part.glow]||part.glow],['表示設定',state.hidden.has(p.key+':'+part.index)?'非表示':'表示'],['画面',state.screen.some(packet=>packet.resource===p.key&&packet.partIndex===part.index)?'描画中':'非描画']];
-  el('part-detail').innerHTML='<table class="motion-property-table"><tbody>'+rows.map(([key,value])=>'<tr><th>'+key+'</th><td>'+esc(value)+'</td></tr>').join('')+'</tbody></table>';
+  el('part-detail').innerHTML='<table class="data-sheet motion-property-table" aria-label="ファイル情報"><tbody>'+rows.map(([key,value])=>'<tr><th scope="row">'+key+'</th><td>'+esc(value)+'</td></tr>').join('')+'</tbody></table>';
 }
 function renderTracks(){
   const p=selectedResource();if(!p)return;

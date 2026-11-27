@@ -58,7 +58,7 @@ function drawFormation(){
 async function refreshFormationStats(version){
   const current=entry,value=await castleHealth(units,battleFormation(units,current.document));
   if(version!==choiceVersion||entry!==current)return;
-  health=value;node('health-breakdown').innerHTML=[['施設',value.facility],['城開発',value.development],['お宝',value.beforeCombo-value.facility-value.development],['コンボ加算',value.maximum-value.beforeCombo]].map(([name,amount])=>'<dt>'+name+'</dt><dd>'+formatNumber(amount)+'</dd>').join('');node('castle-health').textContent=formatNumber(value.maximum);node('sniper-damage').textContent=formatNumber(value.sniper);store();status('');await refreshDeployment();
+  health=value;node('health-breakdown').innerHTML=[['施設',value.facility],['城開発',value.development],['お宝',value.beforeCombo-value.facility-value.development],['コンボ加算',value.maximum-value.beforeCombo]].map(([name,amount])=>'<tr><th scope="row">'+name+'</th><td class="data-align-right">'+formatNumber(amount)+'</td></tr>').join('');node('castle-health').textContent=formatNumber(value.maximum);node('sniper-damage').textContent=formatNumber(value.sniper);store();status('');await refreshDeployment();
 }
 async function saveFormationOrder(before){
   const current=entry,version=++choiceVersion;formationSaving=true;health=null;deployment=null;++deployVersion;
