@@ -8,7 +8,7 @@ pub struct SecondaryHit {
     pub attack_type: i32,
 }
 #[repr(C)]
-#[derive(Default, serde::Deserialize)]
+#[derive(Default, serde::Deserialize, serde::Serialize)]
 pub struct AreaRules {
     pub summon_sound_frame: i32,
     pub summon_frame: i32,

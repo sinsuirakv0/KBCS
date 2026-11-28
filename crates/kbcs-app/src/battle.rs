@@ -1,12 +1,22 @@
 ﻿use anyhow::{Context, Result, ensure};
-use kbcs_bridge::{actor, battle, battle_screen, production, render, stage};
+use kbcs_bridge::{battle, battle_screen, render, stage};
+#[cfg(not(target_os = "emscripten"))]
+use kbcs_bridge::{actor, production};
+#[cfg(not(target_os = "emscripten"))]
 use kbcs_data::{equipment, formations::Document, store::Database};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+#[cfg(not(target_os = "emscripten"))]
+use kbcs_data::inventory::CONTINUE_CAT_FOOD_COST as CONTINUE_COST;
+#[cfg(target_os = "emscripten")]
+const CONTINUE_COST: i64 = 30;
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
 #[path = "battle_inspector.rs"]
 pub(super) mod inspector;
+#[path = "battle_runtime.rs"]
+pub mod runtime;
 
+#[cfg(not(target_os = "emscripten"))]
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Start {
@@ -18,6 +28,7 @@ pub struct Start {
     pub require_exact: bool,
 }
 
+#[cfg(not(target_os = "emscripten"))]
 fn set_sortie_speed(
     snapshot: &Value,
     screen: &mut battle_screen::Config,
@@ -62,35 +73,45 @@ pub struct ActorDrawRanges {
     pub focus: Option<(usize, usize)>,
     pub preview: Option<[usize; 2]>,
 }
+#[derive(Serialize, Deserialize)]
 pub struct Clip {
     pub model: render::Model,
     pub texture: i32,
 }
+#[derive(Serialize, Deserialize)]
 pub struct MotionSet {
     pub death_frames: i32,
     pub clips: BTreeMap<i32, Clip>,
     pub name: String,
     pub character: Value,
 }
-pub struct Session {
+#[derive(Serialize, Deserialize)]
+pub struct Prepared {
     pub scene: crate::scene::Scene,
-    pub core: battle::Battle,
+    pub data: BattleData,
+    config: battle::Config,
+    profiles: Vec<battle::Profile>,
+    rows: Vec<stage::Row>,
+    hint_candidates: Vec<i32>,
+    hint_lengths: Vec<i32>,
+    reward_rules: battle::RewardRules,
+    continue_policy: battle::ContinuePolicy,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BattleData {
     pub models: Vec<MotionSet>,
-    pub effects: BTreeMap<(i32, i32, i32), Clip>,
+    #[serde(with = "effect_entries")]
+    effects: BTreeMap<(i32, i32, i32), Clip>,
     pub key: String,
     pub title: Value,
     pub stage_sounds: Vec<i32>,
     pub stage_music: [i32; 2],
-    combos: Vec<kbcs_data::combos::Combo>,
-    pub combo_skipped: bool,
-    receipt: crate::battle_rewards::Receipt,
+    combos: Vec<Value>,
     defeat_hints: Vec<Vec<String>>,
+    boss_hp: Option<String>,
     continue_notice: Option<String>,
     continue_text: Option<(Vec<String>, String)>,
-    continue_balance: Option<i64>,
-    continue_error: Option<String>,
-    continues_on_camera: i32,
-    ending_camera_applied: bool,
     cannon_clips: BTreeMap<i32, Clip>,
     cannon_cuts: Vec<render::Cut>,
     cannon_texture: i32,
@@ -103,10 +124,71 @@ pub struct Session {
     top_cuts: [Vec<render::Cut>; 2],
     top_textures: [i32; 2],
     title_draw: Option<(render::Cut, i32)>,
+    precision: Value,
+}
+
+impl BattleData {
+    pub fn active_combo_ids(&self) -> Vec<i64> {
+        self.combos.iter().filter_map(|combo| combo["id"].as_i64()).collect()
+    }
+}
+
+mod effect_entries {
+    use super::*;
+
+    type Entries = BTreeMap<(i32, i32, i32), Clip>;
+    pub fn serialize<S: serde::Serializer>(value: &Entries, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.collect_seq(value)
+    }
+    pub fn deserialize<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Entries, D::Error> {
+        Ok(Vec::<((i32, i32, i32), Clip)>::deserialize(deserializer)?.into_iter().collect())
+    }
+}
+
+pub struct Session {
+    pub scene: crate::scene::Scene,
+    pub core: battle::Battle,
+    pub data: BattleData,
     rules: battle::Rules,
-    precision: kbcs_data::support::Precision,
+    pub combo_skipped: bool,
+    pub saved: Option<Value>,
+    pub receipt_error: Option<String>,
+    continue_balance: Option<i64>,
+    continue_error: Option<String>,
+    continues_on_camera: i32,
+    ending_camera_applied: bool,
     poses: PoseCache,
 }
+
+impl Prepared {
+    pub fn start(mut self) -> Result<Session> {
+        self.scene.restore_effects()?;
+        let mut core = native(battle::Battle::new(&self.config, &self.profiles, &self.rows))?;
+        native(core.hints(
+            &self.hint_candidates,
+            &self.hint_lengths,
+            self.data.defeat_hints.first().map_or(0, |lines| lines.len() as i32),
+        ))?;
+        native(core.reward_rules(&self.reward_rules))?;
+        native(core.continue_policy(self.continue_policy))?;
+        Ok(Session {
+            scene: self.scene,
+            core,
+            data: self.data,
+            rules: self.config.rules,
+            combo_skipped: false,
+            saved: None,
+            receipt_error: None,
+            continue_balance: None,
+            continue_error: None,
+            continues_on_camera: 0,
+            ending_camera_applied: false,
+            poses: PoseCache::default(),
+        })
+    }
+}
+
+#[cfg(not(target_os = "emscripten"))]
 fn integer(value: &Value) -> Result<i32> {
     value
         .as_i64()
@@ -117,11 +199,13 @@ fn native<T>(value: std::result::Result<T, u32>) -> Result<T> {
     value.map_err(|code| anyhow::anyhow!("戦闘コア: {code}"))
 }
 
+#[cfg(not(target_os = "emscripten"))]
 fn text(db: &Database, path: &str) -> Result<String> {
     Ok(String::from_utf8(db.source(path)?.3)?
         .trim_start_matches('\u{feff}')
         .into())
 }
+#[cfg(not(target_os = "emscripten"))]
 fn catalog() -> Result<Value> {
     Ok(serde_json::from_str(
         include_str!("../../../ui/settings-catalog.js")
@@ -132,12 +216,14 @@ fn catalog() -> Result<Value> {
             .trim_end_matches(';'),
     )?)
 }
+#[cfg(not(target_os = "emscripten"))]
 fn inputs() -> Result<Value> {
     Ok(serde_json::from_str(
         include_str!("../../kbcs-data/resources/battle-inputs.json").trim_start_matches('\u{feff}'),
     )?)
 }
 // 原本のatoi同様、整数接頭辞の後の注記を値へ含めない。
+#[cfg(not(target_os = "emscripten"))]
 fn cells(raw: &[String]) -> Result<Vec<i32>> {
     raw.iter()
         .map(|s| {
@@ -155,6 +241,7 @@ fn cells(raw: &[String]) -> Result<Vec<i32>> {
         })
         .collect()
 }
+#[cfg(not(target_os = "emscripten"))]
 fn load_model(
     db: &Database,
     cut: &str,
@@ -165,6 +252,7 @@ fn load_model(
     render::Model::parse(&text(db, cut)?, &text(db, model)?, a.as_deref())
         .map_err(anyhow::Error::msg)
 }
+#[cfg(not(target_os = "emscripten"))]
 fn motion(
     db: &Database,
     scene: &mut crate::scene::Scene,
@@ -266,15 +354,13 @@ fn motion(
     ))
 }
 impl Session {
-    pub fn active_combo_ids(&self) -> Vec<i64> {
-        self.combos.iter().map(|combo| combo.id).collect()
-    }
-    pub fn new(
+    #[cfg(not(target_os = "emscripten"))]
+    pub fn prepare(
         root: &std::path::Path,
         region: &str,
         start: Start,
         persist_rewards: bool,
-    ) -> Result<Self> {
+    ) -> Result<(Prepared, crate::battle_rewards::Receipt)> {
         let database = Database::open(root, region)?;
         let metadata = database.metadata()?;
         let snapshot = &start.snapshot;
@@ -1275,7 +1361,6 @@ impl Session {
             "精度指定により戦闘を開始できません: {}",
             serde_json::to_string(&precision)?
         );
-        let mut core = native(battle::Battle::new(&config, &profiles, &rows))?;
         let hints = kbcs_data::model::csv_rows(&database.source("res/Lose_ja.csv")?.3)?;
         let groups: Vec<i32> = hints
             .iter()
@@ -1320,11 +1405,6 @@ impl Session {
             .iter()
             .map(|&id| defeat_hints[id as usize].len() as i32)
             .collect();
-        native(core.hints(
-            &candidates,
-            &lengths,
-            defeat_hints.first().map_or(0, |lines| lines.len() as i32),
-        ))?;
         let (receipt, reward_rules) = crate::battle_rewards::Receipt::new(
             root,
             region,
@@ -1338,7 +1418,6 @@ impl Session {
             config.environment.combos[13],
             config.screen.items as u32,
         )?;
-        native(core.reward_rules(&reward_rules))?;
         let stage_sounds = std::iter::once(reward_rules.start_sound)
             .chain(
                 reward_rules
@@ -1385,7 +1464,6 @@ impl Session {
                     (Some((lines, warning(0)?[0].clone())), None)
                 }
             };
-        native(core.continue_policy(continue_policy))?;
         let title = kbcs_data::stage_media::battle_title(&database, map, stage)?;
         let title_draw = title["image"]
             .as_str()
@@ -1433,27 +1511,19 @@ impl Session {
         }
         // 出撃時に背景演出の画像索引まで確定し、戦闘フレームからDB参照を外す。
         scene.prepare_effects(&database, &start.scene)?;
-        Ok(Self {
-            scene,
-            core,
-            rules,
-            precision,
+        let data = BattleData {
+            precision: serde_json::to_value(precision)?,
             models,
             effects,
             key: start.scene.key(),
             title,
             stage_sounds,
             stage_music: reward_rules.music,
-            combos: active_combos,
-            combo_skipped: false,
-            receipt,
+            combos: active_combos.into_iter().map(serde_json::to_value).collect::<Result<_, _>>()?,
             defeat_hints,
+            boss_hp: receipt.text("boss_hp").ok().map(str::to_owned),
             continue_notice,
             continue_text,
-            continue_balance: None,
-            continue_error: None,
-            continues_on_camera: 0,
-            ending_camera_applied: false,
             cannon_clips,
             cannon_cuts,
             cannon_texture,
@@ -1466,8 +1536,18 @@ impl Session {
             top_cuts,
             top_textures,
             title_draw,
-            poses: PoseCache::default(),
-        })
+        };
+        Ok((Prepared {
+            scene,
+            data,
+            config,
+            profiles,
+            rows,
+            hint_candidates: candidates,
+            hint_lengths: lengths,
+            reward_rules,
+            continue_policy,
+        }, receipt))
     }
     pub fn draw(
         &mut self,
@@ -1504,14 +1584,14 @@ impl Session {
         let mut commands = Vec::new();
         commands.extend(native(self.core.cannon_range_draw(
             &frame.layout,
-            &self.range_cuts,
-            self.range_texture,
+            &self.data.range_cuts,
+            self.data.range_texture,
         ))?);
         for value in order {
             let (side, slot) = (value.side, value.slot);
             let start = commands.len();
             let words = &value.actor.words;
-            let model = self
+            let model = self.data
                 .models
                 .get(value.profile as usize)
                 .context("個体モデルなし")?;
@@ -1533,7 +1613,7 @@ impl Session {
                 .find(|v| v.kind == 12 && v.side == side as i32 && v.slot == slot as i32);
             let asset = if let Some(bone) = bone {
                 Some(
-                    self.effects
+                    self.data.effects
                         .get(&(6, 0, bone.phase))
                         .context("蘇生待ちの骨モデルなし")?,
                 )
@@ -1543,7 +1623,7 @@ impl Session {
             // 蘇生待ち14も共通の骨を描き、所有する二次演出の走査を継続する。
             if let Some(asset) = asset {
                 if matches!(action, 18 | 20) {
-                    let warp = self
+                    let warp = self.data
                         .effects
                         .get(&(6, 0, if action == 18 { 0x2c08 } else { 0x2c40 }))
                         .context("ワープ制御モデルなし")?;
@@ -1638,7 +1718,7 @@ impl Session {
                 .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 9))
                 .chain(visuals.iter().filter(belonging).filter(|v| v.kind == 4))
             {
-                let asset = self
+                let asset = self.data
                     .effects
                     .get(&(
                         if matches!(value.kind, 7 | 9 | 10 | 11 | 13) {
@@ -1679,16 +1759,16 @@ impl Session {
         }
         commands.extend(native(self.core.sniper_draw(
             &frame.layout,
-            [&self.sniper_cuts[0], &self.sniper_cuts[1]],
-            self.sniper_textures,
+            [&self.data.sniper_cuts[0], &self.data.sniper_cuts[1]],
+            self.data.sniper_textures,
         ))?);
         commands.extend(native(self.core.hit_draw(
             &frame.layout,
-            &self.sniper_cuts[1],
-            self.sniper_textures[1],
+            &self.data.sniper_cuts[1],
+            self.data.sniper_textures[1],
         ))?);
         for value in visuals.iter().filter(|v| v.kind == 6) {
-            let asset = self
+            let asset = self.data
                 .effects
                 .get(&(6, 0, value.phase))
                 .context("共通演出モデルなし")?;
@@ -1706,12 +1786,12 @@ impl Session {
         if [1, 3, 9, 12].contains(&actors[0][0].words[9]) {
             commands.extend(native(self.core.cannon_draw(
                 &frame.layout,
-                &self.cannon_cuts,
-                self.cannon_texture,
+                &self.data.cannon_cuts,
+                self.data.cannon_texture,
             ))?);
         }
         for value in visuals.iter().filter(|v| v.kind == 5) {
-            if let Some(asset) = self.cannon_clips.get(&value.phase) {
+            if let Some(asset) = self.data.cannon_clips.get(&value.phase) {
                 let packets = native(asset.model.pose_scaled(value.frame, value.root))?;
                 paint_packets(
                     &mut commands,
@@ -1724,7 +1804,7 @@ impl Session {
             }
         }
         for value in visuals.iter().filter(|v| v.kind == 8) {
-            let asset = self
+            let asset = self.data
                 .effects
                 .get(&(6, 0, value.phase))
                 .context("ボス演出モデルなし")?;
@@ -1781,28 +1861,29 @@ impl Session {
         }
         if matches!(self.rules.score_type, 1 | 3) {
             frame.commands.extend(native(self.core.top_draw(
-                &self.top_cuts[0],
-                &self.top_cuts[1],
-                self.top_textures,
-                self.title_draw,
+                &self.data.top_cuts[0],
+                &self.data.top_cuts[1],
+                self.data.top_textures,
+                self.data.title_draw,
                 input.safe_left,
             ))?);
         } else {
             // 通常ステージも終了帯の乗算を背景と同じ描画先へ適用する。
             frame.commands.extend(native(self.core.top_draw(
-                &self.sniper_cuts[1],
+                &self.data.sniper_cuts[1],
                 &[],
-                self.sniper_textures,
-                self.title_draw,
+                self.data.sniper_textures,
+                self.data.title_draw,
                 input.safe_left,
             ))?);
         }
         frame.animated = true;
         Ok(frame)
     }
-    pub fn settle(&mut self) -> Result<()> {
+    #[cfg(not(target_os = "emscripten"))]
+    pub fn settle(&mut self, receipt: &mut crate::battle_rewards::Receipt) -> Result<()> {
         let outcome = native(self.core.outcome())?;
-        if let Some((_, insufficient)) = &self.continue_text
+        if let Some((_, insufficient)) = &self.data.continue_text
             && outcome.mode == 2
         {
             match native(self.core.ending())?.phase {
@@ -1810,7 +1891,7 @@ impl Session {
                 3 => {
                     let pending = native(self.core.continue_view())?.pending != 0;
                     if pending {
-                        let payment = self.receipt.spend_continue_cat_food();
+                        let payment = receipt.spend_continue_cat_food();
                         let paid = payment.as_ref().is_ok_and(|&paid| paid);
                         // Sessionのロック内で、受理待ちの1操作につき一度だけ支払う。
                         native(self.core.continue_payment(paid))?;
@@ -1824,7 +1905,7 @@ impl Session {
                     }
                     if pending || (self.continue_balance.is_none() && self.continue_error.is_none())
                     {
-                        match self.receipt.cat_food_display() {
+                        match receipt.cat_food_display() {
                             Ok(balance) => self.continue_balance = Some(balance),
                             Err(error) => {
                                 self.continue_error.get_or_insert_with(|| {
@@ -1841,15 +1922,21 @@ impl Session {
         self.continue_balance = None;
         self.continue_error = None;
         // 保存側へは戦闘ハンドルを渡さず、確定した数値だけを渡す。
-        if self.receipt.settle(&outcome, || native(self.core.rewards()))
-            && let Some(notifications) = self
-                .receipt
+        let saved = receipt.settle(&outcome, || native(self.core.rewards()));
+        if saved
+            && let Some(notifications) = receipt
                 .saved
                 .as_ref()
                 .and_then(|saved| saved["notifications"].as_array())
             && !notifications.is_empty()
         {
             native(self.core.notifications(notifications.len() as i32))?;
+        }
+        if saved {
+            self.saved.clone_from(&receipt.saved);
+        }
+        if self.receipt_error != receipt.error {
+            self.receipt_error.clone_from(&receipt.error);
         }
         Ok(())
     }
@@ -1882,18 +1969,18 @@ impl Session {
                 .count()
         };
         let hint = native(self.core.hint())?;
-        let hint_lines = self.defeat_hints.get(hint.id as usize);
+        let hint_lines = self.data.defeat_hints.get(hint.id as usize);
         let ending = native(self.core.ending())?;
         let camera_limits = native(self.core.camera_limits())?;
         let boss_line = native(self.core.defeat_boss_hp())?
             .map(|hp| {
-                self.receipt
-                    .text("boss_hp")
+                self.data.boss_hp.as_deref()
+                    .context("ボス残り体力の原本文面がありません")
                     .map(|label| format!("{label}{hp}%"))
             })
             .transpose()?;
         let continue_prompt = if ending.phase == 3
-            && let Some((lines, _)) = &self.continue_text
+            && let Some((lines, _)) = &self.data.continue_text
             && native(self.core.outcome())?.mode == 2
         {
             let mut lines = lines.clone();
@@ -1902,7 +1989,7 @@ impl Session {
             {
                 last_line.push_str(&format!("({boss})"));
             }
-            json!({"layout":native(self.core.continue_view())?,"cost":kbcs_data::inventory::CONTINUE_CAT_FOOD_COST,"balance":self.continue_balance,"error":self.continue_error,"lines":lines})
+            json!({"layout":native(self.core.continue_view())?,"cost":CONTINUE_COST,"balance":self.continue_balance,"error":self.continue_error,"lines":lines})
         } else {
             Value::Null
         };
@@ -1916,13 +2003,13 @@ impl Session {
             "ending": ending,
             "endingMap": native(self.core.ending_map())?,
             "continuePrompt": continue_prompt,
-            "continueNotice": self.continue_notice,
+            "continueNotice": self.data.continue_notice,
             "defeatBossHp": boss_line,
-            "receipt": self.receipt.saved,
-            "receiptError": self.receipt.error,
+            "receipt": self.saved,
+            "receiptError": self.receipt_error,
             "units": count(0),
             "enemies": count(1),
-            "precision": self.precision,
+            "precision": self.data.precision,
             "wait": production.wait,
             "costs": native(self.core.prices())?,
             "extras": native(self.core.extras())?,
@@ -1939,7 +2026,7 @@ impl Session {
                 json!({"side":value.side,"slot":value.slot,"profile":value.profile,"raw":a[0],"layer":a[5],"frame":a[2],"action":a[1],"hp":a[8],"maximum":a[7],"x":a[3],"y":a[4],"serial":a[240]})
             }).collect();
             let diagnostic = json!({
-                "endCamera":native(self.core.end_camera())?, "noContinue":self.continue_notice.is_some(),
+                "endCamera":native(self.core.end_camera())?, "noContinue":self.data.continue_notice.is_some(),
                 "rewardRolls":native(self.core.rewards())?, "castleHp":[actors[0][0].words[8], actors[1][0].words[8]],
                 "maximum":production.maximum, "produced":production.produced, "lastCosts":production.last_cost,
                 "seed":seed, "actors":units, "cannon":[actors[0][0].words[9], actors[0][0].words[10], actors[0][0].words[13]],
@@ -1972,14 +2059,14 @@ impl Session {
         let layout = self.combo_layout(frame, width)?;
         let combo = usize::try_from(layout.index)
             .ok()
-            .and_then(|index| self.combos.get(index));
+            .and_then(|index| self.data.combos.get(index));
         Ok(json!({"layout":layout,"combo":combo}))
     }
     fn combo_layout(&self, frame: i32, width: i32) -> Result<kbcs_bridge::interface::ComboIntro> {
-        let groups = self
+        let groups = self.data
             .combos
             .iter()
-            .map(|combo| i32::try_from(combo.group))
+            .map(|combo| i32::try_from(combo["group"].as_i64().unwrap_or_default()))
             .collect::<Result<Vec<_>, _>>()?;
         let count = if self.combo_skipped || native(self.core.outcome())?.mode != 0 {
             &[][..]
@@ -1994,11 +2081,11 @@ impl Session {
     }
     pub fn hud(&self, layout: &render::Layout) -> Result<Value> {
         let (actors, profiles) = native(self.core.actors())?;
-        let point = usize::try_from(self.castle_slot)
+        let point = usize::try_from(self.data.castle_slot)
             .ok()
             .filter(|&slot| slot > 0 && slot < 51)
             .and_then(|slot| {
-                self.models
+                self.data.models
                     .get(profiles[1][slot] as usize)
                     .map(|model| (model, actors[1][slot].words[2]))
             })
@@ -2013,13 +2100,13 @@ impl Session {
             .flatten()
             .unwrap_or([0; 2]);
         let mut value = serde_json::to_value(native(self.core.hud(layout, point))?)?;
-        if self.castle_slot > 0 {
+        if self.data.castle_slot > 0 {
             value["specialEnemyCastle"] = json!(true);
         }
         value["warning"] = json!(native(self.core.warning())?);
-        if self.orb_icons.iter().any(|icons| !icons.is_empty()) {
+        if self.data.orb_icons.iter().any(|icons| !icons.is_empty()) {
             let masks = native(self.core.orb_visibility())?;
-            let visible = self.orb_icons.iter().zip(masks).map(|(icons, mask)| {
+            let visible = self.data.orb_icons.iter().zip(masks).map(|(icons, mask)| {
                 icons.iter().enumerate().filter_map(move |(index, icon)| {
                     (mask & (1 << index) != 0).then_some(icon)
                 }).collect::<Vec<_>>()

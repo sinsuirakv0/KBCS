@@ -1,12 +1,12 @@
 ﻿use serde::{Deserialize, Serialize};
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Part {
     cells: [i32; 13],
 }
 #[repr(C)]
-#[derive(Clone, Copy, Serialize)]
+#[derive(Clone, Copy, Serialize, serde::Deserialize)]
 pub struct Cut {
     pub x: i32,
     pub y: i32,
@@ -14,7 +14,7 @@ pub struct Cut {
     pub height: i32,
 }
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Key {
     frame: i32,
     value: i32,
@@ -22,7 +22,7 @@ struct Key {
     power: i32,
 }
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Track {
     part: i32,
     property: i32,
@@ -352,6 +352,7 @@ fn battle_zoom_and_scroll_limits_cover_the_visible_stage_width() {
     let ending = battle_layout(&input, 1000).unwrap();
     assert_eq!((ending.zoom, ending.y_offset), (0.9633, -15.));
 }
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Model {
     parts: Vec<Part>,
     pub cuts: Vec<Cut>,

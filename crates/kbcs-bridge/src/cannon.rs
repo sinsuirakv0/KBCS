@@ -1,6 +1,6 @@
 use crate::actor;
 #[repr(C)]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 pub struct Rules {
     pub encoded: [i32; 4],
     pub attack_rate: i32,

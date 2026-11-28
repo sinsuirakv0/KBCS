@@ -3,6 +3,7 @@ use kbcs_bridge::{
     render::{self, Command, Cut, Model, PaintInput, SceneInput},
     render_effects,
 };
+#[cfg(not(target_os = "emscripten"))]
 use kbcs_data::{stage_media, store::Database};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -76,6 +77,7 @@ fn array<const N: usize>(value: &Value) -> Result<[i32; N]> {
         .try_into()
         .map_err(|_| anyhow::anyhow!("描画の列数が不正です"))
 }
+#[cfg(not(target_os = "emscripten"))]
 fn parsed_cuts(database: &Database, path: &str) -> Result<Vec<Cut>> {
     Ok(stage_media::cuts(database, path)
         .with_context(|| format!("分割定義の読み込み失敗: {path}"))?
@@ -88,6 +90,7 @@ fn parsed_cuts(database: &Database, path: &str) -> Result<Vec<Cut>> {
         })
         .collect())
 }
+#[derive(Serialize, Deserialize)]
 struct Asset {
     model: Model,
     texture: i32,
@@ -106,15 +109,26 @@ pub struct Frame<'a> {
     #[serde(rename = "computeMs")]
     pub compute_ms: f64,
 }
+#[derive(Serialize, Deserialize)]
+struct EffectSetup {
+    width: f64,
+    parameters: Vec<Value>,
+    counts: Vec<usize>,
+}
+#[derive(Serialize, Deserialize)]
 pub struct Scene {
+    #[serde(skip, default = "paint_buffer")]
     paint_buffer: Vec<Command>,
     background: Value,
+    #[serde(skip)]
     source: Value,
     textures: Vec<Option<String>>,
     sizes: Vec<[i32; 2]>,
     castle: [i32; 3],
     assets: Vec<Asset>,
+    #[serde(skip)]
     runtime: Option<render_effects::Runtime>,
+    effect_setup: Option<EffectSetup>,
     actor: Option<Asset>,
     classic: i32,
     cuts: Vec<Cut>,
@@ -122,7 +136,11 @@ pub struct Scene {
     issues: usize,
     missing: Vec<String>,
 }
+fn paint_buffer() -> Vec<Command> {
+    vec![Command::default(); 16384]
+}
 impl Scene {
+    #[cfg(not(target_os = "emscripten"))]
     pub fn player_parts(
         &mut self,
         database: &Database,
@@ -138,6 +156,7 @@ impl Scene {
         }
         Ok(())
     }
+    #[cfg(not(target_os = "emscripten"))]
     pub fn owned_castle(&mut self) {
         self.actor = None;
     }
@@ -147,6 +166,7 @@ impl Scene {
     pub fn castle_geometry(&self) -> [i32; 3] {
         self.castle
     }
+    #[cfg(not(target_os = "emscripten"))]
     pub fn texture(&mut self, path: &str) -> i32 {
         if let Some(index) = self
             .textures
@@ -159,6 +179,7 @@ impl Scene {
         self.textures.push(Some(path.into()));
         index as i32
     }
+    #[cfg(not(target_os = "emscripten"))]
     pub fn new(database: &Database, input: &Input) -> Result<Self> {
         ensure!(
             input.width.is_finite()
@@ -239,7 +260,7 @@ impl Scene {
             -1
         };
         let mut scene = Self {
-            paint_buffer: vec![Command::default(); 16384],
+            paint_buffer: paint_buffer(),
             background,
             source,
             textures,
@@ -247,6 +268,7 @@ impl Scene {
             castle,
             assets: Vec::new(),
             runtime: None,
+            effect_setup: None,
             actor: None,
             classic,
             cuts,
@@ -277,6 +299,7 @@ impl Scene {
         }
         Ok(scene)
     }
+    #[cfg(not(target_os = "emscripten"))]
     pub(crate) fn prepare_effects(&mut self, database: &Database, input: &Input) -> Result<()> {
         if self.runtime.is_some() {
             return Ok(());
@@ -312,7 +335,6 @@ impl Scene {
             .flatten()
             .context("背景演出の分割IDなし")?;
         let mut parameters = Vec::new();
-        let mut lengths = Vec::new();
         let mut counts = Vec::new();
         for segment in data["data"].as_array().into_iter().flatten() {
             let mut group = Vec::new();
@@ -366,27 +388,36 @@ impl Scene {
                     animation,
                 )
                 .map_err(anyhow::Error::msg)?;
-                lengths.push(model.length());
                 let texture = self.textures.len() as i32;
                 self.sizes.push(stage_media::image_size(database, &image)?);
                 self.textures.push(Some(image));
                 self.assets.push(Asset { model, texture });
             }
         }
+        self.effect_setup = Some(EffectSetup { width: input.width, parameters, counts });
+        self.source = Value::Null;
+        self.restore_effects()
+    }
+
+    pub fn restore_effects(&mut self) -> Result<()> {
+        let Some(setup) = self.effect_setup.as_ref().filter(|_| self.runtime.is_none()) else {
+            return Ok(());
+        };
+        let lengths = self.assets.iter().map(|asset| asset.model.length()).collect::<Vec<_>>();
         self.runtime = Some(
             render_effects::Runtime::new(
-                input.width,
+                setup.width,
                 self.classic,
-                &parameters,
+                &setup.parameters,
                 &lengths,
-                &counts,
+                &setup.counts,
                 0x12345678,
             )
             .map_err(core)?,
         );
-        self.source = Value::Null;
         Ok(())
     }
+    #[cfg(not(target_os = "emscripten"))]
     pub fn draw(&mut self, database: &Database, input: &Input) -> Result<Frame<'_>> {
         if input.show_effects {
             self.prepare_effects(database, input)?;

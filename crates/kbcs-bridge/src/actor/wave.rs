@@ -7,7 +7,7 @@ pub struct WaveSegment {
     pub x: i32,
 }
 #[repr(C)]
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct WaveRules {
     pub small_interval: i32,
     pub small_start: i32,

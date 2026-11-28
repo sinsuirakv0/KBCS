@@ -82,3 +82,7 @@ GUIのWindows限定を解除し、Apple Silicon/Intel Macもtao+wry→共通Serv
 2026-10-30: [起動画面・設定・戦闘キー](../../ui/docs/settings.md)と[data::maintenance](../../crates/kbcs-data/docs/validation.md)を追加。入力の確定と描画/設定/データ管理を分離し、既存のC++生産・待機へ接続する。
 
 2026-11-01: [コンボと戦闘キャラ情報](../../native/kbcs-core/docs/interface-20261101.md)を共通PODへ追加。ABI5の未公開変更にはBattleConfigの赤ゲージ設定とBattleScreenStateのhold_waitを含む。編成・マップ別所持金・PCキー・ショートカットの制御と、本家の数値/配置の根拠を分離する。
+
+## スマホ側の戦闘実行
+
+PCで出撃データを解決する`Session::prepare`と、C++の戦闘・背景状態を作る`Prepared::start`を分離する。出撃データは明示したserdeフィールドでやり取りし、C ABIの生メモリやハンドルを渡さない。Windows・macOSは通常戦闘に、ChromeのWorkerはUSB接続時の戦闘に、同じ`Session::frame`と入力処理を使う。公式DB・編成・報酬保存はPCが所有し、監視表示は端末側の戦闘時計を止めずに受け取る。[スマホ接続](../../ui/docs/phone-display.md)。

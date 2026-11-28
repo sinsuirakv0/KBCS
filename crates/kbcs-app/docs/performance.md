@@ -94,7 +94,7 @@ Windows開発ビルドと同一のJP 16.0.0 DBで、プレビュー起動後の�
 
 ## AndroidのUSB戦闘表示
 
-`Session::new`で確定した画像と音源を暗転中に端末へ準備する。`battle_wire::encode_mobile`は画像索引の文字列と未使用の頂点だけを省く。戦闘の乱数・適用順序・論理座標は共通経路を使う。PCの観測用一覧・個体プレビューとスマホの描画フレームは独立した応答。PCは中央のWebGL・HUD・音声を動かさない。詳細は[スマホ接続](../../../ui/docs/phone-display.md)。
+`Session::prepare`で確定した画像と音源を暗転中に端末へ準備する。`battle_wire::encode_mobile`は画像索引の文字列と未使用の頂点を省く。配布版では`Session::frame`をChromeのWorkerで実行し、KBP1は端末内を通る。PCの観測用一覧と個体プレビューは別経路で受け取る。以下はWebAssemblyを同梱していないビルドのUSB描画転送についての計測。[スマホ接続](../../../ui/docs/phone-display.md)。
 
 Pixel 8で圧縮前のUSB応答を採取した際、約73 KBの描画フレームはPC側の処理が中央値1.48 ms、スマホでの受信完了が54.91 msだった。スマホがgzipを受け付ける場合、USBサーバーは16 KiBを超える応答をHTTPで可逆圧縮する。`KBP1`の内容はそのままで、ChromeのHTTP受信処理が展開する。PC側処理時間は`KBP1`の生成まで、USBで送ったサイズは`Content-Length`から測る。
 

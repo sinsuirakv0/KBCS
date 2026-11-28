@@ -17,6 +17,7 @@ pub mod score;
 pub mod stage;
 pub mod stage_source;
 pub mod transition;
+mod fixed_array;
 
 #[repr(C)]
 #[derive(Clone, Copy, Default, Deserialize)]

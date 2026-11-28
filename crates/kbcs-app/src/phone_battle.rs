@@ -1,5 +1,4 @@
 use anyhow::{Result, ensure};
-use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{
     collections::VecDeque,
@@ -32,14 +31,10 @@ struct Battle {
     frame: Value,
     sample: Option<Instant>,
     query: Query,
+    local: bool,
 }
 
-#[derive(Default, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct Query {
-    pub inspection: Option<Vec<crate::battle::inspector::Query>>,
-    pub focus_actor: Option<i32>,
-}
+pub use crate::battle::runtime::Observation as Query;
 
 impl Exchange {
     pub fn reset(&self) {
@@ -97,12 +92,18 @@ impl Exchange {
         }
         let mut commands = std::mem::take(&mut state.commands);
         if std::mem::take(&mut state.redraw) {
-            commands.push_back(json!({"type":"observe"}));
+            if let Some(battle) = state.battle.as_mut().filter(|battle| battle.local) {
+                commands.push_back(json!({"type":"observe","query":{
+                    "inspection":battle.query.inspection.take(),"focusActor":battle.query.focus_actor
+                }}));
+            } else {
+                commands.push_back(json!({"type":"observe"}));
+            }
         }
         commands
     }
 
-    pub fn register(&self, generation: u64, id: String, start: Value) -> Result<()> {
+    pub fn register(&self, generation: u64, id: String, start: Value, local: bool) -> Result<()> {
         let mut state = self.state.lock().unwrap();
         ensure!(
             state.generation == generation,
@@ -121,6 +122,7 @@ impl Exchange {
             frame: Value::Null,
             sample: None,
             query: Query::default(),
+            local,
         });
         Ok(())
     }
@@ -187,7 +189,7 @@ impl Exchange {
 
     pub fn query(&self, id: &str) -> Option<Query> {
         let mut state = self.state.lock().unwrap();
-        let battle = state.battle.as_mut().filter(|battle| battle.id == id)?;
+        let battle = state.battle.as_mut().filter(|battle| battle.id == id && !battle.local)?;
         let now = Instant::now();
         if battle
             .sample
@@ -218,13 +220,29 @@ impl Exchange {
 }
 
 #[test]
+fn local_battle_sends_inspection_to_the_phone() {
+    let exchange = Exchange::default();
+    exchange
+        .register(exchange.generation(), "local".into(), Value::Null, true)
+        .unwrap();
+    let query = serde_json::from_value(json!({"focusActor":7,"inspection":[
+        {"side":0,"group":"present","offset":0,"selected":7,"revision":1}
+    ]})).unwrap();
+    exchange.observe("local", query);
+    let commands = exchange.commands(&AtomicBool::new(true));
+    assert_eq!(commands[0]["query"]["focusActor"], 7);
+    assert_eq!(commands[0]["query"]["inspection"][0]["revision"], 1);
+    assert!(exchange.query("local").is_none());
+}
+
+#[test]
 fn desktop_observes_only_the_current_prepared_battle() {
     let exchange = Exchange::default();
     let generation = exchange.generation();
     exchange.reset();
     assert!(
         exchange
-            .register(generation, "old".into(), Value::Null)
+            .register(generation, "old".into(), Value::Null, false)
             .is_err()
     );
     exchange
@@ -232,6 +250,7 @@ fn desktop_observes_only_the_current_prepared_battle() {
             exchange.generation(),
             "active".into(),
             json!({"textures":[]}),
+            false,
         )
         .unwrap();
     assert_eq!(exchange.status(None)["loading"], true);

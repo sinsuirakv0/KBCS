@@ -1,7 +1,7 @@
 ﻿use serde::{Deserialize, Serialize};
 
 #[repr(C)]
-#[derive(Clone, Copy, Deserialize)]
+#[derive(Clone, Copy, Deserialize, serde::Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Input {
     pub count: f32,

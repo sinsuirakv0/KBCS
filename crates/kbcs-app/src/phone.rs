@@ -351,9 +351,10 @@ fn phone_route(method: &str, path: &str) -> bool {
                     && path.rsplit_once('.').is_some_and(|(_, ext)| {
                         matches!(
                             ext,
-                            "js" | "css" | "png" | "svg" | "woff" | "woff2" | "ttf" | "json"
+                            "js" | "mjs" | "css" | "png" | "svg" | "woff" | "woff2" | "ttf" | "json"
                         )
                     })
+                || path == "/phone-runtime/kbcs_phone.wasm"
         }
         "POST" => matches!(
             path,
@@ -367,6 +368,8 @@ fn phone_route(method: &str, path: &str) -> bool {
                 | "/api/battle-session"
                 | "/api/battle-session/frame"
                 | "/api/battle-session/input"
+                | "/api/phone/sample"
+                | "/api/phone/settle"
                 | "/api/phone/failure"
         ),
         "PUT" => path == "/api/battle-options",
@@ -425,7 +428,7 @@ fn service_reply(request: Request, reply: Reply, cache: bool) {
     let frame = reply.mime == BATTLE_FRAME_MIME;
     let gzip_started = frame.then(Instant::now);
     // 小さいフレームには圧縮の待ち時間を足さない。大きいフレームはChromeのHTTP展開を使う。
-    let compressed = if frame
+    let compressed = if (frame || reply.mime == "application/x-kbcs-battle-setup")
         && reply.bytes.len() > 16 * 1024
         && request_header(&request, "Accept-Encoding").is_some_and(accepts_gzip)
     {
@@ -448,13 +451,13 @@ fn service_reply(request: Request, reply: Reply, cache: bool) {
         ("X-KBCS-Gzip-Ms", gzip_ms.as_deref().unwrap_or_default()),
         ("Content-Encoding", "gzip"),
     ];
-    let header_count = if compressed.is_some() {
-        4
-    } else if frame {
-        3
-    } else {
-        2
-    };
+    let mut headers = headers;
+    let mut header_count = 2;
+    if frame { header_count += 1; }
+    if compressed.is_some() {
+        headers[header_count] = ("Content-Encoding", "gzip");
+        header_count += 1;
+    }
     respond(
         request,
         reply.status,

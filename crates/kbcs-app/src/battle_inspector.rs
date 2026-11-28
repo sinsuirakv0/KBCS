@@ -1,10 +1,10 @@
-﻿use super::{Clip, Session, native};
+﻿use super::{BattleData, Clip, Session, native};
 use anyhow::{Context, Result, ensure};
 use kbcs_bridge::battle::Inspection;
 use serde::Deserialize;
 use serde_json::{Value, json};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Query {
     side: i32,
@@ -120,6 +120,9 @@ impl Session {
             .collect::<Result<Vec<_>>>()?;
         Ok(json!(values))
     }
+}
+
+impl BattleData {
     pub fn inspection_assets(&self) -> Result<Value> {
         let profiles = self.models.iter().map(|model| Ok(json!({"character":model.character,"idle":pose(model.clips.get(&1),true,0)?,"kb":pose(model.clips.get(&3),true,0)?,"soul":pose(model.clips.get(&9),false,0)?}))).collect::<Result<Vec<_>>>()?;
         // downの最終静止姿勢。生きた個体の時計は変更しない。

@@ -41,7 +41,7 @@ impl AttackRoll {
 }
 
 #[repr(C)]
-#[derive(Default, serde::Deserialize)]
+#[derive(Default, serde::Deserialize, serde::Serialize)]
 pub struct EffectContext {
     pub fruit: i32,
     // 0063a050の200/202/204/206。鈍足・停止・弱体・呪いの1/10000軽減。
@@ -58,15 +58,18 @@ pub struct EffectEvents {
     pub events: [[i32; 2]; 16],
 }
 #[repr(C)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Clock {
     pub encoded: [i32; 4],
     pub plain: [i32; 4],
+    #[serde(with = "crate::fixed_array::nested")]
     pub forms: [[i32; SLOTS]; 2],
+    #[serde(with = "crate::fixed_array")]
     pub kill_orb: [i32; SLOTS],
     pub kill_threshold: i32,
 }
 #[repr(C)]
-#[derive(Default, serde::Deserialize)]
+#[derive(Default, serde::Deserialize, serde::Serialize)]
 pub struct Motion {
     pub encoded: [i32; 8],
     pub plain: [i32; 8],
@@ -157,8 +160,9 @@ pub enum Effect {
 }
 
 #[repr(C)]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Actor {
+    #[serde(with = "crate::fixed_array")]
     pub words: [i32; WORDS],
 }
 impl Default for Actor {
@@ -168,13 +172,17 @@ impl Default for Actor {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Definition {
+    #[serde(with = "crate::fixed_array")]
     pub cells: [i32; COLUMNS],
     pub count: i32,
     pub growth: [i32; 20],
+    #[serde(with = "crate::fixed_array")]
     pub talents: [[i32; 4]; SKILLS],
+    #[serde(with = "crate::fixed_array")]
     pub talent_active: [i32; SKILLS],
+    #[serde(with = "crate::fixed_array")]
     pub talent_min_level: [i32; SKILLS],
     pub added_targets: i32,
     pub orb_enabled: i32,
@@ -213,7 +221,7 @@ impl Definition {
 }
 
 #[repr(C)]
-#[derive(Clone, Default, serde::Deserialize)]
+#[derive(Clone, Default, serde::Deserialize, serde::Serialize)]
 pub struct Environment {
     pub unit_modes: [i32; 2],
     pub stage_width: i32,

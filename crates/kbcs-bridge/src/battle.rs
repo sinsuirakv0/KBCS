@@ -2,6 +2,7 @@
 use std::ptr::NonNull;
 
 #[repr(i32)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Copy)]
 pub enum ContinuePolicy {
     Hint,
     Offer,
@@ -84,6 +85,7 @@ pub struct InspectionSource {
 }
 
 #[repr(C)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct RewardRules {
     pub enabled: i32,
     pub mode: i32,
@@ -140,7 +142,7 @@ impl Default for RewardRules {
     }
 }
 #[repr(C)]
-#[derive(Default, serde::Serialize)]
+#[derive(Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rewards {
     pub ready: i32,
@@ -327,7 +329,7 @@ fn native_hint_priority_witnesses() {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 pub struct Orb {
     pub effect: i32,
     pub mask: i32,
@@ -352,6 +354,7 @@ pub fn equipment(
     if code == 0 { Ok(()) } else { Err(code) }
 }
 #[repr(C)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Profile {
     pub definition: actor::Definition,
     pub spawn: production::SpawnRequest,
@@ -371,6 +374,7 @@ pub struct Profile {
     pub price: production::Cost,
 }
 #[repr(C)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Config {
     pub environment: actor::Environment,
     pub screen: battle_screen::Config,
@@ -393,15 +397,27 @@ pub struct Config {
     pub summon_position: i32,
     pub boss_frames: i32,
     pub castle_y_offset: i32,
+    #[serde(with = "crate::fixed_array")]
     pub effect_clocks: [[i32; 3]; 64],
     pub price_rule: [i32; 4],
+    #[serde(serialize_with = "serialize_config_rules")]
     pub rules: Rules,
     pub castle: actor::Actor,
     pub cannon: crate::cannon::Rules,
     pub seed: u32,
 }
+fn serialize_config_rules<S: serde::Serializer>(
+    rules: &Rules,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    use serde::{Serialize, ser::Error};
+    // 出撃データでは、計測画面の省略を使わずC++の固定枠を維持する。
+    let mut value = serde_json::to_value(rules).map_err(S::Error::custom)?;
+    value["unitCombos"] = serde_json::to_value(rules.unit_combos).map_err(S::Error::custom)?;
+    value.serialize(serializer)
+}
 #[repr(C)]
-#[derive(Clone, Copy, Default, serde::Serialize)]
+#[derive(Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rules {
     pub native_kind: i32,
@@ -435,13 +451,13 @@ fn serialize_unit_combos<S: serde::Serializer>(
     sequence.end()
 }
 #[repr(C)]
-#[derive(Clone, Copy, Default, serde::Serialize)]
+#[derive(Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 pub struct UnitCombo {
     pub unit_id: i32,
     pub values: [i32; 32],
 }
 #[repr(C)]
-#[derive(Clone, Copy, Default, serde::Serialize)]
+#[derive(Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PointRules {
     pub kind: i32,
@@ -469,7 +485,7 @@ pub struct Extra {
     pub wait: i32,
 }
 #[repr(C)]
-#[derive(Default, serde::Serialize)]
+#[derive(Default, serde::Serialize, serde::Deserialize)]
 pub struct Outcome {
     pub mode: i32,
     pub timer: i32,

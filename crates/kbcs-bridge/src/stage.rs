@@ -1,7 +1,7 @@
 ﻿use serde::Deserialize;
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, serde::Serialize)]
 #[serde(transparent)]
 pub struct Row(pub [i32; 14]);
 

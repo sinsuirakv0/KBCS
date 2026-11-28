@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 #[repr(C)]
-#[derive(Clone, Copy, Default, Deserialize)]
+#[derive(Clone, Copy, Default, Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Input {
     pub chance: i32,
@@ -12,7 +12,7 @@ pub struct Input {
     pub group_present: i32,
 }
 #[repr(C)]
-#[derive(Clone, Copy, Default, Deserialize)]
+#[derive(Clone, Copy, Default, Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Choice {
     pub group: i32,

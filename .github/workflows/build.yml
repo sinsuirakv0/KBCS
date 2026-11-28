@@ -73,10 +73,42 @@ jobs:
         if: github.repository != 'sinsuirakv0/KBCS' || (github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/kbcs-v'))
         run: python -m unittest discover -s scripts/tests
 
+  phone-runtime:
+    name: Build phone WebAssembly
+    needs: prepare
+    if: ${{ !cancelled() && (needs.prepare.result == 'success' || needs.prepare.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.prepare.outputs.commit || github.sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            .cargo
+            crates
+            native
+            scripts
+      - name: Build the phone runtime
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal --target wasm32-unknown-emscripten --no-self-update
+          git clone --depth 1 --branch 5.0.3 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          "$RUNNER_TEMP/emsdk/emsdk" install 5.0.3
+          "$RUNNER_TEMP/emsdk/emsdk" activate 5.0.3
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          RUSTUP_TOOLCHAIN=1.98.1 python3 scripts/build-phone-runtime.py --output .local/phone-runtime
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: kbcs-phone-runtime
+          path: .local/phone-runtime/*
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 1
+
   build:
     name: ${{ matrix.platform }}
-    needs: [prepare, checks]
-    if: ${{ !cancelled() && needs.checks.result == 'success' && (needs.prepare.result == 'success' || needs.prepare.result == 'skipped') }}
+    needs: [prepare, checks, phone-runtime]
+    if: ${{ !cancelled() && needs.checks.result == 'success' && needs.phone-runtime.result == 'success' && (needs.prepare.result == 'success' || needs.prepare.result == 'skipped') }}
     permissions:
       contents: write
     strategy:

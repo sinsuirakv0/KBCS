@@ -1,4 +1,4 @@
-use crate::cache::Cache;
+use crate::{battle::runtime::BattleFrame, cache::Cache};
 use anyhow::{Context, Result, ensure};
 use include_dir::{Dir, include_dir};
 use kbcs_data::{import, store::Database};
@@ -14,6 +14,7 @@ use std::{
 };
 
 static UI: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../ui");
+static PHONE_RUNTIME: Dir<'_> = include_dir!("$OUT_DIR/phone-runtime");
 
 pub struct Reply {
     pub status: u16,
@@ -100,7 +101,21 @@ pub struct Service {
 type CatalogCache = Cache<(PathBuf, Vec<u8>)>;
 type SceneSlot = Slot<(Database, crate::scene::Scene)>;
 type ModelSlot = Slot<Arc<kbcs_bridge::render::Model>>;
-type BattleSlot = Arc<Mutex<crate::battle::Session>>;
+type BattleSlot = Arc<Mutex<HostBattle>>;
+
+struct HostBattle {
+    session: Option<crate::battle::Session>,
+    receipt: crate::battle_rewards::Receipt,
+    payment: Option<(u32, crate::battle::runtime::SettlementReply)>,
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PhonePreparation<'a> {
+    metadata: Value,
+    prepared: &'a crate::battle::Prepared,
+    continue_balance: Option<i64>,
+}
 
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -114,20 +129,10 @@ struct BattleRequest {
     #[serde(default)]
     compressed: bool,
 }
-struct BattleResult<'a> {
-    frame: &'a kbcs_bridge::battle_screen::Frame,
+struct BattleResult {
+    frame: kbcs_bridge::battle_screen::Frame,
     core_ms: f64,
     packed: Option<(std::time::Instant, bool)>,
-}
-#[derive(serde::Serialize)]
-struct BattleFrame<'a> {
-    #[serde(flatten)]
-    battle: &'a kbcs_bridge::battle_screen::Frame,
-    scene: Option<crate::scene::Frame<'a>>,
-    #[serde(rename = "coreMs")]
-    core_ms: f64,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    runtime: Option<Value>,
 }
 
 type Slot<T> = Arc<Mutex<Option<T>>>;
@@ -209,7 +214,7 @@ impl Service {
     fn scene_reply(
         &self,
         input: &crate::scene::Input,
-        battle: Option<BattleResult<'_>>,
+        battle: Option<BattleResult>,
     ) -> Result<Reply> {
         let current = kbcs_data::store::current_path(&self.root, &self.region)?;
         let key = format!("{}:{}", current.display(), input.key());
@@ -231,6 +236,7 @@ impl Service {
                     scene: Some(frame),
                     core_ms: battle.core_ms,
                     runtime: None,
+                    preview: None,
                 },
                 battle.packed,
             ),
@@ -302,6 +308,62 @@ impl Service {
             let value: String = serde_json::from_slice(body)?;
             self.phone.battle.fail(&value);
             return Ok(Reply::json(json!({"accepted":true})));
+        }
+        if path == "/api/phone/sample" || path == "/api/phone/settle" {
+            ensure!(self.phone_surface && method == "POST", "スマホの戦闘通知が不正です");
+            let id = url.query_pairs().find(|(key, _)| key == "session").context("戦闘IDなし")?.1;
+            let battle = self.battles.lock().unwrap().get(id.as_ref()).cloned()
+                .context("スマホの戦闘が終了しています")?;
+            let mut battle = battle.lock().unwrap();
+            ensure!(battle.session.is_none(), "スマホ端末の戦闘ではありません");
+            if path == "/api/phone/sample" {
+                ensure!(body.len() <= 262144, "スマホの監視データが大きすぎます");
+                let sample: Value = serde_json::from_slice(body)?;
+                ensure!(sample["state"].is_object() && sample["runtime"].is_object(), "監視データが不正です");
+                self.phone.battle.publish(&id, sample);
+                return Ok(Reply::json(json!({"accepted":true})));
+            }
+            ensure!(body.len() <= 4096, "スマホの戦闘結果が不正です");
+            use crate::battle::runtime::{Settlement, SettlementReply};
+            let reply = match serde_json::from_slice(body)? {
+                Settlement::Continue { attempt } => {
+                    if let Some((last, reply)) = &battle.payment {
+                        if *last == attempt {
+                            return Reply::serialized(reply);
+                        }
+                        ensure!(last.checked_add(1) == Some(attempt), "復活要求の順番が不正です");
+                    } else {
+                        ensure!(attempt == 1, "復活要求の順番が不正です");
+                    }
+                    let payment = battle.receipt.spend_continue_cat_food();
+                    let reply = SettlementReply {
+                        paid: Some(payment.as_ref().is_ok_and(|&paid| paid)),
+                        balance: battle.receipt.cat_food_display().ok(),
+                        error: payment.err().map(|error| format!("ネコカンを消費できませんでした。{error:#}")),
+                        receipt: None,
+                    };
+                    let result = Reply::serialized(&reply);
+                    battle.payment = Some((attempt, reply));
+                    return result;
+                }
+                Settlement::Reward { outcome, rewards } => {
+                    ensure!(outcome.mode != 0 && rewards.ready != 0, "戦闘結果が不正です");
+                    battle.receipt.settle(&outcome, || Ok(rewards));
+                    SettlementReply { paid: None, balance: None, error: battle.receipt.error.clone(), receipt: battle.receipt.saved.clone() }
+                }
+            };
+            return Reply::serialized(&reply);
+        }
+        if self.phone_surface && method == "GET" && let Some(name) = path.strip_prefix("/phone-runtime/") {
+            let mime = match name {
+                "kbcs-phone.mjs" => "text/javascript; charset=utf-8",
+                "kbcs_phone.wasm" => "application/wasm",
+                _ => return Ok(Reply { status: 404, mime: "text/plain", bytes: Vec::new() }),
+            };
+            return Ok(PHONE_RUNTIME.get_file(name).map_or(
+                Reply { status: 404, mime, bytes: Vec::new() },
+                |file| Reply { status: 200, mime, bytes: file.contents().to_vec() },
+            ));
         }
         if path == "/api/battle-recording" {
             return Ok(Reply::json(self.recordings.handle(method, &url, body)?));
@@ -480,16 +542,7 @@ impl Service {
                 method == "POST" && body.len() <= 16384,
                 "通知配置の入力が不正です"
             );
-            let inputs: Vec<kbcs_bridge::battle::PopupInput> = serde_json::from_slice(body)?;
-            ensure!(inputs.len() <= 64, "通知配置が多すぎます");
-            let values = inputs
-                .iter()
-                .map(|input| {
-                    kbcs_bridge::battle::popup_layout(input)
-                        .map_err(|c| anyhow::anyhow!("通知配置: {c}"))
-                })
-                .collect::<Result<Vec<_>>>()?;
-            return Reply::serialized(&values);
+            return Reply::serialized(&crate::battle::runtime::popup_layouts(body)?);
         }
         if path == "/api/inventory/catalog" {
             ensure!(method == "GET", "持ち物の操作が不正です");
@@ -524,18 +577,34 @@ impl Service {
                 .phone_surface
                 .then(|| (self.phone.battle.generation(), request.snapshot.clone()));
             ensure!(!id.is_empty() && id.len() <= 128, "戦闘ID不正");
-            let session = crate::battle::Session::new(
+            let (prepared, receipt) = crate::battle::Session::prepare(
                 &self.root,
                 &self.region,
                 request,
                 self.persist_rewards,
             )?;
-            let stats = session.stats(self.phone_surface)?;
-            let textures = session.scene.textures().to_vec();
-            let title = session.title.clone();
-            let active_combos = session.active_combo_ids();
-            let inspection_assets = session.inspection_assets()?;
-            let audio = json!({"se":session.stage_sounds,"music":session.stage_music});
+            let textures = prepared.scene.textures().to_vec();
+            let title = prepared.data.title.clone();
+            let active_combos = prepared.data.active_combo_ids();
+            let inspection_assets = prepared.data.inspection_assets()?;
+            let audio = json!({"se":prepared.data.stage_sounds,"music":prepared.data.stage_music});
+            let local = self.phone_surface
+                && url.query_pairs().any(|(key, value)| key == "local" && value == "1")
+                && PHONE_RUNTIME.get_file("kbcs_phone.wasm").is_some();
+            let local_reply = if local {
+                Some(Reply {
+                    status: 200,
+                    mime: "application/x-kbcs-battle-setup",
+                    bytes: serde_json::to_vec(&PhonePreparation {
+                        metadata: json!({"session":id,"textures":textures,"title":title,"audio":audio,"activeComboIds":active_combos}),
+                        prepared: &prepared,
+                        continue_balance: receipt.cat_food_display().ok(),
+                    })?,
+                })
+            } else {
+                None
+            };
+            let session = (!local).then(|| prepared.start()).transpose()?;
             let mut battles = self
                 .battles
                 .lock()
@@ -545,43 +614,25 @@ impl Service {
                 "戦闘を閉じてから開始してください"
             );
             if let Some((generation, snapshot)) = phone_start {
-                self.phone.battle.register(generation, id.clone(), json!({"snapshot":snapshot,"textures":textures,"inspectionAssets":inspection_assets}))?;
-                battles.insert(id.clone(), Arc::new(Mutex::new(session)));
+                self.phone.battle.register(generation, id.clone(), json!({"snapshot":snapshot,"textures":textures,"inspectionAssets":inspection_assets}), local)?;
+                battles.insert(id.clone(), Arc::new(Mutex::new(HostBattle {session, receipt, payment: None})));
+                if let Some(reply) = local_reply { return Ok(reply); }
                 return Ok(Reply::json(
                     json!({"session":id,"textures":textures,"title":title,"audio":audio,"activeComboIds":active_combos}),
                 ));
             }
-            battles.insert(id.clone(), Arc::new(Mutex::new(session)));
+            let stats = session.as_ref().unwrap().stats(false)?;
+            battles.insert(id.clone(), Arc::new(Mutex::new(HostBattle {session, receipt, payment: None})));
             return Ok(Reply::json(
                 json!({"session":id,"runtime":stats,"textures":textures,"title":title,"inspectionAssets":inspection_assets,"activeComboIds":active_combos}),
             ));
         }
         if path == "/api/battle-session/input" {
-            #[derive(serde::Deserialize)]
-            #[serde(deny_unknown_fields)]
-            struct KeyInput {
-                session: String,
-                control: i32,
-                cheats: u32,
-                #[serde(default)]
-                phase: i32,
-                #[serde(default)]
-                x: i32,
-                #[serde(default)]
-                y: i32,
-            }
             ensure!(
                 method == "POST" && body.len() <= 1024,
                 "戦闘キー入力が不正です"
             );
-            let request: KeyInput = serde_json::from_slice(body)?;
-            ensure!(
-                request.control == 2
-                    || request.control == 4
-                    || request.control == 11
-                    || request.control >= 1000,
-                "戦闘キー操作が不正です"
-            );
+            let request: crate::battle::runtime::KeyInput = serde_json::from_slice(body)?;
             let session = self
                 .battles
                 .lock()
@@ -592,28 +643,8 @@ impl Service {
             let mut session = session
                 .lock()
                 .map_err(|_| anyhow::anyhow!("戦闘更新ロック失敗"))?;
-            session
-                .core
-                .cheats(request.cheats)
-                .map_err(|code| anyhow::anyhow!("チート設定: {code}"))?;
-            // 描画RPC待ちのキーをUIへ貯めない。論理F・シーン計算を進めず入力だけを処理する。
-            let frame = session
-                .core
-                .advance(&kbcs_bridge::battle_screen::Input {
-                    control: request.control,
-                    phase: request.phase,
-                    x: request.x,
-                    y: request.y,
-                    ..Default::default()
-                })
-                .map_err(|code| anyhow::anyhow!("戦闘キー操作: {code}"))?;
-            let sounds = session
-                .core
-                .sounds()
-                .map_err(|code| anyhow::anyhow!("戦闘音源: {code}"))?;
-            return Ok(Reply::json(
-                json!({"state":frame.state,"layout":frame.layout,"sounds":sounds}),
-            ));
+            let session = session.session.as_mut().context("戦闘が終了しています")?;
+            return Ok(Reply::json(session.input(request)?));
         }
         if path == "/api/battle-session/frame" {
             let started = std::time::Instant::now();
@@ -636,132 +667,30 @@ impl Service {
             let mut session = session
                 .lock()
                 .map_err(|_| anyhow::anyhow!("戦闘更新ロック失敗"))?;
-            ensure!(
-                request.scene.key() == session.key,
-                "戦闘中のステージ変更はできません"
-            );
-            session
-                .core
-                .cheats(request.cheats)
-                .map_err(|code| anyhow::anyhow!("チート設定: {code}"))?;
-            session
-                .core
-                .viewport(request.scene.viewport_width)
-                .map_err(|code| anyhow::anyhow!("画面幅: {code}"))?;
-            session.ending_camera(&mut request.scene)?;
-            let camera = session.layout(&request.scene)?;
-            session
-                .core
-                .camera(&camera)
-                .map_err(|code| anyhow::anyhow!("戦闘カメラ: {code}"))?;
-            let battle = session.core.advance(&request.input).map_err(|code| {
-                anyhow::anyhow!(
-                    "戦闘更新: {code} / frame,phase,side,slot={:?}",
-                    session.core.diagnostic()
-                )
-            })?;
-            let core_ms = started.elapsed().as_secs_f64() * 1000.;
-            session.settle()?;
-            let mut runtime = session.stats(request.compact && !request.debug)?;
-            if let Some(query) = request.inspection.as_ref().or_else(|| {
-                observation
-                    .as_ref()
-                    .and_then(|view| view.inspection.as_ref())
-            }) {
-                runtime["inspection"] = session.inspection(query)?;
-            }
-            if request.debug {
-                let (actors, _) = session
-                    .core
-                    .actors()
-                    .map_err(|code| anyhow::anyhow!("個体読取: {code}"))?;
-                runtime["words"] = json!(
-                    actors
-                        .iter()
-                        .map(|side| side
-                            .iter()
-                            .map(|actor| actor.words.as_slice())
-                            .collect::<Vec<_>>())
-                        .collect::<Vec<_>>()
-                );
-            }
-            if request.debug {
-                runtime["visuals"] = serde_json::to_value(
-                    session
-                        .core
-                        .visuals()
-                        .map_err(|code| anyhow::anyhow!("効果読取: {code}"))?,
-                )?;
-            }
-            if request.debug {
-                let extra: Vec<_> = session.core.active_actors().map_err(|code| anyhow::anyhow!("追加個体読取: {code}"))?.into_iter().filter(|value| value.slot >= 51).map(|value| json!({"side":value.side,"slot":value.slot,"words":value.actor.words.as_slice()})).collect();
-                if !extra.is_empty() {
-                    runtime["extraWords"] = json!(extra);
-                }
-            }
-            request.scene.frame = battle.state.frame;
-            session.combo_skipped |= request.skip_combos;
-            session.ending_camera(&mut request.scene)?;
-            // 描画がSceneを借用する前に、同じ配置でHUDを作る。
-            let hud_layout = session.layout(&request.scene)?;
-            runtime["hud"] = serde_json::to_value(session.hud(&hud_layout)?)?;
-            // 006d6d04は倍速分の論理更新に入る前にコンボの時計を1回だけ進める。
-            let combo_frame = battle.state.hud_frame;
-            runtime["comboIntro"] =
-                session.combo_intro(combo_frame, request.scene.viewport_width)?;
-            let mut ranges = crate::battle::ActorDrawRanges::default();
-            if let Some(id) = request
-                .focus_actor
-                .or_else(|| observation.as_ref().and_then(|view| view.focus_actor))
-                && let Some((actor, value)) = session.focused_actor(id)?
-            {
-                if actor.retired_frame < 0 {
-                    ranges.focus = Some((actor.side as usize, actor.slot as usize));
-                }
-                runtime["focusedActor"] = value;
-            }
-            let mut frame = session.draw(&request.scene, combo_frame, &mut ranges)?;
+            let HostBattle { session, receipt, .. } = &mut *session;
+            let session = session.as_mut().context("戦闘が終了しています")?;
+            let mut frame = session.frame(&mut request, observation.as_ref(), started, |session| session.settle(receipt))?;
             if self.phone_surface && observation.is_some() {
-                let pose = ranges
-                    .preview
-                    .and_then(|[start, end]| frame.commands.get(start..end));
-                self.phone.battle.publish(&request.session, json!({"state":battle.state,"runtime":runtime,
-                    "coreMs":core_ms,"pose":pose,"phoneStats":request.phone_stats,"sceneMs":frame.compute_ms}));
+                let scene = frame.scene.as_ref().unwrap();
+                let pose = frame.preview.and_then(|[start, end]| scene.commands.get(start..end));
+                let runtime = frame.runtime.as_mut().unwrap();
+                self.phone.battle.publish(&request.session, json!({"state":frame.battle.state,"runtime":runtime,
+                    "coreMs":frame.core_ms,"pose":pose,"phoneStats":request.phone_stats,"sceneMs":scene.compute_ms}));
                 for key in ["inspection", "focusedActor"] {
                     runtime.as_object_mut().unwrap().remove(key);
                 }
             }
             if self.phone_surface && request.packed {
-                // 画像の索引は出撃時の固定テーブルを端末側で使う。
-                frame.textures = &[];
-                let commands = std::mem::take(&mut frame.commands);
                 return Ok(Reply {
                     status: 200,
                     mime: "application/x-kbcs-battle-frame",
-                    bytes: crate::battle_wire::encode_mobile(
-                        &BattleFrame {
-                            battle: &battle,
-                            scene: Some(frame),
-                            core_ms,
-                            runtime: Some(runtime),
-                        },
-                        &commands,
-                        started,
-                    )?,
+                    bytes: crate::battle::runtime::encode_mobile(frame, started)?,
                 });
             }
-            if let Some(range) = ranges.preview {
-                runtime["focusedDrawRange"] = json!(range);
+            if let Some(range) = frame.preview {
+                frame.runtime.as_mut().unwrap()["focusedDrawRange"] = json!(range);
             }
-            return Reply::battle(
-                BattleFrame {
-                    battle: &battle,
-                    scene: Some(frame),
-                    core_ms,
-                    runtime: Some(runtime),
-                },
-                request.packed.then_some((started, request.compressed)),
-            );
+            return Reply::battle(frame, request.packed.then_some((started, request.compressed)));
         }
         if path == "/api/battle-screen" {
             ensure!(
@@ -795,7 +724,7 @@ impl Service {
                 return self.scene_reply(
                     scene,
                     Some(BattleResult {
-                        frame: &battle,
+                        frame: battle,
                         core_ms,
                         packed: request
                             .packed
@@ -805,10 +734,11 @@ impl Service {
             }
             return Reply::battle(
                 BattleFrame {
-                    battle: &battle,
+                    battle,
                     scene: None,
                     core_ms,
                     runtime: None,
+                    preview: None,
                 },
                 request
                     .packed

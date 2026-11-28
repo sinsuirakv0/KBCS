@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::{any::Any, ffi::c_void, panic::AssertUnwindSafe};
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq, serde::Serialize)]
 pub struct SpawnRequest {
     pub side: i32,
     pub raw: i32,
@@ -14,7 +14,7 @@ pub struct SpawnRequest {
     pub row: i32,
 }
 #[repr(C)]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, serde::Serialize, serde::Deserialize)]
 pub struct Cost {
     pub enabled: i32,
     pub raw: i32,

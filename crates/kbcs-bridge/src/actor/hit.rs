@@ -2,7 +2,7 @@ use super::*;
 use std::ptr::NonNull;
 
 #[repr(C)]
-#[derive(Default, serde::Deserialize)]
+#[derive(Default, serde::Deserialize, serde::Serialize)]
 pub struct HitContext {
     pub effects: EffectContext,
     pub form: i32,
