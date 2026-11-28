@@ -14,6 +14,8 @@
 
 `enemy::stat`は敵基礎値の3段階、`reward::legend_pick`は通常報酬の候補・比較乱数消費数・取得済み記録要求・レーダーによる打切りを返す。入力乱数/セーブ/取得済み状態は呼出側が所有する。現在は乱数も含む8テスト（workspace全体11件、Service境界を含む）と候補再利用のcompile_fail 1件。同版実命令のfixture比較をまとめ、入力不正時の部分更新がないことも確認する。
 
+`Battle::top_draw` はC++のHUD描画命令とホストのテクスチャを接続する。ステージ名の4頂点は幅2の座標ペアとして扱い、左の安全余白をX座標に加える。
+
 0.1.11はexperience::event、reward::stage_pick / weight_total / weight_pickを追加。acquiredは先頭の報酬種別に応じた保存フラグ/所有判定を解決して渡す。重み合計→乱数1回→選択の所有順と未実装境界は[native設計](../../../native/kbcs-core/docs/event-rewards.md)。既存の2つの回帰テストへ追加した。
 
 0.1.12はscore::calculateとreward::weight_finishを追加。前者は数値と新規報酬mask、後者は履歴/付与要求を返す。保存と付与を所有しない。[関数の関係と実行順](../../../native/kbcs-core/docs/stage-score.md)。bridge9件/workspace12件とcompile_fail 1件。

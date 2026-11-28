@@ -1,4 +1,4 @@
-use crate::{actor, battle_screen, production, render, stage};
+﻿use crate::{actor, battle_screen, production, render, stage};
 use std::ptr::NonNull;
 
 #[repr(i32)]
@@ -836,8 +836,8 @@ impl Battle {
         out.truncate(count as usize);
         for command in &mut out {
             command.texture = if command.texture == 2 {
-                for point in command.points[..8].chunks_exact_mut(2) {
-                    point[0] += f64::from(safe_left);
+                for [x, _] in command.points[..8].as_chunks_mut::<2>().0 {
+                    *x += f64::from(safe_left);
                 }
                 title.as_ref().ok_or(1u32)?.1
             } else {
