@@ -122,7 +122,12 @@ jobs:
         env:
           TARGET: ${{ inputs.target }}
         run: |
-          cargo clippy --fix --workspace --all-targets --release --locked --target "$TARGET"
+          status=$(git status --porcelain)
+          if [[ -n "$status" ]]; then
+            echo 'The checkout must be clean before generating a Clippy patch.' >&2
+            exit 1
+          fi
+          cargo clippy --fix --allow-dirty --workspace --all-targets --release --locked --target "$TARGET"
           if git diff --quiet HEAD -- '*.rs'; then
             echo 'Clippy did not produce a Rust patch.'
             exit 0

@@ -20,7 +20,7 @@ Cargo registry/git/targetをOS・CPU・Rust/LLVM・lock・ソースSHA・run_att
 
 ### Clippyの修正パッチ
 
-通常のClippyが失敗したOSに限り、キャッシュ保存の後で、同じtargetとlockfileを指定して `cargo clippy --fix` を実行する。追跡済みRustファイルに差分があり、元の厳格なClippyとworkspaceテストが通った場合に `clippy-fix-<platform>-<attempt>` を7日間保存する。Actionsの実行概要に表示される基準SHAに対する差分で、採番を伴う場合は採番コミットが基準になる。基準SHAの作業ツリーで、展開した `kbcs-clippy.patch` を `git apply --check` で確認してから `git apply` で取り込む。元の検査結果は失敗のまま残る。取り込み後は通常の3環境CIで確認する。
+通常のClippyが失敗したOSに限り、キャッシュ保存の後で、`git status --porcelain` が空であることを確認し、同じtargetとlockfileで `cargo clippy --fix --allow-dirty` を実行する。Cargoの変更検査はsparse checkoutで省いた解析資料を変更と判定することがあるため、作業ツリーの変更確認はGitで行う。追跡済みRustファイルに差分があり、元の厳格なClippyとworkspaceテストが通った場合に `clippy-fix-<platform>-<attempt>` を7日間保存する。Actionsの実行概要に表示される基準SHAに対する差分で、採番を伴う場合は採番コミットが基準になる。基準SHAの作業ツリーで、展開した `kbcs-clippy.patch` を `git apply --check` で確認してから `git apply` で取り込む。元の検査結果は失敗のまま残る。取り込み後は通常の3環境CIで確認する。
 
 ### 所要時間の比較
 
