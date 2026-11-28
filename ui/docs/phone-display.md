@@ -12,6 +12,8 @@ PCでステージを選ぶとスマホは待機画面から出撃準備へ進む
 
 `KBP1`は既存の戦闘フレームから画像パスの繰り返しと未使用頂点を省く。描画頂点は倍精度のまま。 端末がgzipを受け付ける場合、USBサーバーは16 KiBを超える応答をHTTPで可逆圧縮する。圧縮で縮む応答に`Content-Encoding: gzip`を付ける。Chromeは受信中に展開し、旧来と同じKBP1を描画処理へ渡す。USB側の固定長レスポンスはContent-Lengthで送る。PCの一覧データは約75ms間隔で別経路に取り出し、スマホの描画フレームには付けない。スマホの論理画面高は640。`phoneCanvasSize`は画面内に収まる描画領域のCSS寸法と端末のDPRからCanvasの物理画素数を求める。出撃準備の回帰テストではDPR 3で800×360 CSS pxが2400×1080、1920×640 CSS pxが5760×1920になることを確認する。
 
+USBの戦闘フレームでは `phone::respond` がHTTPヘッダーと本文をまとめて書き込む。`createBattleFrameClient` がChromeのヘッダー受信までと本文受信・HTTP展開を別々に計測し、`service_reply` が計測したgzip判定・圧縮の時間と合わせてPCの「転送」欄のツールチップと診断JSONに載せる。
+
 ## 全画面と端末の余白
 
 「横向き全画面」をスマホで押すと、Chromeの全画面表示と横向き固定を要求する。横向きにできなかったときの案内は5秒で消える。`phone-display.js`は全画面の開始時にChromeの案内の上へ横スワイプの説明を出す。Chrome側の案内を閉じた通知はページに届かないため、KBCSの説明は4秒後か全画面解除時に消す。全画面中の操作は説明の下にも届く。［[Chromiumの全画面案内](https://chromium.googlesource.com/chromium/src/tools/+/202afc1279188dbb134b0329e19ab0f4dceb5a82)］

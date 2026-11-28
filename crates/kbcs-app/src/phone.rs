@@ -2,7 +2,7 @@ use crate::service::{Reply, Service, dispatch};
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::{Value, json};
 use std::{
-    io::Read,
+    io::{Read, Write},
     net::{Ipv4Addr, TcpListener},
     path::{Path, PathBuf},
     process::{Command, Stdio},
@@ -20,6 +20,7 @@ pub mod battle;
 const DISPLAY: &str = "/pages/phone-display/";
 const COOKIE: &str = "kbcs_phone";
 const MAX_BODY: u64 = 1_000_000;
+const BATTLE_FRAME_MIME: &str = "application/x-kbcs-battle-frame";
 
 #[derive(Default)]
 pub struct Phone {
@@ -383,6 +384,8 @@ fn request_header<'a>(request: &'a Request, field: &'static str) -> Option<&'a s
 }
 
 fn respond(request: Request, status: u16, body: Vec<u8>, headers: &[(&str, &str)]) {
+    let frame = headers.contains(&("Content-Type", BATTLE_FRAME_MIME));
+    let body_size = body.len();
     // 長さが確定済みのUSB応答にチャンクの区切りを挟まない。
     let mut response = Response::from_data(body)
         .with_status_code(status)
@@ -396,13 +399,33 @@ fn respond(request: Request, status: u16, body: Vec<u8>, headers: &[(&str, &str)
             response.add_header(header);
         }
     }
-    let _ = request.respond(response);
+    if frame {
+        // ヘッダーと本文をまとめ、adb reverseで短い先頭の書き込みが先行しないようにする。
+        let mut bytes = Vec::with_capacity(body_size + 512);
+        if response
+            .raw_print(
+                &mut bytes,
+                request.http_version().clone(),
+                request.headers(),
+                request.method() == &tiny_http::Method::Head,
+                None,
+            )
+            .is_ok()
+        {
+            let mut writer = request.into_writer();
+            let _ = writer.write_all(&bytes).and_then(|()| writer.flush());
+        }
+    } else {
+        let _ = request.respond(response);
+    }
 }
 
 fn service_reply(request: Request, reply: Reply, cache: bool) {
     let cache = cache && reply.status == 200;
+    let frame = reply.mime == BATTLE_FRAME_MIME;
+    let gzip_started = frame.then(Instant::now);
     // 小さいフレームには圧縮の待ち時間を足さない。大きいフレームはChromeのHTTP展開を使う。
-    let compressed = if reply.mime == "application/x-kbcs-battle-frame"
+    let compressed = if frame
         && reply.bytes.len() > 16 * 1024
         && request_header(&request, "Accept-Encoding").is_some_and(accepts_gzip)
     {
@@ -410,6 +433,8 @@ fn service_reply(request: Request, reply: Reply, cache: bool) {
     } else {
         None
     };
+    let gzip_ms =
+        gzip_started.map(|started| format!("{:.3}", started.elapsed().as_secs_f64() * 1000.));
     let headers = [
         ("Content-Type", reply.mime),
         (
@@ -420,9 +445,16 @@ fn service_reply(request: Request, reply: Reply, cache: bool) {
                 "no-store"
             },
         ),
+        ("X-KBCS-Gzip-Ms", gzip_ms.as_deref().unwrap_or_default()),
         ("Content-Encoding", "gzip"),
     ];
-    let header_count = if compressed.is_some() { 3 } else { 2 };
+    let header_count = if compressed.is_some() {
+        4
+    } else if frame {
+        3
+    } else {
+        2
+    };
     respond(
         request,
         reply.status,

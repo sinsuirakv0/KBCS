@@ -45,10 +45,13 @@ export function createBattleFrameClient({compress=true}={}){
   async load(payload,signal){
    const started=performance.now(),body=JSON.stringify({...payload,packed:true,compressed:compress&&typeof DecompressionStream==='function'});
    const response=await fetch(payload.session?'/api/battle-session/frame':'/api/battle-frame',{method:'POST',headers:{'Content-Type':'application/json'},body,signal});
+   const headersReceived=performance.now();
    if(!response.ok){const value=await response.json();throw Error(value.error||'戦闘フレームを取得できません');}
    const buffer=await response.arrayBuffer(),received=performance.now(),value=await unpackBattleFrame(buffer),finished=performance.now();
    const wireBytes=Number(response.headers.get('Content-Length'))||buffer.byteLength;
    const timing={apiMs:finished-started,serverMs:value.serverMs,encodeMs:value.encodeMs,decodeMs:finished-received,transferMs:Math.max(0,received-started-value.serverMs),payloadBytes:wireBytes};
+   const gzipMs=response.headers.get('X-KBCS-Gzip-Ms');
+   if(gzipMs!==null)Object.assign(timing,{headersMs:headersReceived-started,bodyMs:received-headersReceived,gzipMs:Number(gzipMs)});
    samples[count++%samples.length]=timing.apiMs;
    return {value,timing};
   },

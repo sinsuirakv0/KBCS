@@ -13,7 +13,8 @@ export function createBattleMonitor(root,read){
   show('average-fps','平均 '+number(latest.averageFps)+' FPS','連続した戦闘描画の間隔の平均。非表示と一時停止の時間を除きます');
   show('core','更新計算 '+number(value.coreMs)+'ms');show('scene','戦闘API '+number(value.apiMs)+'ms / p95 '+number(value.apiP95Ms)+'ms','直近'+value.apiSamples+'要求 / 最大 '+number(value.apiMaxMs)+'ms\nサーバー '+number(value.serverMs)+'ms（背景 '+number(value.computeMs)+' / 変換 '+number(value.encodeMs)+'）\n受渡・待機 '+number(value.transferMs)+'ms / 復元 '+number(value.decodeMs)+'ms / '+number(value.payloadBytes/1024,0)+'KB');
   show('draw','WebGL '+number(value.drawMs)+'ms / HUD '+number(value.hudMs)+'ms','CPUからの描画提出時間。GPU実行時間は含めません');
-  show('transfer','転送 '+number(value.payloadBytes/1024,0)+'KB / 復元 '+number(value.decodeMs)+'ms');
+  const usbTiming=Number.isFinite(value.headersMs)?'ヘッダー受信まで '+number(value.headersMs)+'ms / 本文受信・展開 '+number(value.bodyMs)+'ms\nUSB応答のgzip判定・圧縮 '+number(value.gzipMs)+'ms（ヘッダー受信までに含む）':undefined;
+  show('transfer','転送 '+number(value.payloadBytes/1024,0)+'KB / 復元 '+number(value.decodeMs)+'ms',usbTiming);
   show('lag','未処理 '+Math.ceil(value.lag)+'F / 描画待ち '+number(value.displayWaitMs)+'ms','フレーム受信後の待ち。FPS上限による待ち時間も含みます');
   const images=value.images;
   show('images','画像 '+number(images.bytes/1048576,0)+'MB / 読込 '+images.pending,'展開後の推定値。開始前にGPUへ転送 '+number(value.warmTextureBytes/1048576,0)+'MB');
