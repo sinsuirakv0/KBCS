@@ -22,8 +22,8 @@ for(const [on,speed,cut] of [[false,2,6],[true,2,0],[true,3,16]]){
 }
 for(const [ratio,expected]of [['20:9',1422],['16:9',1138],['18:9',1280],['21:9',1493]]){assert.equal(battleViewportWidth(ratio,300,600),expected);assert.equal(battleViewportWidth(ratio,1600,600),expected);}
 assert.equal(battleViewportWidth('auto',960,640),960);assert.equal(battleViewportWidth('unknown',960,640),1422);
-assert.deepEqual(phoneCanvasSize(1422,{width:800,height:360},3),[1600,720]);
-assert.deepEqual(phoneCanvasSize(1920,{width:1920,height:640},3),[1600,533]);
+assert.deepEqual(phoneCanvasSize(1422,{width:800,height:360},3),[2400,1080]);
+assert.deepEqual(phoneCanvasSize(1920,{width:1920,height:640},3),[5760,1920]);
 assert.deepEqual(phoneCanvasSize(1422,{width:800,height:360},1),[800,360]);
 assert.deepEqual(phoneHudPoint({x:70,y:550},1422,{left:34,right:12},2),{x:36,y:550});
 assert.deepEqual(phoneHudPoint({x:1280,y:550},1422,{left:34,right:12},2),{x:1292,y:550});
