@@ -1,12 +1,12 @@
 ﻿// 005e97d8 / 005ecde0 / 005ee758 / 005efbac。時計と座標はC++が返す。
 import {createResultPopup} from './battle-result-popup.js';
 import {nativeFont} from './native-font.js';
-export function createBattleResults(controls,{drawing=true,summary=true,pixel8TextPreview=false}={}){
+export function createBattleResults(controls,{drawing=true,summary=true,pixel8TextPreview=false,loadLayouts}={}){
  const panel=document.createElement('section');panel.className='battle-receipt';panel.hidden=true;panel.setAttribute('aria-label','戦闘結果');
  const host=document.querySelector('.workspace-right .workspace-panel-content');(host||controls).append(panel);
  const button=document.createElement('button');button.type='button';button.textContent='報酬・記録';button.hidden=true;controls.querySelector('.battle-actions').append(button);
  let runtime,last,lastEx;const metadata=new Map();
- const popup=drawing?createResultPopup(error=>{panel.hidden=false;panel.textContent='通知の配置を取得できません：'+error;},{pixel8TextPreview}):null;
+ const popup=drawing?createResultPopup(error=>{panel.hidden=false;panel.textContent='通知の配置を取得できません：'+error;},{pixel8TextPreview,loadLayouts}):null;
  function open(){const toggle=document.querySelector('[data-workspace-toggle=right]');if(toggle?.getAttribute('aria-expanded')==='false')toggle.click();panel.scrollIntoView({block:'nearest'});}
  button.addEventListener('click',open);
  function render(){

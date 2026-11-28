@@ -19,9 +19,12 @@ export function startPhoneBattle(id,{snapshot,textures,inspectionAssets},databas
  const message=document.createElement('span');message.setAttribute('role','status');root.querySelector('.battle-status-line').prepend(message);
  const controller=new AbortController(),{signal}=controller,images=new Map();
  const stage=createBattleStageStats(root,snapshot),results=createBattleResults(controls,{drawing:false});
- let timer,inspector,details,frame=0,remote={},clockOffset=0,clockSample,force=true;
+ const phoneTab=root.querySelector('#battle-tab-phone');phoneTab.hidden=false;
+ let timer,inspector,frame=0,remote={},clockOffset=0,clockSample,force=true;
+ const request=()=>{force=true;};
+ const details=createBattleDetails(root,{profiles:[]},images,request);
  const monitor=createBattleMonitor(root,()=>({images:{bytes:0,pending:0},fpsLimit:30,lag:0,...remote,frame,
-  firstPaint:remote.firstPaint+clockOffset,lastPaint:remote.lastPaint+clockOffset}));
+  firstPaint:remote.firstPaint+clockOffset,lastPaint:remote.lastPaint+clockOffset}),{phone:true});
  const restricted=[...controls.querySelectorAll('[data-debug=large],[data-debug=fullscreen],[data-recording],[data-battle-aspect]')];
  for(const node of restricted)node.hidden=true;
  for(const node of controls.querySelectorAll('button'))node.disabled=false;
@@ -59,11 +62,10 @@ export function startPhoneBattle(id,{snapshot,textures,inspectionAssets},databas
  },{signal});
  window.addEventListener('blur',()=>{for(const action of held)send({type:'key',phase:'up',action});held.clear();},{signal});
 
- const request=()=>{force=true;};
  const poses=[inspectionAssets.bone,...inspectionAssets.profiles.flatMap(profile=>[profile.idle,profile.kb,profile.soul])];
  prepareBattleImages(poses.map(pose=>textures[pose?.texture]),images,signal).then(()=>prepareInspectorAssets(inspectionAssets,textures,images,database,signal)).then(assets=>{
   if(signal.aborted)return;
-  details=createBattleDetails(root,assets,images,request);
+  details.setAssets(assets);
   inspector=createBattleInspector(document.getElementById('battle-actor-list'),document.getElementById('battle-actor-detail'),assets,database,enemies,request,actor=>details.select(actor));
  }).catch(fail);
 
@@ -90,6 +92,7 @@ export function startPhoneBattle(id,{snapshot,textures,inspectionAssets},databas
  poll();
  return {stop(){
   controller.abort();clearTimeout(timer);monitor.stop();stage.stop();results.stop();inspector?.stop();details?.stop();disconnect.remove();message.remove();
+  phoneTab.hidden=true;root.querySelector('#battle-detail-phone').hidden=true;
   for(const node of restricted)node.hidden=false;
   for(const node of controls.querySelectorAll('[data-debug]'))node.disabled=false;
  }};

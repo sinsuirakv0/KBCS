@@ -39,8 +39,16 @@ export async function unpackBattleFrame(buffer){
  return parseBattleFrame(header,payload,0);
 }
 
-export function createBattleFrameClient({compress=true}={}){
+export function battleFrameSamples(){
  const samples=new Float64Array(120);let count=0;
+ return {
+  record(ms){samples[count++%samples.length]=ms;},
+  stats(){const values=[...samples.subarray(0,Math.min(count,samples.length))].sort((a,b)=>a-b);return {apiP95Ms:values[Math.ceil(values.length*.95)-1]||0,apiMaxMs:values.at(-1)||0,apiSamples:values.length};},
+ };
+}
+
+export function createBattleFrameClient({compress=true}={}){
+ const samples=battleFrameSamples();
  return {
   async load(payload,signal){
    const started=performance.now(),body=JSON.stringify({...payload,packed:true,compressed:compress&&typeof DecompressionStream==='function'});
@@ -52,9 +60,9 @@ export function createBattleFrameClient({compress=true}={}){
    const timing={apiMs:finished-started,serverMs:value.serverMs,encodeMs:value.encodeMs,decodeMs:finished-received,transferMs:Math.max(0,received-started-value.serverMs),payloadBytes:wireBytes};
    const gzipMs=response.headers.get('X-KBCS-Gzip-Ms');
    if(gzipMs!==null)Object.assign(timing,{headersMs:headersReceived-started,bodyMs:received-headersReceived,gzipMs:Number(gzipMs)});
-   samples[count++%samples.length]=timing.apiMs;
+   samples.record(timing.apiMs);
    return {value,timing};
   },
-  stats(){const values=[...samples.subarray(0,Math.min(count,samples.length))].sort((a,b)=>a-b);return {apiP95Ms:values[Math.ceil(values.length*.95)-1]||0,apiMaxMs:values.at(-1)||0,apiSamples:values.length};},
+  stats:samples.stats,
  };
 }

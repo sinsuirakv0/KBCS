@@ -1,9 +1,11 @@
 ﻿// 計測は1秒ごと。数値は表示/提出時間で、GPU実行時間と混同しない。
-export function createBattleMonitor(root,read){
- const fields=new Map([...root.querySelectorAll('[data-stat]')].map(node=>[node.dataset.stat,node]));
+export function createBattleMonitor(root,read,{phone=false}={}){
+ const fields=new Map([...root.querySelectorAll('#battle-detail-system [data-stat]')].map(node=>[node.dataset.stat,node]));
+ const deviceFields=phone?new Map([...root.querySelectorAll('#battle-detail-phone [data-stat]')].map(node=>[node.dataset.stat,node])):fields;
  let at=performance.now(),lastFrame=0,lastPaints=0,lastPaint,polling=false,resource=null,latest;
  const controller=new AbortController(),number=(value,digits=1)=>Number.isFinite(value)?value.toFixed(digits):'—';
- const show=(key,value,title)=>{const node=fields.get(key);if(node){node.textContent=value;if(title)node.title=title;}};
+ const show=(key,value,title)=>{const node=(fields.has(key)&&['cpu','memory','host-memory','queue'].includes(key)?fields:deviceFields).get(key);if(node){node.textContent=value;if(title)node.title=title;}};
+ for(const [key,node] of fields)node.hidden=phone&&deviceFields.has(key);
  async function tick(){
   const now=performance.now(),value=read(),seconds=(now-at)/1000;
   const count=value.paints-lastPaints,intervals=count-(lastPaint==null?1:0),span=value.lastPaint-(lastPaint??value.firstPaint);
@@ -11,10 +13,14 @@ export function createBattleMonitor(root,read){
   show('fps',number(latest.fps)+' FPS / 上限 '+value.fpsLimit);show('progress','進行 '+number(latest.progress,2)+'×');
   latest.averageFps=value.activeMs>0?value.activePaints*1000/value.activeMs:null;
   show('average-fps','平均 '+number(latest.averageFps)+' FPS','連続した戦闘描画の間隔の平均。非表示と一時停止の時間を除きます');
-  show('core','更新計算 '+number(value.coreMs)+'ms');show('scene','戦闘API '+number(value.apiMs)+'ms / p95 '+number(value.apiP95Ms)+'ms','直近'+value.apiSamples+'要求 / 最大 '+number(value.apiMaxMs)+'ms\nサーバー '+number(value.serverMs)+'ms（背景 '+number(value.computeMs)+' / 変換 '+number(value.encodeMs)+'）\n受渡・待機 '+number(value.transferMs)+'ms / 復元 '+number(value.decodeMs)+'ms / '+number(value.payloadBytes/1024,0)+'KB');
+  show('core','更新計算 '+number(value.coreMs)+'ms');
+  show('scene',(value.localWasm?'端末内フレーム ':'戦闘API ')+number(value.apiMs)+'ms / p95 '+number(value.apiP95Ms)+'ms',
+   '直近'+value.apiSamples+'要求 / 最大 '+number(value.apiMaxMs)+'ms\n'+(value.localWasm?'WebAssembly ':'サーバー ')+number(value.serverMs)+'ms（シーン '+number(value.computeMs)+' / 変換 '+number(value.encodeMs)+'）\n'+
+   (value.localWasm?'Worker受渡・待機 '+number(value.workerWaitMs)+'ms / 復元 '+number(value.decodeMs)+'ms':'受渡・待機 '+number(value.transferMs)+'ms / 復元 '+number(value.decodeMs)+'ms / '+number(value.payloadBytes/1024,0)+'KB'));
   show('draw','WebGL '+number(value.drawMs)+'ms / HUD '+number(value.hudMs)+'ms','CPUからの描画提出時間。GPU実行時間は含めません');
   const usbTiming=Number.isFinite(value.headersMs)?'ヘッダー受信まで '+number(value.headersMs)+'ms / 本文受信・展開 '+number(value.bodyMs)+'ms\nUSB応答のgzip判定・圧縮 '+number(value.gzipMs)+'ms（ヘッダー受信までに含む）':undefined;
-  show('transfer','転送 '+number(value.payloadBytes/1024,0)+'KB / 復元 '+number(value.decodeMs)+'ms',usbTiming);
+  show('transfer',value.localWasm?'Worker受渡・待機 '+number(value.workerWaitMs)+'ms':'転送 '+number(value.payloadBytes/1024,0)+'KB / 復元 '+number(value.decodeMs)+'ms',
+   value.localWasm?'PCへの監視送信は非同期。保存の待ち時間 '+number(value.settlementMs)+'ms':usbTiming);
   show('lag','未処理 '+Math.ceil(value.lag)+'F / 描画待ち '+number(value.displayWaitMs)+'ms','フレーム受信後の待ち。FPS上限による待ち時間も含みます');
   const images=value.images;
   show('images','画像 '+number(images.bytes/1048576,0)+'MB / 読込 '+images.pending,'展開後の推定値。開始前にGPUへ転送 '+number(value.warmTextureBytes/1048576,0)+'MB');

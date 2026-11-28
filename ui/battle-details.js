@@ -32,7 +32,7 @@ function fitPose(commands,width,height){
 }
 
 export function createBattleDetails(root,assets,images,onChange){
- const buttons=[...root.querySelectorAll('[role=tab]')],panel=id=>root.querySelector('#battle-detail-'+id);
+ const buttons=[...root.querySelectorAll('[role=tab]:not([hidden])')],panel=id=>root.querySelector('#battle-detail-'+id);
  const actorPanel=panel('actor'),sheet=actorPanel.querySelector('dl'),log=actorPanel.querySelector('ol');
  const heading=actorPanel.querySelector('[data-actor-name]'),hint=actorPanel.querySelector('[data-pose-status]');
  const canvas=actorPanel.querySelector('canvas'),shelf=root.closest('details');
@@ -59,6 +59,7 @@ export function createBattleDetails(root,assets,images,onChange){
  }
  open(buttons[0].dataset.detailTab);reset();
  return {
+  setAssets(value){assets=value;},
   select(id){if(selected!==id){selected=id;reset();}if(shelf)shelf.open=true;open('actor');},
   focus(){return tab==='actor'&&(!shelf||shelf.open)?selected:null;},
   update(actor,frame,range,scene){

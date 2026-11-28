@@ -12,6 +12,8 @@ import {catalog} from './simulation-profile.js';
 import {stageSceneInput,createStagePainter,stageMediaStats} from './src/features/stages/native-media.js';
 import {createBattleMonitor} from './battle-monitor.js';
 import {createBattleFrameClient} from './battle-frame.js';
+import {createPhoneRuntime} from './phone-runtime.js';
+import {requestPopupLayouts} from './battle-result-popup.js';
 import {initializeSceneGestures,createSceneMotion} from './src/features/stages/scene-controls.js';
 import {sortieFixedMoney} from './sortie-view.js';
 import {prepareBattleInfo,drawBattleInfo,drawBattleSlotOrbs} from './battle-info.js';
@@ -136,7 +138,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  }
  const sounds=createBattleSounds(resources.audioErrors,resources.atlas.sounds,{preloadedOnly:phone,version:resources.mediaVersion}),tints=new Map();
  const pixel8TextPreview=!phone&&new URLSearchParams(globalThis.location?.search).get('text-preview')==='pixel8';
- const results=createBattleResults(controls,{summary:!phone,pixel8TextPreview});
+ const results=createBattleResults(controls,{summary:!phone,pixel8TextPreview,loadLayouts:input=>localBattle?localBattle.popupLayouts(input):requestPopupLayouts(input)});
  let leftInset=0,rightInset=0;
  if(!phone)sounds.preload([8,9,10,11,15,19,20,21,22,23,24,25,26,27,28,29,36,37,42,44,45,50,57,59,60,61,65,70,71,72,73,74,83,84,85,86,90,105,106,110,111,112,124,137,138,139,159,162,167,168,169,188,189,194]);
  function tinted(image,cut,color,key){
@@ -202,10 +204,10 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
    scheduleUpdate();
   });
  }
- let phoneTextures,lastPhoneStats=-Infinity;
+ let phoneTextures,lastPhoneStats=-Infinity,localBattle;
  function phoneStats(){
   const now=performance.now();if(!phone||now-lastPhoneStats<250)return undefined;lastPhoneStats=now;
-  return {...timing,...frames.stats(),clock:now,paints,firstPaint,lastPaint,activeMs,activePaints,fpsLimit:Number(fps.value),lag:accumulator,images:stageMediaStats(resources.sceneImages),playbackPaused};
+  return {...timing,...(localBattle||frames).stats(),clock:now,paints,firstPaint,lastPaint,activeMs,activePaints,fpsLimit:Number(fps.value),lag:accumulator,images:stageMediaStats(resources.sceneImages),playbackPaused};
  }
  async function update(ticks,stepping=false){
   inspectionDirty=false;
@@ -214,10 +216,12 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   if(ticks||immediate)pointer.phase=0;control=0;
   const version=cameraVersion,sentSettings=settingsVersion,sentKeys=keySerial;
   const sceneInput=stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session});
-  const {value:next,timing:measured}=await frames.load({session,input,cheats,skipCombos,compact:true,inspection:inspector?.query(performance.now(),stepping||immediate),focusActor:details?.focus(),phoneStats:phoneStats(),scene:{...sceneInput,viewportWidth:screenWidth,safeLeft:leftInset}},requestController.signal);
+  const payload={session,input,cheats,skipCombos,compact:true,inspection:inspector?.query(performance.now(),stepping||immediate),focusActor:details?.focus(),phoneStats:localBattle?undefined:phoneStats(),scene:{...sceneInput,viewportWidth:screenWidth,safeLeft:leftInset}};
+  const loaded=await (localBattle||frames).load(payload,requestController.signal),{value:next,timing:measured}=loaded;
   if(phone&&next.scene&&!next.scene.textures.length)next.scene.textures=phoneTextures;
   Object.assign(timing,measured);timing.coreMs=next.coreMs;
   if(stopped)return;appliedSettings=sentSettings;
+  localBattle?.publish(loaded,phoneStats());
   accrueClock(performance.now());
   // 0tickキーの後に届いた同一Fの古い描画応答で、押下状態を巻き戻さない。
   if(sentKeys===keySerial||next.state.ui_frame>state.ui_frame||next.state.frame>state.frame){state=next.state;view=next.layout;}runtime=next.runtime;
@@ -428,7 +432,7 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
  root.addEventListener('click',command);
  function remote(event){
   const value=event.detail;if(value.id&&value.id!==session)return;
-  if(value.type==='observe'){inspectionDirty=true;scheduleUpdate();return;}
+  if(value.type==='observe'){localBattle?.observe(value.query);inspectionDirty=true;scheduleUpdate();return;}
   if(value.type==='action'){inspectionDirty=true;lastPhoneStats=-Infinity;}
   if(value.type==='action')controls.querySelector('[data-debug='+CSS.escape(value.action)+']')?.click();
   if(value.type==='setting'){
@@ -447,7 +451,9 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
 function fail(e){if(!stopped&&!error){error=true;resources.onFailure?.(e.message);failure={frame:state.frame,message:e.message};message.textContent='戦闘停止: '+e.message;message.title=message.textContent;message.setAttribute('role','alert');const shelf=detailsRoot.closest('details');if(shelf)shelf.open=true;if(audio)audio.pause();for(const button of controls.querySelectorAll('button'))button.disabled=!['report','return'].includes(button.dataset.debug);}}
  function sendInput(input){
   const serial=++keySerial;
-  return readBattleJson('/api/battle-session/input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session,cheats,...input}),signal:requestController.signal}).then(next=>{
+  const payload={session,cheats,...input};
+  const request=localBattle?localBattle.input(payload):readBattleJson('/api/battle-session/input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:requestController.signal});
+  return request.then(next=>{
    if(stopped)return;
    if(state.battle_mode&&!next.state.battle_mode)return;
    sounds.update(next.sounds,state.se_level,state.speed_mode+1,playbackPaused,!!runtime.result?.mode);
@@ -523,7 +529,7 @@ function fail(e){if(!stopped&&!error){error=true;resources.onFailure?.(e.message
   detailsRoot.removeEventListener('click',command);results.stop();window.removeEventListener('pagehide',stop);
   signal?.removeEventListener('abort',stop);recording?.detach();if(sessionCreated)fetch('/api/battle-session?'+new URLSearchParams({session}),{method:'DELETE',keepalive:true}).catch(()=>{});
   stageStats.stop();notices.remove();message.removeAttribute('title');message.setAttribute('role','status');messageHome.append(message);
-  cancelAnimationFrame(raf);clearTimeout(presentationTimer);clearTimeout(updateTimer);requestController.abort();observer.disconnect();
+  cancelAnimationFrame(raf);clearTimeout(presentationTimer);clearTimeout(updateTimer);requestController.abort();localBattle?.stop();observer.disconnect();
   aspect.removeEventListener('change',changeAspect);controls.removeEventListener('change',changeSettings);painter.dispose();monitor?.stop();controls.removeEventListener('click',command);
   gestures.dispose();sounds.stop();tints.clear();cameraPointers.clear();canvas.removeEventListener('wheel',wheel);if(audio){audio.pause();audio.removeAttribute('src');}resources.dispose();
   for(const type of ['pointerdown','pointerup','pointercancel','pointermove'])canvas.removeEventListener(type,input);
@@ -534,7 +540,20 @@ function fail(e){if(!stopped&&!error){error=true;resources.onFailure?.(e.message
  signal?.addEventListener('abort',stop,{once:true});
  try{signal?.throwIfAborted();if(largeAtStart)setLargeBattle(true);else resize();observer.observe(canvas.parentElement);
   const sceneInput={...stageSceneInput(snapshot.stage,{center:camera.center,zoom:camera.zoom,showEnemy:true,showPlayer:true,showEffects:true,session}),viewportWidth:screenWidth};
-  const started=await readBattleJson('/api/battle-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot,config:resources.config,state,scene:sceneInput}),signal:requestController.signal});sessionCreated=true;
+  const startOptions={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot,config:resources.config,state,scene:sceneInput}),signal:requestController.signal};
+  let started;
+  if(phone){
+   const response=await fetch('/api/battle-session?local=1',startOptions);
+   if(!response.ok)throw Error((await response.json()).error||'スマホの戦闘を準備できません');
+   sessionCreated=true;
+   if(response.headers.get('Content-Type')==='application/x-kbcs-battle-setup'){
+    localBattle=createPhoneRuntime(session,requestController.signal);
+    started=await localBattle.start(await response.arrayBuffer());
+   }else started=await response.json();
+  }else{
+   started=await readBattleJson('/api/battle-session',startOptions);
+   sessionCreated=true;
+  }
   phoneTextures=started.textures;
   const preparation=[prepareBattleImages(started.textures,resources.sceneImages,requestController.signal,phone?resources.report:undefined,resources.mediaVersion)];
   if(phone){
