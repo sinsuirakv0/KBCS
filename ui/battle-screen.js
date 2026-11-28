@@ -320,17 +320,8 @@ export async function startBattleScreen(root,canvas,scene,snapshot,resources,onR
   context.restore();
   const [pauseX,pauseY,pauseW,pauseH]=view.pause_icon;
   sprite('img002_ja',2,leftInset+pauseX-slide,pauseY,pauseW,pauseH);
-  const hud=runtime.hud,scale=hud.scale,hpCuts=resources.atlas.atlases.img001_ja.rects;
-  for(let side=0;side<2;++side){
-   const [anchor,y]=hud.anchors[side],[hp,maximum,unknown]=hud.health[side];
-   // 0070af68〜0070b028。特殊敵城の基準は斜線の位置でなく、分母の桁数を加える前の左端。
-   const x=side&&hud.specialEnemyCastle?anchor+(unknown?7*hpCuts[108][2]:String(maximum).length*hpCuts[57][2])*scale:anchor;
-   if(unknown){const cut=hpCuts[108];for(let i=0;i<7;++i){sprite('img001_ja',108,x-(7-i)*cut[2]*scale,y,cut[2]*scale,cut[3]*scale);sprite('img001_ja',108,x+(18+i*cut[2])*scale,y,cut[2]*scale,cut[3]*scale);}}
-   else{number(hp,57,x,y,0,scale);number(maximum,57,x+18*scale,y,0,scale,true);}
-   sprite('img001_ja',67,x,y,18*scale,18*scale);
-  }
   for(const [cut,x,y,w,h] of view.item_icons)if(w)sprite('mapicon',cut,x-rightInset,y-slide,w,h);
-  const [warning,warningX,warningY]=hud.warning;
+  const [warning,warningX,warningY]=runtime.hud.warning;
   if(warning){
    context.font=nativeFont(30);context.textAlign='center';context.textBaseline='top';context.fillStyle='#000';
    const text=resources.atlas.deploymentWarnings[warning-1];
@@ -555,6 +546,8 @@ function fail(e){if(!stopped&&!error){error=true;resources.onFailure?.(e.message
    sessionCreated=true;
   }
   phoneTextures=started.textures;
+  const hudAtlas=resources.atlas.atlases.img001_ja.image;
+  if(!resources.presentationDifferences.some(({path})=>path===hudAtlas))resources.sceneImages.set(hudAtlas,resources.images.get(hudAtlas));
   const preparation=[prepareBattleImages(started.textures,resources.sceneImages,requestController.signal,phone?resources.report:undefined,resources.mediaVersion)];
   if(phone){
    const ids=resources.atlas.sounds.flatMap((sound,id)=>sound.bgm?[]:[id]);

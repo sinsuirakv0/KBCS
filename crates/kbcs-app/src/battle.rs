@@ -1494,8 +1494,7 @@ impl Session {
         let mut top_cuts = [Vec::new(), Vec::new()];
         let mut top_textures = [-1; 2];
         for (i, stem) in ["img001_ja", "FeverEffect"].iter().enumerate() {
-            if i == 0 && matches!(rules.score_type, 1 | 3) || i == 1 && rules.point.fever_count >= 3
-            {
+            if i == 0 || rules.point.fever_count >= 3 {
                 top_cuts[i] =
                     kbcs_data::stage_media::cuts(&database, &format!("ImageData/{stem}.imgcut"))?
                         .into_iter()
@@ -1553,6 +1552,7 @@ impl Session {
         &mut self,
         input: &crate::scene::Input,
         combo_frame: i32,
+        health: Option<&battle::Hud>,
         ranges: &mut ActorDrawRanges,
     ) -> Result<crate::scene::Frame<'_>> {
         let intro = self.combo_layout(combo_frame, input.viewport_width)?;
@@ -1828,8 +1828,25 @@ impl Session {
             *preview = preview.map(|index| index + at);
         }
         frame.commands.splice(at..at, commands);
+        // 16.0.3の0070af68〜0070b4b4。城体力をステージ名・上部表示より先に合成する。
+        if let Some(hud) = health {
+            draw_castle_health(
+                &mut frame.commands,
+                hud,
+                self.data.castle_slot > 0,
+                &self.data.top_cuts[0],
+                self.data.top_textures[0],
+            )?;
+        }
+        frame.commands.extend(native(self.core.top_draw(
+            &self.data.top_cuts[0],
+            &self.data.top_cuts[1],
+            self.data.top_textures,
+            self.data.title_draw,
+            input.safe_left,
+        ))?);
         if intro.index >= 0 {
-            // 005d63f8の帯は乗算。同じ描画先の背景・個体へ適用する。
+            // 007082e8から呼ばれる005fb4e8の乗算帯を残り時間の後に合成する。
             let [x, y, w, h] = intro.band.map(f64::from);
             frame.commands.push(render::Command {
                 texture: -2,
@@ -1858,24 +1875,6 @@ impl Session {
                 colors: [40, 40, 77, 0, 0, 0],
                 ..Default::default()
             });
-        }
-        if matches!(self.rules.score_type, 1 | 3) {
-            frame.commands.extend(native(self.core.top_draw(
-                &self.data.top_cuts[0],
-                &self.data.top_cuts[1],
-                self.data.top_textures,
-                self.data.title_draw,
-                input.safe_left,
-            ))?);
-        } else {
-            // 通常ステージも終了帯の乗算を背景と同じ描画先へ適用する。
-            frame.commands.extend(native(self.core.top_draw(
-                &self.data.sniper_cuts[1],
-                &[],
-                self.data.sniper_textures,
-                self.data.title_draw,
-                input.safe_left,
-            ))?);
         }
         frame.animated = true;
         Ok(frame)
@@ -2079,7 +2078,7 @@ impl Session {
             count,
         ))
     }
-    pub fn hud(&self, layout: &render::Layout) -> Result<Value> {
+    pub fn hud(&self, layout: &render::Layout) -> Result<(battle::Hud, Value)> {
         let (actors, profiles) = native(self.core.actors())?;
         let point = usize::try_from(self.data.castle_slot)
             .ok()
@@ -2099,7 +2098,8 @@ impl Session {
             .transpose()?
             .flatten()
             .unwrap_or([0; 2]);
-        let mut value = serde_json::to_value(native(self.core.hud(layout, point))?)?;
+        let hud = native(self.core.hud(layout, point))?;
+        let mut value = serde_json::to_value(&hud)?;
         if self.data.castle_slot > 0 {
             value["specialEnemyCastle"] = json!(true);
         }
@@ -2113,8 +2113,76 @@ impl Session {
             }).collect::<Vec<_>>();
             value["orbIcons"] = json!(visible);
         }
-        Ok(value)
+        Ok((hud, value))
     }
+}
+
+fn draw_castle_health(
+    commands: &mut Vec<render::Command>,
+    hud: &battle::Hud,
+    special_enemy: bool,
+    cuts: &[render::Cut],
+    texture: i32,
+) -> Result<()> {
+    let cut = |id| cuts.get(id).context("城体力の分割定義がありません");
+    let digits = |value: i32| {
+        value
+            .max(0)
+            .to_string()
+            .bytes()
+            .map(|digit| 57 + usize::from(digit - b'0'))
+            .collect::<Vec<_>>()
+    };
+    let scale = hud.scale;
+    for (side, (&[anchor, y], &[hp, maximum, unknown])) in
+        hud.anchors.iter().zip(&hud.health).enumerate()
+    {
+        let (numerator, denominator) = if unknown != 0 {
+            (vec![108; 7], vec![108; 7])
+        } else {
+            (digits(hp), digits(maximum))
+        };
+        let mut slash = anchor;
+        if side == 1 && special_enemy {
+            let digit = cut(if unknown != 0 { 108 } else { 57 })?;
+            slash += denominator.len() as f64 * f64::from(digit.width) * scale;
+        }
+        let mut glyph = |id, x, width, height| -> Result<()> {
+            let &render::Cut {
+                x: sx,
+                y: sy,
+                width: sw,
+                height: sh,
+            } = cut(id)?;
+            let mut command = render::Command {
+                texture,
+                layer: 10,
+                count: 4,
+                opacity: 1.,
+                cut: [sx, sy, sw, sh],
+                ..Default::default()
+            };
+            command.points[..8].copy_from_slice(&[x, y, x, y + height, x + width, y + height, x + width, y]);
+            commands.push(command);
+            Ok(())
+        };
+        let mut x = slash;
+        for &id in numerator.iter().rev() {
+            let part = cut(id)?;
+            let width = f64::from(part.width) * scale;
+            x -= width;
+            glyph(id, x, width, f64::from(part.height) * scale)?;
+        }
+        x = slash + 18. * scale;
+        for id in denominator {
+            let part = cut(id)?;
+            let width = f64::from(part.width) * scale;
+            glyph(id, x, width, f64::from(part.height) * scale)?;
+            x += width;
+        }
+        glyph(67, slash, 18. * scale, 18. * scale)?;
+    }
+    Ok(())
 }
 
 type PoseKey = (usize, i32, bool);
