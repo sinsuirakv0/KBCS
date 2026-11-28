@@ -4,7 +4,23 @@ export function sceneGestureView(view,previous,current,rectangle){
     ?Math.max(view.minimum,Math.min(view.maximum??2,view.zoom*current.distance/previous.distance))
     :view.zoom;
   const offset=point=>(point-rectangle.left-rectangle.width/2)*(view.viewport_width||960)/rectangle.width;
-  return {zoom,center:view.center+offset(previous.x)/view.zoom-offset(current.x)/zoom};
+  const center=view.center+offset(previous.x)/view.zoom-offset(current.x)/zoom;
+  return {zoom,center:view.cameraWidth?boundedCenter(view,center,zoom):center};
+}
+
+const clamp=(value,lo,hi)=>Math.max(lo,Math.min(hi,value));
+
+function boundedCenter(view,center,zoom){
+ if(view.cameraWidth){
+  // 戦闘コアと同じ単精度の右端を使い、操作中に端を越えて座標を蓄積しない。
+  const scale=Math.round(zoom*10000),f=Math.fround;
+  const nativeScale=f(f(scale/100)/100);
+  const right=Math.max(0,Math.trunc(f(f(Math.round(view.width*10))-f(view.cameraWidth*10/nativeScale))));
+  const half=view.cameraWidth*.5/(scale/10000);
+  return clamp(center,half,half+right/10);
+ }
+ const half=(view.viewport_width||960)*.5/zoom;
+ return view.width<=half*2?view.width/2:clamp(center,half,view.width-half);
 }
 // PCキーも既存カメラの倍率・中心と同じ制限で解決する。戦闘時計は進めない。
 export function sceneKeyboardView(view,action){
@@ -16,7 +32,6 @@ export function sceneKeyboardView(view,action){
 // PCの連続操作。OSのキーリピートやRPCの応答間隔を移動量へ使わない。
 export function createSceneMotion(){
  const held=new Set();let wheel=null;
- const clamp=(value,lo,hi)=>Math.max(lo,Math.min(hi,value));
  return {
   key(action,down){if(down)held.add(action);else held.delete(action);},
   zoom(view,target,x,rectangle){wheel={zoom:clamp((wheel?.zoom??view.zoom)*target.zoom/view.zoom,view.minimum,view.maximum??2),x,rectangle,remaining:.12};},
@@ -30,7 +45,7 @@ export function createSceneMotion(){
    if(direction)next.center+=direction*width*.6*dt/view.zoom;
    if(zooming){next.zoom=clamp(view.zoom+zooming*.6*dt,view.minimum,view.maximum??2);wheel=null;}
    else if(wheel){const used=Math.min(dt,wheel.remaining),zoom=view.zoom+(wheel.zoom-view.zoom)*used/wheel.remaining;next=sceneGestureView({...view,...next},{x:wheel.x,distance:view.zoom},{x:wheel.x,distance:zoom},wheel.rectangle);wheel.remaining-=used;if(wheel.remaining<=1e-6)wheel=null;}
-   if(view.width){const half=(view.cameraWidth??width)*.5/next.zoom;next.center=view.width<=half*2?view.width/2:clamp(next.center,half,view.width-half);}
+   if(view.width)next.center=boundedCenter(view,next.center,next.zoom);
    return next.zoom===view.zoom&&next.center===view.center?null:next;
   },
  };

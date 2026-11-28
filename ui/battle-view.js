@@ -32,7 +32,7 @@ export function phoneHudPoint(point,width,{left,right},icons){
 // 終了演出の操作権と拡大上限は戦闘コアが返す。
 export function battleCameraView(state,runtime,camera,width){
  if(state.intro<24||state.paused||runtime.endCameraActive)return null;
- return {...camera,viewport_width:width,maximum:runtime.cameraMaximum??1};
+ return {...camera,viewport_width:width,cameraWidth:960,maximum:runtime.cameraMaximum??1};
 }
 
 // 指定速度は通常の1倍基準。0は本家スピードアップの設定に従う。

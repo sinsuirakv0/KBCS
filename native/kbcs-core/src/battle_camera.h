@@ -1,9 +1,14 @@
 #pragma once
 #include <algorithm>
 
-// 009eadc8: 戦闘座標の幅から整数%で下限を求める。
-inline int battle_camera_minimum(int width,int viewport=960){
- return (viewport*1000/width+1)*100;
+// 16.0.3の00a48f48 / 00700f00。横長画面でも制限の基準幅は960。
+inline int battle_camera_minimum(int width){
+ return (960000/width+1)*100;
+}
+
+inline int battle_camera_right(int width,int zoom){
+ const float right=float(width)-9600.f/((float(zoom)/100.f)/100.f);
+ return std::max(0,int(right));
 }
 
 // 005c8a6c: スロットの下がり量を境界に加え、投影した整数座標との重なりを戻す。

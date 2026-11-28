@@ -244,7 +244,7 @@ fn player_castle_shakes_on_odd_battle_frames() {
         top: [0; 4],
         colors: [0; 12],
         overlay: [0, 0, 0, 0, 0, 0, -1],
-        self_sizes: [100; 6],
+        self_sizes: [157, 126, 160, 125, 180, 173],
         show_enemy: 1,
         show_player: 1,
     };
@@ -257,6 +257,14 @@ fn player_castle_shakes_on_odd_battle_frames() {
             .count(),
         3
     );
+    for (command, [width, height]) in baseline
+        .iter()
+        .filter(|c| (2..=4).contains(&c.texture))
+        .zip([[199, 160], [203, 158], [228, 219]])
+    {
+        assert_eq!(command.points[4] - command.points[0], f64::from(width) * 0.5);
+        assert_eq!(command.points[3] - command.points[1], f64::from(height) * 0.5);
+    }
     let mut output = vec![Command::default(); 16];
     for (state, frame, shift) in [(0, 1, 0.), (1, 1, 2.), (2, 2, 0.), (2, 3, 2.)] {
         let (_, actual) = live_paint(&input, 0, state, frame, &mut output).unwrap();
@@ -324,7 +332,7 @@ pub fn battle_layout(input: &SceneInput, slot_slide: i32) -> Result<Layout, u32>
 }
 
 #[test]
-fn battle_zoom_and_scroll_limits_cover_the_visible_stage_width() {
+fn battle_zoom_and_scroll_limits_use_native_width_at_every_aspect() {
     let mut input = SceneInput {
         width: 5000.,
         center: 0.,
@@ -335,22 +343,23 @@ fn battle_zoom_and_scroll_limits_cover_the_visible_stage_width() {
         viewport_width: 1422,
         battle_rows: 2,
     };
-    let wide = layout(&input).unwrap();
-    assert_eq!(wide.zoom, 0.72);
-    let half = 711. / wide.zoom;
-    assert_eq!(wide.center, half);
-    input.center = 1e6;
-    let right = layout(&input).unwrap();
-    assert_eq!(right.center, 2000. - half);
-    input.center = 0.;
-    input.viewport_width = 960;
-    let standard = layout(&input).unwrap();
-    assert_eq!((standard.zoom, standard.center), (0.49, 480. / 0.49));
+    for viewport in [960, 1422, 1493] {
+        input.viewport_width = viewport;
+        input.center = -1e6;
+        let left = layout(&input).unwrap();
+        assert_eq!((left.zoom, left.center), (0.49, 480. / 0.49));
+        input.center = 1e6;
+        let right = layout(&input).unwrap();
+        assert_eq!(right.center, 40.8 + 480. / 0.49);
+    }
     input.zoom = 2.;
     assert_eq!(layout(&input).unwrap().zoom, 0.8803);
     input.focus = 4;
     let ending = battle_layout(&input, 1000).unwrap();
     assert_eq!((ending.zoom, ending.y_offset), (0.9633, -15.));
+    input.battle_rows = 1;
+    let single = layout(&input).unwrap();
+    assert_eq!((single.zoom, single.center), (1., 1520.));
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Model {

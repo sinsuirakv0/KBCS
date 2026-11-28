@@ -166,10 +166,13 @@ const {sortieFixedMoney}=await import('../sortie-view.js');
 const fixedMap={rules:[{id:0,parameters:[25000]}]};
 assert.equal(sortieFixedMoney({rules:[]}),null);assert.equal(sortieFixedMoney(fixedMap),25000);assert.equal(sortieFixedMoney(fixedMap,0),0);assert.equal(sortieFixedMoney(fixedMap,10000000),10000000);
 for(const value of [-1,1.5,NaN,10000001])assert.throws(()=>sortieFixedMoney(fixedMap,value));
-const {sceneKeyboardView}=await import('../src/features/stages/scene-controls.js');
+const {sceneGestureView,sceneKeyboardView}=await import('../src/features/stages/scene-controls.js');
 const camera={center:3000,zoom:1,minimum:.5,maximum:1,viewport_width:1000};
 assert.equal(sceneKeyboardView(camera,'cameraLeft').center,2900);assert.equal(sceneKeyboardView(camera,'cameraRight').center,3100);assert.equal(sceneKeyboardView(camera,'cameraIn').zoom,1);
 assert.equal(sceneKeyboardView({...camera,zoom:.5},'cameraOut').zoom,.5);
+const wideBattle={center:1000,width:2000,zoom:.49,minimum:.49,maximum:.8803,cameraWidth:960,viewport_width:1422};
+assert.equal(sceneGestureView(wideBattle,{x:600,distance:2},{x:1300,distance:1},{left:0,width:1422}).center,480/.49);
+assert.equal(sceneGestureView(wideBattle,{x:1300,distance:2},{x:600,distance:1},{left:0,width:1422}).center,480/.49+40.8);
 // 自動セットで移る既存キャラのLv・本能・玉はそのまま保持する。
 const {applyComboPlan,activeFormationCombos}=await import('../formation-combos.js');
 const comboMember={unitId:45,form:2,level:59,plus:1,talents:{0:5},orbs:[12]};

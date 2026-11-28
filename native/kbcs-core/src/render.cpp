@@ -245,16 +245,23 @@ extern "C" uint32_t kbcs_core_warp_packets(const KbcsWarpPose *warp,const int32_
 extern "C" uint32_t kbcs_core_battle_scene_layout(const KbcsSceneInput *in,int32_t slot_slide,KbcsSceneLayout *out) {
   if(!in||!out||!std::isfinite(in->width)||!std::isfinite(in->center)||!std::isfinite(in->zoom)||in->width<=0||in->width>10000000||in->cut_height<=0||in->cut_height>100000||in->focus<0||in->focus>4||in->viewport_width<0||in->viewport_width>3840||in->battle_rows<0||in->battle_rows>2||slot_slide<0||slot_slide>1000)return 1;
   const double viewport=in->viewport_width?std::max(960,in->viewport_width):960;
-  const double width=std::max(1.,in->width*.4),maximum=in->battle_rows?battle_camera_limit(in->battle_rows,slot_slide)/10000.:2.;
-  // 009eadc8 / 006d6d04: 原本は960を使う。操作可能な横長表示は同じ整数式を描画幅に合わせる。
   const int native_width=int(std::max(1.,in->width*4));
-  const double native_minimum=battle_camera_minimum(native_width)/10000.;
-  const double visible_minimum=in->battle_rows?battle_camera_minimum(native_width,int(viewport))/10000.:std::min(1.,viewport/width);
-  const double minimum=std::min(maximum,visible_minimum);
-  const double limit=in->battle_rows&&in->focus==4?std::max(maximum,native_minimum):maximum;
-  const double zoom=in->focus==3?minimum:std::clamp(in->zoom,in->battle_rows&&in->focus==4?std::min(maximum,native_minimum):minimum,limit);
+  const double width=in->battle_rows?native_width/10.:std::max(1.,in->width*.4);
+  const int maximum=in->battle_rows?battle_camera_limit(in->battle_rows,slot_slide):20000;
+  const double minimum=in->battle_rows?std::min(maximum,battle_camera_minimum(native_width))/10000.:std::min(1.,viewport/width);
+  double zoom=in->focus==3?minimum:std::clamp(in->zoom,minimum,maximum/10000.);
   const double desired=in->focus==1?320:in->focus==2?width-320:in->focus==3?width/2:in->center;
-  const double half=viewport*.5/zoom,center=in->focus==4?desired:width<=half*2?width/2:std::clamp(desired,half,width-half);
+  double center;
+  if(in->battle_rows){
+    const int scale=int(std::lround(zoom*10000));
+    zoom=scale/10000.;
+    const double half=480./zoom;
+    const int left=int(std::lround(std::clamp((desired-half)*10.,0.,double(battle_camera_right(native_width,scale)))));
+    center=left/10.+half;
+  }else{
+    const double half=viewport*.5/zoom;
+    center=in->focus==4?desired:width<=half*2?width/2:std::clamp(desired,half,width-half);
+  }
   const auto x=[&](double value){return viewport*.5+(value-center)*zoom;};
   // 005c8a6cは二段スロットの上端を超えた分もカメラへ戻す。
   const double anchor=in->battle_rows==2?505:520;
@@ -320,7 +327,8 @@ extern "C" uint32_t kbcs_core_live_scene_paint(const KbcsPaintInput *in,int32_t 
   if(in->show_player)for(int i=0;i<3;++i){
     if(in->self_sizes[i*2]<=0||in->self_sizes[i*2+1]<=0)continue;
     const int32_t cut[4]={0,0,in->self_sizes[i*2],in->self_sizes[i*2+1]};
-    sprite(2+i,2,cut,player_x,i==2?117:280,std::trunc(cut[2]*1.27),std::trunc(cut[3]*1.27));
+    // 005e4464: 各PNGの寸法に127を掛けて整数除算。砲と残り2部品で倍率は共通。
+    sprite(2+i,2,cut,player_x,i==2?117:280,int64_t(cut[2])*127/100,int64_t(cut[3])*127/100);
   }
   if(in->overlay[6]>=0)gradient(in->overlay,in->overlay+3,0,640,double(in->overlay[6])/255,4);
   if(commands.size()>size_t(capacity))return 2;

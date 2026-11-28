@@ -86,7 +86,7 @@ extern "C" uint32_t kbcs_core_battle_camera(KbcsBattle *battle,const KbcsSceneLa
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);
  if(!battle||battle->failed||!layout||!std::isfinite(layout->center)||!std::isfinite(layout->zoom)||layout->zoom<=0)return 1;
  const double value=(layout->center-480./layout->zoom)*10.;if(value<INT32_MIN||value>INT32_MAX)return 1;
- battle->camera=int32_t(value);battle->camera_zoom=layout->zoom;return 0;
+ battle->camera=int32_t(std::lround(value));battle->camera_zoom=layout->zoom;return 0;
 }
 extern "C" uint32_t kbcs_core_battle_sniper_status(const KbcsBattle *battle,int32_t out[5]){
  ActorPoolScope pool_scope(battle?&battle->pool:nullptr);

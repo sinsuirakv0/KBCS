@@ -90,9 +90,7 @@ static void end_camera_bounds(KbcsBattleEndCamera &s,int slide){
  // 006d76e0..006d77c0: phase更新後の下がり量で倍率を制限し、その倍率で右端を計算する。
  const int minimum=battle_camera_minimum(s.width);
  s.zoom=s.zoom<minimum?minimum:std::min(s.zoom,battle_camera_limit(s.rows,slide));
- const float right=float(s.width)-9600.f/((float(s.zoom)/100.f)/100.f);
- if(float(s.left)>right)s.left=int(right);
- else s.left=std::max(0,s.left);
+ s.left=std::clamp(s.left,0,battle_camera_right(s.width,s.zoom));
 }
 extern "C" uint32_t kbcs_core_battle_end_camera_step(KbcsBattleEndCamera *state){
  bool castle_reached=false;
